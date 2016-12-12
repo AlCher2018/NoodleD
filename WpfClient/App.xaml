@@ -1,0 +1,25 @@
+﻿<Application x:Class="WpfClient.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:WpfClient"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <!--цвета приложения по умолчанию-->
+        <!-- COLOR1 - dark pink -->
+        <Color x:Key="appColorDarkPink" R="122" G="34" B="104" A="255"/>
+        <!-- COLOR2 - dark yellow -->
+        <Color x:Key="appColorYellow" R="255" G="200" B="62" A="255"/>
+        <!-- COLOR3 - white -->
+        <Color x:Key="appColorWhite" R="255" G="255" B="255" A="255"/>
+        <!-- COLOR4 - dark-dark pink -->
+        <Color x:Key="appColorDDarkPink" R="99" G="29" B="85" A="255"/>
+        <!-- COLOR5 - dark-dark pink -->
+        <Color x:Key="appColorSelectButton" R="173" G="32" B="72" A="255"/>
+
+        <SolidColorBrush x:Key="appBackgroundColor" Color="{StaticResource appColorDarkPink}"/>
+        <SolidColorBrush x:Key="appNotSelectedItemColor" Color="{StaticResource appColorWhite}"/>
+        <SolidColorBrush x:Key="appSelectedItemColor" Color="{StaticResource appColorYellow}"/>
+        <SolidColorBrush x:Key="mainMenuSelectedItemColor" Color="{StaticResource appColorDDarkPink}"/>
+        <SolidColorBrush x:Key="btnAddColor" Color="{StaticResource appColorSelectButton}"/>
+    </Application.Resources>
+</Application>

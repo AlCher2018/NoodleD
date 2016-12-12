@@ -1,0 +1,164 @@
+﻿<Window x:Class="WpfClient.DishPopup"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfClient"
+        mc:Ignorable="d"
+        Title="DishPopup" Height="300" Width="300"
+        PreviewKeyDown="Window_PreviewKeyDown"
+        WindowStyle="None" ResizeMode="NoResize"
+        AllowsTransparency="True" Background="Transparent" 
+        >
+
+    <Window.Resources>
+        <local:LangDictToTextConverter x:Key="langDictToText"/>
+        <local:MultiplyParamValueConverter x:Key="multiplyParamConv"/>
+        <local:MultiplyParamValueConverter x:Key="multiplyParamDefVal1Conv" DefaultValue="1"/>
+        <local:MultiplyValueConverter x:Key="elemSize_0_03" Multiplier="0.03"/>
+        <local:MultiplyValueConverter x:Key="elemSize_0_02" Multiplier="0.02"/>
+        <local:MultiplyValueConverter x:Key="elemSize_0_01" Multiplier="0.01"/>
+
+        <local:CornerRadiusConverter x:Key="cornerRadiusLeft" Side="Left"/>
+        <local:CornerRadiusConverter x:Key="cornerRadiusRight" Side="Right"/>
+
+        <!--кнопка закрытия окна-->
+        <Viewbox x:Key="btnClose" Stretch="Uniform"
+                 Grid.Row="1" Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Right"
+                 Height="{Binding Path=ActualWidth, Converter={StaticResource elemSize_0_03}, ElementName=gridMain, Mode=OneWay}"
+                 Width="{Binding Path=ActualWidth, Converter={StaticResource elemSize_0_03}, ElementName=gridMain, Mode=OneWay}"
+                 PreviewMouseDown="btnClose_PreviewMouseDown" PreviewTouchDown="btnClose_PreviewTouchDown"
+                >
+            <Canvas Height="10" Width="10" Background="White">
+                <Path>
+                    <Path.Data>
+                        <RectangleGeometry Rect="0,0,10,10"/>
+                    </Path.Data>
+                </Path>
+                <Path Stroke="DarkGray">
+                    <Path.Data>
+                        <GeometryGroup>
+                            <LineGeometry StartPoint="0,0" EndPoint="10,10"/>
+                            <LineGeometry StartPoint="0,10" EndPoint="10,0"/>
+                        </GeometryGroup>
+                    </Path.Data>
+                </Path>
+            </Canvas>
+        </Viewbox>
+
+        <Style x:Key="addButtonTextStyle" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="{Binding Path=ActualWidth, Converter={StaticResource elemSize_0_02}, ElementName=gridMain, Mode=OneWay}"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="Orange"/>
+                    <Setter Property="FontWeight" Value="Bold"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <DropShadowEffect x:Key="addButtonShadow" Color="#22CF446B" Direction="280" BlurRadius="40" ShadowDepth="10"/>
+        
+    </Window.Resources>
+
+    <Grid UseLayoutRounding="True" Background="#01000000"
+          MouseUp="gridWindow_MouseDown" TouchUp="gridWindow_TouchUp">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="5*"/>
+        </Grid.ColumnDefinitions>
+    <Grid Grid.Column="1" x:Name="gridWindow" Background="#AA000000">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="12*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition  Width="*"/>
+            <ColumnDefinition  Width="5*"/>
+            <ColumnDefinition  Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Border x:Name="borderMain" Grid.Column="1" Grid.Row="1" CornerRadius="10" Background="White"
+                MouseUp="borderMain_PreviewMouseUp" TouchUp="borderMain_PreviewTouchUp">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="0.1*"/>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="0.1*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="0.1*"/>
+                    <RowDefinition Height="2*"/>
+                    <RowDefinition Height="0.1*"/>
+                </Grid.RowDefinitions>
+                <!--кнопка закрытия окна-->
+                <StaticResource ResourceKey="btnClose"/>
+
+                <Grid x:Name="gridMain" Grid.Row="1" Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="3*"/>
+                        <RowDefinition Height="2*"/>
+                        <RowDefinition Height="2*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!--Раздел 1. Выбранное блюдо-->
+                    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
+                        <TextBlock FontWeight="Bold"
+                            FontSize="{Binding Path=ActualWidth, Converter={StaticResource elemSize_0_02}, ElementName=gridMain, Mode=OneWay}"
+                            Text="{Binding {x:Null}, ConverterParameter=appSet.formPopUpHeaderText1, Converter={StaticResource langDictToText}}"/>
+                        <TextBlock FontSize="{Binding Path=ActualWidth, Converter={StaticResource elemSize_0_01}, ElementName=gridMain, Mode=OneWay}"
+                            Text="{Binding langNames, Converter={StaticResource langDictToText}}"
+                               />
+                    </StackPanel>
+
+                    <!--Раздел 2. ИНГРЕДИЕНТЫ -->
+                    <StackPanel Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Top">
+                        <TextBlock FontWeight="Bold"
+                            FontSize="{Binding Path=ActualWidth, Converter={StaticResource elemSize_0_02}, ElementName=gridMain, Mode=OneWay}"
+                            Text="{Binding {x:Null}, ConverterParameter=appSet.formPopUpHeaderText2, Converter={StaticResource langDictToText}}"/>
+                    </StackPanel>
+
+                    <!--Раздел 3. РЕКОМЕНДАЦИИ -->
+                    <StackPanel Grid.Row="2"  HorizontalAlignment="Left" VerticalAlignment="Top">
+                        <TextBlock FontWeight="Bold"
+                            FontSize="{Binding Path=ActualWidth, Converter={StaticResource elemSize_0_02}, ElementName=gridMain, Mode=OneWay}"
+                            Text="{Binding {x:Null}, ConverterParameter=appSet.formPopUpHeaderText3, Converter={StaticResource langDictToText}}"/>
+                    </StackPanel>
+
+                    <!--Раздел 4. Кнопка Добавить -->
+                    <Grid Grid.Row="3">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="2*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Row="1" Grid.Column="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="2*"/>
+                            </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Background="#FF931D3F" Effect="{StaticResource addButtonShadow}"
+                                        CornerRadius="{Binding Path=ActualWidth, Converter={StaticResource cornerRadiusLeft}, ConverterParameter=0.02, ElementName=gridMain, Mode=OneWay}">
+                                    <TextBlock x:Name="txtDishPrice" Text="123 ₴" Style="{StaticResource addButtonTextStyle}"/>
+                             </Border>
+                                <Border x:Name="btnAddDish" Grid.Column="1" Background="#FFAD2048" Effect="{StaticResource addButtonShadow}"
+                                    CornerRadius="{Binding Path=ActualWidth, Converter={StaticResource cornerRadiusRight}, ConverterParameter=0.02, ElementName=gridMain, Mode=OneWay}"
+                                        PreviewMouseUp="btnAddDish_MouseUp" >
+                                    <TextBlock Text="{Binding {x:Null}, ConverterParameter=appSet.btnSelectDishText, Converter={StaticResource langDictToText}}" Style="{StaticResource addButtonTextStyle}"/>
+                                </Border>
+                            </Grid>  <!--кнопка Добавить-->
+                    </Grid> <!-- область содержимого -->
+                </Grid>
+            </Grid>
+        </Border>
+        </Grid>
+    </Grid>
+</Window>
