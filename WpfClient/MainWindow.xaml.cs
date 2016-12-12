@@ -90,7 +90,10 @@ namespace WpfClient
             // создать текущий заказ
             CurrentOrder curOrder = new CurrentOrder();
             AppLib.SetAppGlobalValue("currentOrder", curOrder);
+
+            lstMenuFolders.SelectedIndex = 1;
         }
+
 
         private void initCurrentSettings(NoodleDContext db)
         {
@@ -414,7 +417,7 @@ namespace WpfClient
             DishItem curDI = (DishItem)lstDishes.SelectedItem;
             if (curDI.SelectedGarnishes == null) _curDishItem = curDI;
 
-            popupWin.DataContext = _curDishItem;
+            popupWin.DataContext = _curDishItem;  // контекст данных
 
             popupWin.ShowDialog();
         }
@@ -533,8 +536,6 @@ namespace WpfClient
         {
             logger.Info("End application");
         }
-
-
 
     } // class MainWindow
 

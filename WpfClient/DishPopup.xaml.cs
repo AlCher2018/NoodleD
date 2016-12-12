@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,16 +30,16 @@ namespace WpfClient
             if (e.Key == Key.Escape) this.Close();
         }
 
-        private void btnClose_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        private void btnClose_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
             closeWin(e);
         }
-        private void btnClose_PreviewTouchDown(object sender, TouchEventArgs e)
+        private void btnClose_PreviewTouchUp(object sender, TouchEventArgs e)
         {
             closeWin(e);
         }
 
-        private void gridWindow_MouseDown(object sender, MouseButtonEventArgs e)
+        private void gridWindow_MouseUp(object sender, MouseButtonEventArgs e)
         {
             closeWin(e);
         }
@@ -59,14 +60,19 @@ namespace WpfClient
             MessageBox.Show("добавление блюда в корзину");
         }
 
-        private void borderMain_PreviewMouseUp(object sender, MouseButtonEventArgs e)
+        private void borderMain_MouseUp(object sender, MouseButtonEventArgs e)
         {
             e.Handled = true;
         }
 
-        private void borderMain_PreviewTouchUp(object sender, TouchEventArgs e)
+        private void borderMain_TouchUp(object sender, TouchEventArgs e)
         {
             e.Handled = true;
+        }
+
+        private void qqq(object sender, MouseButtonEventArgs e)
+        {
+            Debug.Print("source {0}: {1}", e.Source.ToString(), e.RoutedEvent.Name);
         }
     }
 }

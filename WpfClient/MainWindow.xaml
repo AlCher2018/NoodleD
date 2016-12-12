@@ -265,21 +265,21 @@
                     <Grid x:Name="dishHeader">
                         <WrapPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                             <!--маркеры блюда-->
-                            <ListBox ItemsSource="{Binding Marks}" BorderThickness="0" Background="Transparent" Margin="0,0,0,20" SnapsToDevicePixels="True" Focusable="False"  IsHitTestVisible="True" IsTextSearchEnabled="False" ScrollViewer.CanContentScroll="False" FocusVisualStyle="{x:Null}"
+                            <ListBox ItemsSource="{Binding Marks}" BorderThickness="0" Background="Transparent" Margin="0,0,0,20" SnapsToDevicePixels="True" Focusable="False"  IsHitTestVisible="True" ScrollViewer.CanContentScroll="False" FocusVisualStyle="{x:Null}"
                         ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled"
                      Height="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=Grid, Mode=FindAncestor} , Converter={StaticResource multiplyParamConv}, ConverterParameter=0.4}"
                      >
                                 <ListBox.ItemContainerStyle>
                                     <Style TargetType="ListBoxItem">
                                         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-                                        <Setter Property="Margin" Value="0" />
-                                        <Setter Property="Padding" Value="0" />
+                                        <Setter Property="Padding" Value="0"/>
+                                        <Setter Property="Margin" Value="0"/>
                                         <Setter Property="BorderThickness" Value="0" />
                                     </Style>
                                 </ListBox.ItemContainerStyle>
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <Image Source="{Binding Image}" Margin="0"/>
+                                        <Image Source="{Binding Image}"/>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
                                 <ListBox.ItemsPanel>

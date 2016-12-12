@@ -200,7 +200,7 @@ namespace AppModel
 
         public List<DishAdding> SelectedGarnishes { get; set; }
         public List<DishAdding> SelectedIngredients { get; set; }
-
+        public List<DishItem> SelectedRecommends { get; set; }
 
         // надписи на кнопках
         public Dictionary<string, string> langBtnSelGarnishText { get; set; }
