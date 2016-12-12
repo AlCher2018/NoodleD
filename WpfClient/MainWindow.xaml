@@ -50,8 +50,8 @@
             </Setter>
             <Setter Property="Width" Value="{Binding Height, RelativeSource={RelativeSource Self}, Mode=OneWay}"/>
             <Setter Property="CornerRadius" Value="{Binding ActualHeight, RelativeSource={RelativeSource Self}, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.5, Mode=OneWay}"/>
-            <EventSetter Event="Control.MouseDown" Handler="lblButtonLang_MouseDown"/>
-            <EventSetter Event="Control.TouchDown" Handler="lblButtonLang_TouchDown"/>
+            <EventSetter Event="Control.MouseUp" Handler="lblButtonLang_MouseDown"/>
+            <EventSetter Event="Control.TouchUp" Handler="lblButtonLang_TouchDown"/>
             <Style.Triggers>
                 <Trigger Property="Control.IsMouseOver" Value="True">
                     <Setter Property="Control.Background" Value="DarkViolet" />
@@ -137,9 +137,8 @@
             <Setter Property="Template" Value="{StaticResource menuListBoxItemTemplate}"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="{DynamicResource mainMenuSelectedItemColor}"/>
-                    <Setter Property="BorderBrush"  Value="#FFFFA0DA"/>
-                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="Foreground" Value="Yellow"/>
+                    <!--<Setter Property="Background" Value="{DynamicResource mainMenuSelectedItemColor}"/>-->
                 </Trigger>
                 <Trigger Property="IsSelected" Value="True">
                     <!--<Setter Property="Foreground" Value="Yellow"/>-->
