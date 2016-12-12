@@ -74,5 +74,10 @@ namespace WpfClient
         {
             Debug.Print("source {0}: {1}", e.Source.ToString(), e.RoutedEvent.Name);
         }
+
+        private void listIngredients_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
     }
 }

@@ -12,6 +12,7 @@
         >
 
     <Window.Resources>
+        <local:IsNullValueConverter x:Key="isNullValueConverter"/>
         <local:LangDictToTextConverter x:Key="langDictToText"/>
         <local:MultiplyParamValueConverter x:Key="multiplyParamConv"/>
         <local:MultiplyParamValueConverter x:Key="multiplyParamDefVal1Conv" DefaultValue="1"/>
@@ -66,7 +67,7 @@
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="VerticalAlignment" Value="Bottom"/>
         </Style>
-        <Path x:Key="garnBase1" x:Shared="False"  Fill="{StaticResource appBackgroundColor}">
+        <Path x:Key="garnBase1" x:Shared="False" x:Name="garnBase1" Fill="{StaticResource appBackgroundColor}">
             <Path.Data>
                 <CombinedGeometry GeometryCombineMode="Exclude">
                     <CombinedGeometry.Geometry1>
@@ -126,7 +127,7 @@
                  >
                 <Grid x:Name="gridMain">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="0.5*"/> <!-- 0. отступ слева -->
+                        <RowDefinition Height="0.5*"/> <!-- 0. отступ сверху -->
                         <RowDefinition Height="Auto"/>    <!-- 1. раздел Наименование блюда-->
                         <RowDefinition Height="0.3*"/>    <!-- 2. промежуток между наим.раздела и разделом -->
                         <RowDefinition Height="3*"/>    <!-- 3. изображение -->
@@ -134,10 +135,10 @@
                         <RowDefinition Height="Auto"/>   <!-- 5. раздел Удвоить ингредиенты -->
                         <RowDefinition Height="0.2*"/>   <!-- 6. промеж.между наим.раздела и разделом -->
                         <RowDefinition Height="1.5*"/>   <!-- 7. ингредиенты -->
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="0.5*"/>   <!-- 8. промеж.между вторым и третьим разделами-->
+                        <RowDefinition Height="Auto"/>    <!-- 9. раздел Рекомендации-->
+                        <RowDefinition Height="0.2*"/>   <!-- 10. промеж.между наим.раздела и разделом-->
+                        <RowDefinition Height="*"/>   <!-- 11. рекомендации-->
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
@@ -196,9 +197,24 @@
                                                 </ListBox>
                                             </StackPanel>
                                             <!-- гарнир -->
-                                            <TextBlock Text="{Binding SelectedGarnishes, Converter={StaticResource garnishLangTextConverter}, ConverterParameter=1}"
-                                                       FontSize="{Binding Path=ActualWidth, Converter={StaticResource SectionTextFontSize}, ElementName=gridMain, Mode=OneWay}"/>
-                                            <StackPanel Orientation="Horizontal">   <!-- количество и ед.изм -->
+                                <TextBlock
+                                                Text="{Binding SelectedGarnishes, Converter={StaticResource garnishLangTextConverter}, ConverterParameter=1}"
+                                                       FontSize="{Binding Path=ActualWidth, Converter={StaticResource SectionTextFontSize}, ElementName=gridMain, Mode=OneWay}"
+                                                       >
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Garnishes, Converter={StaticResource isNullValueConverter}}" Value="True">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Garnishes, Converter={StaticResource isNullValueConverter}}" Value="False">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <StackPanel Orientation="Horizontal">   <!-- количество и ед.изм -->
                                                 <TextBlock Text="{Binding UnitCount}"
                                                            FontSize="{Binding Path=ActualWidth, Converter={StaticResource SectionTextFontSize}, ElementName=gridMain, Mode=OneWay}"/>
                                                 <TextBlock Margin="6,0,0,0"
@@ -215,9 +231,9 @@
                     <TextBlock Grid.Row="5" Grid.Column="1" FontWeight="Bold"
                         FontSize="{Binding Path=ActualWidth, Converter={StaticResource SectionTitleFontSize}, ElementName=gridMain, Mode=OneWay}"
                         Text="{Binding {x:Null}, ConverterParameter=appSet.formPopUpHeaderText2, Converter={StaticResource langDictToText}}"/>
-                    <Border Grid.Row="6" Background="Azure"/>
-                    <ListBox Grid.Row="7" Grid.Column="1" SelectionMode="Multiple" 
-                             ItemsSource="{Binding Ingredients}" BorderThickness="0" Margin="0" SnapsToDevicePixels="True" Focusable="False" IsHitTestVisible="True" ScrollViewer.CanContentScroll="False" FocusVisualStyle="{x:Null}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                    <ListBox x:Name="listIngredients" Grid.Row="7" Grid.Column="1" SelectionMode="Multiple" 
+                             ItemsSource="{Binding Ingredients}" BorderThickness="0" Margin="0" SnapsToDevicePixels="True" Focusable="False" IsHitTestVisible="True" ScrollViewer.CanContentScroll="False" FocusVisualStyle="{x:Null}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" SelectionChanged="listIngredients_SelectionChanged"
+                             >
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <StackPanel Orientation="Horizontal"/>
@@ -227,37 +243,125 @@
                             <Style TargetType="ListBoxItem">
                                 <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
                                 <Setter Property="Padding" Value="0"/>
-                                <Setter Property="Margin" Value="0,0,20,0"/>
+                                <Setter Property="Margin" Value="0,0,30,0"/>
                                 <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                                <ContentPresenter />
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
                             </Style>
                         </ListBox.ItemContainerStyle>
+
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Viewbox Stretch="Uniform">
                                     <Grid Height="100" Width="100" >
-                                        <StaticResource ResourceKey="garnBase1"/>
+                                        <Path x:Name="garnBase1"  Fill="{StaticResource appBackgroundColor}">
+                                            <Path.Data>
+                                                <CombinedGeometry GeometryCombineMode="Exclude">
+                                                    <CombinedGeometry.Geometry1>
+                                                        <RectangleGeometry Rect="0,0,100,100" RadiusX="10" RadiusY="10"/>
+                                                    </CombinedGeometry.Geometry1>
+                                                    <CombinedGeometry.Geometry2>
+                                                        <EllipseGeometry Center="50,95" RadiusX="28" RadiusY="28"/>
+                                                    </CombinedGeometry.Geometry2>
+                                                </CombinedGeometry>
+                                            </Path.Data>
+                                        </Path>
                                         <StaticResource ResourceKey="garnBase2"/>
-                                        <TextBlock Style="{StaticResource garnishTextStyle}"
+                                        <TextBlock x:Name="ingrName" Style="{StaticResource garnishTextStyle}"
                                            Text="{Binding langNames, Converter={StaticResource langDictToText}}"
                                                    FontSize="{Binding Path=ActualWidth, Converter={StaticResource  multiplyParamConv}, ConverterParameter=0.012, ElementName=gridMain, Mode=OneWay}"/>
                                         <TextBlock Style="{StaticResource garnishPriceStyle}"
                                            Text="{Binding Price, StringFormat={}{0:#0} ₴}"
                                                    FontSize="{Binding Path=ActualWidth, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.015, ElementName=gridMain, Mode=OneWay}"
-
                                                    />
                                     </Grid>
                                 </Viewbox>
+
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsSelected}" Value="True">
+                                        <Setter TargetName="garnBase1" Property="Fill" Value="{StaticResource appSelectedItemColor}"/>
+                                        <Setter TargetName="ingrName" Property="Foreground" Value="Black"/>
+                                        <Setter TargetName="ingrName" Property="FontWeight" Value="Bold"/>
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
     
-                    
                     <!--Раздел 3. РЕКОМЕНДАЦИИ -->
-                    <!--<StackPanel Grid.Row="2"  HorizontalAlignment="Left" VerticalAlignment="Top">
-                        <TextBlock FontWeight="Bold"
-                            FontSize="{Binding Path=ActualWidth, Converter={StaticResource elemSize_0_02}, ElementName=gridMain, Mode=OneWay}"
-                            Text="{Binding {x:Null}, ConverterParameter=appSet.formPopUpHeaderText3, Converter={StaticResource langDictToText}}"/>
-                    </StackPanel>-->
+                    <TextBlock Grid.Row="9" Grid.Column="1" FontWeight="Bold"
+                        FontSize="{Binding Path=ActualWidth, Converter={StaticResource SectionTitleFontSize}, ElementName=gridMain, Mode=OneWay}"
+                        Text="{Binding {x:Null}, ConverterParameter=appSet.formPopUpHeaderText3, Converter={StaticResource langDictToText}}"/>
+                    
+                    <ListBox x:Name="listRecommends" Grid.Row="11" Grid.Column="1" SelectionMode="Multiple" 
+                             ItemsSource="{Binding Recommends}" BorderThickness="0" Margin="0" SnapsToDevicePixels="True" Focusable="False" IsHitTestVisible="True" ScrollViewer.CanContentScroll="False" FocusVisualStyle="{x:Null}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" SelectionChanged="listIngredients_SelectionChanged"
+                             >
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="Margin" Value="0,0,30,0"/>
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                            <ContentPresenter />
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Viewbox Stretch="Uniform">
+                                    <Grid Height="100" Width="100" >
+                                        <Path x:Name="garnBase1"  Fill="{StaticResource appBackgroundColor}">
+                                            <Path.Data>
+                                                <CombinedGeometry GeometryCombineMode="Exclude">
+                                                    <CombinedGeometry.Geometry1>
+                                                        <RectangleGeometry Rect="0,0,100,100" RadiusX="10" RadiusY="10"/>
+                                                    </CombinedGeometry.Geometry1>
+                                                    <CombinedGeometry.Geometry2>
+                                                        <EllipseGeometry Center="50,95" RadiusX="28" RadiusY="28"/>
+                                                    </CombinedGeometry.Geometry2>
+                                                </CombinedGeometry>
+                                            </Path.Data>
+                                        </Path>
+                                        <StaticResource ResourceKey="garnBase2"/>
+                                        <TextBlock x:Name="recomName" Style="{StaticResource garnishTextStyle}"
+                                           Text="{Binding Path=langNames, Converter={StaticResource langDictToText}}"
+                                                   FontSize="{Binding Path=ActualWidth, Converter={StaticResource  multiplyParamConv}, ConverterParameter=0.012, ElementName=gridMain, Mode=OneWay}"/>
+                                        <TextBlock Style="{StaticResource garnishPriceStyle}"
+                                           Text="{Binding Price, StringFormat={}{0:#0} ₴}"
+                                                   FontSize="{Binding Path=ActualWidth, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.015, ElementName=gridMain, Mode=OneWay}"
+                                                   />
+                                    </Grid>
+                                </Viewbox>
+
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsSelected}" Value="True">
+                                        <Setter TargetName="garnBase1" Property="Fill" Value="{StaticResource appSelectedItemColor}"/>
+                                        <Setter TargetName="recomName" Property="Foreground" Value="Black"/>
+                                        <Setter TargetName="recomName" Property="FontWeight" Value="Bold"/>
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
 
                     <!--Раздел 4. Кнопка Добавить -->
                     <!--<Grid Grid.Row="3">
