@@ -89,7 +89,7 @@ namespace WpfClient
             {
                 logger.Fatal("Fatal error: {0}\nSource: {1}\nStackTrace: {2}", e.Message, e.Source, e.StackTrace);
                 MessageBox.Show("Ошибка доступа к данным: " + e.Message +"\nПрограмма будет закрыта.");
-                this.Close();
+                Application.Current.Shutdown(1);
             }
 
 
@@ -355,7 +355,7 @@ namespace WpfClient
             if (_curDishItem == null)
             {
                 _curDishItem = (DishItem)lstDishes.SelectedItem;
-                _curDishItem.SelectedGarnishes = new List<DishAdding>();
+                _curDishItem.SelectedGarnishes = new ObservableCollection<DishAdding>();
 
                 DishAdding da = _curDishItem.Garnishes[garnIndex];
                 da.Uid = gridGarn.Uid;
@@ -403,7 +403,7 @@ namespace WpfClient
                     }
 
                     _curDishItem = (DishItem)lstDishes.SelectedItem;
-                    if (_curDishItem.SelectedGarnishes == null) _curDishItem.SelectedGarnishes = new List<DishAdding>();
+                    if (_curDishItem.SelectedGarnishes == null) _curDishItem.SelectedGarnishes = new ObservableCollection<DishAdding>();
 
                     DishAdding da = _curDishItem.Garnishes[garnIndex];
                     da.Uid = gridGarn.Uid;
@@ -424,7 +424,7 @@ namespace WpfClient
             SolidColorBrush notSelBase = (SolidColorBrush)AppLib.GetAppGlobalValue("appBackgroundColor");
             SolidColorBrush notSelText = (SolidColorBrush)AppLib.GetAppGlobalValue("appNotSelectedItemColor");
 
-            List<DishAdding> garList = _curDishItem.SelectedGarnishes;  // SelectedGarnishes
+            ObservableCollection<DishAdding> garList = _curDishItem.SelectedGarnishes;  // SelectedGarnishes
             if (garList==null || garList.Count == 0)  // ничего не выбрано
             {
                 _curGarnishBorder.Fill = notSelBase;
@@ -436,16 +436,17 @@ namespace WpfClient
                 _curGarnishTextBlock.Foreground = brushBlack;
             }
 
-            BindingExpression be;
+            _curAddButton.InvalidateProperty(UIElement.VisibilityProperty);
+            //BindingExpression be;
             //be = _curGarnishBorder.GetBindingExpression(Border.BackgroundProperty);
             //be.UpdateTarget();
             //be = _curGarnishBorder.GetBindingExpression(TextBlock.ForegroundProperty);
             //be.UpdateTarget();
-            if (isUpdAddBut)
-            {
-                be = _curAddButton.GetBindingExpression(Border.VisibilityProperty);
-                be.UpdateTarget();
-            }
+            //if (isUpdAddBut)
+            //{
+            //    be = _curAddButton.GetBindingExpression(Border.VisibilityProperty);
+            //    be.UpdateTarget();
+            //}
         }
 
         #endregion
@@ -636,6 +637,7 @@ namespace WpfClient
         {
             BindingExpression be = this.txtOrderPrice.GetBindingExpression(TextBlock.TextProperty);
             be.UpdateTarget();
+            
         }
 
 

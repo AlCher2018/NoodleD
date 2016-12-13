@@ -106,7 +106,7 @@ namespace AppModel
                 var lGarn = _listGarn.Where(g => g.DishGUID == dishDb.RowGUID).ToList();
                 if (lGarn.Count > 0) {
                     dishApp.Garnishes = new List<DishAdding>();
-                    dishApp.SelectedGarnishes = new List<DishAdding>();
+                    dishApp.SelectedGarnishes = new ObservableCollection<DishAdding>();
                     foreach (DishGarnish item in lGarn)
                     {
                         DishAdding da = new DishAdding() { Id = item.Id, RowGUID=item.RowGUID, Price = item.Price };
@@ -215,7 +215,7 @@ namespace AppModel
         public List<DishAddingImage> Marks { get; set; }
         public List<DishItem> Recommends { get; set; }
 
-        public List<DishAdding> SelectedGarnishes { get; set; }
+        public ObservableCollection<DishAdding> SelectedGarnishes { get; set; }
         public List<DishAdding> SelectedIngredients { get; set; }
         public List<DishItem> SelectedRecommends { get; set; }
 
@@ -234,9 +234,14 @@ namespace AppModel
             other.Count = 1;
 
             // скопировать выбранные элементы
-            other.SelectedGarnishes = new List<DishAdding>();
-            if (this.SelectedGarnishes != null) other.SelectedGarnishes.AddRange(this.SelectedGarnishes);
-
+            other.SelectedGarnishes = new ObservableCollection<DishAdding>();
+            if (this.SelectedGarnishes != null)
+            {
+                foreach (DishAdding item in this.SelectedGarnishes)
+                {
+                    other.SelectedGarnishes.Add(item);
+                }
+            }
             other.SelectedIngredients = new List<DishAdding>();
             if (this.SelectedIngredients != null) other.SelectedIngredients.AddRange(this.SelectedIngredients);
 

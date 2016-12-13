@@ -18,6 +18,7 @@ namespace WpfClient
             decimal retVal = 0;
 
             OrderItem curOrder = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
+            if (curOrder == null) return retVal;
 
             if (curOrder.Dishes != null)
             {

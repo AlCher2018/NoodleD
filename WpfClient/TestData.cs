@@ -86,7 +86,7 @@ namespace WpfClient
                 db.Setting.Add(appSet);
                 appSet = new Setting() { UniqName = "mainMenuSelectedItemColor", RowGUID = Guid.NewGuid(), Value = "99,29,85" };
                 db.Setting.Add(appSet);
-                appSet = new Setting() { UniqName = "btnAddColor", RowGUID = Guid.NewGuid(), Value = "173,32,72" };
+                appSet = new Setting() { UniqName = "addButtonBackgroundTextColor", RowGUID = Guid.NewGuid(), Value = "173,32,72" };
                 db.Setting.Add(appSet);
 
                 appSet = new Setting() { UniqName = "langButtonTextUa", RowGUID = Guid.NewGuid(), Value = "Укр" };

@@ -11,13 +11,7 @@
         >
 
     <Window.Resources>
-       
-        <local:GetAppSetValue x:Key="getAppSetValue" />
-        <local:LangDictToTextConverter x:Key="langDictToText"/>
-        <local:MultiplyParamValueConverter x:Key="multiplyParamConv"/>
         <local:MultiplyParamValueConverter x:Key="multiplyParamDefVal1Conv" DefaultValue="1"/>
-        
-        <local:GetMinValue x:Key="getMinValue"/>
         <local:GetOrderPrice x:Key="getOrderPrice"/>
         
         <local:GarnishVisibilityConverter x:Key="garnishVisibilityConverter"/>
@@ -293,13 +287,6 @@
                      FontSize="{Binding ActualHeight, Mode=OneWay, RelativeSource={RelativeSource AncestorType=Grid}, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.25}"/>
                 <Run Text="{Binding Path=langUnitNames, Converter={StaticResource langDictToText}}" 
                      FontSize="{Binding ActualHeight, Mode=OneWay, RelativeSource={RelativeSource AncestorType=Grid}, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.25}"/>
-
-                            <!-- стоимость блюда -->
-                            <Run Text="  "/>
-                                <Run x:Name="txtPrice"
-                                 Text="{Binding Path=Price, StringFormat={StaticResource priceFormatString}}" FontWeight="Bold" 
-                                 FontSize="{Binding ActualHeight, Mode=OneWay, RelativeSource={RelativeSource AncestorType=Grid}, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.25}"/>
-
                             </TextBlock>
                         </WrapPanel>
                     </Grid>
@@ -420,20 +407,43 @@
 
                     <!--грид с кнопкой добавления блюда-->
                     <Grid x:Name="gridDishBottomButtons" Grid.Row="3" Margin="0,10,0,0" HorizontalAlignment="Stretch">
-                        <Border x:Name="gridDishSelectGarnishButton" CornerRadius="7" BorderBrush="Gray" BorderThickness="1" Background="White" SnapsToDevicePixels="True" UseLayoutRounding="True">
-                            <TextBlock Text="{Binding langBtnSelGarnishText, Converter={StaticResource langDictToText}}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{Binding Path=ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Border}, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.4}" Foreground="Gray"/>
+                        
+                        <Border CornerRadius="7" BorderBrush="Gray" BorderThickness="1"  Background="White" SnapsToDevicePixels="True" UseLayoutRounding="True">
+                            <TextBlock Foreground="Gray" Style="{StaticResource centeredText}"
+                                Text="{Binding langBtnSelGarnishText, Converter={StaticResource langDictToText}}" FontSize="{Binding Path=ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Border}, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.4}" />
                         </Border>
-                        <Border x:Name="gridDishAddButton" CornerRadius="7" Background="{DynamicResource btnAddColor}" SnapsToDevicePixels="True"
-                    Visibility="{Binding BindsDirectlyToSource=True, Converter={StaticResource addDishButtonVisibilityConverter}}" MouseUp="gridDishAddButton_MouseDown" TouchUp="gridDishAddButton_TouchDown">
-                            <Border.Effect>
-                                <DropShadowEffect ShadowDepth="3" Opacity="0.5" Color="Red"/>
-                            </Border.Effect>
-                            <TextBlock Text="{Binding langBtnAddDishText, Converter={StaticResource langDictToText}}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{Binding Path=ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Border}, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.4}" Foreground="White"/>
+                        
+                        
+                        <Border x:Name="gridDishAddButton" CornerRadius="7" Background="{DynamicResource addButtonBackgroundTextColor}" SnapsToDevicePixels="True" Effect="{StaticResource addButtonShadow}"
+                                MouseUp="gridDishAddButton_MouseDown" TouchUp="gridDishAddButton_TouchDown">
+                            <TextBlock Foreground="White" Style="{StaticResource centeredText}"
+                                Text="{Binding langBtnAddDishText, Converter={StaticResource langDictToText}}" 
+                                FontSize="{Binding Path=ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Border}, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.4}" />
                         </Border>
                     </Grid>
                 </Grid>
-
             </Border>
+
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding Garnishes, Converter={StaticResource isNullValueConverter}, Mode=OneWay}" Value="True">
+                    <Setter TargetName="gridDishAddButton" Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding Garnishes, Converter={StaticResource isNullValueConverter}, Mode=OneWay}" Value="False"/>
+                        <Condition Binding="{Binding SelectedGarnishes, Converter={StaticResource isEmptyEnumerator}, Mode=OneWay}" Value="True"/>
+                    </MultiDataTrigger.Conditions>
+                    <Setter TargetName="gridDishAddButton" Property="Visibility" Value="Collapsed"/>
+                </MultiDataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding Garnishes, Converter={StaticResource isNullValueConverter}, Mode=OneWay}" Value="False"/>
+                        <Condition Binding="{Binding SelectedGarnishes, Converter={StaticResource isEmptyEnumerator}}" Value="False"/>
+                    </MultiDataTrigger.Conditions>
+                    <Setter TargetName="gridDishAddButton" Property="Visibility" Value="Visible"/>
+                </MultiDataTrigger>
+            </DataTemplate.Triggers>
+
         </DataTemplate>
 
     </Window.Resources>

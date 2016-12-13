@@ -21,10 +21,19 @@
         <SolidColorBrush x:Key="appNotSelectedItemColor" Color="{StaticResource appColorWhite}"/>
         <SolidColorBrush x:Key="appSelectedItemColor" Color="{StaticResource appColorYellow}"/>
         <SolidColorBrush x:Key="mainMenuSelectedItemColor" Color="{StaticResource appColorDDarkPink}"/>
-        <SolidColorBrush x:Key="btnAddColor" Color="{StaticResource appColorSelectButton}"/>
+        <SolidColorBrush x:Key="addButtonBackgroundTextColor" Color="{StaticResource appColorSelectButton}"/>
+        <SolidColorBrush x:Key="addButtonBackgroundPriceColor" Color="#FF931D3F"/>
 
         <sys:String x:Key="priceFormatString">{0:#0} ₴</sys:String>
+        <DropShadowEffect x:Key="addButtonShadow" Color="#77CF446B" Direction="280" BlurRadius="40" ShadowDepth="10"/>
 
+        <local:IsNullValueConverter x:Key="isNullValueConverter"/>
+        <local:GetAppSetValue x:Key="getAppSetValue" />
+        <local:LangDictToTextConverter x:Key="langDictToText"/>
+        <local:MultiplyParamValueConverter x:Key="multiplyParamConv"/>
+        <local:GetMinValue x:Key="getMinValue"/>
 
+        <local:IsEmptyEnumerator x:Key="isEmptyEnumerator"/>
+        
     </Application.Resources>
 </Application>

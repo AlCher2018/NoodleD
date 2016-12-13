@@ -12,9 +12,6 @@
         >
 
     <Window.Resources>
-        <local:IsNullValueConverter x:Key="isNullValueConverter"/>
-        <local:LangDictToTextConverter x:Key="langDictToText"/>
-        <local:MultiplyParamValueConverter x:Key="multiplyParamConv"/>
         <local:MultiplyParamValueConverter x:Key="multiplyParamDefVal1Conv" DefaultValue="1"/>
         <local:MultiplyValueConverter x:Key="SectionTitleFontSize" Multiplier="0.025"/>
         <local:MultiplyValueConverter x:Key="SectionTextFontSize" Multiplier="0.02"/>
@@ -164,9 +161,9 @@
             </Style.Triggers>
         </Style>
        
-        <DropShadowEffect x:Key="addButtonShadow" Color="#22CF446B" Direction="280" BlurRadius="40" ShadowDepth="10"/>
-        
     </Window.Resources>
+    
+    
     <!-- события: PreviewMouseDown - MouseDown - PreviewMouseUp -->
     <Grid UseLayoutRounding="True" Background="#01000000"
           MouseUp="gridWindow_MouseUp" TouchUp="gridWindow_TouchUp" >
@@ -307,7 +304,7 @@
                              SelectionChanged="listRecommends_SelectionChanged"/>
 
                     <!--Раздел 4. Кнопка Добавить -->
-                    <Grid Grid.Row="13" Grid.Column="1">
+                    <Grid Grid.Row="13" Grid.Column="1" Effect="{StaticResource addButtonShadow}">  <!-- грид размещения кнопки -->
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="2*"/>
@@ -318,22 +315,23 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Grid Grid.Row="1" Grid.Column="1">
+                        <Grid x:Name="gridAddButton" Grid.Row="1" Grid.Column="1">  <!-- грид отрисовки кнопки -->
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="2*"/>
                             </Grid.ColumnDefinitions>
-                            <Border Grid.Column="0" Background="#FF931D3F" Effect="{StaticResource addButtonShadow}"
-                                CornerRadius="{Binding Path=ActualWidth, Converter={StaticResource cornerRadiusLeft}, ConverterParameter=0.01, ElementName=gridMain, Mode=OneWay}">
+                            <Border Grid.Column="0" Background="{StaticResource addButtonBackgroundPriceColor}"
+                                CornerRadius="{Binding Path=ActualHeight, Converter={StaticResource cornerRadiusLeft}, ConverterParameter=0.1, ElementName=gridAddButton, Mode=OneWay}">
                                 <TextBlock x:Name="txtDishPrice" Style="{StaticResource addButtonTextStyle}"
-                                           Text="{Binding Converter={StaticResource getDishPriceTotal}, StringFormat={}{0:#0} ₴}"/>
+                                           Text="{Binding Converter={StaticResource getDishPriceTotal}, StringFormat={StaticResource priceFormatString}}"/>
                             </Border>
-                            <Border x:Name="btnAddDish" Grid.Column="1" Background="#FFAD2048" Effect="{StaticResource addButtonShadow}" CornerRadius="{Binding Path=ActualWidth, Converter={StaticResource cornerRadiusRight}, ConverterParameter=0.01, ElementName=gridMain, Mode=OneWay}"
+                            <Border Grid.Column="1" Background="{StaticResource addButtonBackgroundTextColor}"  CornerRadius="{Binding Path=ActualWidth, Converter={StaticResource cornerRadiusRight}, ConverterParameter=0.01, ElementName=gridMain, Mode=OneWay}"
                                     MouseUp="btnAddDish_MouseUp" TouchUp="btnAddDish_PreviewTouchUp">
                                 <TextBlock Text="{Binding {x:Null}, ConverterParameter=appSet.btnSelectDishText, Converter={StaticResource langDictToText}}" Style="{StaticResource addButtonTextStyle}"/>
                             </Border>
                         </Grid>
                     </Grid>  <!--Раздел 4. Кнопка Добавить -->
+                    
                 </Grid>  <!--  <Grid x:Name="gridMain"> -->
             </Border>
         </Grid>
