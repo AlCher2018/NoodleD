@@ -135,7 +135,7 @@ namespace AppModel
                 dishApp.Recommends = new List<DishItem>();
                 foreach (DishRecommends item in _listRecom.Where(g => g.DishGUID == dishDb.RowGUID))
                 {
-                    Dish recomDb = _listDish.FirstOrDefault(d => d.RowGUID == item.DishGUID);
+                    Dish recomDb = _listDish.FirstOrDefault(d => d.RowGUID == item.RecommendGUID);
                     if (recomDb != null)
                     {
                         DishItem itemRecom = getNewDishItem(recomDb);
@@ -205,6 +205,20 @@ namespace AppModel
         // надписи на кнопках
         public Dictionary<string, string> langBtnSelGarnishText { get; set; }
         public Dictionary<string, string> langBtnAddDishText { get; set; }
+
+        public decimal GetTotalPrice()
+        {
+            decimal retVal=this.Price;
+            if ((SelectedGarnishes != null) && (SelectedGarnishes.Count > 0))
+                retVal = SelectedGarnishes[0].Price;
+            // добавить ингредиенты
+            if (SelectedIngredients != null) foreach (DishAdding item in this.SelectedIngredients) retVal += item.Price;
+            // добавить рекомендованные блюда
+            if (SelectedRecommends != null) foreach (DishItem item in this.SelectedRecommends) retVal += item.Price;
+
+            return retVal;
+        }
+
     }  // class DishItem
 
     public class DishAdding

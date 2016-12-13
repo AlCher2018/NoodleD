@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AppModel;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -30,6 +31,8 @@ namespace WpfClient
             if (e.Key == Key.Escape) this.Close();
         }
 
+        #region закрытие всплывашки
+
         private void btnClose_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
             closeWin(e);
@@ -47,7 +50,7 @@ namespace WpfClient
         {
             closeWin(e);
         }
-
+        #endregion
 
         private void closeWin(RoutedEventArgs e = null)
         {
@@ -57,7 +60,11 @@ namespace WpfClient
 
         private void btnAddDish_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            MessageBox.Show("добавление блюда в корзину");
+            addDishToOrder();
+        }
+        private void btnAddDish_PreviewTouchUp(object sender, TouchEventArgs e)
+        {
+            addDishToOrder();
         }
 
         private void borderMain_MouseUp(object sender, MouseButtonEventArgs e)
@@ -70,14 +77,43 @@ namespace WpfClient
             e.Handled = true;
         }
 
-        private void qqq(object sender, MouseButtonEventArgs e)
-        {
-            Debug.Print("source {0}: {1}", e.Source.ToString(), e.RoutedEvent.Name);
-        }
-
         private void listIngredients_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            DishItem dishItem = (DishItem)DataContext;
 
+            if (dishItem.SelectedIngredients == null) dishItem.SelectedIngredients = new List<DishAdding>();
+            else dishItem.SelectedIngredients.Clear();
+
+            foreach (DishAdding item in listIngredients.SelectedItems)
+            {
+                dishItem.SelectedIngredients.Add(item);
+            }
+            updatePriceControl();
+        }
+
+        private void listRecommends_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            DishItem dishItem = (DishItem)DataContext;
+
+            if (dishItem.SelectedRecommends == null) dishItem.SelectedRecommends = new List<DishItem>();
+            else dishItem.SelectedRecommends.Clear();
+
+            foreach (DishItem item in listRecommends.SelectedItems)
+            {
+                dishItem.SelectedRecommends.Add(item);
+            }
+            updatePriceControl();
+        }
+
+        private void updatePriceControl()
+        {
+            BindingExpression be = txtDishPrice.GetBindingExpression(TextBlock.TextProperty);
+            be.UpdateTarget();
+        }
+
+        private void addDishToOrder()
+        {
+            MessageBox.Show("add to Order");
         }
     }
 }

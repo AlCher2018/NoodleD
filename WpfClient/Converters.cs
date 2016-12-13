@@ -218,6 +218,4 @@ namespace WpfClient
         }
     }
 
-
-
 }

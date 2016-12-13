@@ -14,7 +14,7 @@ namespace WpfClient
         {
             //clearData();
 
-            setGlobalDataFrom1C();
+            //setGlobalDataFrom1C();
 
             //setMainMenu();
             //setDishUnits();
@@ -492,16 +492,21 @@ namespace WpfClient
             using (NoodleDContext db = new NoodleDContext())
             {
                 List<Dish> dList = db.Dish.ToList();
-                Random rnd = new Random(); int cnt = db.Dish.Count();
+                Random rnd = new Random(); int cnt = db.Dish.Count(), curRnd;
                 foreach (Dish dish in db.Dish)
                 {
-                    Dish dRec1 = dList.ToList().ElementAt(rnd.Next(1, cnt));
-                    Dish dRec2 = dList.ToList().ElementAt(rnd.Next(1, cnt));
-                    Dish dRec3 = dList.ToList().ElementAt(rnd.Next(1, cnt));
+                    curRnd = rnd.Next(1, cnt);
+                    Dish dRec1 = dList.ElementAt(curRnd);
+
+                    curRnd = rnd.Next(1, cnt);
+                    Dish dRec2 = dList.ElementAt(curRnd);
+
+                    curRnd = rnd.Next(1, cnt);
+                    Dish dRec3 = dList.ElementAt(curRnd);
 
                     db.DishRecommends.Add(new DishRecommends() { DishGUID = dish.RowGUID, RecommendGUID = dRec1.RowGUID, RowPosition = 1 });
-                    db.DishRecommends.Add(new DishRecommends() { DishGUID = dish.RowGUID, RecommendGUID = dRec1.RowGUID, RowPosition = 2 });
-                    db.DishRecommends.Add(new DishRecommends() { DishGUID = dish.RowGUID, RecommendGUID = dRec1.RowGUID, RowPosition = 3 });
+                    db.DishRecommends.Add(new DishRecommends() { DishGUID = dish.RowGUID, RecommendGUID = dRec2.RowGUID, RowPosition = 2 });
+                    db.DishRecommends.Add(new DishRecommends() { DishGUID = dish.RowGUID, RecommendGUID = dRec3.RowGUID, RowPosition = 3 });
                 }
                 db.SaveChanges();
             }

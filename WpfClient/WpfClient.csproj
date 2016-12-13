@@ -73,6 +73,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="DishConverters.cs" />
     <Compile Include="DishPopup.xaml.cs">
       <DependentUpon>DishPopup.xaml</DependentUpon>
     </Compile>
