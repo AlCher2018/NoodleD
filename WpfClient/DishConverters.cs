@@ -11,6 +11,33 @@ namespace WpfClient
 {
 
     [ValueConversion(typeof(DishItem), typeof(decimal))]
+    public class GetOrderPrice : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            decimal retVal = 0;
+
+            OrderItem curOrder = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
+
+            if (curOrder.Dishes != null)
+            {
+                foreach (DishItem item in curOrder.Dishes)
+                {
+                    retVal += item.GetTotalPrice();
+                }
+            }
+
+            return retVal;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+
+    [ValueConversion(typeof(DishItem), typeof(decimal))]
     public class GetDishPriceTotal : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

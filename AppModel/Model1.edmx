@@ -93,7 +93,7 @@
             <PropertyRef Name="Id" />
           </Key>
           <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="OrderGUID" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="RowGUID" Type="uniqueidentifier" Nullable="false" />
           <Property Name="OrderDate" Type="datetime" />
         </EntityType>
         <EntityType Name="OrderDish">
@@ -101,32 +101,26 @@
             <PropertyRef Name="Id" />
           </Key>
           <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="OrderId" Type="int" Nullable="false" />
-          <Property Name="DishId" Type="int" Nullable="false" />
+          <Property Name="OrderGUID" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="DishGUID" Type="uniqueidentifier" Nullable="false" />
           <Property Name="Count" Type="int" Nullable="false" />
         </EntityType>
-        <!--Errors Found During Generation:
-warning 6002: The table/view 'NoodleD.dbo.OrderDishGarnish' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
         <EntityType Name="OrderDishGarnish">
           <Key>
-            <PropertyRef Name="OrderDishId" />
-            <PropertyRef Name="GarnishId" />
-            <PropertyRef Name="Count" />
+            <PropertyRef Name="Id" />
           </Key>
-          <Property Name="OrderDishId" Type="int" Nullable="false" />
-          <Property Name="GarnishId" Type="int" Nullable="false" />
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="DishGUID" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="GarnishGUID" Type="uniqueidentifier" Nullable="false" />
           <Property Name="Count" Type="int" Nullable="false" />
         </EntityType>
-        <!--Errors Found During Generation:
-warning 6002: The table/view 'NoodleD.dbo.OrderDishIngredient' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
         <EntityType Name="OrderDishIngredient">
           <Key>
-            <PropertyRef Name="OrderDishId" />
-            <PropertyRef Name="IngredientId" />
-            <PropertyRef Name="Count" />
+            <PropertyRef Name="Id" />
           </Key>
-          <Property Name="OrderDishId" Type="int" Nullable="false" />
-          <Property Name="IngredientId" Type="int" Nullable="false" />
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="DishGUID" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="IngredientGUID" Type="uniqueidentifier" Nullable="false" />
           <Property Name="Count" Type="int" Nullable="false" />
         </EntityType>
         <EntityType Name="Setting">
@@ -172,42 +166,15 @@ warning 6035: The relationship 'FK_DishMarks_DishMark1' has columns that are not
         <!--Errors Found During Generation:
 warning 6035: The relationship 'FK_DishRecommends_Dish1' has columns that are not part of the key of the table on the primary side of the relationship. The relationship was excluded.
         <Association Name="FK_DishRecommends_Dish1" />-->
-        <Association Name="FK_OrderDish_Order">
-          <End Role="Order" Type="Self.Order" Multiplicity="1" />
-          <End Role="OrderDish" Type="Self.OrderDish" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Order">
-              <PropertyRef Name="Id" />
-            </Principal>
-            <Dependent Role="OrderDish">
-              <PropertyRef Name="OrderId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_OrderDishGarnish_OrderDish">
-          <End Role="OrderDish" Type="Self.OrderDish" Multiplicity="1" />
-          <End Role="OrderDishGarnish" Type="Self.OrderDishGarnish" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="OrderDish">
-              <PropertyRef Name="Id" />
-            </Principal>
-            <Dependent Role="OrderDishGarnish">
-              <PropertyRef Name="OrderDishId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_OrderDishUngredient_OrderDish">
-          <End Role="OrderDish" Type="Self.OrderDish" Multiplicity="1" />
-          <End Role="OrderDishIngredient" Type="Self.OrderDishIngredient" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="OrderDish">
-              <PropertyRef Name="Id" />
-            </Principal>
-            <Dependent Role="OrderDishIngredient">
-              <PropertyRef Name="OrderDishId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
+        <!--Errors Found During Generation:
+warning 6035: The relationship 'FK_OrderDish_Order' has columns that are not part of the key of the table on the primary side of the relationship. The relationship was excluded.
+        <Association Name="FK_OrderDish_Order" />-->
+        <!--Errors Found During Generation:
+warning 6035: The relationship 'FK_OrderDishGarnish_OrderDish' has columns that are not part of the key of the table on the primary side of the relationship. The relationship was excluded.
+        <Association Name="FK_OrderDishGarnish_OrderDish" />-->
+        <!--Errors Found During Generation:
+warning 6035: The relationship 'FK_OrderDishIngredient_OrderDish' has columns that are not part of the key of the table on the primary side of the relationship. The relationship was excluded.
+        <Association Name="FK_OrderDishIngredient_OrderDish" />-->
         <Association Name="FK_StringValue_FieldType">
           <End Role="FieldType" Type="Self.FieldType" Multiplicity="1" />
           <End Role="StringValue" Type="Self.StringValue" Multiplicity="*" />
@@ -232,35 +199,11 @@ warning 6035: The relationship 'FK_DishRecommends_Dish1' has columns that are no
           <EntitySet Name="MenuFolder" EntityType="Self.MenuFolder" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Order" EntityType="Self.Order" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="OrderDish" EntityType="Self.OrderDish" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="OrderDishGarnish" EntityType="Self.OrderDishGarnish" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="OrderDishIngredient" EntityType="Self.OrderDishIngredient" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Setting" EntityType="Self.Setting" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="StringValue" EntityType="Self.StringValue" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Terminal" EntityType="Self.Terminal" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="OrderDishGarnish" EntityType="Self.OrderDishGarnish" store:Type="Tables" store:Schema="dbo">
-            <DefiningQuery>SELECT 
-    [OrderDishGarnish].[OrderDishId] AS [OrderDishId], 
-    [OrderDishGarnish].[GarnishId] AS [GarnishId], 
-    [OrderDishGarnish].[Count] AS [Count]
-    FROM [dbo].[OrderDishGarnish] AS [OrderDishGarnish]</DefiningQuery>
-          </EntitySet>
-          <EntitySet Name="OrderDishIngredient" EntityType="Self.OrderDishIngredient" store:Type="Tables" store:Schema="dbo">
-            <DefiningQuery>SELECT 
-    [OrderDishIngredient].[OrderDishId] AS [OrderDishId], 
-    [OrderDishIngredient].[IngredientId] AS [IngredientId], 
-    [OrderDishIngredient].[Count] AS [Count]
-    FROM [dbo].[OrderDishIngredient] AS [OrderDishIngredient]</DefiningQuery>
-          </EntitySet>
-          <AssociationSet Name="FK_OrderDish_Order" Association="Self.FK_OrderDish_Order">
-            <End Role="Order" EntitySet="Order" />
-            <End Role="OrderDish" EntitySet="OrderDish" />
-          </AssociationSet>
-          <AssociationSet Name="FK_OrderDishGarnish_OrderDish" Association="Self.FK_OrderDishGarnish_OrderDish">
-            <End Role="OrderDish" EntitySet="OrderDish" />
-            <End Role="OrderDishGarnish" EntitySet="OrderDishGarnish" />
-          </AssociationSet>
-          <AssociationSet Name="FK_OrderDishUngredient_OrderDish" Association="Self.FK_OrderDishUngredient_OrderDish">
-            <End Role="OrderDish" EntitySet="OrderDish" />
-            <End Role="OrderDishIngredient" EntitySet="OrderDishIngredient" />
-          </AssociationSet>
           <AssociationSet Name="FK_StringValue_FieldType" Association="Self.FK_StringValue_FieldType">
             <End Role="FieldType" EntitySet="FieldType" />
             <End Role="StringValue" EntitySet="StringValue" />
@@ -280,29 +223,17 @@ warning 6035: The relationship 'FK_DishRecommends_Dish1' has columns that are no
           <EntitySet Name="FieldType" EntityType="NoodleDModel.FieldType" />
           <EntitySet Name="MenuFolder" EntityType="NoodleDModel.MenuFolder" />
           <EntitySet Name="Order" EntityType="NoodleDModel.Order" />
-          <EntitySet Name="OrderDish" EntityType="NoodleDModel.OrderDish" />
           <EntitySet Name="Setting" EntityType="NoodleDModel.Setting" />
           <EntitySet Name="StringValue" EntityType="NoodleDModel.StringValue" />
           <EntitySet Name="Terminal" EntityType="NoodleDModel.Terminal" />
-          <EntitySet Name="OrderDishGarnish" EntityType="NoodleDModel.OrderDishGarnish" />
-          <EntitySet Name="OrderDishIngredient" EntityType="NoodleDModel.OrderDishIngredient" />
           <AssociationSet Name="FK_StringValue_FieldType" Association="NoodleDModel.FK_StringValue_FieldType">
             <End Role="FieldType" EntitySet="FieldType" />
             <End Role="StringValue" EntitySet="StringValue" />
           </AssociationSet>
-          <AssociationSet Name="FK_OrderDish_Order" Association="NoodleDModel.FK_OrderDish_Order">
-            <End Role="Order" EntitySet="Order" />
-            <End Role="OrderDish" EntitySet="OrderDish" />
-          </AssociationSet>
-          <AssociationSet Name="FK_OrderDishGarnish_OrderDish" Association="NoodleDModel.FK_OrderDishGarnish_OrderDish">
-            <End Role="OrderDish" EntitySet="OrderDish" />
-            <End Role="OrderDishGarnish" EntitySet="OrderDishGarnish" />
-          </AssociationSet>
-          <AssociationSet Name="FK_OrderDishUngredient_OrderDish" Association="NoodleDModel.FK_OrderDishUngredient_OrderDish">
-            <End Role="OrderDish" EntitySet="OrderDish" />
-            <End Role="OrderDishIngredient" EntitySet="OrderDishIngredient" />
-          </AssociationSet>
           <EntitySet Name="DishRecommends" EntityType="NoodleDModel.DishRecommends" />
+          <EntitySet Name="OrderDish" EntityType="NoodleDModel.OrderDish" />
+          <EntitySet Name="OrderDishGarnish" EntityType="NoodleDModel.OrderDishGarnish" />
+          <EntitySet Name="OrderDishIngredient" EntityType="NoodleDModel.OrderDishIngredient" />
         </EntityContainer>
         <EntityType Name="Dish">
           <Key>
@@ -384,21 +315,8 @@ warning 6035: The relationship 'FK_DishRecommends_Dish1' has columns that are no
             <PropertyRef Name="Id" />
           </Key>
           <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="OrderGUID" Type="Guid" Nullable="false" />
           <Property Name="OrderDate" Type="DateTime" Precision="3" />
-          <NavigationProperty Name="OrderDish" Relationship="NoodleDModel.FK_OrderDish_Order" FromRole="Order" ToRole="OrderDish" />
-        </EntityType>
-        <EntityType Name="OrderDish">
-          <Key>
-            <PropertyRef Name="Id" />
-          </Key>
-          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="OrderId" Type="Int32" Nullable="false" />
-          <Property Name="DishId" Type="Int32" Nullable="false" />
-          <Property Name="Count" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="Order" Relationship="NoodleDModel.FK_OrderDish_Order" FromRole="OrderDish" ToRole="Order" />
-          <NavigationProperty Name="OrderDishGarnish" Relationship="NoodleDModel.FK_OrderDishGarnish_OrderDish" FromRole="OrderDish" ToRole="OrderDishGarnish" />
-          <NavigationProperty Name="OrderDishIngredient" Relationship="NoodleDModel.FK_OrderDishUngredient_OrderDish" FromRole="OrderDish" ToRole="OrderDishIngredient" />
+          <Property Name="RowGUID" Type="Guid" Nullable="false" />
         </EntityType>
         <EntityType Name="Setting">
           <Key>
@@ -429,28 +347,6 @@ warning 6035: The relationship 'FK_DishRecommends_Dish1' has columns that are no
           <Property Name="TimeOff" Type="DateTime" Precision="3" />
           <Property Name="State" Type="Int32" />
         </EntityType>
-        <EntityType Name="OrderDishGarnish">
-          <Key>
-            <PropertyRef Name="OrderDishId" />
-            <PropertyRef Name="GarnishId" />
-            <PropertyRef Name="Count" />
-          </Key>
-          <Property Name="OrderDishId" Type="Int32" Nullable="false" />
-          <Property Name="GarnishId" Type="Int32" Nullable="false" />
-          <Property Name="Count" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="OrderDish" Relationship="NoodleDModel.FK_OrderDishGarnish_OrderDish" FromRole="OrderDishGarnish" ToRole="OrderDish" />
-        </EntityType>
-        <EntityType Name="OrderDishIngredient">
-          <Key>
-            <PropertyRef Name="OrderDishId" />
-            <PropertyRef Name="IngredientId" />
-            <PropertyRef Name="Count" />
-          </Key>
-          <Property Name="OrderDishId" Type="Int32" Nullable="false" />
-          <Property Name="IngredientId" Type="Int32" Nullable="false" />
-          <Property Name="Count" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="OrderDish" Relationship="NoodleDModel.FK_OrderDishUngredient_OrderDish" FromRole="OrderDishIngredient" ToRole="OrderDish" />
-        </EntityType>
         <Association Name="FK_StringValue_FieldType">
           <End Type="NoodleDModel.FieldType" Role="FieldType" Multiplicity="1" />
           <End Type="NoodleDModel.StringValue" Role="StringValue" Multiplicity="*" />
@@ -463,42 +359,6 @@ warning 6035: The relationship 'FK_DishRecommends_Dish1' has columns that are no
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_OrderDish_Order">
-          <End Type="NoodleDModel.Order" Role="Order" Multiplicity="1" />
-          <End Type="NoodleDModel.OrderDish" Role="OrderDish" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Order">
-              <PropertyRef Name="Id" />
-            </Principal>
-            <Dependent Role="OrderDish">
-              <PropertyRef Name="OrderId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_OrderDishGarnish_OrderDish">
-          <End Type="NoodleDModel.OrderDish" Role="OrderDish" Multiplicity="1" />
-          <End Type="NoodleDModel.OrderDishGarnish" Role="OrderDishGarnish" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="OrderDish">
-              <PropertyRef Name="Id" />
-            </Principal>
-            <Dependent Role="OrderDishGarnish">
-              <PropertyRef Name="OrderDishId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_OrderDishUngredient_OrderDish">
-          <End Type="NoodleDModel.OrderDish" Role="OrderDish" Multiplicity="1" />
-          <End Type="NoodleDModel.OrderDishIngredient" Role="OrderDishIngredient" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="OrderDish">
-              <PropertyRef Name="Id" />
-            </Principal>
-            <Dependent Role="OrderDishIngredient">
-              <PropertyRef Name="OrderDishId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <EntityType Name="DishRecommends">
           <Key>
             <PropertyRef Name="Id" />
@@ -507,6 +367,33 @@ warning 6035: The relationship 'FK_DishRecommends_Dish1' has columns that are no
           <Property Name="DishGUID" Type="Guid" Nullable="false" />
           <Property Name="RecommendGUID" Type="Guid" Nullable="false" />
           <Property Name="RowPosition" Type="Int32" Nullable="false" />
+        </EntityType>
+        <EntityType Name="OrderDish">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="OrderGUID" Type="Guid" Nullable="false" />
+          <Property Name="DishGUID" Type="Guid" Nullable="false" />
+          <Property Name="Count" Type="Int32" Nullable="false" />
+        </EntityType>
+        <EntityType Name="OrderDishGarnish">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="DishGUID" Type="Guid" Nullable="false" />
+          <Property Name="GarnishGUID" Type="Guid" Nullable="false" />
+          <Property Name="Count" Type="Int32" Nullable="false" />
+        </EntityType>
+        <EntityType Name="OrderDishIngredient">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="DishGUID" Type="Guid" Nullable="false" />
+          <Property Name="IngredientGUID" Type="Guid" Nullable="false" />
+          <Property Name="Count" Type="Int32" Nullable="false" />
         </EntityType>
         </Schema>
     </edmx:ConceptualModels>
@@ -599,18 +486,8 @@ warning 6035: The relationship 'FK_DishRecommends_Dish1' has columns that are no
           <EntitySetMapping Name="Order">
             <EntityTypeMapping TypeName="NoodleDModel.Order">
               <MappingFragment StoreEntitySet="Order">
+                <ScalarProperty Name="RowGUID" ColumnName="RowGUID" />
                 <ScalarProperty Name="OrderDate" ColumnName="OrderDate" />
-                <ScalarProperty Name="OrderGUID" ColumnName="OrderGUID" />
-                <ScalarProperty Name="Id" ColumnName="Id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="OrderDish">
-            <EntityTypeMapping TypeName="NoodleDModel.OrderDish">
-              <MappingFragment StoreEntitySet="OrderDish">
-                <ScalarProperty Name="Count" ColumnName="Count" />
-                <ScalarProperty Name="DishId" ColumnName="DishId" />
-                <ScalarProperty Name="OrderId" ColumnName="OrderId" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
               </MappingFragment>
             </EntityTypeMapping>
@@ -646,12 +523,33 @@ warning 6035: The relationship 'FK_DishRecommends_Dish1' has columns that are no
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="DishRecommends">
+            <EntityTypeMapping TypeName="NoodleDModel.DishRecommends">
+              <MappingFragment StoreEntitySet="DishRecommends">
+                <ScalarProperty Name="RowPosition" ColumnName="RowPosition" />
+                <ScalarProperty Name="RecommendGUID" ColumnName="RecommendGUID" />
+                <ScalarProperty Name="DishGUID" ColumnName="DishGUID" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="OrderDish">
+            <EntityTypeMapping TypeName="NoodleDModel.OrderDish">
+              <MappingFragment StoreEntitySet="OrderDish">
+                <ScalarProperty Name="Count" ColumnName="Count" />
+                <ScalarProperty Name="DishGUID" ColumnName="DishGUID" />
+                <ScalarProperty Name="OrderGUID" ColumnName="OrderGUID" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="OrderDishGarnish">
             <EntityTypeMapping TypeName="NoodleDModel.OrderDishGarnish">
               <MappingFragment StoreEntitySet="OrderDishGarnish">
                 <ScalarProperty Name="Count" ColumnName="Count" />
-                <ScalarProperty Name="GarnishId" ColumnName="GarnishId" />
-                <ScalarProperty Name="OrderDishId" ColumnName="OrderDishId" />
+                <ScalarProperty Name="GarnishGUID" ColumnName="GarnishGUID" />
+                <ScalarProperty Name="DishGUID" ColumnName="DishGUID" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -659,16 +557,7 @@ warning 6035: The relationship 'FK_DishRecommends_Dish1' has columns that are no
             <EntityTypeMapping TypeName="NoodleDModel.OrderDishIngredient">
               <MappingFragment StoreEntitySet="OrderDishIngredient">
                 <ScalarProperty Name="Count" ColumnName="Count" />
-                <ScalarProperty Name="IngredientId" ColumnName="IngredientId" />
-                <ScalarProperty Name="OrderDishId" ColumnName="OrderDishId" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="DishRecommends">
-            <EntityTypeMapping TypeName="NoodleDModel.DishRecommends">
-              <MappingFragment StoreEntitySet="DishRecommends">
-                <ScalarProperty Name="RowPosition" ColumnName="RowPosition" />
-                <ScalarProperty Name="RecommendGUID" ColumnName="RecommendGUID" />
+                <ScalarProperty Name="IngredientGUID" ColumnName="IngredientGUID" />
                 <ScalarProperty Name="DishGUID" ColumnName="DishGUID" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
               </MappingFragment>

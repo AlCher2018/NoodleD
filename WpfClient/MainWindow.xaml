@@ -19,6 +19,7 @@
         <local:MultiplyParamValueConverter x:Key="multiplyParamDefVal1Conv" DefaultValue="1"/>
         
         <local:GetMinValue x:Key="getMinValue"/>
+        <local:GetOrderPrice x:Key="getOrderPrice"/>
         
         <local:GarnishVisibilityConverter x:Key="garnishVisibilityConverter"/>
         <local:AddDishButtonVisibilityConverter x:Key="addDishButtonVisibilityConverter"/>
@@ -450,11 +451,12 @@
         <!--боковая панель - меню категорий блюд-->
         <Grid x:Name="gridMenuSide" Grid.Column="0" UseLayoutRounding="True" Background="{DynamicResource appBackgroundColor}">
             <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="0.7*"/>
-                <RowDefinition Height="8*"/>
-                <RowDefinition Height="0.7*"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>    <!-- 1. логотип -->
+                <RowDefinition Height="0.7*"/> <!-- 2. языковые кнопки -->
+                <RowDefinition Height="8*"/>   <!-- 3. ListBox категорий блюд -->
+                <RowDefinition Height="0.7*"/> <!-- 4. промокод -->
+                <RowDefinition Height="0.3*"/> <!-- 5. промеж.между промокодом и кн.Оформить -->
+                <RowDefinition Height="*"/>   <!-- 6. цена и кнопка Оформить -->
             </Grid.RowDefinitions>
             <Image Grid.Row="0" Source="AppImages\logo1.png" Stretch="Uniform" Margin="20"/>
             
@@ -485,7 +487,7 @@
                      HorizontalContentAlignment="Stretch" SelectionChanged="lstMenuFolders_SelectionChanged" SelectionMode="Single"/>
 
             <!--промо панель-->
-            <Grid Grid.Row="3" Margin="0,0,0,10">
+            <Grid Grid.Row="3">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1.7*"/>
                     <ColumnDefinition Width="*"/>
@@ -494,6 +496,7 @@
                         Width="{Binding ElementName=panelPromo, Path=ActualWidth, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.4}">
                     <TextBox x:Name="txtPromoCode" Background="Transparent" VerticalAlignment="Center" HorizontalAlignment="Stretch" BorderThickness="0"
                          TextWrapping="Wrap" Foreground="Black" Opacity="0.6" FontStyle="Italic" Margin="5,0"
+                             Text="{Binding {x:Null}, Converter={StaticResource langDictToText}, ConverterParameter=appSet.invitePromoText, Mode=OneWay}"
                              FontSize="{Binding ActualWidth, Mode=OneWay, ElementName=dishItemsBorder, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.01}"
                              GotFocus="txtPromoCode_GotFocus" LostFocus="txtPromoCode_LostFocus"/>
                 </Border>
@@ -507,10 +510,16 @@
             </Grid>
 
             <!--кнопка ОФОРМИТЬ-->
-            <Border Grid.Row="4" Style="{StaticResource buttonOrderPrice}">
-                <TextBlock x:Name="lblOrderPrice" Style="{StaticResource centeredText}"
-                           FontSize="{Binding Path=ActualWidth, ElementName=gridMenuSide, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.09}"
-                           />
+            <Border Grid.Row="6" Style="{StaticResource buttonOrderPrice}">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <TextBlock x:Name="txtOrderPrice" Style="{StaticResource centeredText}"
+                               Text="{Binding {x:Null}, Converter={StaticResource getOrderPrice}, StringFormat={}{0:#0 ₴}}"
+                           FontSize="{Binding Path=ActualWidth, ElementName=gridMenuSide, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.09, Mode=OneWay}"/>
+                    <TextBlock Text="  "/>
+                    <TextBlock x:Name="lblMakeOrderText" Style="{StaticResource centeredText}"
+                               Text="{Binding {x:Null}, Converter={StaticResource langDictToText}, ConverterParameter=appSet.btnCreateOrderText, Mode=OneWay}"
+                           FontSize="{Binding Path=ActualWidth, ElementName=gridMenuSide, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.09}"/>
+                </StackPanel>
             </Border>
 
         </Grid>

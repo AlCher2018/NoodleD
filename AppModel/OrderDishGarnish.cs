@@ -14,10 +14,9 @@ namespace AppModel
     
     public partial class OrderDishGarnish
     {
-        public int OrderDishId { get; set; }
-        public int GarnishId { get; set; }
+        public int Id { get; set; }
+        public System.Guid DishGUID { get; set; }
+        public System.Guid GarnishGUID { get; set; }
         public int Count { get; set; }
-    
-        public virtual OrderDish OrderDish { get; set; }
     }
 }

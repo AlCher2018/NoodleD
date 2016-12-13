@@ -113,7 +113,19 @@ namespace WpfClient
 
         private void addDishToOrder()
         {
-            MessageBox.Show("add to Order");
+            OrderItem curOrder = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
+            DishItem curDish = (DishItem)DataContext;
+            DishItem orderDish = curDish.GetCopyForOrder();
+            curOrder.Dishes.Add(orderDish);
+
+            MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
+            // снять выделение
+            mainWindow.clearSelectedDish();
+            // и обновить стоимость заказа
+            BindingExpression be = mainWindow.txtOrderPrice.GetBindingExpression(TextBlock.TextProperty);
+            be.UpdateTarget();
+
+            closeWin();
         }
     }
 }

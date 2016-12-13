@@ -14,22 +14,9 @@ namespace AppModel
     
     public partial class OrderDish
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public OrderDish()
-        {
-            this.OrderDishGarnish = new HashSet<OrderDishGarnish>();
-            this.OrderDishIngredient = new HashSet<OrderDishIngredient>();
-        }
-    
         public int Id { get; set; }
-        public int OrderId { get; set; }
-        public int DishId { get; set; }
+        public System.Guid OrderGUID { get; set; }
+        public System.Guid DishGUID { get; set; }
         public int Count { get; set; }
-    
-        public virtual Order Order { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<OrderDishGarnish> OrderDishGarnish { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<OrderDishIngredient> OrderDishIngredient { get; set; }
     }
 }

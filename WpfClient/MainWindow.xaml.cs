@@ -53,20 +53,33 @@ namespace WpfClient
             logger.Info("Start application");
 
             logger.Trace("Получаю данные от SQL Server...");
-            ObservableCollection<AppModel.MenuItem> mFolders;
-            using (NoodleDContext db = new NoodleDContext())
+            ObservableCollection<AppModel.MenuItem> mFolders = null;
+            try
             {
-                initCurrentSettings(db);
+                using (NoodleDContext db = new NoodleDContext())
+                {
+                    logger.Trace("invoke initCurrentSettings(db)");
+                    initCurrentSettings(db);
 
-                // получить язык UI
-                string langId = (string)AppLib.GetAppGlobalValue("langButtonDefaultId");
-                AppLib.AppLang = langId;
+                    // получить язык UI
+                    string langId = (string)AppLib.GetAppGlobalValue("langButtonDefaultId");
+                    AppLib.AppLang = langId;
 
-                // получить данные с SQL во внутренние объекты
-                mFolders = MenuLib.GetMenuMainFolders();
+                    // получить данные с SQL во внутренние объекты
+                    logger.Trace("invoke MenuLib.GetMenuMainFolders()");
+                    mFolders = MenuLib.GetMenuMainFolders();
+                }
+                logger.Trace("Получаю данные от SQL Server - READY");
             }
-            logger.Trace("Получаю данные от SQL Server - READY");
+            catch (Exception e)
+            {
+                logger.Fatal("Fatal error: {0}\nSource: {1}\nStackTrace: {2}", e.Message, e.Source, e.StackTrace);
+                MessageBox.Show("Ошибка доступа к данным: " + e.Message +"\nПрограмма будет закрыта.");
+                this.Close();
+            }
 
+
+            logger.Trace("Настраиваю визуальные элементы...");
             // добавить к блюдам надписи на кнопках
             Dictionary<string, string> langSelGarnishDict = (Dictionary<string, string>)AppLib.GetAppGlobalValue("btnSelectGarnishText");
             Dictionary<string, string> langAddDishDict = (Dictionary<string, string>)AppLib.GetAppGlobalValue("btnSelectDishText");
@@ -88,10 +101,11 @@ namespace WpfClient
             selectAppLang(null);
 
             // создать текущий заказ
-            CurrentOrder curOrder = new CurrentOrder();
+            OrderItem curOrder = new OrderItem();
             AppLib.SetAppGlobalValue("currentOrder", curOrder);
 
             lstMenuFolders.SelectedIndex = 1;
+            logger.Trace("Настраиваю визуальные элементы - READY");
         }
 
 
@@ -182,11 +196,26 @@ namespace WpfClient
 
             // установка текстов на выбранном языке
             setCheckedLangButton(langControl);
-            txtPromoCode.Text = AppLib.GetLangText((Dictionary<string, string>)AppLib.GetAppGlobalValue("invitePromoText"));
-            lblOrderPrice.Text = "0 ₴ " + AppLib.GetLangText((Dictionary<string, string>)AppLib.GetAppGlobalValue("btnCreateOrderText"));
+
+            BindingExpression be = txtPromoCode.GetBindingExpression(TextBox.TextProperty);
+            be.UpdateTarget();
+            be = lblMakeOrderText.GetBindingExpression(TextBlock.TextProperty);
+            be.UpdateTarget();
+
             lstMenuFolders.Items.Refresh();
             lstDishes.Items.Refresh();
+
             // сбросить выбор блюда
+            clearSelectedDish();
+            
+            // восстановить выбранный пункт главного меню
+            if (selMenuItem >= 0) selMenuItem = 0;
+            lstMenuFolders.SelectedIndex = (int)(AppLib.GetAppGlobalValue("selectedMenuIndex")??0);
+        }
+
+        // сбросить выбор блюда
+        public void clearSelectedDish()
+        {
             if (_curDishItem != null)
             {
                 if (_curDishItem.SelectedGarnishes != null && (_curDishItem.SelectedGarnishes.Count > 0))
@@ -194,13 +223,14 @@ namespace WpfClient
                     _curDishItem.SelectedGarnishes = null;
                     updateVisualGarnish(true);
                 }
-                _curDishItem = null; _curGarnishBorder = null; _curAddButton = null;
-            }
+                if (_curDishItem.SelectedIngredients != null) _curDishItem.SelectedIngredients.Clear();
+                if (_curDishItem.SelectedRecommends != null) _curDishItem.SelectedRecommends.Clear();
 
-            // восстановить выбранный пункт главного меню
-            if (selMenuItem >= 0) selMenuItem = 0;
-            lstMenuFolders.SelectedIndex = (int)(AppLib.GetAppGlobalValue("selectedMenuIndex")??0);
+                _curDishItem = null; _curGarnishBorder = null; _curAddButton = null;
+
+            }
         }
+
         private void setCheckedLangButton(FrameworkElement langControl)
         {
             langControl.Style = (Style)this.Resources["langButtonBorderCheckedStyle"];

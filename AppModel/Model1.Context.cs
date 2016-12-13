@@ -34,12 +34,12 @@ namespace AppModel
         public virtual DbSet<FieldType> FieldType { get; set; }
         public virtual DbSet<MenuFolder> MenuFolder { get; set; }
         public virtual DbSet<Order> Order { get; set; }
-        public virtual DbSet<OrderDish> OrderDish { get; set; }
         public virtual DbSet<Setting> Setting { get; set; }
         public virtual DbSet<StringValue> StringValue { get; set; }
         public virtual DbSet<Terminal> Terminal { get; set; }
+        public virtual DbSet<DishRecommends> DishRecommends { get; set; }
+        public virtual DbSet<OrderDish> OrderDish { get; set; }
         public virtual DbSet<OrderDishGarnish> OrderDishGarnish { get; set; }
         public virtual DbSet<OrderDishIngredient> OrderDishIngredient { get; set; }
-        public virtual DbSet<DishRecommends> DishRecommends { get; set; }
     }
 }

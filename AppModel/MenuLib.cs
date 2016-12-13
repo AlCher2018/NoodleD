@@ -186,12 +186,15 @@ namespace AppModel
         public int MenuId { get; set; }
         public int Id { get; set; }
         public Guid RowGUID { get; set; }
+        public int UnitCount { get; set; }
+        public decimal Price { get; set; }
+        public int Count { get; set; }
+
         public Dictionary<string, string> langNames { get; set; }
         public Dictionary<string, string> langDescriptions { get; set; }
-        public byte[] Image { get; set; }
-        public int UnitCount { get; set; }
         public Dictionary<string, string> langUnitNames { get; set; }
-        public decimal Price { get; set; }
+
+        public byte[] Image { get; set; }
 
         public List<DishAdding> Garnishes { get; set; }
         public List<DishAdding> Ingredients { get; set; }
@@ -205,6 +208,29 @@ namespace AppModel
         // надписи на кнопках
         public Dictionary<string, string> langBtnSelGarnishText { get; set; }
         public Dictionary<string, string> langBtnAddDishText { get; set; }
+
+        public DishItem GetCopyForOrder()
+        {
+            DishItem other = new DishItem();
+            other.Id = this.Id;
+            other.MenuId = this.MenuId;
+            other.RowGUID = this.RowGUID;
+            other.UnitCount = this.UnitCount;
+            other.Price = this.Price;
+            other.Count = 1;
+
+            // скопировать выбранные элементы
+            other.SelectedGarnishes = new List<DishAdding>();
+            if (this.SelectedGarnishes != null) other.SelectedGarnishes.AddRange(this.SelectedGarnishes);
+
+            other.SelectedIngredients = new List<DishAdding>();
+            if (this.SelectedIngredients != null) other.SelectedIngredients.AddRange(this.SelectedIngredients);
+
+            other.SelectedRecommends = new List<DishItem>();
+            if (this.SelectedRecommends != null) other.SelectedRecommends.AddRange(this.SelectedRecommends);
+
+            return other;
+        }
 
         public decimal GetTotalPrice()
         {
@@ -228,6 +254,7 @@ namespace AppModel
         public Dictionary<string, string> langNames { get; set; }
         public decimal Price { get; set; }
         public string Uid { get; set; }
+        public int Count { get; set; }
     }
 
     public class DishAddingImage
@@ -236,6 +263,7 @@ namespace AppModel
         public Guid RowGUID { get; set; }
         public Dictionary<string, string> langNames { get; set; }
         public byte[] Image { get; set; }
+        public int Count { get; set; }
     }
 
 
