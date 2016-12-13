@@ -52,12 +52,26 @@ namespace WpfClient
 
             logger.Info("Start application");
 
+            string logMsg = "Проверяю соединение с источником данных...";
+            try
+            {
+                checkDBConnection();
+            }
+            catch (Exception e)
+            {
+                logger.Trace(logMsg);
+                logger.Fatal(e.Message);
+                throw;
+            }
+            logger.Trace(logMsg + " Ok");
+
             logger.Trace("Получаю данные от SQL Server...");
             ObservableCollection<AppModel.MenuItem> mFolders = null;
             try
             {
                 using (NoodleDContext db = new NoodleDContext())
                 {
+                    logger.Trace("EntityFramework connection string: {0}", db.Database.Connection.ConnectionString);
                     logger.Trace("invoke initCurrentSettings(db)");
                     initCurrentSettings(db);
 
@@ -108,6 +122,39 @@ namespace WpfClient
             logger.Trace("Настраиваю визуальные элементы - READY");
         }
 
+        private void checkDBConnection()
+        {
+            Configuration con = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+
+            string connectionName = null;
+            string connectionString = null;
+            foreach (ConnectionStringSettings item in ConfigurationManager.ConnectionStrings)
+            {
+                if (item.ProviderName == "System.Data.EntityClient")
+                {
+                    connectionString = item.ConnectionString;
+                    int i = connectionString.IndexOf("connection string=", 0);
+                    connectionString = connectionString.Substring(i+19);
+                    connectionString = connectionString.Substring(0, connectionString.Length - 1);
+                    connectionName = item.Name; break;
+                }
+            }
+            if (connectionName == null)
+            {
+                throw new Exception("Cannot find EntityClient connection string in application config file.");
+            }
+
+            SqlConnection conn = new SqlConnection(connectionString);
+            conn.Open();
+            if (conn.State == ConnectionState.Open)
+            {
+                conn.Close();
+            }
+            else
+            {
+                throw new Exception("Cannot open EF connection " + connectionName + " by its connection string: " + connectionString);
+            }
+        }
 
         private void initCurrentSettings(NoodleDContext db)
         {
@@ -211,24 +258,6 @@ namespace WpfClient
             // восстановить выбранный пункт главного меню
             if (selMenuItem >= 0) selMenuItem = 0;
             lstMenuFolders.SelectedIndex = (int)(AppLib.GetAppGlobalValue("selectedMenuIndex")??0);
-        }
-
-        // сбросить выбор блюда
-        public void clearSelectedDish()
-        {
-            if (_curDishItem != null)
-            {
-                if (_curDishItem.SelectedGarnishes != null && (_curDishItem.SelectedGarnishes.Count > 0))
-                {
-                    _curDishItem.SelectedGarnishes = null;
-                    updateVisualGarnish(true);
-                }
-                if (_curDishItem.SelectedIngredients != null) _curDishItem.SelectedIngredients.Clear();
-                if (_curDishItem.SelectedRecommends != null) _curDishItem.SelectedRecommends.Clear();
-
-                _curDishItem = null; _curGarnishBorder = null; _curAddButton = null;
-
-            }
         }
 
         private void setCheckedLangButton(FrameworkElement langControl)
@@ -432,24 +461,42 @@ namespace WpfClient
         }
         private void gridDishAddButtonHandler(object sender)
         {
-            //MessageBox.Show("Under construction");
-            DishPopup popupWin = new DishPopup();
-            // размеры
-            FrameworkElement pnlClient = this.Content as FrameworkElement;
-            popupWin.Height = pnlClient.ActualHeight;
-            popupWin.Width = pnlClient.ActualWidth;
-            // и положение
-            Point p = this.PointToScreen(new Point(0, 0));
-            popupWin.Left = p.X;
-            popupWin.Top = p.Y;
+            if (_curDishItem == null) _curDishItem = (DishItem)lstDishes.SelectedItem;
 
-            // установить контекст окна - текущий DishItem
-            DishItem curDI = (DishItem)lstDishes.SelectedItem;
-            if (curDI.SelectedGarnishes == null) _curDishItem = curDI;
+            if ((_curDishItem.Ingredients == null) || _curDishItem.Ingredients.Count == 0)
+            {
+                // если нет ингредиентов, то сразу в корзину
+                OrderItem curOrder = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
+                DishItem curDish = _curDishItem;
+                DishItem orderDish = curDish.GetCopyForOrder();
+                curOrder.Dishes.Add(orderDish);
 
-            popupWin.DataContext = _curDishItem;  // контекст данных
+                // снять выделение
+                this.clearSelectedDish();
+                // и обновить стоимость заказа
+                updatePrice();
+            }
+            else
+            {
+                // иначе через "всплывашку"
+                DishPopup popupWin = new DishPopup();
+                // размеры
+                FrameworkElement pnlClient = this.Content as FrameworkElement;
+                popupWin.Height = pnlClient.ActualHeight;
+                popupWin.Width = pnlClient.ActualWidth;
+                // и положение
+                Point p = this.PointToScreen(new Point(0, 0));
+                popupWin.Left = p.X;
+                popupWin.Top = p.Y;
 
-            popupWin.ShowDialog();
+                // установить контекст окна - текущий DishItem
+                DishItem curDI = (DishItem)lstDishes.SelectedItem;
+                if (curDI.SelectedGarnishes == null) _curDishItem = curDI;
+
+                popupWin.DataContext = _curDishItem;  // контекст данных
+
+                popupWin.ShowDialog();
+            }
         }
         #endregion
 
@@ -566,6 +613,31 @@ namespace WpfClient
         {
             logger.Info("End application");
         }
+
+        // сбросить выбор блюда
+        public void clearSelectedDish()
+        {
+            if (_curDishItem != null)
+            {
+                if (_curDishItem.SelectedGarnishes != null && (_curDishItem.SelectedGarnishes.Count > 0))
+                {
+                    _curDishItem.SelectedGarnishes = null;
+                    updateVisualGarnish(true);
+                }
+                if (_curDishItem.SelectedIngredients != null) _curDishItem.SelectedIngredients.Clear();
+                if (_curDishItem.SelectedRecommends != null) _curDishItem.SelectedRecommends.Clear();
+
+                _curDishItem = null; _curGarnishBorder = null; _curAddButton = null;
+
+            }
+        }
+        // обновить стоимость заказа
+        public void updatePrice()
+        {
+            BindingExpression be = this.txtOrderPrice.GetBindingExpression(TextBlock.TextProperty);
+            be.UpdateTarget();
+        }
+
 
     } // class MainWindow
 

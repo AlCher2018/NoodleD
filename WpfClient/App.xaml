@@ -1,6 +1,7 @@
 ﻿<Application x:Class="WpfClient.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:local="clr-namespace:WpfClient"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
@@ -21,5 +22,9 @@
         <SolidColorBrush x:Key="appSelectedItemColor" Color="{StaticResource appColorYellow}"/>
         <SolidColorBrush x:Key="mainMenuSelectedItemColor" Color="{StaticResource appColorDDarkPink}"/>
         <SolidColorBrush x:Key="btnAddColor" Color="{StaticResource appColorSelectButton}"/>
+
+        <sys:String x:Key="priceFormatString">{0:#0} ₴</sys:String>
+
+
     </Application.Resources>
 </Application>

@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfClient"
-        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="MainWindow" 
         WindowStyle="None" WindowState="Maximized" WindowStartupLocation="CenterScreen" 
@@ -232,10 +231,6 @@
 
         <local:IsNullValueConverter x:Key="isNullValueConverter"/>
 
-<!--
-                            Height="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth, Converter={StaticResource multiplyParamConv}, ConverterParameter=1.4}" 
-
-        -->
         <DataTemplate x:Key="dishItemTemplate">
             <Border x:Name="dishItemBorder"  
                     Background="Transparent"  BorderThickness="0"
@@ -298,6 +293,13 @@
                      FontSize="{Binding ActualHeight, Mode=OneWay, RelativeSource={RelativeSource AncestorType=Grid}, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.25}"/>
                 <Run Text="{Binding Path=langUnitNames, Converter={StaticResource langDictToText}}" 
                      FontSize="{Binding ActualHeight, Mode=OneWay, RelativeSource={RelativeSource AncestorType=Grid}, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.25}"/>
+
+                            <!-- стоимость блюда -->
+                            <Run Text="  "/>
+                                <Run x:Name="txtPrice"
+                                 Text="{Binding Path=Price, StringFormat={StaticResource priceFormatString}}" FontWeight="Bold" 
+                                 FontSize="{Binding ActualHeight, Mode=OneWay, RelativeSource={RelativeSource AncestorType=Grid}, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.25}"/>
+
                             </TextBlock>
                         </WrapPanel>
                     </Grid>
@@ -385,7 +387,7 @@
                                 <TextBlock x:Name="txtGarnName1" Style="{StaticResource garnishTextStyle}"
                                            Text="{Binding Garnishes, Converter={StaticResource garnishLangTextConverter}, ConverterParameter=1}"/>
                                 <TextBlock x:Name="txtGarnPrice1" Style="{StaticResource garnishPriceStyle}"
-                                           Text="{Binding Garnishes, Converter={StaticResource garnishPriceConverter}, ConverterParameter=1}"/>
+                                           Text="{Binding Garnishes, Converter={StaticResource garnishPriceConverter}, ConverterParameter=1, StringFormat={StaticResource priceFormatString}}"/>
                             </Grid>
                         </Viewbox>
 
@@ -398,7 +400,7 @@
                                 <TextBlock x:Name="txtGarnName2" Style="{StaticResource garnishTextStyle}"
                                            Text="{Binding Garnishes, Converter={StaticResource garnishLangTextConverter}, ConverterParameter=2}"/>
                                 <TextBlock x:Name="txtGarnPrice2" Style="{StaticResource garnishPriceStyle}"
-                                           Text="{Binding Garnishes, Converter={StaticResource garnishPriceConverter}, ConverterParameter=2}"/>
+                                           Text="{Binding Garnishes, Converter={StaticResource garnishPriceConverter}, ConverterParameter=2, StringFormat={StaticResource priceFormatString}}"/>
                             </Grid>
                         </Viewbox>
 
@@ -411,7 +413,7 @@
                                 <TextBlock x:Name="txtGarnName3" Style="{StaticResource garnishTextStyle}"
                                            Text="{Binding Garnishes, Converter={StaticResource garnishLangTextConverter}, ConverterParameter=3}"/>
                                 <TextBlock x:Name="txtGarnPrice3" Style="{StaticResource garnishPriceStyle}"
-                                           Text="{Binding Garnishes, Converter={StaticResource garnishPriceConverter}, ConverterParameter=3}"/>
+                                           Text="{Binding Garnishes, Converter={StaticResource garnishPriceConverter}, ConverterParameter=3, StringFormat={StaticResource priceFormatString}}"/>
                             </Grid>
                         </Viewbox>
                     </Grid>
@@ -421,9 +423,6 @@
                         <Border x:Name="gridDishSelectGarnishButton" CornerRadius="7" BorderBrush="Gray" BorderThickness="1" Background="White" SnapsToDevicePixels="True" UseLayoutRounding="True">
                             <TextBlock Text="{Binding langBtnSelGarnishText, Converter={StaticResource langDictToText}}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{Binding Path=ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Border}, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.4}" Foreground="Gray"/>
                         </Border>
-                        <!--<Border x:Name="gridDishSelectGarnishButton" CornerRadius="7" BorderBrush="Gray" BorderThickness="1" Background="White" SnapsToDevicePixels="True" UseLayoutRounding="True">
-                            <TextBlock Text="{Binding langBtnSelGarnishText, Converter={StaticResource langDictToText}}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" Foreground="Gray"/>
-                        </Border>-->
                         <Border x:Name="gridDishAddButton" CornerRadius="7" Background="{DynamicResource btnAddColor}" SnapsToDevicePixels="True"
                     Visibility="{Binding BindsDirectlyToSource=True, Converter={StaticResource addDishButtonVisibilityConverter}}" MouseUp="gridDishAddButton_MouseDown" TouchUp="gridDishAddButton_TouchDown">
                             <Border.Effect>
@@ -513,7 +512,7 @@
             <Border Grid.Row="6" Style="{StaticResource buttonOrderPrice}">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <TextBlock x:Name="txtOrderPrice" Style="{StaticResource centeredText}"
-                               Text="{Binding {x:Null}, Converter={StaticResource getOrderPrice}, StringFormat={}{0:#0 ₴}}"
+                               Text="{Binding {x:Null}, Converter={StaticResource getOrderPrice}, StringFormat={StaticResource priceFormatString}}"
                            FontSize="{Binding Path=ActualWidth, ElementName=gridMenuSide, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.09, Mode=OneWay}"/>
                     <TextBlock Text="  "/>
                     <TextBlock x:Name="lblMakeOrderText" Style="{StaticResource centeredText}"
@@ -538,12 +537,12 @@
                   PreviewTouchMove="scrollDishes_PreviewTouchMove"
                       >
                 <ListBox x:Name="lstDishes" Background="Transparent" IsHitTestVisible="True"
-                          VirtualizingPanel.ScrollUnit="Pixel" 
+                         VirtualizingPanel.ScrollUnit="Pixel" 
                      ItemTemplate="{StaticResource dishItemTemplate}" 
                      ItemsPanel="{StaticResource dishesListPanelTemplate}"
                      ItemContainerStyle="{StaticResource dishListBoxItemStyle}"
                      >
-                    <ListBox.Template>
+                    <ListBox.Template>  <!-- для прокрутки мышью -->
                         <ControlTemplate>
                             <ItemsPresenter SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
                         </ControlTemplate>

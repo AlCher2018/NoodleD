@@ -122,8 +122,7 @@ namespace WpfClient
             // снять выделение
             mainWindow.clearSelectedDish();
             // и обновить стоимость заказа
-            BindingExpression be = mainWindow.txtOrderPrice.GetBindingExpression(TextBlock.TextProperty);
-            be.UpdateTarget();
+            mainWindow.updatePrice();
 
             closeWin();
         }

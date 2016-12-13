@@ -112,7 +112,7 @@ namespace WpfClient
     }
 
     // Стоимость гарнира в виде строки
-    [ValueConversion(typeof(List<DishAdding>), typeof(string))]
+    [ValueConversion(typeof(List<DishAdding>), typeof(decimal))]
     public class GarnishPriceConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -125,10 +125,10 @@ namespace WpfClient
             int garnishIndex = 0;
             int.TryParse(parameter.ToString(), out garnishIndex);
 
-            string retVal = null;
+            decimal retVal = 0;
             if (garnishIndex <= garList.Count)
             {
-                retVal = garList[garnishIndex-1].Price.ToString("#0 ₴");
+                retVal = garList[garnishIndex-1].Price;
             }
             return retVal;
         }

@@ -103,8 +103,8 @@ namespace AppModel
                 dishApp.MenuId = menuId;
 
                 // гарниры
-                var lGarn = _listGarn.Where(g => g.DishGUID == dishDb.RowGUID);
-                if (lGarn.Count() > 0) {
+                var lGarn = _listGarn.Where(g => g.DishGUID == dishDb.RowGUID).ToList();
+                if (lGarn.Count > 0) {
                     dishApp.Garnishes = new List<DishAdding>();
                     dishApp.SelectedGarnishes = new List<DishAdding>();
                     foreach (DishGarnish item in lGarn)
@@ -114,32 +114,46 @@ namespace AppModel
                         dishApp.Garnishes.Add(da);
                     }
                 }
+
                 // ингредиенты
-                dishApp.Ingredients = new List<DishAdding>();
-                foreach (DishIngredient item in _listIngr.Where(g => g.DishGUID == dishDb.RowGUID))
-                {
-                    DishAdding da = new DishAdding() { Id = item.Id, RowGUID = item.RowGUID, Price = item.Price };
-                    da.langNames = getLangTextDict(item.RowGUID, 1);
-                    dishApp.Ingredients.Add(da);
-                }
-                // маркеры
-                dishApp.Marks = new List<DishAddingImage>();
-                foreach (DishMarks item in _listMarks.Where(g => g.DishGUID == dishDb.RowGUID))
-                {
-                    DishMark dm = _listMark.FirstOrDefault(m => m.RowGUID == item.MarkGUID);
-                    DishAddingImage da = new DishAddingImage() { Id = item.Id, Image = dm.Image };
-                    da.langNames = getLangTextDict(dm.RowGUID, 1);
-                    dishApp.Marks.Add(da);
-                }
-                // рекомендации
-                dishApp.Recommends = new List<DishItem>();
-                foreach (DishRecommends item in _listRecom.Where(g => g.DishGUID == dishDb.RowGUID))
-                {
-                    Dish recomDb = _listDish.FirstOrDefault(d => d.RowGUID == item.RecommendGUID);
-                    if (recomDb != null)
+                var lIngr = _listIngr.Where(g => g.DishGUID == dishDb.RowGUID).ToList();
+                if (lIngr.Count > 0) {
+                    dishApp.Ingredients = new List<DishAdding>();
+                    foreach (DishIngredient item in lIngr)
                     {
-                        DishItem itemRecom = getNewDishItem(recomDb);
-                        dishApp.Recommends.Add(itemRecom);
+                        DishAdding da = new DishAdding() { Id = item.Id, RowGUID = item.RowGUID, Price = item.Price };
+                        da.langNames = getLangTextDict(item.RowGUID, 1);
+                        dishApp.Ingredients.Add(da);
+                    }
+                }
+
+                // маркеры
+                var lMark = _listMarks.Where(g => g.DishGUID == dishDb.RowGUID).ToList();
+                if (lMark.Count > 0)
+                {
+                    dishApp.Marks = new List<DishAddingImage>();
+                    foreach (DishMarks item in lMark)
+                    {
+                        DishMark dm = _listMark.FirstOrDefault(m => m.RowGUID == item.MarkGUID);
+                        DishAddingImage da = new DishAddingImage() { Id = item.Id, Image = dm.Image };
+                        da.langNames = getLangTextDict(dm.RowGUID, 1);
+                        dishApp.Marks.Add(da);
+                    }
+                }
+
+                // рекомендации
+                var lRecom = _listRecom.Where(g => g.DishGUID == dishDb.RowGUID).ToList();
+                if (lRecom.Count > 0)
+                {
+                    dishApp.Recommends = new List<DishItem>();
+                    foreach (DishRecommends item in lRecom)
+                    {
+                        Dish recomDb = _listDish.FirstOrDefault(d => d.RowGUID == item.RecommendGUID);
+                        if (recomDb != null)
+                        {
+                            DishItem itemRecom = getNewDishItem(recomDb);
+                            dishApp.Recommends.Add(itemRecom);
+                        }
                     }
                 }
 
