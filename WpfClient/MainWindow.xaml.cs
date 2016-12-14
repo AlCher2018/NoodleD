@@ -82,6 +82,8 @@ namespace WpfClient
                     // получить данные с SQL во внутренние объекты
                     logger.Trace("invoke MenuLib.GetMenuMainFolders()");
                     mFolders = MenuLib.GetMenuMainFolders();
+
+                    if (mFolders == null) throw new Exception("Ошибка создания меню");
                 }
                 logger.Trace("Получаю данные от SQL Server - READY");
             }
@@ -118,8 +120,9 @@ namespace WpfClient
             OrderItem curOrder = new OrderItem();
             AppLib.SetAppGlobalValue("currentOrder", curOrder);
 
-            lstMenuFolders.SelectedIndex = 1;
             logger.Trace("Настраиваю визуальные элементы - READY");
+
+            lstDishes.SelectedIndex = 3;
         }
 
         private void checkDBConnection()
@@ -292,32 +295,13 @@ namespace WpfClient
 
         #region работа с промокодом
 
-        private void txtPromoCode_GotFocus(object sender, RoutedEventArgs e)
-        {
-            brdPromoCode.BorderThickness = new Thickness(3);
-        }
-
-        private void txtPromoCode_LostFocus(object sender, RoutedEventArgs e)
-        {
-            brdPromoCode.BorderThickness = new Thickness(0);
-        }
         #endregion
 
         // боковое меню выбора категории блюд
         private void lstMenuFolders_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // очистить выбранный гарнир
-            ObservableCollection<AppModel.MenuItem> mFolders = (ObservableCollection<AppModel.MenuItem>)AppLib.GetAppGlobalValue("mainMenu");
-            foreach (AppModel.MenuItem item in mFolders)
-            {
-                foreach (DishItem dish in item.Dishes)
-                {
-                    if ((dish.SelectedGarnishes != null) && (dish.SelectedGarnishes.Count() > 0)) dish.SelectedGarnishes.Clear();
-                }
-            }
-
-            //lstDishes.Items.Refresh();
-            lstDishes.ItemsSource = ((AppModel.MenuItem)lstMenuFolders.SelectedItem).Dishes;
+            clearSelectedDish();
+            //lstDishes.ItemsSource = ((AppModel.MenuItem)lstMenuFolders.SelectedItem).Dishes;
 
             scrollDishes.ScrollToTop();
             if (lstDishes.Items.Count > 0) lstDishes.ScrollIntoView(lstDishes.Items[0]);
@@ -350,12 +334,12 @@ namespace WpfClient
 
             Grid gridPar = (Grid)LogicalTreeHelper.GetParent(gridGarnAll); // родительский грид
             Grid gridBigBut = (Grid)(AppLib.FindLogicalChildren<Grid>(gridPar).First(g => g.Name== "gridDishBottomButtons"));  // грид с большими кнопками
-            Border borderAddBut = AppLib.FindVisualChildren<Border>(gridBigBut).First(g => g.Name=="gridDishAddButton");  // бордер кнопки добавления блюда
+            Border borderAddBut = AppLib.FindVisualChildren<Border>(gridBigBut).First(g => g.Name=="txtDishWithIngr");  // бордер кнопки добавления блюда
 
             if (_curDishItem == null)
             {
                 _curDishItem = (DishItem)lstDishes.SelectedItem;
-                _curDishItem.SelectedGarnishes = new ObservableCollection<DishAdding>();
+                if (_curDishItem.SelectedGarnishes == null) _curDishItem.SelectedGarnishes = new List<DishAdding>();
 
                 DishAdding da = _curDishItem.Garnishes[garnIndex];
                 da.Uid = gridGarn.Uid;
@@ -403,7 +387,7 @@ namespace WpfClient
                     }
 
                     _curDishItem = (DishItem)lstDishes.SelectedItem;
-                    if (_curDishItem.SelectedGarnishes == null) _curDishItem.SelectedGarnishes = new ObservableCollection<DishAdding>();
+                    if (_curDishItem.SelectedGarnishes == null) _curDishItem.SelectedGarnishes = new List<DishAdding>();
 
                     DishAdding da = _curDishItem.Garnishes[garnIndex];
                     da.Uid = gridGarn.Uid;
@@ -424,47 +408,43 @@ namespace WpfClient
             SolidColorBrush notSelBase = (SolidColorBrush)AppLib.GetAppGlobalValue("appBackgroundColor");
             SolidColorBrush notSelText = (SolidColorBrush)AppLib.GetAppGlobalValue("appNotSelectedItemColor");
 
-            ObservableCollection<DishAdding> garList = _curDishItem.SelectedGarnishes;  // SelectedGarnishes
+            List<DishAdding> garList = _curDishItem.SelectedGarnishes;  // SelectedGarnishes
             if (garList==null || garList.Count == 0)  // ничего не выбрано
             {
                 _curGarnishBorder.Fill = notSelBase;
                 _curGarnishTextBlock.Foreground = notSelText;
+                if (isUpdAddBut)
+                {
+                    _curAddButton.Visibility = Visibility.Hidden;
+                }
             }
             else
             {
                 _curGarnishBorder.Fill = selBase;
                 _curGarnishTextBlock.Foreground = brushBlack;
+                if (isUpdAddBut)
+                {
+                    _curAddButton.Visibility = Visibility.Visible;
+                }
             }
-
-            _curAddButton.InvalidateProperty(UIElement.VisibilityProperty);
-            //BindingExpression be;
-            //be = _curGarnishBorder.GetBindingExpression(Border.BackgroundProperty);
-            //be.UpdateTarget();
-            //be = _curGarnishBorder.GetBindingExpression(TextBlock.ForegroundProperty);
-            //be.UpdateTarget();
-            //if (isUpdAddBut)
-            //{
-            //    be = _curAddButton.GetBindingExpression(Border.VisibilityProperty);
-            //    be.UpdateTarget();
-            //}
         }
 
         #endregion
 
         #region выбор блюда
-        private void gridDishAddButton_MouseDown(object sender, MouseButtonEventArgs e)
+        private void txtDishAdd_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (_isMoved == false) gridDishAddButtonHandler(sender);
+            if (_isMoved == false) txtDishWithIngrHandler(sender);
         }
-        private void gridDishAddButton_TouchDown(object sender, TouchEventArgs e)
+        private void txtDishAdd_TouchDown(object sender, TouchEventArgs e)
         {
-            if (_isMoved == false) gridDishAddButtonHandler(sender);
+            if (_isMoved == false) txtDishWithIngrHandler(sender);
         }
-        private void gridDishAddButtonHandler(object sender)
+        private void txtDishWithIngrHandler(object sender)
         {
             if (_curDishItem == null) _curDishItem = (DishItem)lstDishes.SelectedItem;
 
-            if ((_curDishItem.Ingredients == null) || _curDishItem.Ingredients.Count == 0)
+            if ((_curDishItem.Ingredients == null) || (_curDishItem.Ingredients.Count == 0))
             {
                 // если нет ингредиентов, то сразу в корзину
                 OrderItem curOrder = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
@@ -637,9 +617,24 @@ namespace WpfClient
         {
             BindingExpression be = this.txtOrderPrice.GetBindingExpression(TextBlock.TextProperty);
             be.UpdateTarget();
-            
         }
 
+        private void btnShowCart_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            showCartWindow();
+        }
+
+        private void btnShowCart_TouchUp(object sender, TouchEventArgs e)
+        {
+            showCartWindow();
+        }
+
+        private void showCartWindow()
+        {
+            Cart cart = new Cart();
+
+            cart.ShowDialog();
+        }
 
     } // class MainWindow
 

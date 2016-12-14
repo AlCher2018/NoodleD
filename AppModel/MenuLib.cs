@@ -106,7 +106,7 @@ namespace AppModel
                 var lGarn = _listGarn.Where(g => g.DishGUID == dishDb.RowGUID).ToList();
                 if (lGarn.Count > 0) {
                     dishApp.Garnishes = new List<DishAdding>();
-                    dishApp.SelectedGarnishes = new ObservableCollection<DishAdding>();
+                    dishApp.SelectedGarnishes = new List<DishAdding>();
                     foreach (DishGarnish item in lGarn)
                     {
                         DishAdding da = new DishAdding() { Id = item.Id, RowGUID=item.RowGUID, Price = item.Price };
@@ -215,7 +215,7 @@ namespace AppModel
         public List<DishAddingImage> Marks { get; set; }
         public List<DishItem> Recommends { get; set; }
 
-        public ObservableCollection<DishAdding> SelectedGarnishes { get; set; }
+        public List<DishAdding> SelectedGarnishes { get; set; }
         public List<DishAdding> SelectedIngredients { get; set; }
         public List<DishItem> SelectedRecommends { get; set; }
 
@@ -226,27 +226,37 @@ namespace AppModel
         public DishItem GetCopyForOrder()
         {
             DishItem other = new DishItem();
+
             other.Id = this.Id;
             other.MenuId = this.MenuId;
             other.RowGUID = this.RowGUID;
             other.UnitCount = this.UnitCount;
             other.Price = this.Price;
             other.Count = 1;
+            other.langDescriptions = this.langDescriptions;
+            other.langNames = this.langNames;
+            other.langUnitNames = this.langUnitNames;
 
-            // скопировать выбранные элементы
-            other.SelectedGarnishes = new ObservableCollection<DishAdding>();
-            if (this.SelectedGarnishes != null)
+            // скопировать гарниры
+            if ((this.SelectedGarnishes != null) && (this.SelectedGarnishes.Count > 0))
             {
-                foreach (DishAdding item in this.SelectedGarnishes)
-                {
-                    other.SelectedGarnishes.Add(item);
-                }
+                other.SelectedGarnishes = new List<DishAdding>();
+                foreach (DishAdding item in this.SelectedGarnishes) other.SelectedGarnishes.Add(item);
             }
-            other.SelectedIngredients = new List<DishAdding>();
-            if (this.SelectedIngredients != null) other.SelectedIngredients.AddRange(this.SelectedIngredients);
+            
+            // ... ингредиенты
+            if ((this.SelectedIngredients != null) && (this.SelectedIngredients.Count > 0))
+            {
+                other.SelectedIngredients = new List<DishAdding>();
+                foreach (DishAdding item in this.SelectedIngredients) other.SelectedIngredients.Add(item);
+            }
 
-            other.SelectedRecommends = new List<DishItem>();
-            if (this.SelectedRecommends != null) other.SelectedRecommends.AddRange(this.SelectedRecommends);
+            // ... маркеры
+            if ((this.Marks != null) && (this.Marks.Count > 0))
+            {
+                other.Marks = new List<DishAddingImage>();
+                foreach (DishAddingImage item in this.Marks) other.Marks.Add(item);
+            }
 
             return other;
         }

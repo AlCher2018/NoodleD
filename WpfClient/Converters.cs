@@ -1,6 +1,7 @@
 ﻿using AppModel;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -11,6 +12,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -83,12 +85,22 @@ namespace WpfClient
     [ValueConversion(typeof(Dictionary<string, string>), typeof(string))]
     public class LangDictToTextConverter : IValueConverter
     {
+        public bool IsUpper { get; set; }
+        public bool IsLower { get; set; }
+
+        public LangDictToTextConverter()
+        {
+            IsLower = false; IsUpper = false;
+        }
+
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             string retVal = null;
             if (parameter == null)
             {
                 retVal = AppLib.GetLangText((Dictionary<string, string>)value);
+                if (IsUpper == true) retVal = retVal.ToUpper(culture);
+                if (IsLower == true) retVal = retVal.ToLower(culture);
             }
             else
             {
@@ -102,6 +114,8 @@ namespace WpfClient
                     {
                         Dictionary<string, string> lDict = (Dictionary<string, string>)AppLib.GetAppGlobalValue(val);
                         retVal = AppLib.GetLangText(lDict);
+                        if (IsUpper == true) retVal = retVal.ToUpper(culture);
+                        if (IsLower == true) retVal = retVal.ToLower(culture);
                     }
                 }
             }
@@ -177,6 +191,7 @@ namespace WpfClient
     public class CornerRadiusConverter : IValueConverter
     {
         public string Side { get; set; }
+
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             double d1 = 0, d2 = 0;
@@ -235,5 +250,54 @@ namespace WpfClient
             throw new NotImplementedException();
         }
     }
+
+    [ValueConversion(typeof(string), typeof(string))]
+    public class UpperCaseConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value == null) return "";
+            else return ((string)value).ToUpper(CultureInfo.CurrentCulture);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+
+    /// <summary>Represents a chain of <see cref="IValueConverter"/>s to be executed in succession.</summary>
+    /// http://stackoverflow.com/questions/1594357/wpf-how-to-use-2-converters-in-1-binding
+    /// https://www.codeproject.com/kb/wpf/pipingvalueconverters_wpf.aspx
+    [ContentProperty("Converters")]
+    [ContentWrapper(typeof(ValueConverterCollection))]
+    public class ConverterChain : IValueConverter
+    {
+        private readonly ValueConverterCollection _converters = new ValueConverterCollection();
+
+        /// <summary>Gets the converters to execute.</summary>
+        public ValueConverterCollection Converters
+        {
+            get { return _converters; }
+        }
+
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return Converters
+                .Aggregate(value, (current, converter) => converter.Convert(current, targetType, parameter, culture));
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return Converters
+                .Reverse()
+                .Aggregate(value, (current, converter) => converter.Convert(current, targetType, parameter, culture));
+        }
+    }
+
+    /// <summary>Represents a collection of <see cref="IValueConverter"/>s.</summary>
+    public sealed class ValueConverterCollection : Collection<IValueConverter> { }
+
 
 }

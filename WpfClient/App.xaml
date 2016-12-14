@@ -29,11 +29,29 @@
 
         <local:IsNullValueConverter x:Key="isNullValueConverter"/>
         <local:GetAppSetValue x:Key="getAppSetValue" />
+        
         <local:LangDictToTextConverter x:Key="langDictToText"/>
+        <local:LangDictToTextConverter x:Key="langDictToUpperText" IsUpper="True"/>  <!--в дизайнере выдает ошибку!!??-->
+        
         <local:MultiplyParamValueConverter x:Key="multiplyParamConv"/>
         <local:GetMinValue x:Key="getMinValue"/>
-
+        <local:UpperCaseConverter x:Key="upperCaseConverter"/>
         <local:IsEmptyEnumerator x:Key="isEmptyEnumerator"/>
-        
+
+        <local:CornerRadiusConverter x:Key="cornerRadiusLeft" Side="Left"/>
+        <local:CornerRadiusConverter x:Key="cornerRadiusRight" Side="Right"/>
+
+        <local:GarnishLangTextConverter x:Key="garnishLangTextConverter"/>
+        <local:GarnishPriceConverter x:Key="garnishPriceConverter"/>
+
+        <local:GetDishPriceTotal x:Key="getDishPriceTotal"/>
+        <local:GetOrderPrice x:Key="getOrderPrice"/>
+
+        <Style x:Key ="centeredElement" TargetType="FrameworkElement">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+
     </Application.Resources>
 </Application>

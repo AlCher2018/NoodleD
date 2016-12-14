@@ -17,13 +17,6 @@
         <local:MultiplyValueConverter x:Key="SectionTextFontSize" Multiplier="0.02"/>
         <local:MultiplyValueConverter x:Key="elemSize_0_01" Multiplier="0.01"/>
 
-        <local:CornerRadiusConverter x:Key="cornerRadiusLeft" Side="Left"/>
-        <local:CornerRadiusConverter x:Key="cornerRadiusRight" Side="Right"/>
-
-        <local:GarnishLangTextConverter x:Key="garnishLangTextConverter"/>
-        <local:GarnishPriceConverter x:Key="garnishPriceConverter"/>
-        <local:GetDishPriceTotal x:Key="getDishPriceTotal"/>
-
         <!--кнопка закрытия окна  -->
         <Viewbox x:Key="btnClose" Stretch="Uniform" Panel.ZIndex="10"
                  Grid.Row="1" Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Right"

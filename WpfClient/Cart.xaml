@@ -1,0 +1,217 @@
+﻿<Window x:Class="WpfClient.Cart"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfClient"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        mc:Ignorable="d"
+        WindowStyle="None" WindowState="Maximized" WindowStartupLocation="CenterScreen" 
+        Title="Cart" Height="254" Width="379"
+        PreviewKeyUp="Window_PreviewKeyUp">
+
+    <Window.Resources>
+        <local:MultiplyValueConverter x:Key="winFontSize" Multiplier="0.08"/>
+        <local:MultiplyValueConverter x:Key="winFontSizeBig" Multiplier="0.15"/>
+        
+        <local:ConverterChain x:Key="langTextToUpper">
+            <local:LangDictToTextConverter/>
+            <local:UpperCaseConverter/>
+        </local:ConverterChain>
+      
+        <Style x:Key="textBackToMenuStyle" TargetType="TextBlock" BasedOn="{StaticResource centeredElement}">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Text" Value="{Binding {x:Null}, Converter={StaticResource langTextToUpper}, ConverterParameter=appSet.btnBackToMenuText, Mode=OneWay, 
+                           StringFormat={}&lt;  {0}}"/>
+            <Setter Property="FontSize" Value="{Binding ElementName=leftSideGrid, Path=ActualWidth, Converter={StaticResource winFontSize}}"/>
+            <EventSetter Event="MouseUp" Handler="txtbackToMenu_MouseUp"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="{StaticResource appSelectedItemColor}"/>
+                    <Setter Property="FontWeight" Value="Bold"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        
+        <Style x:Key="btnTakeAwayStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource appBackgroundColor}"/>
+            <Setter Property="BorderBrush" Value="White"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Height" Value="{Binding ElementName=leftSideGrid, Path=ActualHeight, Mode=OneWay, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.06}"/>
+            <Setter Property="CornerRadius" Value="{Binding ElementName=leftSideGrid, Path=ActualWidth, Mode=OneWay, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.03}"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="DarkViolet" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="textTakeAwayStyle" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Text" Value="{Binding {x:Null}, Converter={StaticResource langTextToUpper}, ConverterParameter=appSet.btnTakeAwayText, Mode=OneWay}"/>
+            <Setter Property="FontSize" Value="{Binding ElementName=leftSideGrid, Path=ActualWidth, Converter={StaticResource winFontSize}}"/>
+        </Style>
+
+        <Style x:Key="btnPrintCheckTextStyle" TargetType="TextBlock" BasedOn="{StaticResource centeredElement}">
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Text" Value="{Binding {x:Null}, Converter={StaticResource langTextToUpper}, ConverterParameter=appSet.btnPrintBillText, Mode=OneWay}"/>
+            <Setter Property="FontSize" Value="{Binding ElementName=leftSideGrid, Path=ActualWidth, Converter={StaticResource winFontSize}}"/>
+        </Style>
+
+        
+        <DataTemplate x:Key="dishItemTemplate">
+            <Border x:Name="dishItemBorder" Background="Transparent" BorderThickness="1" BorderBrush="Green" Height="250">
+                <Grid x:Name="gridDish">
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <ControlTemplate x:Key="dishListBoxItemTemplate" TargetType="{x:Type ListBoxItem}">
+            <Border Background="{TemplateBinding Background}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                Padding="{TemplateBinding Padding}">
+                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+            </Border>
+        </ControlTemplate>
+        <Style x:Key="dishListBoxItemStyle" TargetType="{x:Type ListBoxItem}">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template" Value="{StaticResource dishListBoxItemTemplate}"/>
+            <EventSetter Event="RequestBringIntoView" Handler="lstDishes_RequestBringIntoView"/>
+        </Style>
+
+    </Window.Resources>
+    
+    <Grid x:Name="winMainGrid">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="5*"/>
+        </Grid.ColumnDefinitions>
+        <!-- фон правой панели -->
+        <Image Grid.Column="1" Source="AppImages\Background.png" Stretch="UniformToFill"/>
+
+        <!-- левая панель - панель управления -->
+        <Grid x:Name="leftSideGrid" Grid.Column="0" UseLayoutRounding="True" Background="{DynamicResource appBackgroundColor}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>                <!-- 0. логотип -->
+                <RowDefinition Height="*"/>                <!-- 1. кнопка Назад к меню -->
+                <RowDefinition Height="Auto"/>                <!-- 2. кнопка С собой -->
+                <RowDefinition Height="3.5*"/>                <!-- 3. общая стоимость заказа -->
+                <RowDefinition Height="0.4*"/>                <!-- 4. промокод -->
+                <RowDefinition Height="1.2*"/>                <!-- 5. надпись Подходите с чеком... -->
+                <RowDefinition Height="0.8*"/>                <!-- 6. кнопка Распечатать чек -->
+            </Grid.RowDefinitions>
+            <!-- 0. логотип -->
+            <Image Grid.Row="0" Source="AppImages\logo1.png" Stretch="Uniform" Style="{StaticResource centeredElement}" Margin="20,0"/>
+            <!-- 1. кнопка Назад к меню -->
+            <TextBlock Grid.Row="1" Style="{StaticResource textBackToMenuStyle}">
+            </TextBlock>
+            <!-- 2. кнопка С собой -->
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="1" Style="{StaticResource btnTakeAwayStyle}">
+                    <TextBlock Style="{StaticResource textTakeAwayStyle}" />
+                </Border>
+            </Grid>
+            <!-- 3. общая стоимость заказа -->
+            <StackPanel Grid.Row="3" Style="{StaticResource centeredElement}" 
+                        TextBlock.FontSize="{Binding ElementName=leftSideGrid, Path=ActualWidth, Converter={StaticResource winFontSizeBig}}">
+                <TextBlock Foreground="White" HorizontalAlignment="Center"
+                           Text="{Binding {x:Null}, Converter={StaticResource langDictToText}, ConverterParameter=appSet.lblTotalText, Mode=OneWay}"/>
+                <TextBlock Foreground="Yellow" HorizontalAlignment="Center"
+                           Text="{Binding {x:Null}, Converter={StaticResource getOrderPrice}, StringFormat={StaticResource priceFormatString}}"/>
+            </StackPanel>
+
+            <!-- 4. промокод -->
+            <Grid Grid.Row="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="0.5*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="0.5*"/>
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="1" x:Name="brdPromoCode" Background="{StaticResource appNotSelectedItemColor}"
+                        CornerRadius="{Binding RelativeSource={RelativeSource AncestorType=Grid},Converter={StaticResource cornerRadiusLeft}, ConverterParameter=0.2, Path=ActualHeight, Mode=OneWay}"/>
+                <TextBox x:Name="txtPromoCode" Grid.Column="1" Style="{StaticResource centeredElement}" Background="Transparent" BorderThickness="0" TextWrapping="Wrap" Foreground="Black" Opacity="0.6" Margin="5,0"
+                         Text="{Binding {x:Null}, Converter={StaticResource langDictToText}, ConverterParameter=appSet.invitePromoText, Mode=OneWay}"
+                         FontSize="{Binding RelativeSource={RelativeSource AncestorType=Grid}, Path=ActualHeight, Mode=OneWay, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.3}"
+                         />
+
+                <Border Grid.Column="2" Background="Black"
+                        CornerRadius="{Binding RelativeSource={RelativeSource AncestorType=Grid},Converter={StaticResource cornerRadiusRight}, ConverterParameter=0.2, Path=ActualHeight, Mode=OneWay}"/>
+                <TextBlock x:Name="lblPromoCode" Grid.Column="2" Style="{StaticResource centeredElement}" Text="OK" Foreground="White"
+                        FontSize="{Binding RelativeSource={RelativeSource AncestorType=Grid}, Path=ActualHeight, Mode=OneWay, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.3}"
+                           />
+            </Grid>
+
+            <!-- 5. надпись Подходите с чеком... -->
+            <Grid Grid.Row="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="0.5*"/>
+                    <ColumnDefinition Width="4*"/>
+                    <ColumnDefinition Width="0.5*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="1" Foreground="White" Style="{StaticResource centeredElement}"
+                       Text="{Binding {x:Null}, Converter={StaticResource langDictToText}, ConverterParameter=appSet.lblGoText, Mode=OneWay}" TextWrapping="Wrap" Margin="10,0" TextAlignment="Center"
+                       FontSize="{Binding ElementName=leftSideGrid, Path=ActualWidth, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.065}"/>
+            </Grid>
+            
+            <!-- 6. кнопка Распечатать чек -->
+            <Border Grid.Row="6" Background="{StaticResource appSelectedItemColor}">
+                <TextBlock Grid.Row="6" Style="{StaticResource btnPrintCheckTextStyle}"/>
+                <Border.Style>
+                    <Style>
+                        <Style.Triggers>
+                            <Trigger Property="Control.IsMouseOver" Value="True">
+                                <Setter Property="TextElement.FontWeight" Value="Bold" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+            </Border>
+        </Grid>        <!-- left side grid -->
+
+        <!-- правая панель - список заказанных блюд (OrderItem) -->
+        <!--<DockPanel x:Name="dishItemsBorder" Grid.Column="1">-->
+        <ScrollViewer x:Name="scrollDishes" Grid.Column="1" CanContentScroll="False" VerticalScrollBarVisibility="Auto"
+                  PreviewMouseLeftButtonDown="scrollDishes_PreviewMouseLeftButtonDown"
+                  PreviewMouseLeftButtonUp="scrollDishes_MouseLeftButtonUp" 
+                  PreviewMouseMove = "scrollDishes_MouseMove"
+                  
+                  PreviewTouchDown="scrollDishes_PreviewTouchDown"
+                  PreviewTouchUp="scrollDishes_PreviewTouchUp"
+                  PreviewTouchMove="scrollDishes_PreviewTouchMove"
+                      >
+            <StackPanel>
+                <TextBlock Foreground="Black" HorizontalAlignment="Center" Margin="0,30,0,30"
+                    Text="{Binding {x:Null}, Converter={StaticResource langTextToUpper}, ConverterParameter=appSet.formOrderHeaderText, Mode=OneWay}"
+                           FontSize="{Binding ElementName=leftSideGrid, Path=ActualWidth, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.1}">
+                </TextBlock>
+
+                <ListBox x:Name="lstDishes" Background="Transparent" IsHitTestVisible="True"
+                                VirtualizingPanel.ScrollUnit="Pixel" HorizontalContentAlignment="Stretch"
+                            ItemTemplate="{StaticResource dishItemTemplate}" 
+                            ItemContainerStyle="{StaticResource dishListBoxItemStyle}"
+                            >
+                    <ListBox.Template>
+                        <!-- для прокрутки мышью -->
+                        <ControlTemplate>
+                            <ItemsPresenter SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
+                        </ControlTemplate>
+                    </ListBox.Template>
+                </ListBox>
+
+            </StackPanel>
+        </ScrollViewer>
+
+    </Grid>    <!-- winMainGrid -->
+</Window>

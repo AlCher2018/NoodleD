@@ -117,6 +117,14 @@ namespace WpfClient
             DishItem curDish = (DishItem)DataContext;
             DishItem orderDish = curDish.GetCopyForOrder();
             curOrder.Dishes.Add(orderDish);
+            // добавить в заказ рекомендации
+            if ((curDish.SelectedRecommends != null) && (curDish.SelectedRecommends.Count > 0))
+            {
+                foreach (DishItem item in curDish.SelectedRecommends)
+                {
+                    curOrder.Dishes.Add(item);
+                }
+            }
 
             MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
             // снять выделение

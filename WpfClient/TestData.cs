@@ -143,7 +143,7 @@ namespace WpfClient
                 db.Setting.Add(appSet);
 
                 appSet = new Setting() { UniqName = "lblTotalText", RowGUID = Guid.NewGuid(), Value = "StringValue" };
-                LangStringLib.SetValues(db, appSet.RowGUID, 1, "Всего", "Всього", "Total");
+                LangStringLib.SetValues(db, appSet.RowGUID, 1, "Всего:", "Всього:", "Total:");
                 db.Setting.Add(appSet);
 
                 appSet = new Setting() { UniqName = "lblGoText", RowGUID = Guid.NewGuid(), Value = "StringValue" };
