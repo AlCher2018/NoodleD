@@ -47,6 +47,8 @@
         <local:GetDishPriceTotal x:Key="getDishPriceTotal"/>
         <local:GetOrderPrice x:Key="getOrderPrice"/>
 
+        <local:GetMargin x:Key="getMargin"/>
+
         <Style x:Key ="centeredElement" TargetType="FrameworkElement">
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="VerticalAlignment" Value="Center"/>

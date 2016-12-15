@@ -122,7 +122,29 @@ namespace WpfClient
 
             logger.Trace("Настраиваю визуальные элементы - READY");
 
-            lstDishes.SelectedIndex = 3;
+            // DEBUG Cart
+            DishItem curDish = mFolders[0].Dishes[6];
+            // блюдо с гарнирами
+            curDish.SelectedGarnishes.Add(curDish.Garnishes[1]);
+            // и ингредиентами
+            curDish.SelectedIngredients = new List<DishAdding>();
+            curDish.SelectedIngredients.Add(curDish.Ingredients[0]);
+            curDish.SelectedIngredients.Add(curDish.Ingredients[1]);
+            curDish.SelectedIngredients.Add(curDish.Ingredients[2]);
+            curDish.SelectedIngredients.Add(curDish.Ingredients[3]);
+
+            DishItem orderDish = curDish.GetCopyForOrder();
+            curOrder.Dishes.Add(orderDish);
+
+            curOrder.Dishes.Add(mFolders[3].Dishes[0].GetCopyForOrder());
+            curOrder.Dishes.Add(mFolders[3].Dishes[0].GetCopyForOrder());
+            curOrder.Dishes.Add(mFolders[3].Dishes[0].GetCopyForOrder());
+            curOrder.Dishes.Add(mFolders[3].Dishes[0].GetCopyForOrder());
+            curOrder.Dishes.Add(mFolders[3].Dishes[0].GetCopyForOrder());
+            curOrder.Dishes.Add(mFolders[3].Dishes[0].GetCopyForOrder());
+
+            updatePrice();
+            showCartWindow();
         }
 
         private void checkDBConnection()

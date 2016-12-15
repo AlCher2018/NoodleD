@@ -286,7 +286,7 @@
                     </Grid>
 
                     <!--изображение блюда-->
-                    <Rectangle Grid.Row="1" StrokeThickness="0" RadiusX="10" RadiusY="10" Margin="0,0,0,10">
+                    <Rectangle Grid.Row="1" StrokeThickness="0" RadiusX="10" RadiusY="10" Margin="0,0,0,10" Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}, Converter={StaticResource multiplyParamConv}, ConverterParameter=1.33}">
                         <Rectangle.Fill>
                             <ImageBrush
                                 ImageSource="{Binding Image}" Stretch="Fill"/>

@@ -23,8 +23,7 @@ namespace WpfClient
         // dragging
         Point? lastDragPoint;
         protected DateTime _dateTime;
-        bool _isMoved;
-
+        bool _isMoved = false;
 
         public Cart()
         {
@@ -122,6 +121,100 @@ namespace WpfClient
         private void closeWin()
         {
             this.Close();
+            // DEBUG Cart
+            foreach (Window item in Application.Current.Windows)
+            {
+                item.Close();
+            }
+            Application.Current.Shutdown();
+        }
+
+
+        #region portion Count
+
+        private void ingrDel_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            ingrDel(sender);
+        }
+
+        private void ingrDel_TouchUp(object sender, TouchEventArgs e)
+        {
+            ingrDel(sender);
+        }
+
+        private void portionCountAdd_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            portionCountAdd();
+        }
+
+        private void portionCountAdd_TouchUp(object sender, TouchEventArgs e)
+        {
+            portionCountAdd();
+        }
+
+        private void portionCountDel_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            portionCountDel();
+        }
+
+        private void portionCountDel_TouchUp(object sender, TouchEventArgs e)
+        {
+            portionCountDel();
+        }
+
+        private void ingrDel(object sender)
+        {
+            ListBox ingrList = (ListBox)AppLib.GetAncestorByType(sender as DependencyObject, typeof(ListBox));
+
+            MessageBox.Show(string.Format("pressed item: {0}", ingrList.SelectedIndex));
+        }
+
+        private void portionCountDel()
+        {
+            DishItem curDish = (DishItem)lstDishes.SelectedItem;
+
+            if (curDish.Count > 1)
+            {
+                curDish.Count--;
+                updatePriceControl();
+            }
+        }
+        private void portionCountAdd()
+        {
+            DishItem curDish = (DishItem)lstDishes.SelectedItem;
+
+            curDish.Count++;
+            updatePriceControl();
+        }
+
+        #endregion
+
+        private void updatePriceControl()
+        {
+            var container = lstDishes.ItemContainerGenerator.ContainerFromIndex(lstDishes.SelectedIndex) as FrameworkElement;
+            if (container != null)
+            {
+                ContentPresenter queueListBoxItemCP = AppLib.FindVisualChildren<ContentPresenter>(container).First();
+                if (queueListBoxItemCP != null)
+                {
+                    DataTemplate dataTemplate = queueListBoxItemCP.ContentTemplate;
+                    TextBlock txtDishCount = (TextBlock)dataTemplate.FindName("txtDishCount", queueListBoxItemCP);
+                    TextBlock txtDishPrice = (TextBlock)dataTemplate.FindName("txtDishPrice", queueListBoxItemCP);
+
+                    BindingExpression be = txtDishCount.GetBindingExpression(TextBlock.TextProperty);
+                    be.UpdateTarget();
+                    be = txtDishPrice.GetBindingExpression(TextBlock.TextProperty);
+                    be.UpdateTarget();
+
+                    updatePriceOrder();
+                }
+            }
+        }  // updatePriceControl()
+
+        private void updatePriceOrder()
+        {
+            BindingExpression be = txtOrderPrice.GetBindingExpression(TextBlock.TextProperty);
+            be.UpdateTarget();
         }
 
     }

@@ -213,7 +213,7 @@
                     <!-- изображение и описание блюда -->
                     <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="1">
                         <Rectangle DockPanel.Dock="Left" StrokeThickness="0" RadiusX="10" RadiusY="10" Margin="0"
-                                   Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}">
+                                   Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}, Converter={StaticResource multiplyParamConv}, ConverterParameter=1.33}">
                             <Rectangle.Fill>
                                 <ImageBrush ImageSource="{Binding Image}" Stretch="Fill"/>
                             </Rectangle.Fill>

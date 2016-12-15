@@ -44,13 +44,7 @@ namespace WpfClient
             double dBuf = 0f, retVal = 0f;
             string sParam = parameter.ToString();
 
-            double.TryParse(sParam, out dBuf);
-            if (dBuf == 0)
-            {
-                if (sParam.Contains(".")) sParam = sParam.Replace('.', ',');
-                else if (sParam.Contains(",")) sParam = sParam.Replace(',', '.');
-                double.TryParse(sParam, out dBuf);
-            }
+            dBuf = sParam.GetDoubleValue();
 
             retVal = dBuf * (double)value;
             if ((retVal == 0) && (DefaultValue != 0)) retVal = DefaultValue;
@@ -167,7 +161,6 @@ namespace WpfClient
         }
     }
 
-
     // получить отступ слева панелей блюд
     [ValueConversion(typeof(double), typeof(Thickness))]
     public class WidthToMarginConverter : IValueConverter
@@ -186,6 +179,31 @@ namespace WpfClient
             return value;
         }
     }
+
+
+    // конвертер возвращает Thickness, параметры которого рассчиываются из переданного значения и строки коэффициентов сторон L-T-R-B
+    [ValueConversion(typeof(double), typeof(Thickness))]
+    public class GetMargin : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            string[] param = ((string)parameter).Split(',');
+            double left = 0, top = 0, right = 0, bottom = 0, val = (double)value;
+
+            left = param[0].GetDoubleValue() * val;
+            top = param[1].GetDoubleValue() * val;
+            right = param[2].GetDoubleValue() * val;
+            bottom = param[3].GetDoubleValue() * val;
+
+            return new Thickness(left,top,right,bottom);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
 
     [ValueConversion(typeof(double), typeof(CornerRadius))]
     public class CornerRadiusConverter : IValueConverter

@@ -223,19 +223,22 @@ namespace AppModel
         public Dictionary<string, string> langBtnSelGarnishText { get; set; }
         public Dictionary<string, string> langBtnAddDishText { get; set; }
 
+        public DishItem()
+        {
+            this.Count = 1;
+        }
+
         public DishItem GetCopyForOrder()
         {
-            DishItem other = new DishItem();
+            DishItem other = (DishItem)this.MemberwiseClone();
 
-            other.Id = this.Id;
-            other.MenuId = this.MenuId;
-            other.RowGUID = this.RowGUID;
-            other.UnitCount = this.UnitCount;
-            other.Price = this.Price;
-            other.Count = 1;
+            other.Count = this.Count;
             other.langDescriptions = this.langDescriptions;
             other.langNames = this.langNames;
             other.langUnitNames = this.langUnitNames;
+
+            other.langBtnAddDishText = null;
+            other.langBtnSelGarnishText = null;
 
             // скопировать гарниры
             if ((this.SelectedGarnishes != null) && (this.SelectedGarnishes.Count > 0))
@@ -270,6 +273,8 @@ namespace AppModel
             if (SelectedIngredients != null) foreach (DishAdding item in this.SelectedIngredients) retVal += item.Price;
             // добавить рекомендованные блюда
             if (SelectedRecommends != null) foreach (DishItem item in this.SelectedRecommends) retVal += item.Price;
+
+            retVal *= Count;
 
             return retVal;
         }

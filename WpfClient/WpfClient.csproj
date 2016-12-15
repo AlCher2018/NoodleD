@@ -82,6 +82,7 @@
     </Compile>
     <Compile Include="GarnishConverters.cs" />
     <Compile Include="TestData.cs" />
+    <Compile Include="TypeExtensions.cs" />
     <Page Include="Cart.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -134,10 +135,13 @@
     <Content Include="AppImages\Background.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="AppImages\Корзина\+.png">
+    <Content Include="AppImages\Cart\+.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="AppImages\Корзина\-.png">
+    <Content Include="AppImages\Cart\-.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="AppImages\removeItem.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="NLog.config">

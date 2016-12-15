@@ -90,6 +90,16 @@ namespace WpfClient
             }
         }
 
+
+        public static DependencyObject GetAncestorByType(DependencyObject element, Type type)
+        {
+            if (element == null) return null;
+
+            if (element.GetType() == type) return element;
+
+            return GetAncestorByType(VisualTreeHelper.GetParent(element), type);
+        }
+
         public static FrameworkElement FindLogicalParentByName(FrameworkElement objectFrom, string parentName, int parentLevel = -1)
         {
             int iLevel = 1;
