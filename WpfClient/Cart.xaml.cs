@@ -132,16 +132,6 @@ namespace WpfClient
 
         #region portion Count
 
-        private void ingrDel_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            ingrDel(sender);
-        }
-
-        private void ingrDel_TouchUp(object sender, TouchEventArgs e)
-        {
-            ingrDel(sender);
-        }
-
         private void portionCountAdd_MouseUp(object sender, MouseButtonEventArgs e)
         {
             portionCountAdd();
@@ -165,8 +155,35 @@ namespace WpfClient
         private void ingrDel(object sender)
         {
             ListBox ingrList = (ListBox)AppLib.GetAncestorByType(sender as DependencyObject, typeof(ListBox));
+            ListBoxItem lbItem = (ListBoxItem)AppLib.GetAncestorByType(ingrList as DependencyObject, typeof(ListBoxItem));
+            DishItem dishItem = (DishItem)lstDishes.ItemContainerGenerator.ItemFromContainer(lbItem);
 
-            MessageBox.Show(string.Format("pressed item: {0}", ingrList.SelectedIndex));
+            lstDishes.SelectedItem = dishItem;
+            DishAdding ingrItem = (DishAdding)ingrList.SelectedItem;
+
+            MessageBoxResult result = MessageBox.Show(string.Format("Удалить ингредиент\n{0} ?", ingrItem.langNames["ru"]), "Удаление ингредиента", MessageBoxButton.YesNo);
+            if (result == MessageBoxResult.Yes)
+            {
+                dishItem.SelectedIngredients.Remove(ingrItem);
+                ingrList.Items.Refresh();
+
+                updatePriceControls();
+            }
+        }
+
+        private void dishDel()
+        {
+            DishItem dishItem = (DishItem)lstDishes.SelectedItem;
+            OrderItem order = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
+
+            MessageBoxResult result = MessageBox.Show(string.Format("Удалить блюдо\n{0} ?", dishItem.langNames["ru"]), "Удаление блюда из заказа", MessageBoxButton.YesNo);
+            if (result == MessageBoxResult.Yes)
+            {
+                order.Dishes.Remove(dishItem);
+                lstDishes.Items.Refresh();
+
+                updatePriceOrder();
+            }
         }
 
         private void portionCountDel()
@@ -176,7 +193,7 @@ namespace WpfClient
             if (curDish.Count > 1)
             {
                 curDish.Count--;
-                updatePriceControl();
+                updatePriceControls();
             }
         }
         private void portionCountAdd()
@@ -184,12 +201,33 @@ namespace WpfClient
             DishItem curDish = (DishItem)lstDishes.SelectedItem;
 
             curDish.Count++;
-            updatePriceControl();
+            updatePriceControls();
         }
 
         #endregion
 
-        private void updatePriceControl()
+        private void ingrDel_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            ingrDel(sender);
+        }
+
+        private void ingrDel_TouchUp(object sender, TouchEventArgs e)
+        {
+            ingrDel(sender);
+        }
+
+        private void dishDel_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            dishDel();
+        }
+
+        private void dishDel_TouchUp(object sender, TouchEventArgs e)
+        {
+            dishDel();
+        }
+
+
+        private void updatePriceControls()
         {
             var container = lstDishes.ItemContainerGenerator.ContainerFromIndex(lstDishes.SelectedIndex) as FrameworkElement;
             if (container != null)

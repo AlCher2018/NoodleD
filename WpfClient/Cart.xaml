@@ -218,7 +218,7 @@
                                 <TextBlock x:Name="txtDishCount" Grid.Column="1" Text="{Binding Count}" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="{Binding ElementName=leftSideGrid, Path=ActualWidth, Mode=OneWay, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.09}" FontWeight="Bold"/>
                                     <Image Grid.Column="2" Source="AppImages/Cart/+.png" Style="{StaticResource gridPortionButtonStyle}" MouseUp="portionCountAdd_MouseUp" TouchUp="portionCountAdd_TouchUp"/>
                                     <TextBlock x:Name="txtDishPrice" Grid.Column="3" Text="{Binding Converter={StaticResource getDishPriceTotal}, StringFormat={StaticResource priceFormatString}}" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="{Binding ElementName=leftSideGrid, Path=ActualWidth, Mode=OneWay, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.11}" FontWeight="Bold"/>
-                                    <Image Grid.Column="4" Source="AppImages/removeItem.png" VerticalAlignment="Center" Height="{Binding ElementName=gridPortion, Path=ActualHeight, Mode=OneWay, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.7}"/>
+                                    <Image Grid.Column="4" Source="AppImages/removeItem.png" VerticalAlignment="Center" Height="{Binding ElementName=gridPortion, Path=ActualHeight, Mode=OneWay, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.7}" MouseUp="dishDel_MouseUp" TouchUp="dishDel_TouchUp"/>
                             </Grid>
                             </Grid>
                         </Grid>
