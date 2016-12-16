@@ -225,7 +225,7 @@
                                                            Text="{Binding langNames, Converter={StaticResource langDictToText}}"
                                                            FontSize="{Binding Path=ActualWidth, Converter={StaticResource SectionTextFontSize}, ElementName=gridMain, Mode=OneWay}"/>
                                                 <TextBlock FontWeight="Bold" Margin="6,0,0,0"
-                                                           Text="{Binding SelectedGarnishes, Converter={StaticResource garnishPriceConverter}, ConverterParameter=1, StringFormat={StaticResource priceFormatString}}"
+                                                           Text="{Binding SelectedGarnishes, Converter={StaticResource garnishPriceConverter}, ConverterParameter=1, StringFormat={StaticResource priceFormatString}, TargetNullValue=''}"
                                                            FontSize="{Binding Path=ActualWidth, Converter={StaticResource SectionTextFontSize}, ElementName=gridMain, Mode=OneWay}"/>
                                                 <!--маркеры блюда-->
                                                 <ListBox ItemsSource="{Binding Marks}" BorderThickness="0" Background="Transparent" Margin="10,0,0,10" SnapsToDevicePixels="True" Focusable="False" IsHitTestVisible="True" ScrollViewer.CanContentScroll="False" FocusVisualStyle="{x:Null}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled"

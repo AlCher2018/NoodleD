@@ -185,10 +185,11 @@
             </Path.Data>
         </Path>
 
-        <!--панель блюд - WrapPanel-->
-        <ItemsPanelTemplate x:Key="dishesListPanelTemplate">
-            <WrapPanel x:Name="dishesListPanel" Width="{Binding ElementName=dishItemsBorder, Path= ActualWidth, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.95}"/>
-        </ItemsPanelTemplate>
+        <LinearGradientBrush x:Key="dishDescrBackBrush" EndPoint="0.5,1" StartPoint="0.5,0" Opacity="0.7">
+            <GradientStop Color="{DynamicResource appColorDarkPink}" Offset="1"/>
+            <GradientStop Color="Black" Offset="0.508"/>
+            <GradientStop Color="Black" Offset="0"/>
+        </LinearGradientBrush>
 
         <ControlTemplate x:Key="dishListBoxItemTemplate" TargetType="{x:Type ListBoxItem}">
             <Border Background="{TemplateBinding Background}"
@@ -219,74 +220,71 @@
             </Style.Triggers>
         </Style>
 
+        <!--
+                    Width="{Binding ElementName=dishItemsBorder, Path=ActualWidth, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.25, Mode=OneWay}" 
+                    Margin="{Binding ActualWidth, Converter={StaticResource leftMargin}, Mode=OneWay, ElementName=dishItemsBorder}"
+        
+        
+        -->
+        
+        
         <DataTemplate x:Key="dishItemTemplate">
             <Border x:Name="dishItemBorder"  
                     Background="Transparent"  BorderThickness="0"
-                    Width="{Binding ElementName=dishItemsBorder, Path=ActualWidth, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.25, Mode=OneWay}" 
-                    Margin="{Binding ActualWidth, Converter={StaticResource leftMargin}, Mode=OneWay, ElementName=dishItemsBorder}"
+                    Width="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=dishPanelWidth}" 
+                    Margin="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=dishPanelMargin}"
                     >
                 <Border.Style>
                     <Style TargetType="Border">
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding Garnishes, Converter={StaticResource isNullValueConverter}}" Value="True">
-                                <Setter Property="Height" Value="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth, Converter={StaticResource multiplyParamConv}, ConverterParameter=1.2}"/>
+                                <Setter Property="Height" Value="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=dishPanelHeight2}"/>
                             </DataTrigger>
                             <DataTrigger Binding="{Binding Garnishes, Converter={StaticResource isNullValueConverter}}" Value="False">
-                                <Setter Property="Height" Value="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth, Converter={StaticResource multiplyParamConv}, ConverterParameter=1.4}"/>
+                                <Setter Property="Height" Value="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=dishPanelHeight1}"/>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </Border.Style>
                 <Grid x:Name="gridDish">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="{Binding ActualWidth, Mode=OneWay, ElementName=dishItemBorder, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.2}"/>
-                        <RowDefinition Height="10*"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="2*"/>
+                        <RowDefinition Height="2.5*"/>  <!-- 0. заголовок -->
+                        <RowDefinition Height="10*"/> <!-- 1. изображение и  описание -->
+                        <RowDefinition Height="5*"/> <!-- 2. гарниры, если есть -->
+                        <RowDefinition Height="2*"/>  <!-- 3. кнопки добавления -->
                     </Grid.RowDefinitions>
                     
                     <!--грид заголовка блюда-->
                     <Grid x:Name="dishHeader">
                         <WrapPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                            <!--маркеры блюда-->
-                            <ListBox ItemsSource="{Binding Marks}" BorderThickness="0" Background="Transparent" Margin="0,0,0,20" SnapsToDevicePixels="True" Focusable="False"  IsHitTestVisible="True" ScrollViewer.CanContentScroll="False" FocusVisualStyle="{x:Null}"
-                        ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                     Height="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=Grid, Mode=FindAncestor} , Converter={StaticResource multiplyParamConv}, ConverterParameter=0.4}"
-                     >
-                                <ListBox.ItemContainerStyle>
-                                    <Style TargetType="ListBoxItem">
-                                        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-                                        <Setter Property="Padding" Value="0"/>
-                                        <Setter Property="Margin" Value="0"/>
-                                        <Setter Property="BorderThickness" Value="0" />
-                                    </Style>
-                                </ListBox.ItemContainerStyle>
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <Image Source="{Binding Image}"/>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                                <ListBox.ItemsPanel>
+                         
+                            <!-- маркеры блюда -->
+                            <ItemsControl ItemsSource="{Binding Marks}" Margin="0,0,8,20"
+                                Height="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=Grid, Mode=FindAncestor} , Converter={StaticResource multiplyParamConv}, ConverterParameter=0.4}">
+                                <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <StackPanel Orientation="Horizontal"/>
                                     </ItemsPanelTemplate>
-                                </ListBox.ItemsPanel>
-                            </ListBox>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Image Source="{Binding Image}"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            
                             <!--заголовок с наименованием, количеством и ед.изм.-->
-                            <TextBlock Foreground="Black" TextWrapping="Wrap" VerticalAlignment="Center">
-                <Run Text="{Binding Path=langNames, Converter={StaticResource langDictToText}}" FontWeight="Bold"
-                     FontSize="{Binding ActualHeight, Mode=OneWay, RelativeSource={RelativeSource AncestorType=Grid}, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.3}"/>
-                <Run Text="  "/>
-                <Run Text="{Binding Path=UnitCount}" FontStyle="Italic"
-                     FontSize="{Binding ActualHeight, Mode=OneWay, RelativeSource={RelativeSource AncestorType=Grid}, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.25}"/>
-                <Run Text="{Binding Path=langUnitNames, Converter={StaticResource langDictToText}}" 
-                     FontSize="{Binding ActualHeight, Mode=OneWay, RelativeSource={RelativeSource AncestorType=Grid}, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.25}"/>
+                            <TextBlock Foreground="Black" TextWrapping="Wrap" VerticalAlignment="Center" TextAlignment="Center">
+                                <Run Text="{Binding Path=langNames, Converter={StaticResource langDictToText}}" FontWeight="Bold" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=dishPanelHeaderFontSize}"/>
+                                <Run Text="{Binding Path=UnitCount, StringFormat={}  {0}}" FontStyle="Italic" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=dishPanelTextFontSize}"/>
+                                <Run Text="{Binding Path=langUnitNames, Converter={StaticResource langDictToText}}" 
+                     FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=dishPanelTextFontSize}"/>
                             </TextBlock>
                         </WrapPanel>
                     </Grid>
 
                     <!--изображение блюда-->
-                    <Rectangle Grid.Row="1" StrokeThickness="0" RadiusX="10" RadiusY="10" Margin="0,0,0,10" Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}, Converter={StaticResource multiplyParamConv}, ConverterParameter=1.33}">
+                    <Rectangle Grid.Row="1" StrokeThickness="0" RadiusX="10" RadiusY="10" Margin="0">
                         <Rectangle.Fill>
                             <ImageBrush
                                 ImageSource="{Binding Image}" Stretch="Fill"/>
@@ -294,48 +292,15 @@
                     </Rectangle>
                     
                     <!--описание блюда-->
-                    <Grid x:Name="dishDescrText" Grid.Row="1" Margin="0,0,0,10" Visibility="Hidden">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="7*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="7*"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
+                    <Grid x:Name="dishDescrText" Grid.Row="1">
                         <!--текст описания-->
-                        <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Grid.RowSpan="3" CornerRadius="10">
-                            <Border.Background>
-                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0" Opacity="0.7">
-                                    <GradientStop Color="{DynamicResource appColorDarkPink}" Offset="1"/>
-                                    <GradientStop Color="Black" Offset="0.508"/>
-                                    <GradientStop Color="Black" Offset="0"/>
-                                </LinearGradientBrush>
-                            </Border.Background>
+                        <Border CornerRadius="10" Background="{StaticResource dishDescrBackBrush}"  Visibility="Hidden">
+                            <TextBlock Margin="10" Foreground="White" VerticalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Text="{Binding langDescriptions, Converter={StaticResource langDictToText}}" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=dishPanelHeaderFontSize}"
+                                   MouseUp="btnShowDishDescription_MouseDown" TouchUp="btnShowDishDescription_TouchDown"/>
                         </Border>
 
-                        <TextBlock Grid.Row="1" Grid.Column="1" Foreground="White" VerticalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
-                             Text="{Binding langDescriptions, Converter={StaticResource langDictToText}}"   
-                                   FontSize="{Binding ActualHeight, Mode=OneWay, RelativeSource={RelativeSource AncestorType=Grid}, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.07}"
-                                   MouseUp="btnShowDishDescription_MouseDown" TouchUp="btnShowDishDescription_TouchDown"
-                                   />
-
-                    </Grid>
-                    
-                    <!--кнопка показа описания блюда-->
-                    <Grid x:Name="btnShowDishDescription" Grid.Row="1" Margin="0,10,10,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="7*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="7*"/>
-                        </Grid.RowDefinitions>
-
-                        <Viewbox Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Bottom" 
+                        <!--кнопка показа описания блюда  (dishPanelDescrButtonSize)-->
+                        <Viewbox HorizontalAlignment="Right" VerticalAlignment="Top" Height="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=dishPanelDescrButtonSize}" Width="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=dishPanelDescrButtonSize}" Margin="0,10,10,0"
                                  MouseUp="btnShowDishDescription_MouseDown" TouchUp="btnShowDishDescription_TouchDown">
                             <Grid Width="10" Height="10">
                                 <Path x:Name="btnDishDescr" Fill="White">
@@ -347,8 +312,9 @@
                             </Grid>
                         </Viewbox>
                     </Grid>
+                    
 
-                    <!--грид с кнопками гарниров-->
+                    <!--грид с кнопками гарниров--><!--
                     <Grid x:Name="gridDishGarnish" Grid.Row="2" Margin="0,8,0,0" 
               Visibility="{Binding Garnishes, Converter={StaticResource garnishVisibilityConverter}, ConverterParameter=0}"
               Height="{Binding ActualWidth, Mode=OneWay, ElementName=dishItemBorder, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.25}"
@@ -399,18 +365,18 @@
                         </Viewbox>
                     </Grid>
 
-                    <!--грид с кнопками добавления блюда, имена контролов - НЕ удалять! 
+                    --><!--грид с кнопками добавления блюда, имена контролов - НЕ удалять! 
                     всего 3 надписи: две для блюд с ингредиентами и одна для блюд без ингредиентов
-                    -->
+                    --><!--
                     <Grid x:Name="gridDishBottomButtons" Grid.Row="3" Margin="0,10,0,0" HorizontalAlignment="Stretch">
                         
-                        <!--просто нижележащая надпись для блюд с ингредиентами-->
+                        --><!--просто нижележащая надпись для блюд с ингредиентами--><!--
                         <Border x:Name="txtDishWithIngrNotActive" CornerRadius="7" BorderBrush="Gray" BorderThickness="1"  Background="White" SnapsToDevicePixels="True" UseLayoutRounding="True">
                             <TextBlock Foreground="Gray" Style="{StaticResource centeredElement}"
                                 Text="{Binding langBtnSelGarnishText, Converter={StaticResource langDictToText}}" FontSize="{Binding Path=ActualHeight, ElementName=gridDishBottomButtons, Converter={StaticResource DishAddButtonFontSize}}" />
                         </Border>
 
-                        <!--кнопка для выделенного блюда с ингредиентами-->
+                        --><!--кнопка для выделенного блюда с ингредиентами--><!--
                         <Border x:Name="txtDishWithIngr" CornerRadius="7" Background="{DynamicResource addButtonBackgroundTextColor}" SnapsToDevicePixels="True" Effect="{StaticResource addButtonShadow}"
                                 MouseUp="txtDishAdd_MouseDown" TouchUp="txtDishAdd_TouchDown">
                             <TextBlock Foreground="White" Style="{StaticResource centeredElement}"
@@ -418,30 +384,30 @@
                                 FontSize="{Binding Path=ActualHeight, ElementName=gridDishBottomButtons, Converter={StaticResource DishAddButtonFontSize}}" />
                         </Border>
                         
-                        <!--кнопка для блюд без ингредиентов, на них сразу цена-->
+                        --><!--кнопка для блюд без ингредиентов, на них сразу цена--><!--
                         <Grid x:Name="txtDishWithoutIngr" Effect="{StaticResource addButtonShadow}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="2*"/>
                             </Grid.ColumnDefinitions>
-                            <!-- бордер с ценой -->
+                            --><!-- бордер с ценой --><!--
                             <Border Grid.Column="0" Background="{StaticResource addButtonBackgroundPriceColor}"
                                 CornerRadius="7,0,0,7">
                                 <TextBlock x:Name="txtDishPrice" Style="{StaticResource addButtonTextStyle}" Text="{Binding Path=Price, StringFormat={StaticResource priceFormatString}}"/>
-                            </Border>
+                            </Border>-->
                             <!-- бордер с текстом -->
-                            <Border Grid.Column="1" Background="{StaticResource addButtonBackgroundTextColor}"  CornerRadius="0,7,7,0"
+                            <!--<Border Grid.Column="1" Background="{StaticResource addButtonBackgroundTextColor}"  CornerRadius="0,7,7,0"
                                 MouseUp="txtDishAdd_MouseDown" TouchUp="txtDishAdd_TouchDown">
                                 <TextBlock Style="{StaticResource addButtonTextStyle}"
                                     Text="{Binding {x:Null}, ConverterParameter=appSet.btnSelectDishText, Converter={StaticResource langDictToText}}"/>
                             </Border>
                         </Grid>
-                    </Grid>
+                    </Grid>-->
                 </Grid>
             </Border>
 
-            <DataTemplate.Triggers>
-                <!--если нет гарниров, то сразу показать кнопку с ценой-->
+            <!--<DataTemplate.Triggers>
+                --><!--если нет гарниров, то сразу показать кнопку с ценой--><!--
                 <DataTrigger Binding="{Binding Garnishes, Converter={StaticResource isNullValueConverter}, Mode=OneWay}" Value="True">
                     <Setter TargetName="txtDishWithoutIngr" Property="Visibility" Value="Visible"/>
                     <Setter TargetName="txtDishWithIngrNotActive" Property="Visibility" Value="Hidden"/>
@@ -452,7 +418,7 @@
                     <Setter TargetName="txtDishWithIngrNotActive" Property="Visibility" Value="Visible"/>
                     <Setter TargetName="txtDishWithIngr" Property="Visibility" Value="Hidden"/>
                 </DataTrigger>
-            </DataTemplate.Triggers>
+            </DataTemplate.Triggers>-->
 
         </DataTemplate>
 
@@ -544,7 +510,7 @@
 
         <!--список блюд -->
         <DockPanel x:Name="dishItemsBorder" Grid.Column="1">
-            <ScrollViewer x:Name="scrollDishes" Grid.Column="0" CanContentScroll="False"
+            <ScrollViewer x:Name="scrollDishes" Grid.Column="0" CanContentScroll="False" HorizontalContentAlignment="Center"
                   PreviewMouseLeftButtonDown="scrollDishes_PreviewMouseLeftButtonDown"
                   PreviewMouseLeftButtonUp="scrollDishes_MouseLeftButtonUp" 
                   PreviewMouseMove = "scrollDishes_MouseMove"
@@ -553,11 +519,10 @@
                   PreviewTouchUp="scrollDishes_PreviewTouchUp"
                   PreviewTouchMove="scrollDishes_PreviewTouchMove"
                       >
-                <ListBox x:Name="lstDishes" Background="Transparent" IsHitTestVisible="True"
+                <ListBox Grid.Column="1" HorizontalAlignment="Center" x:Name="lstDishes" IsHitTestVisible="True"
                          VirtualizingPanel.ScrollUnit="Pixel"
                          ItemsSource="{Binding ElementName=lstMenuFolders, Path=SelectedItem.Dishes}"
                      ItemTemplate="{StaticResource dishItemTemplate}" 
-                     ItemsPanel="{StaticResource dishesListPanelTemplate}"
                      ItemContainerStyle="{StaticResource dishListBoxItemStyle}"
                      >
                     <ListBox.Template>  <!-- для прокрутки мышью -->
@@ -565,6 +530,12 @@
                             <ItemsPresenter SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
                         </ControlTemplate>
                     </ListBox.Template>
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel x:Name="dishesListPanel"/>
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+
                 </ListBox>
 
             </ScrollViewer>

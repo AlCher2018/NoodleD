@@ -25,7 +25,7 @@ namespace WpfClient
         public double Multiplier { get; set; }
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return Multiplier * ((double)value);
+            return Multiplier * (System.Convert.ToDouble(value));
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -316,6 +316,5 @@ namespace WpfClient
 
     /// <summary>Represents a collection of <see cref="IValueConverter"/>s.</summary>
     public sealed class ValueConverterCollection : Collection<IValueConverter> { }
-
 
 }

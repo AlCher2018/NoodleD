@@ -26,6 +26,7 @@
                            StringFormat={}&lt;  {0}}"/>
             <Setter Property="FontSize" Value="{Binding ElementName=leftSideGrid, Path=ActualWidth, Converter={StaticResource winFontSize}}"/>
             <EventSetter Event="MouseUp" Handler="txtbackToMenu_MouseUp"/>
+            <EventSetter Event="TouchUp" Handler="txtbackToMenu_TouchUp"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Foreground" Value="{StaticResource appSelectedItemColor}"/>

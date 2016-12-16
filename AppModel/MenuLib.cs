@@ -50,7 +50,7 @@ namespace AppModel
             ObservableCollection<MenuItem> retVal = new ObservableCollection<MenuItem>();
             int fieldTypeId = 1;
             foreach (MenuFolder item in
-                from m in _listMenu where m.ParentId == 0 select m)
+                from m in _listMenu orderby m.RowPosition where m.ParentId == 0 select m)
             {
                 MenuItem mi = new MenuItem() { MenuFolder = item };
                 mi.langNames = getLangTextDict(item.RowGUID, fieldTypeId);

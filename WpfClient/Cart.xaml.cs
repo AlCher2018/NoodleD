@@ -42,6 +42,10 @@ namespace WpfClient
         {
             closeWin();
         }
+        private void txtbackToMenu_TouchUp(object sender, TouchEventArgs e)
+        {
+            closeWin();
+        }
 
 
 
@@ -122,11 +126,11 @@ namespace WpfClient
         {
             this.Close();
             // DEBUG Cart
-            foreach (Window item in Application.Current.Windows)
-            {
-                item.Close();
-            }
-            Application.Current.Shutdown();
+            //foreach (Window item in Application.Current.Windows)
+            //{
+            //    item.Close();
+            //}
+            //Application.Current.Shutdown();
         }
 
 
@@ -181,6 +185,7 @@ namespace WpfClient
             {
                 order.Dishes.Remove(dishItem);
                 lstDishes.Items.Refresh();
+                scrollDishes.ScrollToTop();
 
                 updatePriceOrder();
             }
@@ -252,6 +257,11 @@ namespace WpfClient
         private void updatePriceOrder()
         {
             BindingExpression be = txtOrderPrice.GetBindingExpression(TextBlock.TextProperty);
+            be.UpdateTarget();
+
+            // также обновить на главном меню
+            MainWindow mainWin = (MainWindow)Application.Current.MainWindow;
+            be = mainWin.txtOrderPrice.GetBindingExpression(TextBlock.TextProperty);
             be.UpdateTarget();
         }
 

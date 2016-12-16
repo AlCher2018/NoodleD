@@ -44,6 +44,41 @@ namespace WpfClient
         protected DateTime _dateTime;
         bool _isMoved;
 
+        // static constants
+        static double screenWidth, screenHeight;
+        static double dishPanelWidth, dishPanelHeight1, dishPanelHeight2, dishPanelMargin;
+        static double dishPanelHeaderFontSize, dishPanelTextFontSize;
+        static double dishPanelDescrButtonSize;
+
+        static MainWindow()
+        {
+            screenWidth = SystemParameters.PrimaryScreenWidth;
+            //            screenWidth = SystemParameters.VirtualScreenWidth;
+            screenHeight = SystemParameters.PrimaryScreenHeight;
+            //            screenHeight = SystemParameters.VirtualScreenHeight;
+
+            double dishesPanelWidth = (screenWidth / 6.0 * 5.0);
+            AppLib.SetAppGlobalValue("dishesPanelWidth", dishesPanelWidth);
+
+            // расчет ширины панели блюда
+            dishPanelWidth = 0.9 * dishesPanelWidth / 3.6;  // 3x + 6*0.1x - ширина панелей + отступ слева/справа 
+            AppLib.SetAppGlobalValue("dishPanelWidth", dishPanelWidth);
+            dishPanelHeight1 = dishPanelWidth * 1.5;
+            AppLib.SetAppGlobalValue("dishPanelHeight1", dishPanelHeight1);
+            dishPanelHeight2 = dishPanelWidth * 1.3;
+            AppLib.SetAppGlobalValue("dishPanelHeight2", dishPanelHeight2);
+            dishPanelMargin = 0.1 * dishPanelWidth;
+            AppLib.SetAppGlobalValue("dishPanelMargin", dishPanelMargin);
+
+            dishPanelHeaderFontSize = 0.06 * dishPanelWidth;
+            AppLib.SetAppGlobalValue("dishPanelHeaderFontSize", dishPanelHeaderFontSize);
+            dishPanelTextFontSize = 0.8 * dishPanelHeaderFontSize;
+            AppLib.SetAppGlobalValue("dishPanelTextFontSize", dishPanelTextFontSize);
+
+            dishPanelDescrButtonSize = 0.1 * dishPanelWidth;
+            AppLib.SetAppGlobalValue("dishPanelDescrButtonSize", dishPanelDescrButtonSize);
+        }
+
         public MainWindow()
         {
             InitializeComponent();
@@ -375,7 +410,7 @@ namespace WpfClient
             }
             else
             {
-                if (_curDishItem == (DishItem)lstDishes.SelectedItem)  // клик по гарниру в том же блюде
+                if ((_curDishItem == (DishItem)lstDishes.SelectedItem) && (_curDishItem.SelectedGarnishes != null))  // клик по гарниру в том же блюде
                 {
                     DishAdding da = _curDishItem.SelectedGarnishes.FirstOrDefault(g => g.Uid == gridGarn.Uid);
                     if (da == null)
@@ -426,6 +461,8 @@ namespace WpfClient
         }
         private void updateVisualGarnish(bool isUpdAddBut)
         {
+            if ((_curGarnishBorder == null) || (_curGarnishTextBlock == null) || (_curAddButton == null)) return;
+
             SolidColorBrush selBase = (SolidColorBrush)AppLib.GetAppGlobalValue("appSelectedItemColor");
             SolidColorBrush notSelBase = (SolidColorBrush)AppLib.GetAppGlobalValue("appBackgroundColor");
             SolidColorBrush notSelText = (SolidColorBrush)AppLib.GetAppGlobalValue("appNotSelectedItemColor");
@@ -462,16 +499,16 @@ namespace WpfClient
         {
             if (_isMoved == false) txtDishWithIngrHandler(sender);
         }
+        // клик по кнопке
         private void txtDishWithIngrHandler(object sender)
         {
-            if (_curDishItem == null) _curDishItem = (DishItem)lstDishes.SelectedItem;
+            DishItem selDishItem = (DishItem)lstDishes.SelectedItem;
 
-            if ((_curDishItem.Ingredients == null) || (_curDishItem.Ingredients.Count == 0))
+            // если нет ингредиентов, то сразу в корзину
+            if ((selDishItem.Ingredients == null) || (selDishItem.Ingredients.Count == 0))
             {
-                // если нет ингредиентов, то сразу в корзину
                 OrderItem curOrder = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
-                DishItem curDish = _curDishItem;
-                DishItem orderDish = curDish.GetCopyForOrder();
+                DishItem orderDish = selDishItem.GetCopyForOrder();
                 curOrder.Dishes.Add(orderDish);
 
                 // снять выделение
@@ -493,9 +530,6 @@ namespace WpfClient
                 popupWin.Top = p.Y;
 
                 // установить контекст окна - текущий DishItem
-                DishItem curDI = (DishItem)lstDishes.SelectedItem;
-                if (curDI.SelectedGarnishes == null) _curDishItem = curDI;
-
                 popupWin.DataContext = _curDishItem;  // контекст данных
 
                 popupWin.ShowDialog();
@@ -516,11 +550,11 @@ namespace WpfClient
         private void btnShowDishDescriptionHandler(object sender)
         {
             FrameworkElement vBox = (FrameworkElement)sender;
-            FrameworkElement gridDish = AppLib.FindLogicalParentByName(vBox, "gridDish", 3);
+            FrameworkElement gridDescr = AppLib.FindLogicalParentByName(vBox, "dishDescrText", 3);
 
-            List<Grid> vbList = AppLib.FindLogicalChildren<Grid>(gridDish).ToList();
-            Grid vbButton = vbList.FirstOrDefault(g => g.Name == "btnShowDishDescription"); 
-            Grid vbText = vbList.FirstOrDefault(g => g.Name == "dishDescrText");
+            Border vbText = (Border)AppLib.FindLogicalChildren<Border>(gridDescr).First();
+
+            Viewbox vbButton = (Viewbox)AppLib.FindLogicalChildren<Viewbox>(gridDescr).First();
             System.Windows.Shapes.Path path = AppLib.FindLogicalChildren<System.Windows.Shapes.Path>(vbButton).First();
 
             int tagValue = (int)(vbButton.Tag ?? 0);   // переключатель в теге кнопки
@@ -650,6 +684,15 @@ namespace WpfClient
         {
             showCartWindow();
         }
+
+        protected override void OnRender(DrawingContext drawingContext)
+        {
+            //WrapPanel wp = (WrapPanel)AppLib.FindVisualChildren<WrapPanel>(this.dishItemsBorder).First();
+            //wp.Width = (screenWidth / 6.0) * 5.0 * 0.95;
+
+            base.OnRender(drawingContext);
+        }
+
 
         private void showCartWindow()
         {
