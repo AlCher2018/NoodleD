@@ -296,13 +296,13 @@ namespace WpfClient
             }
             else            // установка языка из имени нажатой кнопки
             {
-                setUncheckedAllLangButtons();
+                setCheckedLangButton(false);
                 string langId = getLangIdByButtonName(langControl.Name);
                 AppLib.AppLang = langId;
             }
 
             // установка текстов на выбранном языке
-            setCheckedLangButton(langControl);
+            setCheckedLangButton(true);
 
             BindingExpression be = txtPromoCode.GetBindingExpression(TextBox.TextProperty);
             be.UpdateTarget();
@@ -320,15 +320,24 @@ namespace WpfClient
             lstMenuFolders.SelectedIndex = (int)(AppLib.GetAppGlobalValue("selectedMenuIndex")??0);
         }
 
-        private void setCheckedLangButton(FrameworkElement langControl)
+        private void setCheckedLangButton(bool checkedMode)
         {
-            langControl.Style = (Style)this.Resources["langButtonBorderCheckedStyle"];
+            Border langBorder = getInnerLangBorder();
+            if (langBorder != null)
+                langBorder.Style = (checkedMode) ? (Style)this.Resources["langButtonBorderCheckedStyle"] : (Style)this.Resources["langButtonBorderUncheckedStyle"];
         }
-        private void setUncheckedAllLangButtons()
+        private Border getInnerLangBorder()
         {
-            btnLangUa.Style = (Style)this.Resources["langButtonBorderUncheckedStyle"];
-            btnLangRu.Style = (Style)this.Resources["langButtonBorderUncheckedStyle"];
-            btnLangEn.Style = (Style)this.Resources["langButtonBorderUncheckedStyle"];
+            Border retVal = null;
+            switch (AppLib.AppLang)
+            {
+                case "ua": retVal = btnLangUaInner; break;
+                case "ru": retVal = btnLangRuInner; break;
+                case "en": retVal = btnLangEnInner; break;
+                default:
+                    break;
+            }
+            return retVal;
         }
 
         private Border getLangButton(string langId)
