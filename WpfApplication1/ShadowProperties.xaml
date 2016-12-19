@@ -1,0 +1,61 @@
+﻿<Window x:Class="WpfApplication1.ShadowProperties"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfApplication1"
+        mc:Ignorable="d"
+        Title="ShadowProperties" Height="400" Width="500"
+        Foreground="White" FontSize="16">
+
+    <Window.Resources>
+        <local:NumToHexConverters x:Key="numToHexConverters"/>
+    </Window.Resources>
+    
+    <Grid Background="Blue">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Border Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" Height="170" Width="300" Background="DarkMagenta" CornerRadius="10">
+            <Border.Effect>
+                <DropShadowEffect Color="Yellow" BlurRadius="{Binding ElementName=sldBlurRadius, Path=Value}" Direction="{Binding ElementName=sldDirection, Path=Value}" Opacity="{Binding ElementName=sldOpacity, Path=Value}" ShadowDepth="{Binding ElementName=sldShadowDepth, Path=Value}"/>
+            </Border.Effect>
+        </Border>
+        <DockPanel Grid.Row="1" >
+            <TextBlock Text="BlurRadius "/>
+            <TextBlock Text="{Binding ElementName=sldBlurRadius, Path=Value, StringFormat={}({0:#0}): , Mode=OneWay}"/>
+            <Slider x:Name="sldBlurRadius" Grid.Row="1" Minimum="1" Maximum="100"/>
+        </DockPanel>
+
+        <DockPanel Grid.Row="2">
+            <TextBlock Text="Direction "/>
+            <TextBlock Text="{Binding ElementName=sldDirection, Path=Value, StringFormat={}({0:#0}): , Mode=OneWay}"/>
+            <Slider x:Name="sldDirection" Minimum="0" Maximum="360" Value="315"/>
+        </DockPanel>
+
+        <DockPanel Grid.Row="3">
+            <TextBlock Text="Opacity "/>
+            <TextBlock Text="{Binding ElementName=sldOpacity, Path=Value, StringFormat={}({0:0.00}): , Mode=OneWay}"/>
+            <Slider x:Name="sldOpacity"  Minimum="0" Maximum="1" LargeChange="0.1" SmallChange="0.01" TickFrequency="0.1" TickPlacement="BottomRight"  Value="1"/>
+        </DockPanel>
+
+        <DockPanel Grid.Row="4">
+            <TextBlock Text="ShadowDepth "/>
+            <TextBlock Text="{Binding ElementName=sldShadowDepth, Path=Value, StringFormat={}({0:#0}): , Mode=OneWay}"/>
+            <Slider x:Name="sldShadowDepth"  Minimum="1" Maximum="70" Value="10"/>
+        </DockPanel>
+
+        <DockPanel Grid.Row="5">
+            <TextBlock Text="Button Color "/>
+            <TextBlock Text="{Binding ElementName=sldButtonColor, Path=Value, 
+                Converter={StaticResource numToHexConverters}, Mode=OneWay, StringFormat={}({0}): }"/>
+            <Slider x:Name="sldButtonColor" Minimum="0" Maximum="16777215" SmallChange="16" LargeChange="256"/>
+        </DockPanel>
+        
+    </Grid>
+</Window>

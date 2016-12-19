@@ -398,7 +398,7 @@ namespace WpfClient
         {
             clearSelectedDish();
             //lstDishes.ItemsSource = ((AppModel.MenuItem)lstMenuFolders.SelectedItem).Dishes;
-
+            
             scrollDishes.ScrollToTop();
             if (lstDishes.Items.Count > 0) lstDishes.ScrollIntoView(lstDishes.Items[0]);
         }
