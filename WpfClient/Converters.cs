@@ -140,27 +140,6 @@ namespace WpfClient
     }
 
 
-
-    [ValueConversion(typeof(DishItem), typeof(Visibility))]
-    public class AddDishButtonVisibilityConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            DishItem di = (DishItem)value;
-            if ((di.Garnishes == null) || di.Garnishes.Count == 0)
-                return Visibility.Visible;
-            else
-            {
-                return ((di.SelectedGarnishes == null) || (di.SelectedGarnishes.Count == 0)) ? Visibility.Hidden : Visibility.Visible;
-            }
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return value;
-        }
-    }
-
     // получить отступ слева панелей блюд
     [ValueConversion(typeof(double), typeof(Thickness))]
     public class WidthToMarginConverter : IValueConverter

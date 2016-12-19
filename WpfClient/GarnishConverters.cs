@@ -46,6 +46,7 @@ namespace WpfClient
         }
     }
 
+
     // Текст гарнира
     [ValueConversion(typeof(List<DishAdding>), typeof(string))]
     public class GarnishLangTextConverter : IValueConverter

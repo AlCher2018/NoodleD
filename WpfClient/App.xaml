@@ -25,7 +25,7 @@
         <SolidColorBrush x:Key="addButtonBackgroundPriceColor" Color="#FF931D3F"/>
 
         <sys:String x:Key="priceFormatString">{0:#0} ₴</sys:String>
-        <DropShadowEffect x:Key="addButtonShadow" Color="#77CF446B" Direction="280" BlurRadius="40" ShadowDepth="10"/>
+        <DropShadowEffect x:Key="addButtonShadow" Color="#55CF446B" Direction="270" BlurRadius="40" ShadowDepth="10"/>
 
         <local:IsNullValueConverter x:Key="isNullValueConverter"/>
         <local:GetAppSetValue x:Key="getAppSetValue" />
@@ -54,6 +54,11 @@
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
 
-
+        <ResourceDictionary x:Key="dicDishCategories">
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="DictionaryDishCategories.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+        
     </Application.Resources>
 </Application>

@@ -300,12 +300,12 @@
                     <Grid Grid.Row="13" Grid.Column="1" Effect="{StaticResource addButtonShadow}">  <!-- грид размещения кнопки -->
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
-                            <RowDefinition Height="2*"/>
+                            <RowDefinition Height="3*"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="2*"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Grid x:Name="gridAddButton" Grid.Row="1" Grid.Column="1">  <!-- грид отрисовки кнопки -->

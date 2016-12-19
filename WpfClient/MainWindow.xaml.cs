@@ -49,6 +49,11 @@ namespace WpfClient
         static double dishPanelWidth, dishPanelHeight1, dishPanelHeight2, dishPanelMargin;
         static double dishPanelHeaderFontSize, dishPanelTextFontSize;
         static double dishPanelDescrButtonSize;
+        static double dishPanelHeaderRowHeight;
+        static double dishPanelImageRowHeight;
+        static double dishPanelGarnishesRowHeight;
+        static double dishPanelAddButtonRowHeight, dishPanelAddButtonHeight;
+        static double dishPanelRowMargin1, dishPanelRowMargin2;
 
         static MainWindow()
         {
@@ -60,21 +65,42 @@ namespace WpfClient
             double dishesPanelWidth = (screenWidth / 6.0 * 5.0);
             AppLib.SetAppGlobalValue("dishesPanelWidth", dishesPanelWidth);
 
+            //  РАЗМЕРЫ ПАНЕЛИ БЛЮДА
             // расчет ширины панели блюда
-            dishPanelWidth = 0.9 * dishesPanelWidth / 3.6;  // 3x + 6*0.1x - ширина панелей + отступ слева/справа 
+            dishPanelWidth = 0.9 * dishesPanelWidth / 3.3;  // 3x + 6*0.05x - ширина панелей + отступ слева/справа 
             AppLib.SetAppGlobalValue("dishPanelWidth", dishPanelWidth);
             dishPanelHeight1 = dishPanelWidth * 1.5;
             AppLib.SetAppGlobalValue("dishPanelHeight1", dishPanelHeight1);
             dishPanelHeight2 = dishPanelWidth * 1.3;
             AppLib.SetAppGlobalValue("dishPanelHeight2", dishPanelHeight2);
-            dishPanelMargin = 0.1 * dishPanelWidth;
+            // расстояние между панелями
+            dishPanelMargin = 0.06 * dishPanelWidth;  
             AppLib.SetAppGlobalValue("dishPanelMargin", dishPanelMargin);
-
+            // высота строки заголовка
+            dishPanelHeaderRowHeight = 0.15 * dishPanelWidth;
+            AppLib.SetAppGlobalValue("dishPanelHeaderRowHeight", dishPanelHeaderRowHeight);
+            // высота строки изображения
+            dishPanelImageRowHeight = 0.83 * dishPanelWidth;
+            AppLib.SetAppGlobalValue("dishPanelImageRowHeight", dishPanelImageRowHeight);
+            // высота строки гарниров
+            dishPanelGarnishesRowHeight = 0.28 * dishPanelWidth;
+            AppLib.SetAppGlobalValue("dishPanelGarnishesRowHeight", dishPanelGarnishesRowHeight);
+            // высота строки кнопки добавления
+            dishPanelAddButtonRowHeight = 0.2 * dishPanelWidth;
+            AppLib.SetAppGlobalValue("dishPanelAddButtonRowHeight", dishPanelAddButtonRowHeight);
+            dishPanelAddButtonHeight = 0.5 * dishPanelAddButtonRowHeight;
+            AppLib.SetAppGlobalValue("dishPanelAddButtonHeight", dishPanelAddButtonHeight);
+            // расстояния между строками панели блюда
+            dishPanelRowMargin1 = 0.02 * dishPanelWidth;
+            dishPanelRowMargin2 = 0.04 * dishPanelWidth;
+            AppLib.SetAppGlobalValue("dishPanelRowMargin1", dishPanelRowMargin1);
+            AppLib.SetAppGlobalValue("dishPanelRowMargin2", dishPanelRowMargin2);
+            // размер шрифтов
             dishPanelHeaderFontSize = 0.06 * dishPanelWidth;
             AppLib.SetAppGlobalValue("dishPanelHeaderFontSize", dishPanelHeaderFontSize);
             dishPanelTextFontSize = 0.8 * dishPanelHeaderFontSize;
             AppLib.SetAppGlobalValue("dishPanelTextFontSize", dishPanelTextFontSize);
-
+            // размер кнопки описания блюда
             dishPanelDescrButtonSize = 0.1 * dishPanelWidth;
             AppLib.SetAppGlobalValue("dishPanelDescrButtonSize", dishPanelDescrButtonSize);
         }
@@ -82,6 +108,9 @@ namespace WpfClient
         public MainWindow()
         {
             InitializeComponent();
+
+            //this.Cursor = Cursors.None;
+            //Mouse.OverrideCursor = Cursors.None;
 
             //TestData.mainProc();
 
@@ -180,6 +209,7 @@ namespace WpfClient
 
             //updatePrice();
             //showCartWindow();
+          
         }
 
         private void checkDBConnection()
