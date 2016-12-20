@@ -126,8 +126,8 @@
             <Setter Property="SnapsToDevicePixels" Value="True"/>
             <Setter Property="Focusable" Value="False"/>
             <Setter Property="IsHitTestVisible" Value="True"/>
+            <!--<Setter Property="FocusVisualStyle" Value="{x:Null}"/>-->
             <Setter Property="ScrollViewer.CanContentScroll" Value="False"/>
-            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
             <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
             <Setter Property="ItemsPanel">
@@ -158,7 +158,7 @@
     
     
     <!-- события: PreviewMouseDown - MouseDown - PreviewMouseUp -->
-    <Grid UseLayoutRounding="True" Background="#01000000"
+    <Grid UseLayoutRounding="True" Background="#33000000"
           MouseUp="gridWindow_MouseUp" TouchUp="gridWindow_TouchUp" >
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -297,7 +297,11 @@
                              SelectionChanged="listRecommends_SelectionChanged"/>
 
                     <!--Раздел 4. Кнопка Добавить -->
-                    <Grid Grid.Row="13" Grid.Column="1" Effect="{StaticResource addButtonShadow}">  <!-- грид размещения кнопки -->
+                    <Grid Grid.Row="13" Grid.Column="1">  <!-- грид размещения кнопки -->
+                        <Grid.Effect>
+                            <DropShadowEffect Direction="270"  Color="#FFCF446B" Opacity="0.7"
+                          ShadowDepth="10" BlurRadius="20"/>
+                        </Grid.Effect>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="3*"/>

@@ -20,14 +20,16 @@ namespace WpfClient
     /// </summary>
     public partial class Cart : Window
     {
+        private bool _isTouchOnly;
+
         // dragging
-        Point? lastDragPoint;
+        Point? lastDragPoint, initDragPoint;
         protected DateTime _dateTime;
-        bool _isMoved = false;
 
         public Cart()
         {
             InitializeComponent();
+            _isTouchOnly = true;
 
             OrderItem currentOrder = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
             this.lstDishes.ItemsSource = currentOrder.Dishes;
@@ -40,6 +42,8 @@ namespace WpfClient
 
         private void txtbackToMenu_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (_isTouchOnly == true) return;
+
             closeWin();
         }
         private void txtbackToMenu_TouchUp(object sender, TouchEventArgs e)
@@ -57,13 +61,13 @@ namespace WpfClient
 
         private void initDrag(Point mousePos)
         {
-            _dateTime = DateTime.Now;
-            _isMoved = false;
+            //_dateTime = DateTime.Now;
             //make sure we still can use the scrollbars
             if (mousePos.X <= scrollDishes.ViewportWidth && mousePos.Y < scrollDishes.ViewportHeight)
             {
                 //scrollViewer.Cursor = Cursors.SizeAll;
-                lastDragPoint = mousePos;
+                initDragPoint = mousePos;
+                lastDragPoint = initDragPoint;
                 //Mouse.Capture(scrollViewer);
             }
         }
@@ -71,7 +75,7 @@ namespace WpfClient
         {
             //scrollViewer.Cursor = Cursors.Arrow;
             //scrollViewer.ReleaseMouseCapture();
-            lastDragPoint = null;
+            //lastDragPoint = null;
         }
         private void doMove(Point posNow)
         {
@@ -82,10 +86,11 @@ namespace WpfClient
 
             scrollDishes.ScrollToHorizontalOffset(scrollDishes.HorizontalOffset - dX);
             scrollDishes.ScrollToVerticalOffset(scrollDishes.VerticalOffset - dY);
-            _isMoved = true;
         }
         private void scrollDishes_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            if (_isTouchOnly == true) return;
+
             initDrag(e.GetPosition(scrollDishes));
         }
 
@@ -96,6 +101,8 @@ namespace WpfClient
 
         private void scrollDishes_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
+            if (_isTouchOnly == true) return;
+
             endDrag();
         }
 
@@ -106,6 +113,8 @@ namespace WpfClient
 
         private void scrollDishes_MouseMove(object sender, MouseEventArgs e)
         {
+            if (_isTouchOnly == true) return;
+
             if (lastDragPoint.HasValue && e.LeftButton == MouseButtonState.Pressed)
             {
                 doMove(e.GetPosition(sender as IInputElement));
@@ -138,21 +147,31 @@ namespace WpfClient
 
         private void portionCountAdd_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (_isTouchOnly == true) return;
+            if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint) == false) { lastDragPoint = null; return; }
+
             portionCountAdd();
         }
 
         private void portionCountAdd_TouchUp(object sender, TouchEventArgs e)
         {
+            if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint) == false) { lastDragPoint = null; return; }
+
             portionCountAdd();
         }
 
         private void portionCountDel_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (_isTouchOnly == true) return;
+            if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint) == false) { lastDragPoint = null; return; }
+
             portionCountDel();
         }
 
         private void portionCountDel_TouchUp(object sender, TouchEventArgs e)
         {
+            if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint) == false) { lastDragPoint = null; return; }
+
             portionCountDel();
         }
 
@@ -164,6 +183,7 @@ namespace WpfClient
 
             lstDishes.SelectedItem = dishItem;
             DishAdding ingrItem = (DishAdding)ingrList.SelectedItem;
+            if (ingrItem == null) return;
 
             MessageBoxResult result = MessageBox.Show(string.Format("Удалить ингредиент\n{0} ?", ingrItem.langNames["ru"]), "Удаление ингредиента", MessageBoxButton.YesNo);
             if (result == MessageBoxResult.Yes)
@@ -178,6 +198,7 @@ namespace WpfClient
         private void dishDel()
         {
             DishItem dishItem = (DishItem)lstDishes.SelectedItem;
+            if (dishItem == null) return;
             OrderItem order = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
 
             MessageBoxResult result = MessageBox.Show(string.Format("Удалить блюдо\n{0} ?", dishItem.langNames["ru"]), "Удаление блюда из заказа", MessageBoxButton.YesNo);
@@ -194,6 +215,7 @@ namespace WpfClient
         private void portionCountDel()
         {
             DishItem curDish = (DishItem)lstDishes.SelectedItem;
+            if (curDish == null) return;
 
             if (curDish.Count > 1)
             {
@@ -204,6 +226,7 @@ namespace WpfClient
         private void portionCountAdd()
         {
             DishItem curDish = (DishItem)lstDishes.SelectedItem;
+            if (curDish == null) return;
 
             curDish.Count++;
             updatePriceControls();
@@ -213,21 +236,31 @@ namespace WpfClient
 
         private void ingrDel_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (_isTouchOnly == true) return;
+            if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint) == false) { lastDragPoint = null; return; }
+
             ingrDel(sender);
         }
 
         private void ingrDel_TouchUp(object sender, TouchEventArgs e)
         {
+            if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint) == false) { lastDragPoint = null; return; }
+
             ingrDel(sender);
         }
 
         private void dishDel_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (_isTouchOnly == true) return;
+            if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint) == false) { lastDragPoint = null; return; }
+
             dishDel();
         }
 
         private void dishDel_TouchUp(object sender, TouchEventArgs e)
         {
+            if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint) == false) { lastDragPoint = null; return; }
+
             dishDel();
         }
 

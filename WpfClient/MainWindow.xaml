@@ -13,12 +13,10 @@
     <Window.Resources>
         <local:MultiplyParamValueConverter x:Key="multiplyParamDefVal1Conv" DefaultValue="1"/>
         <local:MultiplyValueConverter x:Key="DishAddButtonFontSize" Multiplier="0.4"/>
-
+        <local:GetDishMargin x:Key="getDishMargin"/>
         <local:GarnishBrushConverter x:Key="garnishBackgroundConverter" Mode="Background"/>
         <local:GarnishBrushConverter x:Key="garnishForegroundConverter" Mode="Foreground"/>
         <local:GarnishVisibilityConverter x:Key="garnishVisibilityConverter"/>
-
-        <local:WidthToMarginConverter x:Key="leftMargin"/>
 
         <Style x:Key="langButtonBorderStyle" TargetType="Border">
             <Setter Property="BorderThickness" Value="1"/>
@@ -109,13 +107,13 @@
                     <Setter Property="Foreground" Value="{DynamicResource appSelectedItemColor}"/>
                     <Setter Property="Background" Value="{DynamicResource mainMenuSelectedItemColor}"/>
                 </Trigger>
-                <MultiTrigger>
+                <!--<MultiTrigger>
                     <MultiTrigger.Conditions>
                         <Condition Property="IsMouseOver" Value="True"/>
                         <Condition Property="IsSelected" Value="False"/>
                     </MultiTrigger.Conditions>
                     <Setter Property="Foreground" Value="{DynamicResource appSelectedItemColor}"/>
-                </MultiTrigger>
+                </MultiTrigger>-->
                 <!--<MultiTrigger>
                     <MultiTrigger.Conditions>
                         <Condition Property="Selector.IsSelectionActive" Value="True"/>
@@ -155,6 +153,10 @@
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="VerticalAlignment" Value="Bottom"/>
         </Style>
+
+        <DropShadowEffect x:Key="shadowEffect" Direction="270"  Color="#FFCF446B" Opacity="0.7" 
+                          ShadowDepth="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=dishPanelAddButtonShadowDepth}" 
+                          BlurRadius="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=dishPanelAddButtonShadowBlurRadius}"/>
 
         <Canvas x:Key="garnBase" x:Shared="False" Background="Transparent" Height="100" Width="110">
             <Path Fill="{StaticResource appBackgroundColor}">
@@ -203,25 +205,26 @@
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontSize" Value="{Binding Path=ActualHeight, ElementName=gridDishBottomButtons, Converter={StaticResource DishAddButtonFontSize}, Mode=OneWay}"/>
-            <Style.Triggers>
+            <!--<Style.Triggers>
+                <EventTrigger RoutedEvent="TouchDown">
+                    
+                </EventTrigger>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Foreground" Value="Orange"/>
                     <Setter Property="FontWeight" Value="Bold"/>
                 </Trigger>
-            </Style.Triggers>
+            </Style.Triggers>-->
         </Style>
 
         <!--
                     Width="{Binding ElementName=dishItemsBorder, Path=ActualWidth, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.25, Mode=OneWay}" 
-                    Margin="{Binding ActualWidth, Converter={StaticResource leftMargin}, Mode=OneWay, ElementName=dishItemsBorder}"
-        
+        Margin="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=dishPanelMargin}"
         -->
         <DataTemplate x:Key="dishItemTemplate">
             <Border x:Name="dishItemBorder"  
                     Background="Transparent"  BorderThickness="0"
                     Width="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=dishPanelWidth}" 
-                    Margin="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=dishPanelMargin}"
-                    >
+                    Margin="{Binding Converter={StaticResource getDishMargin}}">
                 <Grid x:Name="gridDish">
                     <Grid.RowDefinitions>
                         <!-- 0. заголовок -->
@@ -342,6 +345,10 @@
                     всего 3 надписи: две для блюд с ингредиентами и одна для блюд без ингредиентов
                     -->
                     <Grid x:Name="gridDishBottomButtons" Grid.Row="6" HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=dishPanelAddButtonHeight}">
+
+                        <!--бордер с тенью-->
+                        <Border x:Name="shadowedBorder" CornerRadius="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=dishPanelAddButtonShadowCornerRadius}" Margin="8,0" Background="{DynamicResource addButtonBackgroundTextColor}" Effect="{StaticResource shadowEffect}"/>
+
                         <!--просто нижележащая надпись для блюд с ингредиентами-->
                         <Border x:Name="txtDishWithIngrNotActive" CornerRadius="10" BorderBrush="Gray" BorderThickness="1"  Background="White" SnapsToDevicePixels="True" UseLayoutRounding="True" Margin="1">
                             <TextBlock Foreground="Gray" Style="{StaticResource centeredElement}"
@@ -349,7 +356,7 @@
                         </Border>
 
                         <!--кнопка для выделенного блюда с ингредиентами-->
-                        <Border x:Name="txtDishWithIngr" CornerRadius="10" Background="{StaticResource addButtonBackgroundTextColor}" SnapsToDevicePixels="True" Effect="{StaticResource addButtonShadow}"
+                        <Border x:Name="txtDishWithIngr" CornerRadius="10" Background="{StaticResource addButtonBackgroundTextColor}" SnapsToDevicePixels="True"
                             MouseUp="txtDishAdd_MouseDown" TouchUp="txtDishAdd_TouchDown">
                             <TextBlock Foreground="White" Style="{StaticResource centeredElement}"
                             Text="{Binding langBtnAddDishText, Converter={StaticResource langDictToText}}" 
@@ -357,24 +364,25 @@
                         </Border>
 
                         <!--кнопка для блюд без ингредиентов, на них сразу цена-->
-                        <Grid x:Name="txtDishWithoutIngr">
+                        <Grid x:Name="txtDishWithoutIngr" MouseUp="txtDishAdd_MouseDown" TouchUp="txtDishAdd_TouchDown">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="2*"/>
                             </Grid.ColumnDefinitions>
                             <!-- бордер с ценой -->
-                            <Border Grid.Column="0" Background="{StaticResource addButtonBackgroundPriceColor}"
+                            <Border Grid.Column="0" Background="{DynamicResource addButtonBackgroundPriceColor}"
                                 CornerRadius="10,0,0,10">
                                 <TextBlock x:Name="txtDishPrice" Style="{StaticResource addButtonTextStyle}" Text="{Binding Path=Price, StringFormat={StaticResource priceFormatString}}"/>
                             </Border>
                             <!-- бордер с текстом -->
-                            <Border Grid.Column="1" Background="{StaticResource addButtonBackgroundTextColor}"  CornerRadius="0,10,10,0"
-                                MouseUp="txtDishAdd_MouseDown" TouchUp="txtDishAdd_TouchDown">
+                            <Border Grid.Column="1" Background="{DynamicResource addButtonBackgroundTextColor}"  CornerRadius="0,10,10,0">
                                 <TextBlock Style="{StaticResource addButtonTextStyle}"
                                     Text="{Binding {x:Null}, ConverterParameter=appSet.btnSelectDishText, Converter={StaticResource langDictToText}}"/>
                             </Border>
+
                         </Grid>
                     </Grid>
+
                 </Grid>
             </Border>
 
@@ -382,6 +390,7 @@
                 <!--если нет гарниров, то сразу показать кнопку с ценой-->
                 <DataTrigger Binding="{Binding Garnishes, Converter={StaticResource isNullValueConverter}, Mode=OneWay}" Value="True">
                     <Setter TargetName="txtDishWithoutIngr" Property="Visibility" Value="Visible"/>
+                    <Setter TargetName="shadowedBorder" Property="Border.Visibility" Value="Visible"/>
                     <Setter TargetName="txtDishWithIngrNotActive" Property="Visibility" Value="Hidden"/>
                     <Setter TargetName="txtDishWithIngr" Property="Visibility" Value="Hidden"/>
                     <Setter TargetName="garnishRow" Property="Height" Value="0"/>
@@ -389,6 +398,7 @@
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Garnishes, Converter={StaticResource isNullValueConverter}, Mode=OneWay}" Value="False">
                     <Setter TargetName="txtDishWithoutIngr" Property="Visibility" Value="Hidden"/>
+                    <Setter TargetName="shadowedBorder" Property="Border.Visibility" Value="Hidden"/>
                     <Setter TargetName="txtDishWithIngrNotActive" Property="Visibility" Value="Visible"/>
                     <Setter TargetName="txtDishWithIngr" Property="Visibility" Value="Hidden"/>
                     <Setter TargetName="garnishRow" Property="Height" Value="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=dishPanelGarnishesRowHeight}"/>

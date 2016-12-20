@@ -21,9 +21,14 @@ namespace WpfClient
     /// </summary>
     public partial class DishPopup : Window
     {
+        private bool _isClose;
+        private bool _isTouchOnly;
+
         public DishPopup()
         {
             InitializeComponent();
+            _isClose = true;
+            _isTouchOnly = true;
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -35,6 +40,8 @@ namespace WpfClient
 
         private void btnClose_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (_isTouchOnly == true) return;
+
             closeWin(e);
         }
         private void btnClose_PreviewTouchUp(object sender, TouchEventArgs e)
@@ -44,22 +51,40 @@ namespace WpfClient
 
         private void gridWindow_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            closeWin(e);
+            if (_isTouchOnly == true) return;
+
+            if (_isClose == true) closeWin(e);
+            else _isClose = true;
         }
         private void gridWindow_TouchUp(object sender, TouchEventArgs e)
         {
-            closeWin(e);
+            if (_isClose == true) closeWin(e);
+            else _isClose = true;
         }
-        #endregion
+        private void borderMain_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (_isTouchOnly == true) return;
+
+            _isClose = false;
+        }
+
+        private void borderMain_TouchUp(object sender, TouchEventArgs e)
+        {
+            _isClose = false;
+        }
 
         private void closeWin(RoutedEventArgs e = null)
         {
             if (e != null) e.Handled = true;
             this.Close();
         }
+        #endregion
+
 
         private void btnAddDish_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (_isTouchOnly == true) return;
+
             addDishToOrder();
         }
         private void btnAddDish_PreviewTouchUp(object sender, TouchEventArgs e)
@@ -67,15 +92,6 @@ namespace WpfClient
             addDishToOrder();
         }
 
-        private void borderMain_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            e.Handled = true;
-        }
-
-        private void borderMain_TouchUp(object sender, TouchEventArgs e)
-        {
-            e.Handled = true;
-        }
 
         private void listIngredients_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -134,5 +150,6 @@ namespace WpfClient
 
             closeWin();
         }
+
     }
 }

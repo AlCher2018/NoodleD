@@ -140,26 +140,6 @@ namespace WpfClient
     }
 
 
-    // получить отступ слева панелей блюд
-    [ValueConversion(typeof(double), typeof(Thickness))]
-    public class WidthToMarginConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            double dMarg = (double)value / 3.0;
-            dMarg *= 0.15;
-            dMarg /= 2.0;
-
-            return new Thickness(dMarg, dMarg / 2, dMarg, dMarg / 2);
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return value;
-        }
-    }
-
-
     // конвертер возвращает Thickness, параметры которого рассчиываются из переданного значения и строки коэффициентов сторон L-T-R-B
     [ValueConversion(typeof(double), typeof(Thickness))]
     public class GetMargin : IValueConverter

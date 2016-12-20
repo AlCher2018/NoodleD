@@ -29,7 +29,7 @@
         <DockPanel Grid.Row="1" >
             <TextBlock Text="BlurRadius "/>
             <TextBlock Text="{Binding ElementName=sldBlurRadius, Path=Value, StringFormat={}({0:#0}): , Mode=OneWay}"/>
-            <Slider x:Name="sldBlurRadius" Grid.Row="1" Minimum="1" Maximum="100"/>
+            <Slider x:Name="sldBlurRadius" Grid.Row="1" Minimum="1" Maximum="300"/>
         </DockPanel>
 
         <DockPanel Grid.Row="2">
@@ -49,13 +49,6 @@
             <TextBlock Text="{Binding ElementName=sldShadowDepth, Path=Value, StringFormat={}({0:#0}): , Mode=OneWay}"/>
             <Slider x:Name="sldShadowDepth"  Minimum="1" Maximum="70" Value="10"/>
         </DockPanel>
-
-        <DockPanel Grid.Row="5">
-            <TextBlock Text="Button Color "/>
-            <TextBlock Text="{Binding ElementName=sldButtonColor, Path=Value, 
-                Converter={StaticResource numToHexConverters}, Mode=OneWay, StringFormat={}({0}): }"/>
-            <Slider x:Name="sldButtonColor" Minimum="0" Maximum="16777215" SmallChange="16" LargeChange="256"/>
-        </DockPanel>
-        
+       
     </Grid>
 </Window>
