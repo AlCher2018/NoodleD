@@ -81,6 +81,7 @@
       <DependentUpon>DishPopup.xaml</DependentUpon>
     </Compile>
     <Compile Include="GarnishConverters.cs" />
+    <Compile Include="PreventTouchToMousePromotion.cs" />
     <Compile Include="TestData.cs" />
     <Compile Include="TypeExtensions.cs" />
     <Page Include="Cart.xaml">

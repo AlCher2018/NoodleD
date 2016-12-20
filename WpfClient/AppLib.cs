@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -13,6 +14,14 @@ namespace WpfClient
 {
     public static class AppLib
     {
+        public static string GetAppSetting(string key)
+        {
+            if (ConfigurationManager.AppSettings.AllKeys.Any(k => k == key) == true)
+                return ConfigurationManager.AppSettings.Get(key);
+            else
+                return null;
+        }
+
         public static string AppLang {
             get { return (string)GetAppGlobalValue("currentAppLang"); }
             set { SetAppGlobalValue("currentAppLang", (string)value); }

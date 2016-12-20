@@ -119,8 +119,16 @@ namespace WpfClient
         public MainWindow()
         {
             InitializeComponent();
-            _isTouchOnly = true;
 
+            appInit();
+        }
+
+        private void appInit()
+        {
+            string sBuf = AppLib.GetAppSetting("isTouchOnly");
+            if (sBuf != null) _isTouchOnly = Convert.ToBoolean(sBuf);
+            else _isTouchOnly = false;
+            
             //this.Cursor = Cursors.None;
             //Mouse.OverrideCursor = Cursors.None;
 
@@ -166,12 +174,18 @@ namespace WpfClient
             catch (Exception e)
             {
                 logger.Fatal("Fatal error: {0}\nSource: {1}\nStackTrace: {2}", e.Message, e.Source, e.StackTrace);
-                MessageBox.Show("Ошибка доступа к данным: " + e.Message +"\nПрограмма будет закрыта.");
+                MessageBox.Show("Ошибка доступа к данным: " + e.Message + "\nПрограмма будет закрыта.");
                 Application.Current.Shutdown(1);
             }
 
+            if (mFolders != null) initUI(mFolders);
 
+        }
+
+        private void initUI(ObservableCollection<AppModel.MenuItem> mFolders)
+        {
             logger.Trace("Настраиваю визуальные элементы...");
+
             // добавить к блюдам надписи на кнопках
             Dictionary<string, string> langSelGarnishDict = (Dictionary<string, string>)AppLib.GetAppGlobalValue("btnSelectGarnishText");
             Dictionary<string, string> langAddDishDict = (Dictionary<string, string>)AppLib.GetAppGlobalValue("btnSelectDishText");
@@ -221,7 +235,7 @@ namespace WpfClient
 
             //updatePrice();
             //showCartWindow();
-          
+
         }
 
         private void checkDBConnection()

@@ -29,7 +29,10 @@ namespace WpfClient
         public Cart()
         {
             InitializeComponent();
-            _isTouchOnly = true;
+
+            string sBuf = AppLib.GetAppSetting("isTouchOnly");
+            if (sBuf != null) _isTouchOnly = Convert.ToBoolean(sBuf);
+            else _isTouchOnly = false;
 
             OrderItem currentOrder = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
             this.lstDishes.ItemsSource = currentOrder.Dishes;

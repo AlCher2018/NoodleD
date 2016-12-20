@@ -28,7 +28,10 @@ namespace WpfClient
         {
             InitializeComponent();
             _isClose = true;
-            _isTouchOnly = true;
+
+            string sBuf = AppLib.GetAppSetting("isTouchOnly");
+            if (sBuf != null) _isTouchOnly = Convert.ToBoolean(sBuf);
+            else _isTouchOnly = false;
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -37,7 +40,10 @@ namespace WpfClient
         }
 
         #region закрытие всплывашки
-
+//    On Touch Devices:
+//TouchDown > PreviewMouseDown > TouchUp > PreviewMouseUp
+//    On Non Touch:
+//PreviewMouseDown > PreviewMouseUp
         private void btnClose_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
             if (_isTouchOnly == true) return;
