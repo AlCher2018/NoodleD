@@ -43,7 +43,6 @@ namespace WpfClient
         Point? lastDragPoint, initDragPoint;
         protected DateTime _dateTime;
         bool _isTouchHandled;
-        bool _isTouchOnly;
 
         // static constants
         static double screenWidth, screenHeight;
@@ -51,8 +50,8 @@ namespace WpfClient
         static double dishPanelHeaderFontSize, dishPanelTextFontSize;
         static double dishPanelDescrButtonSize;
         static double dishPanelHeaderRowHeight;
-        static double dishPanelImageRowHeight;
-        static double dishPanelGarnishesRowHeight;
+        static double dishPanelImageRowHeight, dishPanelImageCornerRadius;
+        static double dishPanelGarnishesRowHeight, dishPanelGarnishBaseWidth;
         static double dishPanelAddButtonRowHeight, dishPanelAddButtonHeight;
         static double dishPanelAddButtonShadowDepth, dishPanelAddButtonShadowBlurRadius, dishPanelAddButtonShadowCornerRadius;
         static double dishPanelRowMargin1, dishPanelRowMargin2;
@@ -69,27 +68,34 @@ namespace WpfClient
 
             //  РАЗМЕРЫ ПАНЕЛИ БЛЮДА
             // расчет ширины панели блюда
-            dishPanelWidth = 0.9 * dishesPanelWidth / 3.3;  // 3x + 6*0.05x - ширина панелей + отступ слева/справа 
+            dishPanelWidth = 0.95 * dishesPanelWidth / 3.18;  // 3x + 6*0.03x - ширина панелей + отступ слева/справа 
             AppLib.SetAppGlobalValue("dishPanelWidth", dishPanelWidth);
+            // расстояние между панелями
+            dishPanelMargin = 0.03 * dishPanelWidth;
+            AppLib.SetAppGlobalValue("dishPanelMargin", dishPanelMargin);
+            // высота панелей
             dishPanelHeight1 = dishPanelWidth * 1.5;
             AppLib.SetAppGlobalValue("dishPanelHeight1", dishPanelHeight1);
             dishPanelHeight2 = dishPanelWidth * 1.3;
             AppLib.SetAppGlobalValue("dishPanelHeight2", dishPanelHeight2);
-            // расстояние между панелями
-            dishPanelMargin = 0.06 * dishPanelWidth;  
-            AppLib.SetAppGlobalValue("dishPanelMargin", dishPanelMargin);
             // высота строки заголовка
             dishPanelHeaderRowHeight = 0.15 * dishPanelWidth;
             AppLib.SetAppGlobalValue("dishPanelHeaderRowHeight", dishPanelHeaderRowHeight);
             // высота строки изображения
             dishPanelImageRowHeight = 0.83 * dishPanelWidth;
             AppLib.SetAppGlobalValue("dishPanelImageRowHeight", dishPanelImageRowHeight);
+            // радиус загругления уголков изображения
+            dishPanelImageCornerRadius = 0.05 * dishPanelWidth;
+            AppLib.SetAppGlobalValue("dishPanelImageCornerRadius", dishPanelImageCornerRadius);
             // высота строки гарниров
-            dishPanelGarnishesRowHeight = 0.28 * dishPanelWidth;
+            dishPanelGarnishesRowHeight = 0.2 * dishPanelWidth;
             AppLib.SetAppGlobalValue("dishPanelGarnishesRowHeight", dishPanelGarnishesRowHeight);
-            
+            // ширина подложки гарнира (см. соотн.сторон в Canvas x:Key="garnBase" Width="150" Height="100")
+            dishPanelGarnishBaseWidth = 1.5 * dishPanelGarnishesRowHeight;
+            AppLib.SetAppGlobalValue("dishPanelGarnishBaseWidth", dishPanelGarnishBaseWidth);
+
             // высота строки кнопки добавления
-            dishPanelAddButtonRowHeight = 0.23 * dishPanelWidth;
+            dishPanelAddButtonRowHeight = 0.18 * dishPanelWidth;
             AppLib.SetAppGlobalValue("dishPanelAddButtonRowHeight", dishPanelAddButtonRowHeight);
             dishPanelAddButtonHeight = 0.6 * dishPanelAddButtonRowHeight;
             AppLib.SetAppGlobalValue("dishPanelAddButtonHeight", dishPanelAddButtonHeight);
@@ -102,14 +108,14 @@ namespace WpfClient
             AppLib.SetAppGlobalValue("dishPanelAddButtonShadowCornerRadius", dishPanelAddButtonShadowCornerRadius);
 
             // расстояния между строками панели блюда
-            dishPanelRowMargin1 = 0.02 * dishPanelWidth;
-            dishPanelRowMargin2 = 0.04 * dishPanelWidth;
+            dishPanelRowMargin1 = 0.01 * dishPanelWidth;
+            dishPanelRowMargin2 = 0.02 * dishPanelWidth;
             AppLib.SetAppGlobalValue("dishPanelRowMargin1", dishPanelRowMargin1);
             AppLib.SetAppGlobalValue("dishPanelRowMargin2", dishPanelRowMargin2);
             // размер шрифтов
             dishPanelHeaderFontSize = 0.06 * dishPanelWidth;
             AppLib.SetAppGlobalValue("dishPanelHeaderFontSize", dishPanelHeaderFontSize);
-            dishPanelTextFontSize = 0.8 * dishPanelHeaderFontSize;
+            dishPanelTextFontSize = 0.6 * dishPanelHeaderFontSize;
             AppLib.SetAppGlobalValue("dishPanelTextFontSize", dishPanelTextFontSize);
             // размер кнопки описания блюда
             dishPanelDescrButtonSize = 0.1 * dishPanelWidth;
@@ -125,10 +131,6 @@ namespace WpfClient
 
         private void appInit()
         {
-            string sBuf = AppLib.GetAppSetting("isTouchOnly");
-            if (sBuf != null) _isTouchOnly = Convert.ToBoolean(sBuf);
-            else _isTouchOnly = false;
-            
             //this.Cursor = Cursors.None;
             //Mouse.OverrideCursor = Cursors.None;
 
@@ -331,6 +333,8 @@ namespace WpfClient
 
         private void lblButtonLang_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (e.StylusDevice != null) return;
+
             selectAppLang((FrameworkElement)sender);
         }
         private void lblButtonLang_TouchDown(object sender, TouchEventArgs e)
@@ -435,7 +439,7 @@ namespace WpfClient
         // приходит Grid
         private void borderGarnish_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (_isTouchOnly == true) return;
+            if (e.StylusDevice != null) return;
             if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint) == false) { lastDragPoint = null; return; }
 
             borderGarnisgHandler(sender);
@@ -573,7 +577,7 @@ namespace WpfClient
         #region выбор блюда
         private void txtDishAdd_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (_isTouchOnly == true) return;
+            if (e.StylusDevice != null) return;
             if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint) == false) { lastDragPoint = null; return; }
 
             txtDishWithIngrHandler(sender);
@@ -626,26 +630,19 @@ namespace WpfClient
         #region btnShowDishDescriptionHandler
         private void btnShowDishDescription_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (_isTouchOnly == true) return;
             if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint) == false) { lastDragPoint = null; return; }
 
             btnShowDishDescriptionHandler(sender);
         }
 
-        private void btnShowDishDescription_TouchDown(object sender, TouchEventArgs e)
-        {
-            if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint)==false) { lastDragPoint = null; return; }
-
-            btnShowDishDescriptionHandler(sender);
-        }
         private void btnShowDishDescriptionHandler(object sender)
         {
             FrameworkElement vBox = (FrameworkElement)sender;
             FrameworkElement gridDescr = AppLib.FindLogicalParentByName(vBox, "dishDescrText", 3);
 
-            Border vbText = (Border)AppLib.FindLogicalChildren<Border>(gridDescr).First();
-
-            Viewbox vbButton = (Viewbox)AppLib.FindLogicalChildren<Viewbox>(gridDescr).First();
+            Viewbox[] vbArr = AppLib.FindLogicalChildren<Viewbox>(gridDescr).ToArray();
+            Viewbox vbText = vbArr[0];
+            Viewbox vbButton = vbArr[1];
             System.Windows.Shapes.Path path = AppLib.FindLogicalChildren<System.Windows.Shapes.Path>(vbButton).First();
 
             int tagValue = (int)(vbButton.Tag ?? 0);   // переключатель в теге кнопки
@@ -668,6 +665,54 @@ namespace WpfClient
         private void lstDishes_RequestBringIntoView(object sender, RequestBringIntoViewEventArgs e)
         {
             e.Handled = true;
+        }
+
+        private void scrollDishes_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            //if (e.StylusDevice != null) return;
+
+            Debug.Print("MouseDown" + ", StylusDevice - " + ((e.StylusDevice==null)?"null":"touchDevice"));
+            initDrag(e.GetPosition(scrollDishes));
+        }
+
+        private void scrollDishes_PreviewTouchDown(object sender, TouchEventArgs e)
+        {
+            Debug.Print("TouchDown");
+            initDrag(e.GetTouchPoint(scrollDishes).Position);
+        }
+
+        private void scrollDishes_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            //if (e.StylusDevice != null) return;
+
+            Debug.Print("-MouseUp" + ", StylusDevice - " + ((e.StylusDevice == null) ? "null" : "touchDevice"));
+            endDrag();
+        }
+
+        private void scrollDishes_PreviewTouchUp(object sender, TouchEventArgs e)
+        {
+            Debug.Print("-TouchUp");
+            endDrag();
+        }
+
+        private void scrollDishes_MouseMove(object sender, MouseEventArgs e)
+        {
+            //if (e.StylusDevice != null) return;
+
+            if (lastDragPoint.HasValue && e.LeftButton == MouseButtonState.Pressed)   
+            {
+                Debug.Print("     MouseMove" + ", StylusDevice - " + ((e.StylusDevice == null) ? "null" : "touchDevice"));
+                doMove(e.GetPosition(sender as IInputElement));
+            }
+        }
+
+        private void scrollDishes_PreviewTouchMove(object sender, TouchEventArgs e)
+        {
+            if (lastDragPoint.HasValue)
+            {
+                Debug.Print("     TouchMove");
+                doMove(e.GetTouchPoint((sender as IInputElement)).Position);
+            }
         }
 
         private void initDrag(Point mousePos)
@@ -694,52 +739,10 @@ namespace WpfClient
             double dY = posNow.Y - lastDragPoint.Value.Y;
 
             lastDragPoint = posNow;
-
+            Debug.Print(posNow.ToString());
             scrollDishes.ScrollToHorizontalOffset(scrollDishes.HorizontalOffset - dX);
             scrollDishes.ScrollToVerticalOffset(scrollDishes.VerticalOffset - dY);
         }
-        private void scrollDishes_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            if (_isTouchOnly == true) return;
-
-            initDrag(e.GetPosition(scrollDishes));
-        }
-
-        private void scrollDishes_PreviewTouchDown(object sender, TouchEventArgs e)
-        {
-            initDrag(e.GetTouchPoint(scrollDishes).Position);
-        }
-
-        private void scrollDishes_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            if (_isTouchOnly == true) return;
-
-            endDrag();
-        }
-
-        private void scrollDishes_PreviewTouchUp(object sender, TouchEventArgs e)
-        {
-            endDrag();
-        }
-
-        private void scrollDishes_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (_isTouchOnly == true) return;
-
-            if (lastDragPoint.HasValue && e.LeftButton == MouseButtonState.Pressed)
-            {
-                doMove(e.GetPosition(sender as IInputElement));
-            }
-        }
-
-        private void scrollDishes_PreviewTouchMove(object sender, TouchEventArgs e)
-        {
-            if (lastDragPoint.HasValue)
-            {
-                doMove(e.GetTouchPoint((sender as IInputElement)).Position);
-            }
-        }
-
         #endregion
 
         private void Window_Closed(object sender, EventArgs e)
@@ -773,7 +776,7 @@ namespace WpfClient
 
         private void btnShowCart_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (_isTouchOnly == true) return;
+            if (e.StylusDevice != null) return;
             showCartWindow();
         }
 

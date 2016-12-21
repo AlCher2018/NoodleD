@@ -47,6 +47,7 @@
         <local:GetOrderPrice x:Key="getOrderPrice"/>
 
         <local:GetMargin x:Key="getMargin"/>
+        <local:ConverterChain x:Key="converterChain"/>
 
         <Style x:Key ="centeredElement" TargetType="FrameworkElement">
             <Setter Property="HorizontalAlignment" Value="Center"/>

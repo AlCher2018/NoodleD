@@ -17,7 +17,7 @@ namespace WpfClient
         {
             double marg = (double)AppLib.GetAppGlobalValue("dishPanelMargin");
 
-            return new Thickness(marg, marg, marg, 0);
+            return new Thickness(marg, -marg, marg, 0);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

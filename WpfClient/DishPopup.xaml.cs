@@ -22,16 +22,11 @@ namespace WpfClient
     public partial class DishPopup : Window
     {
         private bool _isClose;
-        private bool _isTouchOnly;
 
         public DishPopup()
         {
             InitializeComponent();
             _isClose = true;
-
-            string sBuf = AppLib.GetAppSetting("isTouchOnly");
-            if (sBuf != null) _isTouchOnly = Convert.ToBoolean(sBuf);
-            else _isTouchOnly = false;
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -46,7 +41,7 @@ namespace WpfClient
 //PreviewMouseDown > PreviewMouseUp
         private void btnClose_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (_isTouchOnly == true) return;
+            if (e.StylusDevice != null) return;
 
             closeWin(e);
         }
@@ -57,8 +52,7 @@ namespace WpfClient
 
         private void gridWindow_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (_isTouchOnly == true) return;
-
+            if (e.StylusDevice != null) return;
             if (_isClose == true) closeWin(e);
             else _isClose = true;
         }
@@ -69,7 +63,7 @@ namespace WpfClient
         }
         private void borderMain_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (_isTouchOnly == true) return;
+            if (e.StylusDevice != null) return;
 
             _isClose = false;
         }
@@ -89,7 +83,7 @@ namespace WpfClient
 
         private void btnAddDish_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (_isTouchOnly == true) return;
+            if (e.StylusDevice != null) return;
 
             addDishToOrder();
         }

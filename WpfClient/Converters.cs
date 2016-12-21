@@ -129,7 +129,6 @@ namespace WpfClient
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             object retVal = AppLib.GetAppGlobalValue(parameter.ToString());
-            Debug.Print("GetAppSetValue: " + parameter ?? "no value");
             return retVal;
         }
 
