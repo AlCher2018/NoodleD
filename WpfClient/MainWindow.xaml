@@ -72,7 +72,7 @@
             <Border Background="{TemplateBinding Background}"
                 BorderThickness="{TemplateBinding BorderThickness}"
                 BorderBrush="{TemplateBinding BorderBrush}"
-                Padding="{TemplateBinding Padding}">
+                Padding="{TemplateBinding Padding}" CornerRadius="{TemplateBinding Property=Border.CornerRadius}">
                 <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                               VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
             </Border>
@@ -83,9 +83,9 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="3*"/>
                 </Grid.ColumnDefinitions>
-                <Image Source="{Binding MenuFolder.Image}" Margin="0,5"
-                       Width="{Binding Path=ActualWidth, ElementName=gridMenuSide, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.2}"
-                       Height="{Binding Path=ActualWidth, ElementName=gridMenuSide, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.2}"/>
+                <Image Source="{Binding MenuFolder.Image}" Margin="5"
+                       Width="{Binding Path=ActualWidth, ElementName=gridMenuSide, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.15}"
+                       Height="{Binding Path=ActualWidth, ElementName=gridMenuSide, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.15}"/>
                 <TextBlock Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,5,0,5"
                            Text="{Binding langNames, Converter={StaticResource langDictToText}}"
                            FontSize="{Binding Path=ActualWidth, ElementName=gridMenuSide, Converter={StaticResource multiplyParamDefVal1Conv}, ConverterParameter=0.1}"/>
@@ -93,10 +93,11 @@
         </DataTemplate>
 
         <Style x:Key="menuItemStyle" TargetType="{x:Type ListBoxItem}">
-            <Setter Property="Margin" Value="0" />
+            <Setter Property="Margin" Value="10,10" />
             <Setter Property="Padding" Value="10,7" />
-            <Setter Property="BorderThickness" Value="0,0,0,3"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource mainMenuSelectedItemColor}"/>
+            <Setter Property="Border.CornerRadius" Value="10"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource appSelectedItemColor}"/>
             <Setter Property="Foreground" Value="{DynamicResource appNotSelectedItemColor}"/>
             <Setter Property="Template" Value="{StaticResource menuListBoxItemTemplate}"/>
             <Style.Triggers>
@@ -105,8 +106,8 @@
                     --><!--<Setter Property="Background" Value="{DynamicResource mainMenuSelectedItemColor}"/>--><!--
                 </Trigger>-->
                 <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Foreground" Value="{DynamicResource appSelectedItemColor}"/>
-                    <Setter Property="Background" Value="{DynamicResource mainMenuSelectedItemColor}"/>
+                    <Setter Property="Foreground" Value="Black"/>
+                    <Setter Property="Background" Value="{DynamicResource appSelectedItemColor}"/>
                 </Trigger>
                 <!--<MultiTrigger>
                     <MultiTrigger.Conditions>
@@ -144,7 +145,7 @@
             <Setter Property="FontSize" Value="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=dishPanelTextFontSize}"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="TextWrapping" Value="Wrap"/>
-            <!--<Setter Property="Margin" Value="5"/>-->
+            <Setter Property="Padding" Value="5"/>
         </Style>
 
         <Style x:Key="garnishPriceStyle" TargetType="TextBlock">
@@ -160,6 +161,18 @@
         <DropShadowEffect x:Key="shadowEffect" Direction="270"  Color="#FFCF446B" Opacity="0.7" 
                           ShadowDepth="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=dishPanelAddButtonShadowDepth}" 
                           BlurRadius="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=dishPanelAddButtonShadowBlurRadius}"/>
+
+        <!-- r-радиус закругления уголков, w/h - ширина/высота фигуры, R - радиус внутр.круга, d - расст.от границ вн.круга до загругления d=(w-2(r+R))/2
+        координаты точек- 1:0,r 2:r,0 3:w-r,0 4:w,r 5:w,h-r 6:w-r,h 7:r+2R+d,h 8:r+d,h 9:r,h 10:0,h-r
+        для w=100, h=100, r=10, R=30, d=10: 
+            Data="M0,10 A10,10 90 0 1 10,0 L90,0 A10,10 90 0 1 100,10 L100,90 A10,10 90 0 1 90,100 L80,100 C80,55 20,55 20,100 L10,100 A10,10 90 0 1 0,90 Z"
+        для w=140, h=100, r=10, R=30, d=25: 
+            Data="M0,10 A10,10 90 0 1 10,0 L120,0 A10,10 90 0 1 130,10 L130,90 A10,10 90 0 1 120,100 L95,100 C100,55 30,55 35,100 L10,100 A10,10 90 0 1 0,90 Z"
+        -->
+        <Canvas x:Key="garnBase1" x:Shared="False" Background="White" Width="130" Height="100">
+            <Path Fill="{StaticResource appBackgroundColor}" 
+                  Data="M0,10 A10,10 90 0 1 10,0 L120,0 A10,10 90 0 1 130,10 L130,90 A10,10 90 0 1 120,100 L95,100 C100,55 30,55 35,100 L10,100 A10,10 90 0 1 0,90 Z"/>
+        </Canvas>
 
         <Canvas x:Key="garnBase" x:Shared="False" Background="Transparent" Width="150" Height="100">
             <Path Fill="{StaticResource appBackgroundColor}">
@@ -310,10 +323,10 @@
                         <Grid x:Name="brdGarnish1" Uid="0" Grid.Column="0" Visibility="{Binding Garnishes, Converter={StaticResource garnishVisibilityConverter}, ConverterParameter=1}"
                                  MouseUp = "borderGarnish_MouseUp" TouchUp = "brdGarnish_TouchDown">
                             <Viewbox HorizontalAlignment="Left">
-                                <StaticResource ResourceKey="garnBase" x:Name="garnBase"/>
+                                <StaticResource ResourceKey="garnBase1" x:Name="garnBase"/>
                             </Viewbox>
                             <TextBlock x:Name="txtGarnName1" Style="{StaticResource garnishTextStyle}"
-                                       HorizontalAlignment="Left"
+                                       HorizontalAlignment="Left" 
                                            Text="{Binding Garnishes, Converter={StaticResource garnishLangTextConverter}, ConverterParameter=1}"/>
                             <TextBlock x:Name="txtGarnPrice1" Style="{StaticResource garnishPriceStyle}"
                                        HorizontalAlignment="Left"
@@ -323,10 +336,10 @@
                         <Grid x:Name="brdGarnish2" Uid="1" Grid.Column="1" Visibility="{Binding Garnishes, Converter={StaticResource garnishVisibilityConverter}, ConverterParameter=2}"
                                  MouseUp = "borderGarnish_MouseUp" TouchUp = "brdGarnish_TouchDown">
                             <Viewbox HorizontalAlignment="Center">
-                                <StaticResource ResourceKey="garnBase"/>
+                                <StaticResource ResourceKey="garnBase1"/>
                             </Viewbox>
                             <TextBlock x:Name="txtGarnName2" Style="{StaticResource garnishTextStyle}"
-                                       HorizontalAlignment="Center"
+                                       HorizontalAlignment="Center" 
                                            Text="{Binding Garnishes, Converter={StaticResource garnishLangTextConverter}, ConverterParameter=2}"/>
                                 <TextBlock x:Name="txtGarnPrice2" Style="{StaticResource garnishPriceStyle}"
                                            HorizontalAlignment="Center"
@@ -336,7 +349,7 @@
                         <Grid x:Name="brdGarnish3" Uid="2" Grid.Column="2" Visibility="{Binding Garnishes, Converter={StaticResource garnishVisibilityConverter}, ConverterParameter=3}"
                                  MouseUp = "borderGarnish_MouseUp" TouchUp = "brdGarnish_TouchDown">
                             <Viewbox HorizontalAlignment="Right">
-                                <StaticResource ResourceKey="garnBase"/>
+                                <StaticResource ResourceKey="garnBase1"/>
                             </Viewbox>
                             <TextBlock x:Name="txtGarnName3" Style="{StaticResource garnishTextStyle}"
                                        HorizontalAlignment="Right"
@@ -428,7 +441,7 @@
         <Grid x:Name="gridMenuSide" Grid.Column="0" UseLayoutRounding="True" Background="{StaticResource appBackgroundColor}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>    <!-- 1. логотип -->
-                <RowDefinition Height="0.9*"/> <!-- 2. языковые кнопки -->
+                <RowDefinition Height="*"/> <!-- 2. языковые кнопки -->
                 <RowDefinition Height="8*"/>   <!-- 3. ListBox категорий блюд -->
                 <RowDefinition Height="0.6*"/> <!-- 4. промокод -->
                 <RowDefinition Height="0.6*"/> <!-- 5. промеж.между промокодом и кн.Оформить -->
@@ -462,9 +475,9 @@
                 </Border>
             </Grid>
 
-            <ListBox x:Name="lstMenuFolders" Grid.Row="2" Margin="0,10" Padding="0,-3,0,0"
+            <ListBox x:Name="lstMenuFolders" Grid.Row="2" Margin="0,10"
                      Background="{DynamicResource appBackgroundColor}" 
-                     BorderThickness="0,3,0,0" BorderBrush="{DynamicResource mainMenuSelectedItemColor}"
+                     BorderThickness="0"
                      ItemContainerStyle="{StaticResource menuItemStyle}"
                      ItemTemplate="{DynamicResource menuDataTemplate}" 
                      HorizontalContentAlignment="Stretch" SelectionChanged="lstMenuFolders_SelectionChanged" SelectionMode="Single"/>

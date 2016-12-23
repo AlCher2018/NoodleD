@@ -90,8 +90,8 @@ namespace WpfClient
             // высота строки гарниров
             dishPanelGarnishesRowHeight = 0.2 * dishPanelWidth;
             AppLib.SetAppGlobalValue("dishPanelGarnishesRowHeight", dishPanelGarnishesRowHeight);
-            // ширина подложки гарнира (см. соотн.сторон в Canvas x:Key="garnBase" Width="150" Height="100")
-            dishPanelGarnishBaseWidth = 1.5 * dishPanelGarnishesRowHeight;
+            // ширина подложки гарнира (см. соотн.сторон в Canvas x:Key="garnBase" Width="130" Height="100")
+            dishPanelGarnishBaseWidth = 1.3 * dishPanelGarnishesRowHeight;
             AppLib.SetAppGlobalValue("dishPanelGarnishBaseWidth", dishPanelGarnishBaseWidth);
 
             // высота строки кнопки добавления

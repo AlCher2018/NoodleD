@@ -30,7 +30,7 @@
         </Grid>
 
     </Window.Resources>
-    
+
     <Grid Background="White">
         <Grid.RowDefinitions>
             <RowDefinition/>
@@ -42,22 +42,47 @@
             <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        
+
         <Viewbox x:Name="btnGarnish1" Uid="0" Grid.Column="0" Grid.Row="1" Stretch="Uniform" PreviewMouseUp="btnGarnish_PreviewMouseUp" Tag="0" HorizontalAlignment="Left">
             <StaticResource ResourceKey="btnGarnistResource"/>
         </Viewbox>
-        
+
         <Viewbox x:Name="btnGarnish2" Uid ="1" Grid.Column="1" Grid.Row="1" Stretch="Uniform" PreviewMouseUp="btnGarnish_PreviewMouseUp" Tag="0" HorizontalAlignment="Center">
             <StaticResource ResourceKey="btnGarnistResource"/>
         </Viewbox>
-        
-        <Viewbox x:Name="btnGarnish3" Uid="2" Grid.Column="2" Grid.Row="1" Stretch="Uniform" PreviewMouseUp="btnGarnish_PreviewMouseUp" Tag="0" HorizontalAlignment="Right">
-            <StaticResource ResourceKey="btnGarnistResource"/>
+
+        <Viewbox x:Name="btnDishScroll" Grid.Column="2" Grid.Row="1" Stretch="Uniform">
+            <Grid Width="100" Height="100">
+                <Image Source="e:\Чернов\NoodleD\дизайн\изображения блюд\EmptyName-1.jpg" Stretch="Fill"/>
+                <Canvas MouseDown="Canvas_MouseDown">
+                    <Path>
+                        <Path.Fill>
+                            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0" Opacity="0.7">
+                                <GradientStop Color="DarkMagenta" Offset="1"/>
+                                <GradientStop Color="Black" Offset="0.508"/>
+                                <GradientStop Color="Black" Offset="0"/>
+                            </LinearGradientBrush>
+                        </Path.Fill>
+                        <Path.Data>
+                            <PathGeometry>
+                                <PathFigure StartPoint="0,100" IsClosed="True" IsFilled="True">
+                                    <ArcSegment Point="100,100" Size="50,50" SweepDirection="Clockwise"/>
+                                </PathFigure>
+                            </PathGeometry>
+                        </Path.Data>
+                    </Path>
+                    <Path x:Name="signDown" Stroke="White" StrokeThickness="2" Data="M40,75 L50,85 L60,75" Visibility="Visible"/>
+                    <Path x:Name="signUp" Stroke="White" StrokeThickness="2" Data="M30,85 L50,65 L70,85" Visibility="Hidden"/>
+                </Canvas>
+            </Grid>
         </Viewbox>
+        <!--<Viewbox x:Name="btnGarnish3" Uid="2" Grid.Column="2" Grid.Row="1" Stretch="Uniform" PreviewMouseUp="btnGarnish_PreviewMouseUp" Tag="0" HorizontalAlignment="Right">
+            <StaticResource ResourceKey="btnGarnistResource"/>
+        </Viewbox>-->
 
         <Viewbox Grid.Column="0" Grid.Row="0" Stretch="Uniform" PreviewMouseUp="btnDishDescr_PreviewMouseUp">
-            <Grid Width="10" Height="10">
-                <Path x:Name="btnDishDescr" Fill="White">
+            <Grid Width="10" Height="10" Background="Brown">
+                <Path Fill="White" x:Name="btnDishDescr">
                     <Path.Data>
                         <EllipseGeometry Center="5,5" RadiusX="5" RadiusY="5"/>
                     </Path.Data>
@@ -66,7 +91,7 @@
             </Grid>
         </Viewbox>
 
-        <Viewbox Grid.Row="2" Grid.Column="0">
+        <Viewbox x:Name="figure1" Grid.Row="2" Grid.Column="0">
             <Canvas Name="g3396" Height="47" Width="46">
                 <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="path3404" Fill="#FFD4B8CE" Data="M 3.7702695 27.84968 C 2.5216213 27.492004 10.05 27.239592 20.5 27.288764 39.541836 27.378366 38.287601 27.74689 17.270269 28.237737 11.093918 28.381981 5.0189177 28.207356 3.7702695 27.84968 Z"/>
                 <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="path3402" Fill="#FFA46897" Data="m 24 23.606989 c 0 -0.216156 0.698372 -0.661002 1.551938 -0.988546 0.889925 -0.341496 1.291322 -0.173849 0.940983 0.393011 C 25.905663 23.961658 24 24.416902 24 23.606989 Z"/>
@@ -75,12 +100,41 @@
             </Canvas>
         </Viewbox>
 
-        <Viewbox Grid.Row="2" Grid.Column="1">
+        <Viewbox x:Name="figure2" Grid.Row="2" Grid.Column="1">
             <Canvas xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" Name="svg3336" Width="47" Height="46">
                 <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="path3358" Fill="#FF7A2167" Data="M 11.222506 44.443296 C 10.000128 43.587109 9 42.321735 9 41.631355 9 40.940974 7.7191364 39.429134 6.1536364 38.271709 3.0553863 35.981074 0 30.433568 0 27.098871 0 25.066711 0.44622166 25 14.039087 25 l 14.039087 0 5.856073 -4.75 C 38.655912 16.420146 40.208466 14.386139 41.94888 9.75 43.136087 6.5875 44.563589 4 45.121107 4 c 0.913456 0 0.658234 1.6959248 -0.865323 5.75 -0.267399 0.711528 0.306997 1.25 1.333394 1.25 1.479304 0 1.253202 0.583708 -1.258904 3.25 -4.163982 4.419556 -5.896281 9.61564 -3.73306 11.197426 1.454687 1.063693 1.451591 1.504164 -0.03591 5.10832 C 39.665985 32.725086 37.633841 35.85 36.045434 37.5 34.457026 39.15 32.017455 41.7375 30.624165 43.25 28.303681 45.769023 27.475842 46 20.767961 46 15.758588 46 12.742845 45.508183 11.222506 44.443296 Z M 29.171259 42.345012 C 30.177067 41.434769 31 40.36271 31 39.962659 c 0 -0.40005 1.8 -2.527365 4 -4.727365 2.2 -2.2 4 -4.952941 4 -6.117647 C 39 27.037096 38.675926 27 20.5 27 8.2498373 27 2 27.354606 2 28.04966 2 30.074106 4.9843942 34.842564 7.4800205 36.805624 8.8660092 37.895843 10 39.137643 10 39.565179 c 0 0.427537 0.744744 1.600273 1.654988 2.60608 2.272803 2.511419 14.795914 2.635643 17.516271 0.173753 z M 11.216795 37.439296 C 8.6211465 35.621233 5.5272432 30.114902 6.5631685 29.15707 6.954021 28.795681 7.5095238 29.175 7.797619 30 8.0857143 30.825 9.8241071 33.0075 11.660714 34.85 13.497321 36.6925 15 38.38 15 38.6 c 0 0.842398 -1.643091 0.33829 -3.783205 -1.160704 z m 26.64776 -15.480602 1.060205 -3.041307 -2.932139 2.087867 C 31.921868 23.903886 31.469274 25 34.343158 25 c 1.843018 0 2.727482 -0.76388 3.521397 -3.041306 z M 14 23.687544 c 0 -0.306539 0.457083 -1.759564 1.01574 -3.228943 0.814566 -2.142471 0.61651 -3.317565 -1 -5.933133 -2.162592 -3.499147 -2.658831 -8.0099819 -0.994351 -9.0386869 0.61298 -0.3788427 0.966286 0.4972349 0.883584 2.190983 -0.07579 1.5522297 0.77029 4.5180079 1.880184 6.5906189 2.103769 3.928569 1.973216 6.857334 -0.393222 8.821303 C 14.626371 23.725048 14 23.994084 14 23.687544 Z m 5.706377 -0.3145 C 19.391456 23.058123 19.602625 21.771489 20.17564 20.513857 21.020735 18.659075 20.724829 17.386596 18.608743 13.775769 17.173935 11.327453 16 8.5539738 16 7.6124825 16 4.8393765 18.923187 0 20.59826 0 c 1.26286 0 1.166336 0.4838095 -0.52568 2.6348587 -2.673216 3.3984431 -2.611117 4.8694164 0.448181 10.6162903 1.715195 3.221987 2.318938 5.539361 1.88922 7.251492 -0.668834 2.664848 -1.755476 3.818531 -2.703604 2.870403 z M 24 23.14235 C 24 22.578976 24.45 21.839919 25 21.5 26.616104 20.501193 26.108726 16.695852 24 14 21.800269 11.187805 21.512239 8.7799077 23.035184 5.9342585 24.591644 3.0259862 26.14471 3.588291 24.78685 6.5684688 c -0.99504 2.1838734 -0.811071 3.2260188 1.228608 6.9598282 1.92193 3.51826 2.208574 4.929861 1.441711 7.099817 C 26.512165 23.302148 24 25.129127 24 23.14235 Z"/>
             </Canvas>
 
         </Viewbox>
-        
+
+        <Viewbox x:Name="path1" Grid.Column="1" Grid.Row="0">
+            <Canvas Width="100" Height="100" Background="White">
+                <Path Stroke="Green" StrokeThickness="3">
+                    <Path.Data>
+                        <PathGeometry>
+                            <PathFigure StartPoint="0,10" IsClosed="True">
+                                <ArcSegment Point="10,0" Size="10,10" SweepDirection="Clockwise"/>
+                                <LineSegment Point="90,0"/>
+                                <ArcSegment Point="100,10" Size="10,10" SweepDirection="Clockwise"/>
+                                <LineSegment Point="100,90"/>
+                                <ArcSegment Point="90,100" Size="10,10" SweepDirection="Clockwise"/>
+                                <LineSegment Point="80,100"/>
+                                <BezierSegment Point1="80,55" Point2="20,55" Point3="20,100"/>
+                                <LineSegment Point="10,100"/>
+                                <ArcSegment Point="0,90" Size="10,10" SweepDirection="Clockwise"/>
+                            </PathFigure>
+                        </PathGeometry>
+                    </Path.Data>
+                </Path>
+            </Canvas>
+        </Viewbox>
+
+        <Viewbox x:Name="path2" Grid.Column="2" Grid.Row="0">
+            <Canvas Width="100" Height="100" Background="White">
+                <Path Stroke="Red" StrokeThickness="3" Data="M0,10 A10,10 90 0 1 10,0 L90,0 A10,10 90 0 1 100,10 L100,90 A10,10 90 0 1 90,100 L80,100 C80,55 20,55 20,100 L10,100A10,10 90 0 1 0,90 Z"/>
+            </Canvas>
+        </Viewbox>
+
+
     </Grid>
 </Window>

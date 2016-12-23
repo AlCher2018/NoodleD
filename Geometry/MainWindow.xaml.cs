@@ -28,6 +28,8 @@ namespace Geometry
 
         private List<Viewbox> _garnList;
 
+        private bool isSignDown = true;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -37,8 +39,15 @@ namespace Geometry
             {
                 if (item.Name.Contains("btnGarn")) _garnList.Add(item);
             }
+
+            setScrollSignStatus();
         }
 
+        private void setScrollSignStatus()
+        {
+            signDown.Visibility = (isSignDown) ? Visibility.Visible : Visibility.Hidden;
+            signUp.Visibility = (isSignDown) ? Visibility.Hidden: Visibility.Visible;
+        }
 
         private void btnDishDescr_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
@@ -109,5 +118,10 @@ namespace Geometry
             }
         }
 
+        private void Canvas_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            isSignDown = !isSignDown;
+            setScrollSignStatus();
+        }
     }
 }
