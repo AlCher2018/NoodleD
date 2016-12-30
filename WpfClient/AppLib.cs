@@ -123,6 +123,23 @@ namespace WpfClient
             return (parent.GetValue(FrameworkElement.NameProperty).ToString() == parentName) ? (FrameworkElement)parent : null;
         }
 
+        public static FrameworkElement FindLogicalChildrenByName(FrameworkElement objectFrom, string childName)
+        {
+            if (objectFrom == null) return null;
+            foreach (object rawChild in LogicalTreeHelper.GetChildren(objectFrom))
+            {
+                if (rawChild is FrameworkElement)
+                {
+                    FrameworkElement curObj = (rawChild as FrameworkElement);
+                    if (curObj.Name == childName) return curObj;
+                    else return FindLogicalChildrenByName(curObj, childName);
+                }
+            }
+
+            return null;
+        }
+
+
         public static byte[] getImageFromFilePath(string filePath)
         {
             byte[] retVal;

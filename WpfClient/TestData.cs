@@ -189,17 +189,23 @@ namespace WpfClient
             using (NoodleDContext db = new NoodleDContext())
             {
                 byte[] image1 = AppLib.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Combo.png");
+                byte[] image1Inv = AppLib.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Combo_inv.png");
                 byte[] image2 = AppLib.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Voki.png");
+                byte[] image2Inv = AppLib.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Voki_inv.png");
                 byte[] image3 = AppLib.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Salads.png");
+                byte[] image3Inv = AppLib.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Salads_inv.png");
                 byte[] image4 = AppLib.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Soups.png");
-                byte[] image5 = AppLib.getImageFromFilePath("AppImages\\dishCategories\\dishCatogery_Desserts.png");
+                byte[] image4Inv = AppLib.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Soups_inv.png");
+                byte[] image5 = AppLib.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Desserts.png");
+                byte[] image5Inv = AppLib.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Desserts_inv.png");
                 byte[] image6 = AppLib.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Beverages.png");
-                mf1 = new MenuFolder() { RowGUID = Guid.NewGuid(), HasIngredients = true, Image = image1, ParentId = 0, RowPosition = 1 };
-                mf2 = new MenuFolder() { RowGUID = Guid.NewGuid(), HasIngredients = false, Image = image2, ParentId = 0, RowPosition = 2 };
-                mf3 = new MenuFolder() { RowGUID = Guid.NewGuid(), HasIngredients = false, Image = image3, ParentId = 0, RowPosition = 3 };
-                mf4 = new MenuFolder() { RowGUID = Guid.NewGuid(), HasIngredients = false, Image = image4, ParentId = 0, RowPosition = 4 };
-                mf5 = new MenuFolder() { RowGUID = Guid.NewGuid(), HasIngredients = false, Image = image5, ParentId = 0, RowPosition = 5 };
-                mf6 = new MenuFolder() { RowGUID = Guid.NewGuid(), HasIngredients = false, Image = image6, ParentId = 0, RowPosition = 6 };
+                byte[] image6Inv = AppLib.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Beverages_inv.png");
+                mf1 = new MenuFolder() { RowGUID = Guid.NewGuid(), Image = image1, ImageInv = image1Inv, ParentId = 0, RowPosition = 1 };
+                mf2 = new MenuFolder() { RowGUID = Guid.NewGuid(), Image = image2, ImageInv = image2Inv, ParentId = 0, RowPosition = 2 };
+                mf3 = new MenuFolder() { RowGUID = Guid.NewGuid(), Image = image3, ImageInv = image3Inv, ParentId = 0, RowPosition = 3 };
+                mf4 = new MenuFolder() { RowGUID = Guid.NewGuid(), Image = image4, ImageInv = image4Inv, ParentId = 0, RowPosition = 4 };
+                mf5 = new MenuFolder() { RowGUID = Guid.NewGuid(), Image = image5, ImageInv = image5Inv, ParentId = 0, RowPosition = 5 };
+                mf6 = new MenuFolder() { RowGUID = Guid.NewGuid(), Image = image6, ImageInv = image6Inv, ParentId = 0, RowPosition = 6 };
                 db.MenuFolder.AddRange(new[] { mf1, mf2, mf3, mf4, mf5, mf6 });
 
                 db.SaveChanges();

@@ -84,8 +84,8 @@
           <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="RowGUID" Type="uniqueidentifier" Nullable="false" />
           <Property Name="ParentId" Type="int" Nullable="false" />
-          <Property Name="HasIngredients" Type="bit" Nullable="false" />
           <Property Name="Image" Type="image" />
+          <Property Name="ImageInv" Type="image" />
           <Property Name="RowPosition" Type="int" Nullable="false" />
         </EntityType>
         <EntityType Name="Order">
@@ -306,9 +306,9 @@ warning 6035: The relationship 'FK_OrderDishIngredient_OrderDish' has columns th
           <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="RowGUID" Type="Guid" Nullable="false" />
           <Property Name="ParentId" Type="Int32" Nullable="false" />
-          <Property Name="HasIngredients" Type="Boolean" Nullable="false" />
           <Property Name="Image" Type="Binary" MaxLength="Max" FixedLength="false" />
           <Property Name="RowPosition" Type="Int32" Nullable="false" />
+          <Property Name="ImageInv" Type="Binary" MaxLength="Max" FixedLength="false" />
         </EntityType>
         <EntityType Name="Order">
           <Key>
@@ -474,9 +474,9 @@ warning 6035: The relationship 'FK_OrderDishIngredient_OrderDish' has columns th
           <EntitySetMapping Name="MenuFolder">
             <EntityTypeMapping TypeName="NoodleDModel.MenuFolder">
               <MappingFragment StoreEntitySet="MenuFolder">
+                <ScalarProperty Name="ImageInv" ColumnName="ImageInv" />
                 <ScalarProperty Name="RowPosition" ColumnName="RowPosition" />
                 <ScalarProperty Name="Image" ColumnName="Image" />
-                <ScalarProperty Name="HasIngredients" ColumnName="HasIngredients" />
                 <ScalarProperty Name="ParentId" ColumnName="ParentId" />
                 <ScalarProperty Name="RowGUID" ColumnName="RowGUID" />
                 <ScalarProperty Name="Id" ColumnName="Id" />

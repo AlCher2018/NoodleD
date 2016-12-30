@@ -17,8 +17,8 @@ namespace AppModel
         public int Id { get; set; }
         public System.Guid RowGUID { get; set; }
         public int ParentId { get; set; }
-        public bool HasIngredients { get; set; }
         public byte[] Image { get; set; }
         public int RowPosition { get; set; }
+        public byte[] ImageInv { get; set; }
     }
 }

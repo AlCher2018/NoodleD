@@ -21,6 +21,7 @@ using NLog;
 using System.Data.SqlClient;
 using System.Data;
 using System.Diagnostics;
+using System.Windows.Media.Animation;
 
 namespace WpfClient
 {
@@ -29,24 +30,9 @@ namespace WpfClient
     /// </summary>
     public partial class MainWindow : Window
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
-
-        // runtime
-        private DishItem _curDishItem;
-        // visual elements
-        System.Windows.Shapes.Path _curGarnishBorder;
-        TextBlock _curGarnishTextBlock;
-        Border _curAddButton, _curAddButtonShadow;
-        SolidColorBrush brushBlack;
-
-        // dragging
-        Point? lastDragPoint, initDragPoint;
-        protected DateTime _dateTime;
-        bool _isTouchHandled;
-
         // static constants
         static double screenWidth, screenHeight;
-        static double dishPanelWidth, dishPanelHeight1, dishPanelHeight2, dishPanelMargin;
+        static double dishPanelWidth, dishPanelMargin;
         static double dishPanelHeaderFontSize, dishPanelTextFontSize;
         static double dishPanelDescrButtonSize;
         static double dishPanelHeaderRowHeight;
@@ -73,11 +59,7 @@ namespace WpfClient
             // расстояние между панелями
             dishPanelMargin = 0.03 * dishPanelWidth;
             AppLib.SetAppGlobalValue("dishPanelMargin", dishPanelMargin);
-            // высота панелей
-            dishPanelHeight1 = dishPanelWidth * 1.5;
-            AppLib.SetAppGlobalValue("dishPanelHeight1", dishPanelHeight1);
-            dishPanelHeight2 = dishPanelWidth * 1.3;
-            AppLib.SetAppGlobalValue("dishPanelHeight2", dishPanelHeight2);
+
             // высота строки заголовка
             dishPanelHeaderRowHeight = 0.15 * dishPanelWidth;
             AppLib.SetAppGlobalValue("dishPanelHeaderRowHeight", dishPanelHeaderRowHeight);
@@ -122,10 +104,37 @@ namespace WpfClient
             AppLib.SetAppGlobalValue("dishPanelDescrButtonSize", dishPanelDescrButtonSize);
         }
 
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
+        // runtime
+        private DishItem _curDishItem;
+        // visual elements
+        System.Windows.Shapes.Path _curGarnishBorder;
+        TextBlock _curGarnishTextBlock;
+        Border _curAddButton, _curAddButtonShadow;
+        SolidColorBrush brushBlack;
+        // scroll viewer animate
+        List<double> animDishRows;
+        int animDishCurRow;
+
+        // dragging
+        Point? lastDragPoint, initDragPoint;
+        protected DateTime _dateTime;
+        bool _isTouchHandled;
+
+
         public MainWindow()
         {
             InitializeComponent();
 
+            // высота панелей
+            double dishPanelHeight, dishPanelHeightWithGarnish;
+            dishPanelHeight = dishPanelHeaderRowHeight + dishPanelRowMargin1 + dishPanelImageRowHeight + dishPanelRowMargin2 + dishPanelAddButtonRowHeight;
+            dishPanelHeightWithGarnish = dishPanelHeight + dishPanelGarnishesRowHeight + dishPanelRowMargin2;
+            AppLib.SetAppGlobalValue("dishPanelHeight", dishPanelHeight);
+            AppLib.SetAppGlobalValue("dishPanelHeightWithGarnish", dishPanelHeightWithGarnish);
+
+            animDishRows = new List<double>();
             appInit();
         }
 
@@ -430,7 +439,7 @@ namespace WpfClient
             //lstDishes.ItemsSource = ((AppModel.MenuItem)lstMenuFolders.SelectedItem).Dishes;
             
             scrollDishes.ScrollToTop();
-            if (lstDishes.Items.Count > 0) lstDishes.ScrollIntoView(lstDishes.Items[0]);
+            //            if (lstDishes.Items.Count > 0) lstDishes.ScrollIntoView(lstDishes.Items[0]);
             e.Handled = true;
         }
 
@@ -647,7 +656,7 @@ namespace WpfClient
 
             int tagValue = (int)(vbButton.Tag ?? 0);   // переключатель в теге кнопки
             vbButton.Tag = (tagValue == 0) ? 1 : 0;
-
+                  
             if ((int)vbButton.Tag == 0)
             {
                 path.Fill = (SolidColorBrush)AppLib.GetAppGlobalValue("appNotSelectedItemColor");
@@ -657,8 +666,22 @@ namespace WpfClient
             {
                 path.Fill = (SolidColorBrush)AppLib.GetAppGlobalValue("appSelectedItemColor");
                 vbText.Visibility = Visibility.Visible;
+
+                //DoubleAnimation scaleAnim = new DoubleAnimation();
+                //scaleAnim.From = 0.05;
+                //scaleAnim.To = 1;
+                //scaleAnim.DecelerationRatio = .2;
+                //scaleAnim.Duration = new Duration(TimeSpan.FromMilliseconds(2000));
+                ////if (isEasing) vertAnim.EasingFunction = new ExponentialEase() { EasingMode = EasingMode.EaseInOut };
+
+                //Storyboard sb = new Storyboard();
+                //sb.Children.Add(scaleAnim);
+                //Storyboard.SetTarget(scaleAnim, vbText);
+                //Storyboard.SetTargetProperty(scaleAnim, new PropertyPath(ScaleTransform.ScaleXProperty));
+                //sb.Begin();
             }
         }
+
         #endregion
 
         #region dish list behaviour
@@ -688,6 +711,7 @@ namespace WpfClient
             Debug.Print("-MouseUp" + ", StylusDevice - " + ((e.StylusDevice == null) ? "null" : "touchDevice"));
             endDrag();
         }
+
 
         private void scrollDishes_PreviewTouchUp(object sender, TouchEventArgs e)
         {
@@ -727,6 +751,31 @@ namespace WpfClient
                 //Mouse.Capture(scrollViewer);
             }
         }
+
+        private void scrollDishes_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            Visibility visButtonTop, visButtonBottom;
+
+            if (e.VerticalOffset == 0)
+            {
+                visButtonTop = Visibility.Hidden;
+                visButtonBottom = (lstDishes.ActualHeight == scrollDishes.ActualHeight)?Visibility.Hidden: Visibility.Visible;
+            }
+            else if(e.VerticalOffset == (lstDishes.ActualHeight - scrollDishes.ActualHeight))
+            {
+                visButtonTop = Visibility.Visible;
+                visButtonBottom = Visibility.Hidden;
+            }
+            else
+            {
+                visButtonTop = Visibility.Visible;
+                visButtonBottom = Visibility.Visible;
+            }
+
+            if (btnScrollDown.Visibility != visButtonBottom) btnScrollDown.Visibility = visButtonBottom;
+            if (btnScrollUp.Visibility != visButtonTop) btnScrollUp.Visibility = visButtonTop;
+        }
+
         private void endDrag()
         {
             //scrollDishes.Cursor = Cursors.Arrow;
@@ -743,6 +792,70 @@ namespace WpfClient
             scrollDishes.ScrollToHorizontalOffset(scrollDishes.HorizontalOffset - dX);
             scrollDishes.ScrollToVerticalOffset(scrollDishes.VerticalOffset - dY);
         }
+        #endregion
+
+        #region animated scrolling
+        private void btnScrollUp_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (lstDishes.Items.Count == 0) return;
+
+            int iRows = Convert.ToInt32(Math.Ceiling(lstDishes.Items.Count / 3.0));
+            // высота панели блюда
+            double h1 = ((FrameworkElement)lstDishes.ItemContainerGenerator.ContainerFromIndex(0)).ActualHeight;
+            // текущая строка
+            Point relativePoint = lstDishes.TransformToAncestor(scrollDishes).Transform(new Point(0, 0));
+            double dFrom = Math.Abs(relativePoint.Y), dTo;
+            int curRow = Convert.ToInt32(Math.Floor(dFrom / h1));
+
+            if ((Convert.ToInt32((dFrom % h1)) == 0) && (curRow > 0)) curRow--;
+            dTo = curRow * h1;
+            animateDishesScroll(dFrom, dTo, Math.Abs(dTo - dFrom) >= h1);
+        }
+
+        private void btnScrollDown_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (lstDishes.Items.Count == 0) return;
+
+            int iRows = Convert.ToInt32(Math.Ceiling(lstDishes.Items.Count / 3.0));
+            // высота панели блюда
+            double h1 = ((FrameworkElement)lstDishes.ItemContainerGenerator.ContainerFromIndex(0)).ActualHeight;
+            // текущая строка
+            Point relativePoint = lstDishes.TransformToAncestor(scrollDishes).Transform(new Point(0, 0));
+            double dFrom = Math.Abs(relativePoint.Y), dTo;
+            int curRow = Convert.ToInt32(Math.Floor(dFrom / h1)) + 1;
+
+            // переход к следующей строке
+            if (curRow < (iRows - 1))
+            {
+                dTo = (curRow) * h1;
+                animateDishesScroll(dFrom, dTo, Math.Abs(dTo - dFrom) >= h1);
+            }
+            // или в конец списка
+            else if (curRow == (iRows - 1))
+            {
+                dTo = lstDishes.ActualHeight - scrollDishes.ActualHeight;
+                animateDishesScroll(dFrom, dTo, Math.Abs(dTo - dFrom) >= h1);
+            }
+        }
+
+        private void animateDishesScroll(double dFrom, double dTo, bool isEasing)
+        {
+            double mSec = (isEasing) ? 1000 : 200;
+
+            DoubleAnimation vertAnim = new DoubleAnimation();
+            vertAnim.From = dFrom;
+            vertAnim.To = dTo;
+            vertAnim.DecelerationRatio = .2;
+            vertAnim.Duration = new Duration(TimeSpan.FromMilliseconds(mSec));
+            if (isEasing) vertAnim.EasingFunction = new ExponentialEase() { EasingMode = EasingMode.EaseInOut };
+
+            Storyboard sb = new Storyboard();
+            sb.Children.Add(vertAnim);
+            Storyboard.SetTarget(vertAnim, scrollDishes);
+            Storyboard.SetTargetProperty(vertAnim, new PropertyPath(AniScrollViewer.CurrentVerticalOffsetProperty));
+            sb.Begin();
+        }
+
         #endregion
 
         private void Window_Closed(object sender, EventArgs e)
@@ -783,14 +896,6 @@ namespace WpfClient
         private void btnShowCart_TouchUp(object sender, TouchEventArgs e)
         {
             showCartWindow();
-        }
-
-        protected override void OnRender(DrawingContext drawingContext)
-        {
-            //WrapPanel wp = (WrapPanel)AppLib.FindVisualChildren<WrapPanel>(this.dishItemsBorder).First();
-            //wp.Width = (screenWidth / 6.0) * 5.0 * 0.95;
-
-            base.OnRender(drawingContext);
         }
 
 

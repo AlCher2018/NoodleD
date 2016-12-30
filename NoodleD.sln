@@ -20,6 +20,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		E:\Чернов\NoodleD\Структура хранения меню для устройства самообслуживания.docx = E:\Чернов\NoodleD\Структура хранения меню для устройства самообслуживания.docx
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Animation", "Animation\Animation.csproj", "{7F679288-C195-415B-8A67-68AD8F476B3B}"
+EndProject
 Global
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true
@@ -49,6 +51,10 @@ Global
 		{084A16C6-018B-44AB-A028-C1CD8B6EF3AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{084A16C6-018B-44AB-A028-C1CD8B6EF3AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{084A16C6-018B-44AB-A028-C1CD8B6EF3AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F679288-C195-415B-8A67-68AD8F476B3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F679288-C195-415B-8A67-68AD8F476B3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F679288-C195-415B-8A67-68AD8F476B3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F679288-C195-415B-8A67-68AD8F476B3B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
