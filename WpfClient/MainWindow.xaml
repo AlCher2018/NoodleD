@@ -451,6 +451,8 @@
             <ColumnDefinition Width="5*"/>
         </Grid.ColumnDefinitions>
 
+        <Image Grid.Column="1" Source="AppImages\bg 3hor 1920x1080.png" Stretch="UniformToFill" Opacity="0.3"/>
+
         <!--боковая панель - меню категорий блюд-->
         <Grid x:Name="gridMenuSide" Grid.Column="0" UseLayoutRounding="True" Background="{StaticResource appBackgroundColor}">
             <Grid.RowDefinitions>
@@ -536,8 +538,6 @@
             </Border>
 
         </Grid>
-
-        <Image Grid.Column="1" Source="AppImages\Background - Copy.png" Stretch="UniformToFill"/>
         
         <DockPanel x:Name="dishItemsBorder" Grid.Column="1" LastChildFill="True">
             <local:AniScrollViewer x:Name="scrollDishes" CanContentScroll="False" HorizontalContentAlignment="Center"

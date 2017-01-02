@@ -122,6 +122,7 @@
             <Setter Property="Grid.Column" Value="1"/>
             <Setter Property="SelectionMode" Value="Multiple"/>
             <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Margin" Value="0"/>
             <Setter Property="SnapsToDevicePixels" Value="True"/>
             <Setter Property="Focusable" Value="False"/>
@@ -177,160 +178,186 @@
                 <ColumnDefinition  Width="5*"/>
                 <ColumnDefinition  Width="*"/>
             </Grid.ColumnDefinitions>
-            <Border x:Name="borderMain" Grid.Column="1" Grid.Row="1" CornerRadius="10" Background="White"
+            
+            <Border x:Name="borderMain" Grid.Column="1" Grid.Row="1" CornerRadius="10"
+                    Background="White"
                     MouseUp="borderMain_MouseUp" TouchUp="borderMain_TouchUp"
-                 >
-                <Grid x:Name="gridMain">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="0.5*"/> <!-- 0. отступ сверху -->
-                        <RowDefinition Height="Auto"/>    <!-- 1. раздел Наименование блюда-->
-                        <RowDefinition Height="0.2*"/>    <!-- 2. промежуток между наим.раздела и разделом -->
-                        <RowDefinition Height="3*"/>    <!-- 3. изображение -->
-                        <RowDefinition Height="0.3*"/>     <!-- 4. промеж.между первым и вторым разделом -->
-                        <RowDefinition Height="Auto"/>   <!-- 5. раздел Удвоить ингредиенты -->
-                        <RowDefinition Height="0.2*"/>   <!-- 6. промеж.между наим.раздела и разделом -->
-                        <RowDefinition Height="1.5*"/>   <!-- 7. ингредиенты -->
-                        <RowDefinition Height="0.3*"/>   <!-- 8. промеж.между вторым и третьим разделами-->
-                        <RowDefinition Height="Auto"/>    <!-- 9. раздел Рекомендации-->
-                        <RowDefinition Height="0.2*"/>   <!-- 10. промеж.между наим.раздела и разделом-->
-                        <RowDefinition Height="1.5*"/>   <!-- 11. рекомендации-->
-                        <RowDefinition Height="0.3*"/>   <!-- 12. промеж.между третьим разделом и кнопкой -->
-                        <RowDefinition Height="1.5*"/>   <!-- 13. кнопка Добавить блюдо к заказу -->
-                        <RowDefinition Height="0.5*"/>   <!-- 14. отступ снизу -->
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="0.1*"/>
-                        <ColumnDefinition Width="2*"/>
-                        <ColumnDefinition Width="0.1*"/>
-                    </Grid.ColumnDefinitions>
+                 />
 
-                    <!--кнопка закрытия окна-->
-                    <StaticResource ResourceKey="btnClose"/>   
-                    
-                    <!--Раздел 1. Выбранное блюдо-->
-                    <TextBlock Grid.Row="1" Style="{StaticResource sectionHeaderStyle}"
+            <Image Grid.Column="1" Grid.Row="1" Source="AppImages\bg 2ver 1080x1280.png" Stretch="Fill" Opacity="0.3"/>
+
+            <Grid x:Name="gridMain" Grid.Column="1" Grid.Row="1" >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="0.5*"/>
+                    <!-- 0. отступ сверху -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- 1. раздел Наименование блюда-->
+                    <RowDefinition Height="0.2*"/>
+                    <!-- 2. промежуток между наим.раздела и разделом -->
+                    <RowDefinition Height="3*"/>
+                    <!-- 3. изображение -->
+                    <RowDefinition Height="0.3*"/>
+                    <!-- 4. промеж.между первым и вторым разделом -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- 5. раздел Удвоить ингредиенты -->
+                    <RowDefinition Height="0.2*"/>
+                    <!-- 6. промеж.между наим.раздела и разделом -->
+                    <RowDefinition Height="1.5*"/>
+                    <!-- 7. ингредиенты -->
+                    <RowDefinition Height="0.3*"/>
+                    <!-- 8. промеж.между вторым и третьим разделами-->
+                    <RowDefinition Height="Auto"/>
+                    <!-- 9. раздел Рекомендации-->
+                    <RowDefinition Height="0.2*"/>
+                    <!-- 10. промеж.между наим.раздела и разделом-->
+                    <RowDefinition Height="1.5*"/>
+                    <!-- 11. рекомендации-->
+                    <RowDefinition Height="0.3*"/>
+                    <!-- 12. промеж.между третьим разделом и кнопкой -->
+                    <RowDefinition Height="1.5*"/>
+                    <!-- 13. кнопка Добавить блюдо к заказу -->
+                    <RowDefinition Height="0.5*"/>
+                    <!-- 14. отступ снизу -->
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="0.1*"/>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="0.1*"/>
+                </Grid.ColumnDefinitions>
+
+                <!--кнопка закрытия окна-->
+                <StaticResource ResourceKey="btnClose"/>
+
+                <!--Раздел 1. Выбранное блюдо-->
+                <TextBlock Grid.Row="1" Style="{StaticResource sectionHeaderStyle}"
                     Text="{Binding {x:Null}, ConverterParameter=appSet.formPopUpHeaderText1, Converter={StaticResource langDictToText}}"/>
-                    <!-- изображение и описание блюда -->
-                    <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="1">
-                        <Rectangle DockPanel.Dock="Left" StrokeThickness="0" RadiusX="10" RadiusY="10" Margin="0"
+                <!-- изображение и описание блюда -->
+                <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="1">
+                    <Rectangle DockPanel.Dock="Left" StrokeThickness="0" RadiusX="10" RadiusY="10" Margin="0"
                                    Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}, Converter={StaticResource multiplyParamConv}, ConverterParameter=1.33}">
-                            <Rectangle.Fill>
-                                <ImageBrush ImageSource="{Binding Image}" Stretch="Fill"/>
-                            </Rectangle.Fill>
-                        </Rectangle>
-                                    <Grid Margin="20,-8,0,0" Width="{Binding ActualWidth, ElementName=gridMain, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.5}">
-                                        <StackPanel Grid.Column="0">  <!-- наименование, цена, маркеры -->
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
-                                                <TextBlock FontWeight="Bold"
+                        <Rectangle.Fill>
+                            <ImageBrush ImageSource="{Binding Image}" Stretch="Fill"/>
+                        </Rectangle.Fill>
+                    </Rectangle>
+                    <Grid Margin="20,-8,0,0" Width="{Binding ActualWidth, ElementName=gridMain, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.5}">
+                        <StackPanel Grid.Column="0">
+                            <!-- наименование, цена, маркеры -->
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
+                                <TextBlock FontWeight="Bold"
                                                            Text="{Binding langNames, Converter={StaticResource langDictToText}}"
                                                            FontSize="{Binding Path=ActualWidth, Converter={StaticResource SectionTextFontSize}, ElementName=gridMain, Mode=OneWay}"/>
-                                                <TextBlock FontWeight="Bold" Margin="6,0,0,0"
+                                <TextBlock FontWeight="Bold" Margin="6,0,0,0"
                                                            Text="{Binding SelectedGarnishes, Converter={StaticResource garnishPriceConverter}, ConverterParameter=1, StringFormat={StaticResource priceFormatString}, TargetNullValue=''}"
                                                            FontSize="{Binding Path=ActualWidth, Converter={StaticResource SectionTextFontSize}, ElementName=gridMain, Mode=OneWay}"/>
-                                                <!--маркеры блюда-->
-                                                <ListBox ItemsSource="{Binding Marks}" BorderThickness="0" Background="Transparent" Margin="10,0,0,10" SnapsToDevicePixels="True" Focusable="False" IsHitTestVisible="True" ScrollViewer.CanContentScroll="False" FocusVisualStyle="{x:Null}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                                <!--маркеры блюда-->
+                                <ListBox ItemsSource="{Binding Marks}" BorderThickness="0" Background="Transparent" Margin="10,0,0,10" SnapsToDevicePixels="True" Focusable="False" IsHitTestVisible="True" ScrollViewer.CanContentScroll="False" FocusVisualStyle="{x:Null}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled"
                                  Height="{Binding ActualWidth, ElementName=gridMain, Mode=OneWay, Converter={StaticResource  SectionTextFontSize}}"
                                  >
-                                                    <ListBox.ItemContainerStyle>
-                                                        <Style TargetType="ListBoxItem">
-                                                            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-                                                            <Setter Property="Padding" Value="0"/>
-                                                            <Setter Property="Margin" Value="0"/>
-                                                            <Setter Property="BorderThickness" Value="0" />
-                                                        </Style>
-                                                    </ListBox.ItemContainerStyle>
-                                                    <ListBox.ItemTemplate>
-                                                        <DataTemplate>
-                                                            <Image Source="{Binding Image}"/>
-                                                        </DataTemplate>
-                                                    </ListBox.ItemTemplate>
-                                                    <ListBox.ItemsPanel>
-                                                        <ItemsPanelTemplate>
-                                                            <StackPanel Orientation="Horizontal"/>
-                                                        </ItemsPanelTemplate>
-                                                    </ListBox.ItemsPanel>
-                                                </ListBox>
-                                            </StackPanel>
-                                            <!-- гарнир -->
-                                <TextBlock
+                                    <ListBox.ItemContainerStyle>
+                                        <Style TargetType="ListBoxItem">
+                                            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                                            <Setter Property="Padding" Value="0"/>
+                                            <Setter Property="Margin" Value="0"/>
+                                            <Setter Property="BorderThickness" Value="0" />
+                                        </Style>
+                                    </ListBox.ItemContainerStyle>
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Image Source="{Binding Image}"/>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                    <ListBox.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal"/>
+                                        </ItemsPanelTemplate>
+                                    </ListBox.ItemsPanel>
+                                </ListBox>
+                            </StackPanel>
+                            <!-- гарнир -->
+                            <TextBlock
                                                 Text="{Binding SelectedGarnishes, Converter={StaticResource garnishLangTextConverter}, ConverterParameter=1}"
                                                        FontSize="{Binding Path=ActualWidth, Converter={StaticResource SectionTextFontSize}, ElementName=gridMain, Mode=OneWay}"
                                                        >
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Garnishes, Converter={StaticResource isNullValueConverter}}" Value="True">
-                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding Garnishes, Converter={StaticResource isNullValueConverter}}" Value="False">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                                <StackPanel Orientation="Horizontal">   <!-- количество и ед.изм -->
-                                                <TextBlock Text="{Binding UnitCount}"
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Garnishes, Converter={StaticResource isNullValueConverter}}" Value="True">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Garnishes, Converter={StaticResource isNullValueConverter}}" Value="False">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                            <StackPanel Orientation="Horizontal">
+                                <!-- количество и ед.изм -->
+                                <TextBlock Text="{Binding UnitCount}"
                                                            FontSize="{Binding Path=ActualWidth, Converter={StaticResource SectionTextFontSize}, ElementName=gridMain, Mode=OneWay}"/>
-                                                <TextBlock Margin="6,0,0,0"
+                                <TextBlock Margin="6,0,0,0"
                                                            Text="{Binding langUnitNames, Converter={StaticResource langDictToText}}"
                                                            FontSize="{Binding Path=ActualWidth, Converter={StaticResource SectionTextFontSize}, ElementName=gridMain, Mode=OneWay}"/>
-                                            </StackPanel>
-                                        </StackPanel>
-                                        <TextBlock Grid.Column="0" VerticalAlignment="Bottom" TextWrapping="Wrap" Margin="0,0,0,-5"           Text="{Binding langDescriptions, Converter={StaticResource langDictToText}}"
+                            </StackPanel>
+                        </StackPanel>
+                        <TextBlock Grid.Column="0" VerticalAlignment="Bottom" TextWrapping="Wrap" Margin="0,0,0,-5"           Text="{Binding langDescriptions, Converter={StaticResource langDictToText}}"
                                                        FontSize="{Binding Path=ActualWidth, Converter={StaticResource SectionTextFontSize}, ElementName=gridMain, Mode=OneWay}"/>
-                        </Grid>
-                    </StackPanel>
+                    </Grid>
+                </StackPanel>
 
-                    <!--Раздел 2. ИНГРЕДИЕНТЫ -->
-                    <TextBlock Grid.Row="5" Style="{StaticResource sectionHeaderStyle}"
+                <!--Раздел 2. ИНГРЕДИЕНТЫ -->
+                <TextBlock Grid.Row="5" Style="{StaticResource sectionHeaderStyle}"
                         Text="{Binding {x:Null}, ConverterParameter=appSet.formPopUpHeaderText2, Converter={StaticResource langDictToText}}"/>
-                    <ListBox x:Name="listIngredients" Grid.Row="7" Style="{StaticResource addingsListBoxStyle}"
+                <ListBox x:Name="listIngredients" Grid.Row="7" Style="{StaticResource addingsListBoxStyle}"
                              ItemsSource="{Binding Ingredients}"
                              SelectionChanged="listIngredients_SelectionChanged"/>
 
-                    <!--Раздел 3. РЕКОМЕНДАЦИИ -->
-                    <TextBlock Grid.Row="9" Style="{StaticResource sectionHeaderStyle}"
+                <!--Раздел 3. РЕКОМЕНДАЦИИ -->
+                <TextBlock Grid.Row="9" Style="{StaticResource sectionHeaderStyle}"
                         Text="{Binding {x:Null}, ConverterParameter=appSet.formPopUpHeaderText3, Converter={StaticResource langDictToText}}"/>
-                    <ListBox x:Name="listRecommends" Grid.Row="11" Style="{StaticResource addingsListBoxStyle}"
+                <ListBox x:Name="listRecommends" Grid.Row="11" Style="{StaticResource addingsListBoxStyle}"
                              ItemsSource="{Binding Recommends}" 
                              SelectionChanged="listRecommends_SelectionChanged"/>
 
-                    <!--Раздел 4. Кнопка Добавить -->
-                    <Grid Grid.Row="13" Grid.Column="1">  <!-- грид размещения кнопки -->
-                        <Grid.Effect>
-                            <DropShadowEffect Direction="270"  Color="#FFCF446B" Opacity="0.7"
+                <!--Раздел 4. Кнопка Добавить -->
+                <Grid Grid.Row="13" Grid.Column="1">
+                    <!-- грид размещения кнопки -->
+                    <Grid.Effect>
+                        <DropShadowEffect Direction="270"  Color="#FFCF446B" Opacity="0.7"
                           ShadowDepth="10" BlurRadius="20"/>
-                        </Grid.Effect>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="3*"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
+                    </Grid.Effect>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="3*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid x:Name="gridAddButton" Grid.Row="1" Grid.Column="1">
+                        <!-- грид отрисовки кнопки -->
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
-                            <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Grid x:Name="gridAddButton" Grid.Row="1" Grid.Column="1">  <!-- грид отрисовки кнопки -->
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="2*"/>
-                            </Grid.ColumnDefinitions>
-                            <Border Grid.Column="0" Background="{StaticResource addButtonBackgroundPriceColor}"
+                        <Border Grid.Column="0" Background="{StaticResource addButtonBackgroundPriceColor}"
                                 CornerRadius="{Binding Path=ActualHeight, Converter={StaticResource cornerRadiusLeft}, ConverterParameter=0.1, ElementName=gridAddButton, Mode=OneWay}">
-                                <TextBlock x:Name="txtDishPrice" Style="{StaticResource addButtonTextStyle}"
+                            <TextBlock x:Name="txtDishPrice" Style="{StaticResource addButtonTextStyle}"
                                            Text="{Binding Converter={StaticResource getDishPriceTotal}, StringFormat={StaticResource priceFormatString}}"/>
-                            </Border>
-                            <Border Grid.Column="1" Background="{StaticResource addButtonBackgroundTextColor}"  CornerRadius="{Binding Path=ActualWidth, Converter={StaticResource cornerRadiusRight}, ConverterParameter=0.01, ElementName=gridMain, Mode=OneWay}"
+                        </Border>
+                        <Border Grid.Column="1" Background="{StaticResource addButtonBackgroundTextColor}"  CornerRadius="{Binding Path=ActualWidth, Converter={StaticResource cornerRadiusRight}, ConverterParameter=0.01, ElementName=gridMain, Mode=OneWay}"
                                     MouseUp="btnAddDish_MouseUp" TouchUp="btnAddDish_PreviewTouchUp">
-                                <TextBlock Text="{Binding {x:Null}, ConverterParameter=appSet.btnSelectDishText, Converter={StaticResource langDictToText}}" Style="{StaticResource addButtonTextStyle}"/>
-                            </Border>
-                        </Grid>
-                    </Grid>  <!--Раздел 4. Кнопка Добавить -->
-                    
-                </Grid>  <!--  <Grid x:Name="gridMain"> -->
-            </Border>
+                            <TextBlock Text="{Binding {x:Null}, ConverterParameter=appSet.btnSelectDishText, Converter={StaticResource langDictToText}}" Style="{StaticResource addButtonTextStyle}"/>
+                        </Border>
+                    </Grid>
+                </Grid>
+                <!--Раздел 4. Кнопка Добавить -->
+
+            </Grid>
+            <!--  <Grid x:Name="gridMain"> -->
+
         </Grid>
     </Grid>
 </Window>

@@ -254,8 +254,9 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="5*"/>
         </Grid.ColumnDefinitions>
+
         <!-- фон правой панели -->
-        <Image Grid.Column="1" Source="AppImages\Background.png" Stretch="UniformToFill"/>
+        <Image Grid.Column="1" Source="AppImages\bg 3hor 1920x1080.png" Stretch="UniformToFill" Opacity="0.3"/>
 
         <!-- левая панель - панель управления -->
         <Grid x:Name="leftSideGrid" Grid.Column="0" UseLayoutRounding="True" Background="{DynamicResource appBackgroundColor}">

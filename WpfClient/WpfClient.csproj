@@ -146,13 +146,13 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <SplashScreen Include="SplashScreen.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </SplashScreen>
     <Resource Include="AppImages\icon.ico" />
-    <Resource Include="AppImages\Background — копия.png" />
-    <Resource Include="AppImages\Background.png" />
-    <Resource Include="AppImages\Background - Copy.png" />
+    <Content Include="AppImages\bg 2ver 1080x1280.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="AppImages\bg 3hor 1920x1080.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="AppImages\dishCategories\dishCategory_Beverages.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
