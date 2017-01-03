@@ -1,0 +1,10 @@
+получить GUID в VBA
+-------------------
+Public Function GetGUID() As String 
+    GetGUID = Mid$(CreateObject("Scriptlet.TypeLib").GUID, 2, 36) 
+End Function 
+
+изменить изображение блюда в MS SQL
+-----------------------------------
+update Dish Set Image = (SELECT MyImage.* from Openrowset(Bulk 'e:\Чернов\NoodleD\дизайн\NodDod\dish1.jpg', Single_Blob) MyImage) where id=1
+

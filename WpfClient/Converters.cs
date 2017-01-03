@@ -23,9 +23,17 @@ namespace WpfClient
     public class MultiplyValueConverter : IValueConverter
     {
         public double Multiplier { get; set; }
+        public double DefaultValue { get; set; }
+
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return Multiplier * (System.Convert.ToDouble(value));
+            double retVal = 0f;
+
+            retVal = Multiplier * (System.Convert.ToDouble(value));
+
+            if ((retVal == 0) && (DefaultValue != 0)) retVal = DefaultValue;
+
+            return retVal;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -46,7 +54,7 @@ namespace WpfClient
 
             dBuf = sParam.GetDoubleValue();
 
-            retVal = dBuf * (double)value;
+            retVal = dBuf * System.Convert.ToDouble(value);
             if ((retVal == 0) && (DefaultValue != 0)) retVal = DefaultValue;
 
             return retVal;

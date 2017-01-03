@@ -150,6 +150,7 @@
     <Content Include="AppImages\bg 2ver 1080x1280.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Resource Include="AppImages\bg 3hor 1920x1080 gauss.png" />
     <Content Include="AppImages\bg 3hor 1920x1080.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

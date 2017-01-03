@@ -13,9 +13,8 @@
 
     <Window.Resources>
         <local:MultiplyParamValueConverter x:Key="multiplyParamDefVal1Conv" DefaultValue="1"/>
-        <local:MultiplyValueConverter x:Key="SectionTitleFontSize" Multiplier="0.025"/>
-        <local:MultiplyValueConverter x:Key="SectionTextFontSize" Multiplier="0.02"/>
-        <local:MultiplyValueConverter x:Key="elemSize_0_01" Multiplier="0.01"/>
+        <local:MultiplyValueConverter x:Key="SectionTitleFontSize" Multiplier="0.025" DefaultValue="8"/>
+        <local:MultiplyValueConverter x:Key="SectionTextFontSize" Multiplier="0.02" DefaultValue="8"/>
 
         <!--кнопка закрытия окна  -->
         <Viewbox x:Key="btnClose" Stretch="Uniform" Panel.ZIndex="10"
@@ -65,28 +64,34 @@
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="VerticalAlignment" Value="Bottom"/>
         </Style>
+        
         <!-- шаблон данных для добавок -->
         <DataTemplate x:Key="addingsListBoxItemTemplate">
             <Viewbox Stretch="Uniform">
-                <Grid Height="100" Width="100" >
-                    <Path x:Name="shape1"  Fill="{StaticResource appBackgroundColor}">
+                <Grid Height="100" Width="120" >
+                    <Path x:Name="garnBase">
                         <Path.Data>
                             <CombinedGeometry GeometryCombineMode="Exclude">
                                 <CombinedGeometry.Geometry1>
-                                    <RectangleGeometry Rect="0,0,100,100" RadiusX="10" RadiusY="10"/>
+                                    <RectangleGeometry Rect="0,0,120,100" RadiusX="10" RadiusY="10"/>
                                 </CombinedGeometry.Geometry1>
                                 <CombinedGeometry.Geometry2>
-                                    <EllipseGeometry Center="50,95" RadiusX="28" RadiusY="28"/>
+                                    <EllipseGeometry Center="60,95" RadiusX="28" RadiusY="28"/>
                                 </CombinedGeometry.Geometry2>
                             </CombinedGeometry>
                         </Path.Data>
+                        <Path.Fill>
+                            <ImageBrush ImageSource="{Binding Image}" Stretch="Fill" RenderOptions.BitmapScalingMode="LowQuality"/>
+                        </Path.Fill>
                     </Path>
+
                     <Path x:Name="shape2" Fill="White">
                         <Path.Data>
-                            <EllipseGeometry Center="50,95" RadiusX="28" RadiusY="28"/>
+                            <EllipseGeometry Center="60,95" RadiusX="28" RadiusY="28"/>
                         </Path.Data>
                     </Path>
 
+                    
                     <TextBlock x:Name="txtName" Style="{StaticResource garnishTextStyle}"
                                Text="{Binding langNames, Converter={StaticResource langDictToText}}"
                                FontSize="{Binding Path=ActualWidth, Converter={StaticResource  multiplyParamConv}, ConverterParameter=0.012, ElementName=gridMain, Mode=OneWay}"/>
@@ -98,7 +103,7 @@
 
             <DataTemplate.Triggers>
                 <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsSelected}" Value="True">
-                    <Setter TargetName="shape1" Property="Fill" Value="{StaticResource appSelectedItemColor}"/>
+                    <Setter TargetName="garnBase" Property="Fill" Value="{StaticResource appSelectedItemColor}"/>
                     <Setter TargetName="txtName" Property="Foreground" Value="Black"/>
                 </DataTrigger>
             </DataTemplate.Triggers>
@@ -184,7 +189,12 @@
                     MouseUp="borderMain_MouseUp" TouchUp="borderMain_TouchUp"
                  />
 
-            <Image Grid.Column="1" Grid.Row="1" Source="AppImages\bg 2ver 1080x1280.png" Stretch="Fill" Opacity="0.3"/>
+            <Image Grid.Column="1" Grid.Row="1" Source="AppImages\bg 2ver 1080x1280.png" Stretch="UniformToFill" Opacity="0.1">
+                <Image.Effect>
+                    <BlurEffect/>
+                </Image.Effect>
+
+            </Image>
 
             <Grid x:Name="gridMain" Grid.Column="1" Grid.Row="1" >
                 <Grid.RowDefinitions>
@@ -229,8 +239,8 @@
                 <StaticResource ResourceKey="btnClose"/>
 
                 <!--Раздел 1. Выбранное блюдо-->
-                <TextBlock Grid.Row="1" Style="{StaticResource sectionHeaderStyle}"
-                    Text="{Binding {x:Null}, ConverterParameter=appSet.formPopUpHeaderText1, Converter={StaticResource langDictToText}}"/>
+                <TextBlock x:Name="txtSec1" Grid.Row="1" Style="{StaticResource sectionHeaderStyle}"
+                    Text="{Binding {x:Null}, ConverterParameter=appSet.formPopUpHeaderText1, Converter={StaticResource langDictToText}, Mode=OneWay}"/>
                 <!-- изображение и описание блюда -->
                 <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="1">
                     <Rectangle DockPanel.Dock="Left" StrokeThickness="0" RadiusX="10" RadiusY="10" Margin="0"
@@ -243,10 +253,10 @@
                         <StackPanel Grid.Column="0">
                             <!-- наименование, цена, маркеры -->
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
-                                <TextBlock FontWeight="Bold"
+                                <TextBlock x:Name="txtDishName" FontWeight="Bold"
                                                            Text="{Binding langNames, Converter={StaticResource langDictToText}}"
                                                            FontSize="{Binding Path=ActualWidth, Converter={StaticResource SectionTextFontSize}, ElementName=gridMain, Mode=OneWay}"/>
-                                <TextBlock FontWeight="Bold" Margin="6,0,0,0"
+                                <TextBlock x:Name="txtDishPrice1" FontWeight="Bold" Margin="6,0,0,0"
                                                            Text="{Binding SelectedGarnishes, Converter={StaticResource garnishPriceConverter}, ConverterParameter=1, StringFormat={StaticResource priceFormatString}, TargetNullValue=''}"
                                                            FontSize="{Binding Path=ActualWidth, Converter={StaticResource SectionTextFontSize}, ElementName=gridMain, Mode=OneWay}"/>
                                 <!--маркеры блюда-->

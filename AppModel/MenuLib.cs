@@ -121,7 +121,7 @@ namespace AppModel
                     dishApp.Ingredients = new List<DishAdding>();
                     foreach (DishIngredient item in lIngr)
                     {
-                        DishAdding da = new DishAdding() { Id = item.Id, RowGUID = item.RowGUID, Price = item.Price };
+                        DishAdding da = new DishAdding() { Id = item.Id, RowGUID = item.RowGUID, Price = item.Price, Image=item.Image };
                         da.langNames = getLangTextDict(item.RowGUID, 1);
                         dishApp.Ingredients.Add(da);
                     }
@@ -287,6 +287,7 @@ namespace AppModel
         public Guid RowGUID { get; set; }
         public Dictionary<string, string> langNames { get; set; }
         public decimal Price { get; set; }
+        public byte[] Image { get; set; }
         public string Uid { get; set; }
         public int Count { get; set; }
     }

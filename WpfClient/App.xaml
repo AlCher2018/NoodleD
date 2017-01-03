@@ -16,6 +16,10 @@
         <Color x:Key="appColorDDarkPink" R="99" G="29" B="85" A="255"/>
         <!-- COLOR5 - dark-dark pink -->
         <Color x:Key="appColorSelectButton" R="173" G="32" B="72" A="255"/>
+        <!-- COLOR6 - green-yellow -->
+        <Color x:Key="appColorCartButtom" R="214" G="244" B="36" A="255"/>
+        <!-- COLOR7 - grey -->
+        <Color x:Key="appColorSelectGarnish" R="137" G="137" B="137" A="255"/>
 
         <SolidColorBrush x:Key="appBackgroundColor" Color="{StaticResource appColorDarkPink}"/>
         <SolidColorBrush x:Key="appNotSelectedItemColor" Color="{StaticResource appColorWhite}"/>
@@ -23,7 +27,9 @@
         <SolidColorBrush x:Key="mainMenuSelectedItemColor" Color="{StaticResource appColorDDarkPink}"/>
         <SolidColorBrush x:Key="addButtonBackgroundTextColor" Color="{StaticResource appColorSelectButton}"/>
         <SolidColorBrush x:Key="addButtonBackgroundPriceColor" Color="#FF931D3F"/>
-
+        <SolidColorBrush x:Key="cartButtonBackgroundColor" Color="{StaticResource appColorCartButtom}"/>
+        <SolidColorBrush x:Key="selectGarnishBackgroundColor" Color="{StaticResource appColorSelectGarnish}"/>
+        
         <sys:String x:Key="priceFormatString">{0:#0} ₴</sys:String>
 
         <local:IsNullValueConverter x:Key="isNullValueConverter"/>

@@ -37,6 +37,7 @@
           <Property Name="RowGUID" Type="uniqueidentifier" Nullable="false" />
           <Property Name="RowPosition" Type="int" Nullable="false" />
           <Property Name="Price" Type="money" Nullable="false" />
+          <Property Name="Image" Type="image" />
         </EntityType>
         <EntityType Name="DishMark">
           <Key>
@@ -267,6 +268,7 @@ warning 6035: The relationship 'FK_OrderDishIngredient_OrderDish' has columns th
           <Property Name="RowGUID" Type="Guid" Nullable="false" />
           <Property Name="RowPosition" Type="Int32" Nullable="false" />
           <Property Name="Price" Type="Decimal" Nullable="false" Precision="19" Scale="4" />
+          <Property Name="Image" Type="Binary" MaxLength="Max" FixedLength="false" />
         </EntityType>
         <EntityType Name="DishMark">
           <Key>
@@ -429,6 +431,7 @@ warning 6035: The relationship 'FK_OrderDishIngredient_OrderDish' has columns th
           <EntitySetMapping Name="DishIngredient">
             <EntityTypeMapping TypeName="NoodleDModel.DishIngredient">
               <MappingFragment StoreEntitySet="DishIngredient">
+                <ScalarProperty Name="Image" ColumnName="Image" />
                 <ScalarProperty Name="Price" ColumnName="Price" />
                 <ScalarProperty Name="RowPosition" ColumnName="RowPosition" />
                 <ScalarProperty Name="RowGUID" ColumnName="RowGUID" />

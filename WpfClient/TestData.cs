@@ -19,6 +19,8 @@ namespace WpfClient
             //setMainMenu();          // главное меню
             //setDishesTestData();    // блюда
             //setRecommends();        // рекомендации
+
+            setInrgImages();
         }
 
         private static void clearData()
@@ -118,6 +120,11 @@ namespace WpfClient
                 db.Setting.Add(appSet);
                 appSet = new Setting() { UniqName = "addButtonBackgroundTextColor", RowGUID = Guid.NewGuid(), Value = "173,32,72" };
                 db.Setting.Add(appSet);
+                appSet = new Setting() { UniqName = "cartButtonBackgroundColor", RowGUID = Guid.NewGuid(), Value = "214,244,36" };
+                db.Setting.Add(appSet);
+                appSet = new Setting() { UniqName = "selectGarnishBackgroundColor", RowGUID = Guid.NewGuid(), Value = "137,137,137" };
+                db.Setting.Add(appSet);
+
                 db.SaveChanges();
 
                 appSet = new Setting() { UniqName = "langButtonTextUa", RowGUID = Guid.NewGuid(), Value = "Укр" };
@@ -228,18 +235,42 @@ namespace WpfClient
             string[] namesList, descrList;
             Guid dUnitGuid1, dUnitGuid2;
             Guid dMarkGuid1, dMarkGuid2;
+            Random rnd = new Random(); int r;
 
-            byte[] imageDish1 = AppLib.getImageFromFilePath(@"e:\Чернов\NoodleD\дизайн\NodDod\dish1.png");
-            byte[] imageDish2 = AppLib.getImageFromFilePath(@"e:\Чернов\NoodleD\дизайн\NodDod\dish2.png");
-            byte[] imageDish3 = AppLib.getImageFromFilePath(@"e:\Чернов\NoodleD\дизайн\NodDod\dish3.png");
-            byte[] imageDish4 = AppLib.getImageFromFilePath(@"e:\Чернов\NoodleD\дизайн\NodDod\dish4.png");
+            string imgPath = @"D:\NoodleD\дизайн\изображения блюд от 22.12.2016\";
+            // 20 изображений блюд
+            byte[][] imagesDish = new[] {
+                AppLib.getImageFromFilePath(imgPath + "EmptyName-1.png"),
+                AppLib.getImageFromFilePath(imgPath + "EmptyName-3.png"),
+                AppLib.getImageFromFilePath(imgPath + "EmptyName-5.png"),
+                AppLib.getImageFromFilePath(imgPath + "EmptyName-7.png"),
+                AppLib.getImageFromFilePath(imgPath + "EmptyName-9.png"),
+                AppLib.getImageFromFilePath(imgPath + "EmptyName-11.png"),
+                AppLib.getImageFromFilePath(imgPath + "EmptyName-13.png"),
+                AppLib.getImageFromFilePath(imgPath + "EmptyName-15.png"),
+                AppLib.getImageFromFilePath(imgPath + "EmptyName-17.png"),
+                AppLib.getImageFromFilePath(imgPath + "EmptyName-19.png"),
+                AppLib.getImageFromFilePath(imgPath + "EmptyName-21.png"),
+                AppLib.getImageFromFilePath(imgPath + "EmptyName-23.png"),
+                AppLib.getImageFromFilePath(imgPath + "EmptyName-25.png"),
+                AppLib.getImageFromFilePath(imgPath + "EmptyName-27.png"),
+                AppLib.getImageFromFilePath(imgPath + "EmptyName-29.png"),
+                AppLib.getImageFromFilePath(imgPath + "EmptyName-31.png"),
+                AppLib.getImageFromFilePath(imgPath + "EmptyName-33.png"),
+                AppLib.getImageFromFilePath(imgPath + "EmptyName-35.png"),
+                AppLib.getImageFromFilePath(imgPath + "EmptyName-37.png"),
+                AppLib.getImageFromFilePath(imgPath + "EmptyName-39.png")};
             byte[] imageNoodles1 = AppLib.getImageFromFilePath(@"e:\Чернов\NoodleD\дизайн\NodDod\noodles1.png");
             byte[] imageNoodles2 = AppLib.getImageFromFilePath(@"e:\Чернов\NoodleD\дизайн\NodDod\noodles2.png");
             byte[] imageNoodles3 = AppLib.getImageFromFilePath(@"e:\Чернов\NoodleD\дизайн\NodDod\noodles3.png");
             byte[] imageSalad1 = AppLib.getImageFromFilePath(@"e:\Чернов\NoodleD\дизайн\NodDod\salad1.png");
             byte[] imageSalad2 = AppLib.getImageFromFilePath(@"e:\Чернов\NoodleD\дизайн\NodDod\salad2.png");
-            byte[] imageDessert1 = AppLib.getImageFromFilePath(@"e:\Чернов\NoodleD\images\20160920-zapechennye-yabloki-v-duhovke-05.jpg");
-            byte[] imageBeverage1 = AppLib.getImageFromFilePath(@"e:\Чернов\NoodleD\images\rphoto1340786322.jpg");
+            byte[] imageDessert1 = AppLib.getImageFromFilePath(@"D:\NoodleD\дизайн\изображения блюд от 22.12.2016\EmptyName-44.jpg");
+            byte[] imageDessert2 = AppLib.getImageFromFilePath(@"D:\NoodleD\дизайн\изображения блюд от 22.12.2016\EmptyName-45.jpg");
+            byte[] imageDessert3 = AppLib.getImageFromFilePath(@"D:\NoodleD\дизайн\изображения блюд от 22.12.2016\EmptyName-46.jpg");
+            byte[] imageBeverage1 = AppLib.getImageFromFilePath(@"D:\NoodleD\дизайн\изображения блюд от 22.12.2016\EmptyName-49.jpg");
+            byte[] imageBeverage2 = AppLib.getImageFromFilePath(@"D:\NoodleD\дизайн\изображения блюд от 22.12.2016\EmptyName-50.jpg");
+            byte[] imageBeverage3 = AppLib.getImageFromFilePath(@"D:\NoodleD\дизайн\изображения блюд от 22.12.2016\EmptyName-51.jpg");
 
             // блюда для первого пункта меню (Комбо)
             namesList = new string[] { "Курица Кунпао", "Куриця Кунпао", "Cunpao chicken" };
@@ -255,26 +286,19 @@ namespace WpfClient
                 dMarkGuid2 = db.DishMark.ToList().ElementAt(1).RowGUID;  // яблочко
 
                 m1 = db.MenuFolder.First(m => m.Id == menuItemId);
+
                 for (int i = 0; i < cnt; i++)
                 {
                     Dish dish = new Dish() { MenuFolderGUID = m1.RowGUID, RowGUID = Guid.NewGuid(),
                         UnitCount = unitCount, UnitGUID = dUnitGuid1, Price = dishPrice, RowPosition=i };
-                    switch ((i+1) % 4)
-                    {
-                        case 0: dish.Image = imageDish4; break;
-                        case 1: dish.Image = imageDish1; break;
-                        case 2: dish.Image = imageDish2; break;
-                        case 3: dish.Image = imageDish3; break;
-                        default:
-                            break;
-                    }
-                    
+                    r = rnd.Next(1, 20);
+                    dish.Image = imagesDish[r];
+
                     db.Dish.Add(dish);
                     db.SaveChanges();
 
                     // добавить к блюду маркеры
-                    Random rnd = new Random();
-                    int r = rnd.Next(1, 4);
+                    r = rnd.Next(1, 4);
                     if (r == 2) db.DishMarks.Add(new DishMarks() { DishGUID = dish.RowGUID, MarkGUID = dMarkGuid1 });
                     else if (r == 3) db.DishMarks.Add(new DishMarks() { DishGUID = dish.RowGUID, MarkGUID = dMarkGuid2 });
                     else if (r == 4)
@@ -306,22 +330,14 @@ namespace WpfClient
                 {
                     Dish dish = new Dish() { MenuFolderGUID = m1.RowGUID, RowGUID = Guid.NewGuid(),
                         UnitCount = unitCount, UnitGUID = dUnitGuid1, Price = dishPrice, RowPosition = i };
-                    switch ((i + 1) % 4)
-                    {
-                        case 0: dish.Image = imageDish4; break;
-                        case 1: dish.Image = imageDish1; break;
-                        case 2: dish.Image = imageDish2; break;
-                        case 3: dish.Image = imageDish3; break;
-                        default:
-                            break;
-                    }
+                    r = rnd.Next(1, 20);
+                    dish.Image = imagesDish[r];
 
                     db.Dish.Add(dish);
                     db.SaveChanges();
 
                     // добавить к блюду маркеры
-                    Random rnd = new Random();
-                    int r = rnd.Next(1, 4);
+                    r = rnd.Next(1, 4);
                     if (r == 2) db.DishMarks.Add(new DishMarks() { DishGUID = dish.RowGUID, MarkGUID = dMarkGuid1 });
                     else if (r == 3) db.DishMarks.Add(new DishMarks() { DishGUID = dish.RowGUID, MarkGUID = dMarkGuid2 });
                     else if (r == 4)
@@ -430,7 +446,15 @@ namespace WpfClient
                 {
                     Dish dish = new Dish() { MenuFolderGUID = m1.RowGUID, RowGUID = Guid.NewGuid(),
                         UnitCount = unitCount, UnitGUID = dUnitGuid1, Price = dishPrice, RowPosition=i };
-                    dish.Image = imageDessert1;
+                    switch (i % 3)
+                    {
+                        case 0: dish.Image = imageDessert1; break;
+                        case 1: dish.Image = imageDessert2; break;
+                        case 2: dish.Image = imageDessert3; break;
+                        default:
+                            break;
+                    }
+                    
                     db.Dish.Add(dish);
                     db.SaveChanges();
 
@@ -451,7 +475,20 @@ namespace WpfClient
                 {
                     Dish dish = new Dish() { MenuFolderGUID = m1.RowGUID, RowGUID = Guid.NewGuid(),
                         UnitCount = unitCount, UnitGUID = dUnitGuid2, Price = dishPrice, RowPosition= i };
-                    dish.Image = imageBeverage1;
+                    switch (i % 3)
+                    {
+                        case 0:
+                            dish.Image = imageBeverage1;
+                            break;
+                        case 1:
+                            dish.Image = imageBeverage2;
+                            break;
+                        case 2:
+                            dish.Image = imageBeverage3;
+                            break;
+                        default:
+                            break;
+                    }
                     db.Dish.Add(dish);
                     db.SaveChanges();
 
@@ -527,6 +564,30 @@ namespace WpfClient
                     db.DishRecommends.Add(new DishRecommends() { DishGUID = dish.RowGUID, RecommendGUID = dRec1.RowGUID, RowPosition = 1 });
                     db.DishRecommends.Add(new DishRecommends() { DishGUID = dish.RowGUID, RecommendGUID = dRec2.RowGUID, RowPosition = 2 });
                     db.DishRecommends.Add(new DishRecommends() { DishGUID = dish.RowGUID, RecommendGUID = dRec3.RowGUID, RowPosition = 3 });
+                }
+                db.SaveChanges();
+            }
+        }
+
+        public static void setInrgImages()
+        {
+            byte[][] images = new[] {
+                AppLib.getImageFromFilePath(@"d:\NoodleD\тестовые изображение блюд\ингредиенты\соус терияки.jpg"),
+                AppLib.getImageFromFilePath(@"d:\NoodleD\тестовые изображение блюд\ингредиенты\фасоль стручковая.jpg"),
+                AppLib.getImageFromFilePath(@"d:\NoodleD\тестовые изображение блюд\ингредиенты\курица.jpg"),
+                AppLib.getImageFromFilePath(@"d:\NoodleD\тестовые изображение блюд\ингредиенты\деревестный гриб.jpg"),
+                AppLib.getImageFromFilePath(@"d:\NoodleD\тестовые изображение блюд\ингредиенты\грибы шампиньоны.jpg")
+            };
+            int idx = 0, i = 0;
+            using (NoodleDContext db = new NoodleDContext())
+            {
+                List<DishIngredient> ingrList = db.DishIngredient.ToList();
+                foreach (DishIngredient ingr in ingrList)
+                {
+                    idx = i % 5;
+                    ingr.Image = images[idx];
+
+                    i++;
                 }
                 db.SaveChanges();
             }

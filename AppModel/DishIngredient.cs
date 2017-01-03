@@ -19,5 +19,6 @@ namespace AppModel
         public System.Guid RowGUID { get; set; }
         public int RowPosition { get; set; }
         public decimal Price { get; set; }
+        public byte[] Image { get; set; }
     }
 }

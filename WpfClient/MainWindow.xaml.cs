@@ -38,7 +38,7 @@ namespace WpfClient
         static double dishPanelHeaderRowHeight;
         static double dishPanelImageRowHeight, dishPanelImageCornerRadius;
         static double dishPanelGarnishesRowHeight, dishPanelGarnishBaseWidth;
-        static double dishPanelAddButtonRowHeight, dishPanelAddButtonHeight;
+        static double dishPanelAddButtonRowHeight, dishPanelAddButtonHeight, dishPanelAddButtonTextSize;
         static double dishPanelAddButtonShadowDepth, dishPanelAddButtonShadowBlurRadius, dishPanelAddButtonShadowCornerRadius;
         static double dishPanelRowMargin1, dishPanelRowMargin2;
 
@@ -81,6 +81,8 @@ namespace WpfClient
             AppLib.SetAppGlobalValue("dishPanelAddButtonRowHeight", dishPanelAddButtonRowHeight);
             dishPanelAddButtonHeight = 0.6 * dishPanelAddButtonRowHeight;
             AppLib.SetAppGlobalValue("dishPanelAddButtonHeight", dishPanelAddButtonHeight);
+            dishPanelAddButtonTextSize = 0.3 * dishPanelAddButtonRowHeight;
+            AppLib.SetAppGlobalValue("dishPanelAddButtonTextSize", dishPanelAddButtonTextSize);
             // размеры тени под кнопками (от высоты самой кнопки, dishPanelAddButtonHeight)
             dishPanelAddButtonShadowDepth = 0.15 * dishPanelAddButtonHeight;
             dishPanelAddButtonShadowBlurRadius = 0.6 * dishPanelAddButtonHeight;
@@ -144,6 +146,7 @@ namespace WpfClient
             //Mouse.OverrideCursor = Cursors.None;
 
             //TestData.mainProc();
+            //TestData.setInrgImages();
 
             logger.Info("Start application");
 
@@ -436,7 +439,19 @@ namespace WpfClient
         private void lstMenuFolders_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             clearSelectedDish();
-            //lstDishes.ItemsSource = ((AppModel.MenuItem)lstMenuFolders.SelectedItem).Dishes;
+            try
+            {
+                lstDishes.ItemsSource = null;
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.WaitForFullGCComplete(0);
+
+                lstDishes.ItemsSource = ((AppModel.MenuItem)lstMenuFolders.SelectedItem).Dishes;
+            }
+            catch (OutOfMemoryException outOfMemEx)
+            {
+                
+            }
             
             scrollDishes.ScrollToTop();
             //            if (lstDishes.Items.Count > 0) lstDishes.ScrollIntoView(lstDishes.Items[0]);
@@ -555,7 +570,7 @@ namespace WpfClient
             if ((_curGarnishBorder == null) || (_curGarnishTextBlock == null) || (_curAddButton == null)) return;
 
             SolidColorBrush selBase = (SolidColorBrush)AppLib.GetAppGlobalValue("appSelectedItemColor");
-            SolidColorBrush notSelBase = (SolidColorBrush)AppLib.GetAppGlobalValue("appBackgroundColor");
+            SolidColorBrush notSelBase = (SolidColorBrush)AppLib.GetAppGlobalValue("selectGarnishBackgroundColor");
             SolidColorBrush notSelText = (SolidColorBrush)AppLib.GetAppGlobalValue("appNotSelectedItemColor");
 
             List<DishAdding> garList = _curDishItem.SelectedGarnishes;  // SelectedGarnishes

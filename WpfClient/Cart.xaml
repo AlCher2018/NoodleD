@@ -256,7 +256,11 @@
         </Grid.ColumnDefinitions>
 
         <!-- фон правой панели -->
-        <Image Grid.Column="1" Source="AppImages\bg 3hor 1920x1080.png" Stretch="UniformToFill" Opacity="0.3"/>
+        <Image Grid.Column="1" Source="AppImages\bg 3hor 1920x1080.png" Stretch="UniformToFill" Opacity="0.1" OpacityMask="#FFD6F424">
+            <Image.Effect>
+                <BlurEffect/>
+            </Image.Effect>
+        </Image>
 
         <!-- левая панель - панель управления -->
         <Grid x:Name="leftSideGrid" Grid.Column="0" UseLayoutRounding="True" Background="{DynamicResource appBackgroundColor}">
@@ -332,7 +336,7 @@
             </Grid>
             
             <!-- 5. кнопка Распечатать чек -->
-            <Border Grid.Row="5" Background="{StaticResource appSelectedItemColor}">
+            <Border Grid.Row="5" Background="{DynamicResource cartButtonBackgroundColor}">
                 <TextBlock Grid.Row="6" Style="{StaticResource btnPrintCheckTextStyle}" FontWeight="Bold"/>
                 <!--<Border.Style>
                     <Style>
