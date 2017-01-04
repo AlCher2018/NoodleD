@@ -1,0 +1,99 @@
+﻿<Window x:Class="WpfClient.MessageBoxDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfClient"
+        mc:Ignorable="d"
+        Title="MessageBoxDialog" ResizeMode="NoResize"
+        ShowInTaskbar="False" SizeToContent="WidthAndHeight" 
+        MaxWidth="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=maxDialogWindowWidth}"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent" Topmost="True" WindowStartupLocation="CenterScreen"
+        PreviewKeyDown="Window_PreviewKeyDown">
+
+    <Window.Resources>
+        <ControlTemplate x:Key="btnTemplate" TargetType="ButtonBase" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+            <Border BorderThickness="0" Background="{TemplateBinding Control.Background}" Name="border" SnapsToDevicePixels="True" CornerRadius="10">
+                <ContentPresenter RecognizesAccessKey="True" Content="{TemplateBinding ContentControl.Content}" ContentTemplate="{TemplateBinding ContentControl.ContentTemplate}" ContentStringFormat="{TemplateBinding ContentControl.ContentStringFormat}" Name="contentPresenter" Margin="{TemplateBinding Control.Padding}" HorizontalAlignment="{TemplateBinding Control.HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding Control.VerticalContentAlignment}" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" Focusable="False" />
+                <Border.Effect>
+                    <DropShadowEffect Color="Gray" BlurRadius="10"/>
+                </Border.Effect>
+            </Border>
+            <!--<ControlTemplate.Triggers>
+                <Trigger Property="UIElement.IsMouseOver">
+                    <Setter Property="Panel.Background" TargetName="border">
+                        <Setter.Value>
+                            <SolidColorBrush>#FFBEE6FD</SolidColorBrush>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="Border.BorderBrush" TargetName="border">
+                        <Setter.Value>
+                            <SolidColorBrush>#FF3C7FB1</SolidColorBrush>
+                        </Setter.Value>
+                    </Setter>
+                    <Trigger.Value>
+                        <s:Boolean>True</s:Boolean>
+                    </Trigger.Value>
+                </Trigger>
+                <Trigger Property="ButtonBase.IsPressed">
+                    <Setter Property="Panel.Background" TargetName="border">
+                        <Setter.Value>
+                            <SolidColorBrush>#FFC4E5F6</SolidColorBrush>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="Border.BorderBrush" TargetName="border">
+                        <Setter.Value>
+                            <SolidColorBrush>#FF2C628B</SolidColorBrush>
+                        </Setter.Value>
+                    </Setter>
+                    <Trigger.Value>
+                        <s:Boolean>True</s:Boolean>
+                    </Trigger.Value>
+                </Trigger>
+            </ControlTemplate.Triggers>-->
+        </ControlTemplate>
+        
+        <Style x:Key="btnStyle" TargetType="Button">
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Background" Value="{DynamicResource appBackgroundColor}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="30,10,30,15"/>
+            <Setter Property="Margin" Value="50,0,0,0"/>
+            <Setter Property="FontSize" Value="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize3, Mode=OneWay}"/>
+            <Setter Property="Template" Value="{StaticResource btnTemplate}"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="40,40,40,60" Background="White">
+        <Grid.Effect>
+            <DropShadowEffect Direction="270" BlurRadius="40" ShadowDepth="20" Color="{DynamicResource appColorDarkPink}"/>
+        </Grid.Effect>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!-- заголовок -->
+        <Border x:Name="brdTitle" Grid.Row="0" Background="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}">
+            <TextBlock x:Name="txtTitle" Grid.Row="0" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionTextBrushKey}}" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize5, Mode=OneWay}" Margin="10" FontStyle="Italic"/>
+        </Border>
+        
+        <!-- текст сообщения -->
+        <TextBlock x:Name="txtMessage" Grid.Row="1" Foreground="Black" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize2, Mode=OneWay}" Margin="50,50,50,30" TextWrapping="Wrap"/>
+
+        <!-- кнопки -->
+        <UniformGrid Grid.Row="2" Rows="1" HorizontalAlignment="Right" Margin="10,10,50,50">
+            <Button Grid.Column="0" x:Name="btnOk" Style="{StaticResource btnStyle}"
+                Content="{Binding {x:Null}, Converter={StaticResource langDictToText}, 
+                ConverterParameter=appSet.dialogBoxYesText, Mode=OneWay}" Click="btnOk_Click"/>
+
+            <Button Grid.Column="1" x:Name="btnCancel" Style="{StaticResource btnStyle}" 
+                Content="{Binding {x:Null}, Converter={StaticResource langDictToText}, 
+                ConverterParameter=appSet.dialogBoxNoText, Mode=OneWay}"
+                    Click="btnCancel_Click"/>
+        </UniformGrid>
+        
+    </Grid>
+</Window>

@@ -22,6 +22,7 @@ using System.Data.SqlClient;
 using System.Data;
 using System.Diagnostics;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Effects;
 
 namespace WpfClient
 {
@@ -30,27 +31,54 @@ namespace WpfClient
     /// </summary>
     public partial class MainWindow : Window
     {
-        // static constants
-        static double screenWidth, screenHeight;
-        static double dishPanelWidth, dishPanelMargin;
-        static double dishPanelHeaderFontSize, dishPanelTextFontSize;
-        static double dishPanelDescrButtonSize;
-        static double dishPanelHeaderRowHeight;
-        static double dishPanelImageRowHeight, dishPanelImageCornerRadius;
-        static double dishPanelGarnishesRowHeight, dishPanelGarnishBaseWidth;
-        static double dishPanelAddButtonRowHeight, dishPanelAddButtonHeight, dishPanelAddButtonTextSize;
-        static double dishPanelAddButtonShadowDepth, dishPanelAddButtonShadowBlurRadius, dishPanelAddButtonShadowCornerRadius;
-        static double dishPanelRowMargin1, dishPanelRowMargin2;
-
         static MainWindow()
         {
+            // static constants
+            double screenWidth, screenHeight;
+            double maxDialogWindowWidth;
+            double appFontSize0, appFontSize1, appFontSize2, appFontSize3, appFontSize4, appFontSize5, appFontSize6, appFontSize7;
+            double dishPanelWidth, dishPanelMargin;
+            double dishPanelHeaderFontSize, dishPanelTextFontSize;
+            double dishPanelDescrButtonSize;
+            double dishPanelHeaderRowHeight;
+            double dishPanelImageRowHeight, dishPanelImageCornerRadius;
+            double dishPanelGarnishesRowHeight, dishPanelGarnishBaseWidth;
+            double dishPanelAddButtonRowHeight, dishPanelAddButtonHeight, dishPanelAddButtonTextSize;
+            double dishPanelAddButtonShadowDepth, dishPanelAddButtonShadowBlurRadius, dishPanelAddButtonShadowCornerRadius;
+            double dishPanelRowMargin1, dishPanelRowMargin2;
+
             screenWidth = SystemParameters.PrimaryScreenWidth;
             //            screenWidth = SystemParameters.VirtualScreenWidth;
             screenHeight = SystemParameters.PrimaryScreenHeight;
             //            screenHeight = SystemParameters.VirtualScreenHeight;
 
+            AppLib.SetAppGlobalValue("screenWidth", screenWidth);
+            AppLib.SetAppGlobalValue("screenHeight", screenHeight);
+
+            maxDialogWindowWidth = 0.5 * screenWidth;
+            AppLib.SetAppGlobalValue("maxDialogWindowWidth", maxDialogWindowWidth);
+
             double dishesPanelWidth = (screenWidth / 6.0 * 5.0);
             AppLib.SetAppGlobalValue("dishesPanelWidth", dishesPanelWidth);
+
+            // РАЗМЕРЫ ШРИФТОВ
+            double minVal = Math.Min(screenWidth, screenHeight);
+            appFontSize0 = 0.055 * minVal;
+            appFontSize1 = 0.04 * minVal;
+            appFontSize2 = 0.8 * appFontSize1;
+            appFontSize3 = 0.8 * appFontSize2;
+            appFontSize4 = 0.8 * appFontSize3;
+            appFontSize5 = 0.8 * appFontSize4;
+            appFontSize6 = 0.8 * appFontSize5;
+            appFontSize7 = 0.8 * appFontSize6;
+            AppLib.SetAppGlobalValue("appFontSize0", appFontSize0);
+            AppLib.SetAppGlobalValue("appFontSize1", appFontSize1);
+            AppLib.SetAppGlobalValue("appFontSize2", appFontSize2);
+            AppLib.SetAppGlobalValue("appFontSize3", appFontSize3);
+            AppLib.SetAppGlobalValue("appFontSize4", appFontSize4);
+            AppLib.SetAppGlobalValue("appFontSize5", appFontSize5);
+            AppLib.SetAppGlobalValue("appFontSize6", appFontSize6);
+            AppLib.SetAppGlobalValue("appFontSize7", appFontSize7);
 
             //  РАЗМЕРЫ ПАНЕЛИ БЛЮДА
             // расчет ширины панели блюда
@@ -104,6 +132,13 @@ namespace WpfClient
             // размер кнопки описания блюда
             dishPanelDescrButtonSize = 0.1 * dishPanelWidth;
             AppLib.SetAppGlobalValue("dishPanelDescrButtonSize", dishPanelDescrButtonSize);
+
+            // высота панелей
+            double dishPanelHeight, dishPanelHeightWithGarnish;
+            dishPanelHeight = dishPanelHeaderRowHeight + dishPanelRowMargin1 + dishPanelImageRowHeight + dishPanelRowMargin2 + dishPanelAddButtonRowHeight;
+            dishPanelHeightWithGarnish = dishPanelHeight + dishPanelGarnishesRowHeight + dishPanelRowMargin2;
+            AppLib.SetAppGlobalValue("dishPanelHeight", dishPanelHeight);
+            AppLib.SetAppGlobalValue("dishPanelHeightWithGarnish", dishPanelHeightWithGarnish);
         }
 
         private static Logger logger = LogManager.GetCurrentClassLogger();
@@ -128,13 +163,6 @@ namespace WpfClient
         public MainWindow()
         {
             InitializeComponent();
-
-            // высота панелей
-            double dishPanelHeight, dishPanelHeightWithGarnish;
-            dishPanelHeight = dishPanelHeaderRowHeight + dishPanelRowMargin1 + dishPanelImageRowHeight + dishPanelRowMargin2 + dishPanelAddButtonRowHeight;
-            dishPanelHeightWithGarnish = dishPanelHeight + dishPanelGarnishesRowHeight + dishPanelRowMargin2;
-            AppLib.SetAppGlobalValue("dishPanelHeight", dishPanelHeight);
-            AppLib.SetAppGlobalValue("dishPanelHeightWithGarnish", dishPanelHeightWithGarnish);
 
             animDishRows = new List<double>();
             appInit();
@@ -192,8 +220,33 @@ namespace WpfClient
                 Application.Current.Shutdown(1);
             }
 
-            if (mFolders != null) initUI(mFolders);
+            // добавить некоторые постоянные тексты
+            setAppLangString();
 
+            if (mFolders != null) initUI(mFolders);
+        }
+
+        private void setAppLangString()
+        {
+            parseAndSetAllLangString("dialogBoxYesText");
+            parseAndSetAllLangString("dialogBoxNoText");
+            parseAndSetAllLangString("cartDelIngrTitle");
+            parseAndSetAllLangString("cartDelIngrQuestion");
+            parseAndSetAllLangString("cartDelDishTitle");
+            parseAndSetAllLangString("cartDelDishQuestion");
+        }
+
+        private void parseAndSetAllLangString(string resKey)
+        {
+            string resValue = AppLib.GetAppSetting(resKey);
+            if (string.IsNullOrEmpty(resValue) == true) return;
+
+            string[] aStr = resValue.Split('|');
+            if (aStr.Length != 3) return;
+
+            Dictionary<string, string> d = new Dictionary<string, string>();
+            d.Add("ru", aStr[0]); d.Add("ua", aStr[1]); d.Add("en", aStr[2]);
+            AppLib.SetAppGlobalValue(resKey, d);
         }
 
         private void initUI(ObservableCollection<AppModel.MenuItem> mFolders)
@@ -225,31 +278,6 @@ namespace WpfClient
             AppLib.SetAppGlobalValue("currentOrder", curOrder);
 
             logger.Trace("Настраиваю визуальные элементы - READY");
-
-            // DEBUG Cart
-            //DishItem curDish = mFolders[0].Dishes[6];
-            //// блюдо с гарнирами
-            //curDish.SelectedGarnishes.Add(curDish.Garnishes[1]);
-            //// и ингредиентами
-            //curDish.SelectedIngredients = new List<DishAdding>();
-            //curDish.SelectedIngredients.Add(curDish.Ingredients[0]);
-            //curDish.SelectedIngredients.Add(curDish.Ingredients[1]);
-            //curDish.SelectedIngredients.Add(curDish.Ingredients[2]);
-            //curDish.SelectedIngredients.Add(curDish.Ingredients[3]);
-
-            //DishItem orderDish = curDish.GetCopyForOrder();
-            //curOrder.Dishes.Add(orderDish);
-
-            //curOrder.Dishes.Add(mFolders[3].Dishes[0].GetCopyForOrder());
-            //curOrder.Dishes.Add(mFolders[3].Dishes[0].GetCopyForOrder());
-            //curOrder.Dishes.Add(mFolders[3].Dishes[0].GetCopyForOrder());
-            //curOrder.Dishes.Add(mFolders[3].Dishes[0].GetCopyForOrder());
-            //curOrder.Dishes.Add(mFolders[3].Dishes[0].GetCopyForOrder());
-            //curOrder.Dishes.Add(mFolders[3].Dishes[0].GetCopyForOrder());
-
-            //updatePrice();
-            //showCartWindow();
-
         }
 
         private void checkDBConnection()
@@ -671,7 +699,7 @@ namespace WpfClient
 
             int tagValue = (int)(vbButton.Tag ?? 0);   // переключатель в теге кнопки
             vbButton.Tag = (tagValue == 0) ? 1 : 0;
-                  
+
             if ((int)vbButton.Tag == 0)
             {
                 path.Fill = (SolidColorBrush)AppLib.GetAppGlobalValue("appNotSelectedItemColor");
@@ -682,18 +710,16 @@ namespace WpfClient
                 path.Fill = (SolidColorBrush)AppLib.GetAppGlobalValue("appSelectedItemColor");
                 vbText.Visibility = Visibility.Visible;
 
-                //DoubleAnimation scaleAnim = new DoubleAnimation();
-                //scaleAnim.From = 0.05;
-                //scaleAnim.To = 1;
-                //scaleAnim.DecelerationRatio = .2;
-                //scaleAnim.Duration = new Duration(TimeSpan.FromMilliseconds(2000));
-                ////if (isEasing) vertAnim.EasingFunction = new ExponentialEase() { EasingMode = EasingMode.EaseInOut };
+                DoubleAnimation blurAnim = new DoubleAnimation();
+                blurAnim.From = 40;
+                blurAnim.To = 0;
+                blurAnim.Duration = new Duration(TimeSpan.FromMilliseconds(4000));
 
-                //Storyboard sb = new Storyboard();
-                //sb.Children.Add(scaleAnim);
-                //Storyboard.SetTarget(scaleAnim, vbText);
-                //Storyboard.SetTargetProperty(scaleAnim, new PropertyPath(ScaleTransform.ScaleXProperty));
-                //sb.Begin();
+                Storyboard sb = new Storyboard();
+                sb.Children.Add(blurAnim);
+                Storyboard.SetTarget(blurAnim, vbText);
+                Storyboard.SetTargetProperty(blurAnim, new PropertyPath(BlurEffect.RadiusProperty));
+                sb.Begin();
             }
         }
 
@@ -904,12 +930,6 @@ namespace WpfClient
 
         private void btnShowCart_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (e.StylusDevice != null) return;
-            showCartWindow();
-        }
-
-        private void btnShowCart_TouchUp(object sender, TouchEventArgs e)
-        {
             showCartWindow();
         }
 
@@ -917,8 +937,9 @@ namespace WpfClient
         private void showCartWindow()
         {
             Cart cart = new Cart();
-
             cart.ShowDialog();
+
+            cart = null;
         }
 
     } // class MainWindow

@@ -41,36 +41,12 @@ namespace WpfClient
 //PreviewMouseDown > PreviewMouseUp
         private void btnClose_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (e.StylusDevice != null) return;
-
-            closeWin(e);
-        }
-        private void btnClose_PreviewTouchUp(object sender, TouchEventArgs e)
-        {
             closeWin(e);
         }
 
-        private void gridWindow_MouseUp(object sender, MouseButtonEventArgs e)
+        private void closeThisWindowHandler(object sender, MouseButtonEventArgs e)
         {
-            if (e.StylusDevice != null) return;
-            if (_isClose == true) closeWin(e);
-            else _isClose = true;
-        }
-        private void gridWindow_TouchUp(object sender, TouchEventArgs e)
-        {
-            if (_isClose == true) closeWin(e);
-            else _isClose = true;
-        }
-        private void borderMain_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            if (e.StylusDevice != null) return;
-
-            _isClose = false;
-        }
-
-        private void borderMain_TouchUp(object sender, TouchEventArgs e)
-        {
-            _isClose = false;
+            closeWin();
         }
 
         private void closeWin(RoutedEventArgs e = null)
@@ -82,12 +58,6 @@ namespace WpfClient
 
 
         private void btnAddDish_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            if (e.StylusDevice != null) return;
-
-            addDishToOrder();
-        }
-        private void btnAddDish_PreviewTouchUp(object sender, TouchEventArgs e)
         {
             addDishToOrder();
         }

@@ -1,6 +1,7 @@
 ﻿using AppModel;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -32,7 +33,7 @@ namespace WpfClient
             this.lstDishes.ItemsSource = currentOrder.Dishes;
         }
 
-        private void Window_PreviewKeyUp(object sender, KeyEventArgs e)
+        private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Escape) closeWin();
         }
@@ -177,8 +178,15 @@ namespace WpfClient
             DishAdding ingrItem = (DishAdding)ingrList.SelectedItem;
             if (ingrItem == null) return;
 
-            MessageBoxResult result = MessageBox.Show(string.Format("Удалить ингредиент\n{0} ?", ingrItem.langNames["ru"]), "Удаление ингредиента", MessageBoxButton.YesNo);
-            if (result == MessageBoxResult.Yes)
+            MessageBoxDialog msg = new MessageBoxDialog();
+            Dictionary<string, string> v = (Dictionary<string, string>)AppLib.GetAppGlobalValue("cartDelIngrTitle");
+            msg.Title = AppLib.GetLangText(v);
+            v = (Dictionary<string, string>)AppLib.GetAppGlobalValue("cartDelIngrQuestion");
+            msg.MessageText = string.Format("{0}\n{1} ?", AppLib.GetLangText(v), AppLib.GetLangText(ingrItem.langNames));
+            bool result = msg.ShowDialog();
+            msg = null;
+
+            if (result == true)
             {
                 dishItem.SelectedIngredients.Remove(ingrItem);
                 ingrList.Items.Refresh();
@@ -193,8 +201,15 @@ namespace WpfClient
             if (dishItem == null) return;
             OrderItem order = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
 
-            MessageBoxResult result = MessageBox.Show(string.Format("Удалить блюдо\n{0} ?", dishItem.langNames["ru"]), "Удаление блюда из заказа", MessageBoxButton.YesNo);
-            if (result == MessageBoxResult.Yes)
+            MessageBoxDialog msg = new MessageBoxDialog();
+            Dictionary<string, string> v = (Dictionary<string, string>)AppLib.GetAppGlobalValue("cartDelDishTitle");
+            msg.Title = AppLib.GetLangText(v);
+            v = (Dictionary<string, string>)AppLib.GetAppGlobalValue("cartDelDishQuestion");
+            msg.MessageText = string.Format("{0}\n{1} ?", AppLib.GetLangText(v), AppLib.GetLangText(dishItem.langNames));
+            bool result = msg.ShowDialog();
+            msg = null;
+
+            if (result == true)
             {
                 order.Dishes.Remove(dishItem);
                 lstDishes.Items.Refresh();
