@@ -193,12 +193,12 @@
                 <ColumnDefinition  Width="*"/>
             </Grid.ColumnDefinitions>
             <!-- тени, закрытие окна -->
-            <Border Grid.Row="0" Grid.ColumnSpan="3" Background="#88000000" MouseUp="closeThisWindowHandler"/>
-            <Border Grid.Row="2" Grid.ColumnSpan="3" Background="#88000000" MouseUp="closeThisWindowHandler"/>
-            <Border Grid.Column="0" Grid.Row="1" Background="#88000000" MouseUp="closeThisWindowHandler"/>
-            <Border Grid.Column="2" Grid.Row="1" Background="#88000000" MouseUp="closeThisWindowHandler"/>
+            <Border Grid.Row="0" Grid.ColumnSpan="3" Background="{StaticResource winShadowColor}" MouseUp="closeThisWindowHandler"/>
+            <Border Grid.Row="2" Grid.ColumnSpan="3" Background="{StaticResource winShadowColor}" MouseUp="closeThisWindowHandler"/>
+            <Border Grid.Column="0" Grid.Row="1" Background="{StaticResource winShadowColor}" MouseUp="closeThisWindowHandler"/>
+            <Border Grid.Column="2" Grid.Row="1" Background="{StaticResource winShadowColor}" MouseUp="closeThisWindowHandler"/>
 
-            <Border x:Name="borderMain" Grid.Column="1" Grid.Row="1" CornerRadius="10" Background="White"/>
+            <Border x:Name="borderMain" Grid.Column="1" Grid.Row="1" CornerRadius="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=cornerRadiusButton, Mode=OneWay}" Background="White"/>
             <Image Grid.Column="1" Grid.Row="1" Source="AppImages\bg 2ver 1080x1280.png" Stretch="UniformToFill" Opacity="0.1">
                 <Image.Effect>
                     <BlurEffect/>
@@ -340,11 +340,11 @@
                             <ColumnDefinition Width="1.5*"/>
                         </Grid.ColumnDefinitions>
                         <Border Grid.Column="0" Background="{StaticResource addButtonBackgroundPriceColor}"
-                                CornerRadius="{Binding Path=ActualHeight, Converter={StaticResource cornerRadiusLeft}, ConverterParameter=0.1, ElementName=gridAddButton, Mode=OneWay}">
+                                CornerRadius="{Binding Converter={StaticResource cornerRadiusLeft}, Mode=OneWay}">
                             <TextBlock x:Name="txtDishPrice" Style="{StaticResource addButtonTextStyle}"
                                            Text="{Binding Converter={StaticResource getDishPriceTotal}, StringFormat={StaticResource priceFormatString}}" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize2, Mode=OneWay}"/>
                         </Border>
-                        <Border Grid.Column="1" Background="{StaticResource addButtonBackgroundTextColor}"  CornerRadius="{Binding Path=ActualWidth, Converter={StaticResource cornerRadiusRight}, ConverterParameter=0.01, ElementName=gridMain, Mode=OneWay}"
+                        <Border Grid.Column="1" Background="{StaticResource addButtonBackgroundTextColor}"  CornerRadius="{Binding Converter={StaticResource cornerRadiusRight}, Mode=OneWay}"
                                     MouseUp="btnAddDish_MouseUp">
                             <TextBlock Style="{StaticResource addButtonTextStyle}"
                                 Text="{Binding {x:Null}, ConverterParameter=appSet.btnSelectDishText, Converter={StaticResource langDictToText}}" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize4, Mode=OneWay}"/>

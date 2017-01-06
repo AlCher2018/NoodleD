@@ -70,11 +70,19 @@ namespace WpfClient
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            double v1 = (double)values[0];
-            double v2 = (double)values[1];
+            if (values[0] == DependencyProperty.UnsetValue) return 1.0;
 
-            v2 = (v2 / 4.0) - 4.0;
-            return (v1 < v2) ? v1 : v2;
+            double v1 = System.Convert.ToDouble(values[0]);
+            double v2 = System.Convert.ToDouble(values[1]);
+            double retVal = Math.Min(v1, v2);
+
+            if (parameter != null)
+            {
+                double mult = System.Convert.ToDouble(parameter);
+                if (mult != 0) retVal *= mult;
+            }
+
+            return retVal;
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
@@ -178,17 +186,19 @@ namespace WpfClient
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            double d1 = 0, d2 = 0;
-            double.TryParse((value??"0").ToString(), out d1);
-            string p = (parameter ?? "0").ToString();
-            double.TryParse(p.ToString(), out d2);
-            if (d2 == 0)
-            {
-                if (p.Contains(".")) p = p.Replace('.', ',');
-                else if (p.Contains(",")) p = p.Replace(',', '.');
-                double.TryParse(p, out d2);
-            }
-            d1 *= d2;  // радиус
+            double d1 = 0; //, d2 = 0;
+            //double.TryParse((value??"0").ToString(), out d1);
+            //string p = (parameter ?? "0").ToString();
+            //double.TryParse(p.ToString(), out d2);
+            //if (d2 == 0)
+            //{
+            //    if (p.Contains(".")) p = p.Replace('.', ',');
+            //    else if (p.Contains(",")) p = p.Replace(',', '.');
+            //    double.TryParse(p, out d2);
+            //}
+            //d1 *= d2;  // радиус
+
+            d1 = (double)AppLib.GetAppGlobalValue("cornerRadiusButton");
 
             CornerRadius retVal;
             string side = (Side == null) ? "all" : Side.ToLower();

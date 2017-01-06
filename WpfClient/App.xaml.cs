@@ -14,4 +14,11 @@ namespace WpfClient
     public partial class App : Application
     {
     }
+
+
+    // ENUMS
+    public enum TakeOrderEnum
+    {
+        None, TakeAway, TakeInRestaurant
+    }
 }

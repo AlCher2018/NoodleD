@@ -36,7 +36,7 @@
             <Setter Property="BorderBrush" Value="White"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Height" Value="{Binding ElementName=leftSideGrid, Path=ActualHeight, Mode=OneWay, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.06}"/>
-            <Setter Property="CornerRadius" Value="{Binding ElementName=leftSideGrid, Path=ActualWidth, Mode=OneWay, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.03}"/>
+            <Setter Property="CornerRadius" Value="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=cornerRadiusButton, Mode=OneWay}"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Background" Value="DarkViolet" />
@@ -78,12 +78,15 @@
         
         <DataTemplate x:Key="dishItemTemplate">
             <!--панель блюда-->
-            <Border x:Name="dishItemBorder" Background="Transparent" BorderThickness="0" Height="{Binding ElementName=scrollDishes, Path=ActualHeight, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.3, Mode=OneWay}">
+            <Border x:Name="dishItemBorder" Background="Transparent" BorderThickness="0" 
+                    Height="{Binding ElementName=scrollDishes, Path=ActualHeight, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.3, Mode=OneWay}">
 
                 <DockPanel x:Name="gridDish" LastChildFill="True">
                     <!--в док-панели слева - изображение-->
                     <Border DockPanel.Dock="Left">
-                        <Rectangle StrokeThickness="0" RadiusX="10" RadiusY="10" Margin="0"
+                        <Rectangle StrokeThickness="0" Margin="0"
+                                   RadiusX="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=cornerRadiusButton, Mode=OneWay}" 
+                                   RadiusY="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=cornerRadiusButton, Mode=OneWay}"
                                 Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}, Converter={StaticResource multiplyParamConv}, ConverterParameter=1.33, Mode=OneWay}">
                             <Rectangle.Fill>
                                 <ImageBrush ImageSource="{Binding Image}" Stretch="Fill"/>
@@ -307,13 +310,13 @@
                     <ColumnDefinition Width="0.5*"/>
                 </Grid.ColumnDefinitions>
                 <Border Grid.Column="1" x:Name="brdPromoCode" Background="{StaticResource appNotSelectedItemColor}"
-                        CornerRadius="{Binding RelativeSource={RelativeSource AncestorType=Grid},Converter={StaticResource cornerRadiusLeft}, ConverterParameter=0.2, Path=ActualHeight, Mode=OneWay}"/>
+                        CornerRadius="{Binding Converter={StaticResource cornerRadiusLeft}, Mode=OneWay}"/>
                 <TextBox x:Name="txtPromoCode" Grid.Column="1" Style="{StaticResource centeredElement}" Background="Transparent" BorderThickness="0" TextWrapping="Wrap" Foreground="Black" Opacity="0.6" Margin="5,0"
                          Text="{Binding {x:Null}, Converter={StaticResource langDictToText}, ConverterParameter=appSet.invitePromoText, Mode=OneWay}"
                          FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize5, Mode= OneWay}"/>
 
                 <Border Grid.Column="2" Background="Black"
-                        CornerRadius="{Binding RelativeSource={RelativeSource AncestorType=Grid},Converter={StaticResource cornerRadiusRight}, ConverterParameter=0.2, Path=ActualHeight, Mode=OneWay}"/>
+                        CornerRadius="{Binding Converter={StaticResource cornerRadiusRight}, Mode=OneWay}"/>
                 <TextBlock x:Name="lblPromoCode" Grid.Column="2" Style="{StaticResource centeredElement}" Text="OK" Foreground="White"
                         FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize5, Mode= OneWay}"/>
             </Grid>
@@ -331,7 +334,7 @@
             </Grid>
             
             <!-- 5. кнопка Распечатать чек -->
-            <Border Grid.Row="5" Background="{DynamicResource cartButtonBackgroundColor}">
+            <Border x:Name="btnPrintCheck" Grid.Row="5" Background="{DynamicResource cartButtonBackgroundColor}" MouseDown="btnPrintCheck_MouseDown">
                 <TextBlock Grid.Row="6" Style="{StaticResource btnPrintCheckTextStyle}"/>
                 <Border.Style>
                     <Style>

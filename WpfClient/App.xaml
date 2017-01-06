@@ -29,9 +29,10 @@
         <SolidColorBrush x:Key="addButtonBackgroundPriceColor" Color="#FF931D3F"/>
         <SolidColorBrush x:Key="cartButtonBackgroundColor" Color="{StaticResource appColorCartButtom}"/>
         <SolidColorBrush x:Key="selectGarnishBackgroundColor" Color="{StaticResource appColorSelectGarnish}"/>
-        
-        <sys:String x:Key="priceFormatString">{0:#0} ₴</sys:String>
+        <SolidColorBrush x:Key="winShadowColor" Color="#88000000"/>
 
+        <sys:String x:Key="priceFormatString">{0:#0} ₴</sys:String>
+        
         <local:IsNullValueConverter x:Key="isNullValueConverter"/>
         <local:GetAppSetValue x:Key="getAppSetValue" />
         

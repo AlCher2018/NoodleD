@@ -263,6 +263,23 @@ namespace WpfClient
             }
         }  // updatePriceControl()
 
+        private void btnPrintCheck_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            TakeOrder takeOrderWin = new TakeOrder();
+            takeOrderWin.ShowDialog();
+            TakeOrderEnum takeMode = takeOrderWin.TakeOrderMode;
+            takeOrderWin = null;
+
+            if (takeMode == TakeOrderEnum.TakeAway)
+            {
+
+            }
+            else if (takeMode == TakeOrderEnum.TakeInRestaurant)
+            {
+
+            }
+        }
+
         private void updatePriceOrder()
         {
             BindingExpression be = txtOrderPrice.GetBindingExpression(TextBlock.TextProperty);

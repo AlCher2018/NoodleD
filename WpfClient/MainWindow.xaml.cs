@@ -33,20 +33,18 @@ namespace WpfClient
     {
         static MainWindow()
         {
-            // static constants
-            double screenWidth, screenHeight;
-            double maxDialogWindowWidth;
-            double appFontSize0, appFontSize1, appFontSize2, appFontSize3, appFontSize4, appFontSize5, appFontSize6, appFontSize7;
-            double dishPanelWidth, dishPanelMargin;
+            double dVar;
+            
             double dishPanelHeaderFontSize, dishPanelTextFontSize;
             double dishPanelDescrButtonSize;
             double dishPanelHeaderRowHeight;
-            double dishPanelImageRowHeight, dishPanelImageCornerRadius;
+            double dishPanelImageRowHeight;
             double dishPanelGarnishesRowHeight, dishPanelGarnishBaseWidth;
             double dishPanelAddButtonRowHeight, dishPanelAddButtonHeight, dishPanelAddButtonTextSize;
             double dishPanelAddButtonShadowDepth, dishPanelAddButtonShadowBlurRadius, dishPanelAddButtonShadowCornerRadius;
             double dishPanelRowMargin1, dishPanelRowMargin2;
 
+            double screenWidth, screenHeight;
             screenWidth = SystemParameters.PrimaryScreenWidth;
             //            screenWidth = SystemParameters.VirtualScreenWidth;
             screenHeight = SystemParameters.PrimaryScreenHeight;
@@ -55,13 +53,20 @@ namespace WpfClient
             AppLib.SetAppGlobalValue("screenWidth", screenWidth);
             AppLib.SetAppGlobalValue("screenHeight", screenHeight);
 
-            maxDialogWindowWidth = 0.5 * screenWidth;
-            AppLib.SetAppGlobalValue("maxDialogWindowWidth", maxDialogWindowWidth);
+            // углы закругления
+            dVar = 0.005 * screenWidth;
+            AppLib.SetAppGlobalValue("cornerRadiusButton", dVar);
+            AppLib.SetAppGlobalValue("cornerRadiusGarnish", 0.5 * dVar);
+            AppLib.SetAppGlobalValue("cornerRadiusDishPanel", 2 * dVar);
+
+            dVar = 0.5 * screenWidth;
+            AppLib.SetAppGlobalValue("maxDialogWindowWidth", dVar);
 
             double dishesPanelWidth = (screenWidth / 6.0 * 5.0);
-            AppLib.SetAppGlobalValue("dishesPanelWidth", dishesPanelWidth);
+            AppLib.SetAppGlobalValue("dishesPanelWidth", dVar);
 
             // РАЗМЕРЫ ШРИФТОВ
+            double appFontSize0, appFontSize1, appFontSize2, appFontSize3, appFontSize4, appFontSize5, appFontSize6, appFontSize7;
             double minVal = Math.Min(screenWidth, screenHeight);
             appFontSize0 = 0.055 * minVal;
             appFontSize1 = 0.04 * minVal;
@@ -82,6 +87,7 @@ namespace WpfClient
 
             //  РАЗМЕРЫ ПАНЕЛИ БЛЮДА
             // расчет ширины панели блюда
+            double dishPanelWidth, dishPanelMargin;
             dishPanelWidth = 0.95 * dishesPanelWidth / 3.18;  // 3x + 6*0.03x - ширина панелей + отступ слева/справа 
             AppLib.SetAppGlobalValue("dishPanelWidth", dishPanelWidth);
             // расстояние между панелями
@@ -94,9 +100,6 @@ namespace WpfClient
             // высота строки изображения
             dishPanelImageRowHeight = 0.83 * dishPanelWidth;
             AppLib.SetAppGlobalValue("dishPanelImageRowHeight", dishPanelImageRowHeight);
-            // радиус загругления уголков изображения
-            dishPanelImageCornerRadius = 0.05 * dishPanelWidth;
-            AppLib.SetAppGlobalValue("dishPanelImageCornerRadius", dishPanelImageCornerRadius);
             // высота строки гарниров
             dishPanelGarnishesRowHeight = 0.2 * dishPanelWidth;
             AppLib.SetAppGlobalValue("dishPanelGarnishesRowHeight", dishPanelGarnishesRowHeight);
@@ -166,6 +169,7 @@ namespace WpfClient
 
             animDishRows = new List<double>();
             appInit();
+
         }
 
         private void appInit()
@@ -234,6 +238,9 @@ namespace WpfClient
             parseAndSetAllLangString("cartDelIngrQuestion");
             parseAndSetAllLangString("cartDelDishTitle");
             parseAndSetAllLangString("cartDelDishQuestion");
+            parseAndSetAllLangString("wordOr");
+            parseAndSetAllLangString("takeOrderOut");
+            parseAndSetAllLangString("takeOrderIn");
         }
 
         private void parseAndSetAllLangString(string resKey)
@@ -640,6 +647,7 @@ namespace WpfClient
 
             txtDishWithIngrHandler(sender);
         }
+
         // клик по кнопке
         private void txtDishWithIngrHandler(object sender)
         {
@@ -655,6 +663,64 @@ namespace WpfClient
 
                 // снять выделение
                 this.clearSelectedDish();
+
+                // нарисовать путь
+                FrameworkElement dishPanel = AppLib.FindLogicalParentByName((FrameworkElement)sender, "dishItemBorder", 4);
+                if (dishPanel != null)
+                {
+                    Point fromCenterPoint, toCenterPoint;
+                    Point fromBasePoint = dishPanel.PointToScreen(new Point(0, 0));
+                    Size fromSize = dishPanel.RenderSize;
+                    fromCenterPoint = new Point(fromBasePoint.X + fromSize.Width / 2.0, fromBasePoint.Y + fromSize.Height / 2.0);
+
+                    Point toBasePoint = brdMakeOrder.PointToScreen(new Point(0, 0));
+                    Size toSize = brdMakeOrder.RenderSize;
+                    toCenterPoint = new Point(toBasePoint.X + toSize.Width / 2.0, toBasePoint.Y + toSize.Height / 2.0);
+
+                    Panel.SetZIndex(cnvAnim, 10);
+                    Ellipse spotFrom = new Ellipse();
+                    spotFrom.Height = 50;spotFrom.Width = 50;
+                    spotFrom.Fill = new SolidColorBrush(Colors.Aqua);
+                    cnvAnim.Children.Add(spotFrom);
+                    Canvas.SetLeft(spotFrom, fromCenterPoint.X - spotFrom.Width / 2f);
+                    Canvas.SetTop(spotFrom, fromCenterPoint.Y - spotFrom.Height / 2f);
+
+                    Ellipse spotTo = new Ellipse();
+                    spotTo.Height = 50; spotTo.Width = 50;
+                    spotTo.Fill = new SolidColorBrush(Colors.Aqua);
+                    cnvAnim.Children.Add(spotTo);
+                    Canvas.SetLeft(spotTo, toCenterPoint.X - spotTo.Width / 2f);
+                    Canvas.SetTop(spotTo, toCenterPoint.Y - spotTo.Height / 2f);
+
+                    PathGeometry path = new PathGeometry();
+
+                    PathFigure pathFigure = new PathFigure();
+                    pathFigure.StartPoint = fromCenterPoint;
+                    pathFigure.IsClosed = true;
+                    BezierSegment curve = new BezierSegment(new Point(fromCenterPoint.X - 30, fromCenterPoint.Y - 30), new Point(toCenterPoint.X-10, toCenterPoint.Y+50), toCenterPoint, false);
+                    pathFigure.Segments.Add(curve);
+                    path.Figures.Add(pathFigure);
+
+                    System.Windows.Shapes.Path p = new System.Windows.Shapes.Path();
+                    p.Stroke = Brushes.Red;
+                    p.StrokeThickness = 5f;
+                    p.Data = path;
+                    cnvAnim.Children.Add(p); // Here
+
+
+                    ColorAnimation colorAnim = new ColorAnimation(Colors.Aqua, Colors.Red, TimeSpan.FromMilliseconds(2000));
+                    //spotTo.Fill.BeginAnimation(SolidColorBrush.ColorProperty, colorAnim);
+                    
+                    Storyboard sb = new Storyboard();
+                    PropertyPath colorTargetPath = new PropertyPath("(Ellipse.Fill).(SolidColorBrush.Color)");
+                    Storyboard.SetTarget(colorAnim, spotTo);
+                    Storyboard.SetTargetProperty(colorAnim, colorTargetPath);
+                    sb.Children.Add(colorAnim);
+                    sb.AutoReverse = true;
+                    sb.Begin();
+
+                }
+
                 // и обновить стоимость заказа
                 updatePrice();
             }
@@ -690,37 +756,55 @@ namespace WpfClient
         private void btnShowDishDescriptionHandler(object sender)
         {
             FrameworkElement vBox = (FrameworkElement)sender;
-            FrameworkElement gridDescr = AppLib.FindLogicalParentByName(vBox, "dishDescrText", 3);
-
-            Viewbox[] vbArr = AppLib.FindLogicalChildren<Viewbox>(gridDescr).ToArray();
-            Viewbox vbText = vbArr[0];
-            Viewbox vbButton = vbArr[1];
-            System.Windows.Shapes.Path path = AppLib.FindLogicalChildren<System.Windows.Shapes.Path>(vbButton).First();
-
-            int tagValue = (int)(vbButton.Tag ?? 0);   // переключатель в теге кнопки
-            vbButton.Tag = (tagValue == 0) ? 1 : 0;
-
-            if ((int)vbButton.Tag == 0)
+            if (vBox.Name != "vboxDishDescrButton")
             {
-                path.Fill = (SolidColorBrush)AppLib.GetAppGlobalValue("appNotSelectedItemColor");
-                vbText.Visibility = Visibility.Collapsed;
-            }
-            else
-            {
-                path.Fill = (SolidColorBrush)AppLib.GetAppGlobalValue("appSelectedItemColor");
-                vbText.Visibility = Visibility.Visible;
+                FrameworkElement gridDescr = AppLib.FindLogicalParentByName(vBox, "gridDescr", 3);
+                Viewbox[] vbArr = AppLib.FindLogicalChildren<Viewbox>(gridDescr).ToArray();
+                Viewbox vbText = vbArr[0];
+                Viewbox vbButton = vbArr[1];
 
-                DoubleAnimation blurAnim = new DoubleAnimation();
-                blurAnim.From = 40;
-                blurAnim.To = 0;
-                blurAnim.Duration = new Duration(TimeSpan.FromMilliseconds(4000));
-
-                Storyboard sb = new Storyboard();
-                sb.Children.Add(blurAnim);
-                Storyboard.SetTarget(blurAnim, vbText);
-                Storyboard.SetTargetProperty(blurAnim, new PropertyPath(BlurEffect.RadiusProperty));
-                sb.Begin();
+                vBox = vbButton;
             }
+
+            string tagValue = (vBox.Tag ?? "0").ToString();
+            vBox.Tag = (tagValue == "0") ? "1" : "0";
+
+            //DoubleAnimation blurAnim = new DoubleAnimation();
+            //blurAnim.To = 0;
+            //blurAnim.Duration = new Duration(TimeSpan.FromSeconds(2));
+            //blurAnim.AutoReverse = true;
+
+            //Storyboard sb = new Storyboard();
+            //sb.Children.Add(blurAnim);
+            //Storyboard.SetTarget(blurAnim, infSymbol);
+            //Storyboard.SetTargetProperty(blurAnim, new PropertyPath(BlurEffect.RadiusProperty));
+            //sb.Begin();
+
+
+
+            //int tagValue = (int)(vbButton.Tag ?? 0);   // переключатель в теге кнопки
+            //vbButton.Tag = (tagValue == 0) ? 1 : 0;
+
+            //if ((int)vbButton.Tag == 0)
+            //{
+            //    path.Fill = (SolidColorBrush)AppLib.GetAppGlobalValue("appNotSelectedItemColor");
+            //    //vbText.Visibility = Visibility.Collapsed;
+            //}
+            //else
+            //{
+            //    path.Fill = (SolidColorBrush)AppLib.GetAppGlobalValue("appSelectedItemColor");
+            //    //vbText.Visibility = Visibility.Visible;
+
+            //    //DoubleAnimation blurAnim = new DoubleAnimation();
+            //    //blurAnim.To = 0;
+            //    //blurAnim.Duration = new Duration(TimeSpan.FromMilliseconds(4000));
+
+            //    //Storyboard sb = new Storyboard();
+            //    //sb.Children.Add(blurAnim);
+            //    //Storyboard.SetTarget(blurAnim, vbText);
+            //    //Storyboard.SetTargetProperty(blurAnim, new PropertyPath(BlurEffect.RadiusProperty));
+            //    //sb.Begin();
+            //}
         }
 
         #endregion
@@ -926,6 +1010,11 @@ namespace WpfClient
         {
             BindingExpression be = this.txtOrderPrice.GetBindingExpression(TextBlock.TextProperty);
             be.UpdateTarget();
+        }
+
+        private void Image_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            this.Close();
         }
 
         private void btnShowCart_MouseUp(object sender, MouseButtonEventArgs e)
