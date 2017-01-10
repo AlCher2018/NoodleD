@@ -22,14 +22,5 @@ namespace WpfClient.Properties {
                 return defaultInstance;
             }
         }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1")]
-        public int LangIdDefault {
-            get {
-                return ((int)(this["LangIdDefault"]));
-            }
-        }
     }
 }

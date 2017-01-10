@@ -22,6 +22,7 @@ namespace WpfClient
                 return null;
         }
 
+        // return "ru", "ua" or "en"
         public static string AppLang {
             get { return (string)GetAppGlobalValue("currentAppLang"); }
             set { SetAppGlobalValue("currentAppLang", (string)value); }

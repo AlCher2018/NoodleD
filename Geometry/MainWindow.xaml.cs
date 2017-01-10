@@ -34,6 +34,10 @@ namespace Geometry
         {
             InitializeComponent();
 
+            var v1 = System.Configuration.ConfigurationManager.AppSettings;
+            System.Configuration.ConfigurationManager.AppSettings.Set("newAppSettong", "nnnnnn");
+
+
             _garnList = new List<Viewbox>();
             foreach (Viewbox item in FindLogicalChildren<Viewbox>(this))
             {

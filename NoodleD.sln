@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfClient", "WpfClient\WpfClient.csproj", "{52E67C8A-CEA1-48B9-9AB7-3E8F0F160230}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ND_SSDhor", "WpfClient\ND_SSDhor.csproj", "{52E67C8A-CEA1-48B9-9AB7-3E8F0F160230}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfAdmin", "WpfAdmin\WpfAdmin.csproj", "{408A5785-9157-4658-8799-84F7FAB93AEA}"
 EndProject

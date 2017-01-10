@@ -205,9 +205,8 @@ namespace WpfClient
                     logger.Trace("invoke initCurrentSettings(db)");
                     initCurrentSettings(db);
 
-                    // получить язык UI
-                    string langId = (string)AppLib.GetAppGlobalValue("langButtonDefaultId");
-                    AppLib.AppLang = langId;
+                    // получить язык UI из config-файла и сохранить его 
+                    AppLib.AppLang = AppLib.GetAppSetting("langDefault");
 
                     // получить данные с SQL во внутренние объекты
                     logger.Trace("invoke MenuLib.GetMenuMainFolders()");
@@ -241,6 +240,8 @@ namespace WpfClient
             parseAndSetAllLangString("wordOr");
             parseAndSetAllLangString("takeOrderOut");
             parseAndSetAllLangString("takeOrderIn");
+
+            parseAndSetAllLangString("CurrencyName");
         }
 
         private void parseAndSetAllLangString(string resKey)
@@ -693,31 +694,35 @@ namespace WpfClient
                     Canvas.SetTop(spotTo, toCenterPoint.Y - spotTo.Height / 2f);
 
                     PathGeometry path = new PathGeometry();
-
                     PathFigure pathFigure = new PathFigure();
                     pathFigure.StartPoint = fromCenterPoint;
-                    pathFigure.IsClosed = true;
-                    BezierSegment curve = new BezierSegment(new Point(fromCenterPoint.X - 30, fromCenterPoint.Y - 30), new Point(toCenterPoint.X-10, toCenterPoint.Y+50), toCenterPoint, false);
+                    pathFigure.IsClosed = false;
+
+                    double dX = fromCenterPoint.X - toCenterPoint.X;
+                    double dY = toCenterPoint.Y - fromCenterPoint.Y;
+                    Point p1 = new Point(fromCenterPoint.X - 0.3*dX, fromCenterPoint.Y - 0.3*dY);
+                    Point p2 = new Point(toCenterPoint.X + 0.05*dX, toCenterPoint.Y - 0.8*dY);
+                    BezierSegment curve = new BezierSegment(p1, p2, toCenterPoint, true);
                     pathFigure.Segments.Add(curve);
                     path.Figures.Add(pathFigure);
 
                     System.Windows.Shapes.Path p = new System.Windows.Shapes.Path();
                     p.Stroke = Brushes.Red;
-                    p.StrokeThickness = 5f;
+                    p.StrokeThickness = 4f;
                     p.Data = path;
                     cnvAnim.Children.Add(p); // Here
 
-
                     ColorAnimation colorAnim = new ColorAnimation(Colors.Aqua, Colors.Red, TimeSpan.FromMilliseconds(2000));
-                    //spotTo.Fill.BeginAnimation(SolidColorBrush.ColorProperty, colorAnim);
+                    colorAnim.Completed += ColorAnim_Completed;
+                    spotTo.Fill.BeginAnimation(SolidColorBrush.ColorProperty, colorAnim);
                     
-                    Storyboard sb = new Storyboard();
-                    PropertyPath colorTargetPath = new PropertyPath("(Ellipse.Fill).(SolidColorBrush.Color)");
-                    Storyboard.SetTarget(colorAnim, spotTo);
-                    Storyboard.SetTargetProperty(colorAnim, colorTargetPath);
-                    sb.Children.Add(colorAnim);
-                    sb.AutoReverse = true;
-                    sb.Begin();
+                    //Storyboard sb = new Storyboard();
+                    //PropertyPath colorTargetPath = new PropertyPath("(Ellipse.Fill).(SolidColorBrush.Color)");
+                    //Storyboard.SetTarget(colorAnim, spotTo);
+                    //Storyboard.SetTargetProperty(colorAnim, colorTargetPath);
+                    //sb.Children.Add(colorAnim);
+                    //sb.AutoReverse = true;
+                    //sb.Begin();
 
                 }
 
@@ -742,6 +747,12 @@ namespace WpfClient
 
                 popupWin.ShowDialog();
             }
+        }
+
+        private void ColorAnim_Completed(object sender, EventArgs e)
+        {
+            cnvAnim.Children.Clear();
+            Panel.SetZIndex(cnvAnim, -1);
         }
         #endregion
 

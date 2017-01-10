@@ -9,6 +9,9 @@ namespace AppModel
     // класс для хранения выбранных пунктов меню (блюд)
     public class OrderItem
     {
+        public int OrderNumberForPrint { get; set; }
+        public DateTime OrderDate { get; set; }
+
         private List<DishItem> _disheItems;
 
         public List<DishItem> Dishes { get { return _disheItems; } }

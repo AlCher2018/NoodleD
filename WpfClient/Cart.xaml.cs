@@ -24,13 +24,14 @@ namespace WpfClient
         // dragging
         Point? lastDragPoint, initDragPoint;
         protected DateTime _dateTime;
+        OrderItem _order;
 
         public Cart()
         {
             InitializeComponent();
 
-            OrderItem currentOrder = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
-            this.lstDishes.ItemsSource = currentOrder.Dishes;
+            _order = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
+            this.lstDishes.ItemsSource = _order.Dishes;
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
@@ -263,6 +264,7 @@ namespace WpfClient
             }
         }  // updatePriceControl()
 
+        // ПЕЧАТЬ чека
         private void btnPrintCheck_MouseDown(object sender, MouseButtonEventArgs e)
         {
             TakeOrder takeOrderWin = new TakeOrder();
@@ -278,6 +280,10 @@ namespace WpfClient
             {
 
             }
+
+            PrintBill prn = new PrintBill(_order);
+            string errMsg = null;
+            bool result = prn.CreateBill(out errMsg);
         }
 
         private void updatePriceOrder()

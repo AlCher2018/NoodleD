@@ -264,11 +264,19 @@ namespace AppModel
             return other;
         }
 
-        public decimal GetTotalPrice()
+        public decimal GetPrice()
         {
-            decimal retVal=this.Price;
+            decimal retVal = this.Price;
             if ((SelectedGarnishes != null) && (SelectedGarnishes.Count > 0))
                 retVal = SelectedGarnishes[0].Price;
+            // добавить ингредиенты
+            if (SelectedIngredients != null) foreach (DishAdding item in this.SelectedIngredients) retVal += item.Price;
+            return retVal;
+        }
+
+        public decimal GetTotalPrice()
+        {
+            decimal retVal=this.GetPrice();
             // добавить ингредиенты
             if (SelectedIngredients != null) foreach (DishAdding item in this.SelectedIngredients) retVal += item.Price;
             // добавить рекомендованные блюда
