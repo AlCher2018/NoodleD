@@ -39,6 +39,15 @@ namespace AppModel
             return _disheItems.Any(d => d.RowGUID == checkingItem.RowGUID);
         }
 
+        public decimal GetOrderValue()
+        {
+            decimal retVal = 0;
+            if (this.Dishes != null)
+                foreach (DishItem item in Dishes) retVal += item.GetValueInOrder();
+
+            return retVal;
+        }
+
     } // class CurrentOrder
 
 }

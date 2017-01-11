@@ -87,11 +87,12 @@ namespace WpfClient
 
             //  РАЗМЕРЫ ПАНЕЛИ БЛЮДА
             // расчет ширины панели блюда
-            double dishPanelWidth, dishPanelMargin;
+            double dishPanelWidth;
             dishPanelWidth = 0.95 * dishesPanelWidth / 3.18;  // 3x + 6*0.03x - ширина панелей + отступ слева/справа 
             AppLib.SetAppGlobalValue("dishPanelWidth", dishPanelWidth);
             // расстояние между панелями
-            dishPanelMargin = 0.03 * dishPanelWidth;
+            dVar = 0.03 * dishPanelWidth;
+            Thickness dishPanelMargin = new Thickness(dVar, 0, dVar, 0);
             AppLib.SetAppGlobalValue("dishPanelMargin", dishPanelMargin);
 
             // высота строки заголовка
@@ -147,6 +148,7 @@ namespace WpfClient
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
         // runtime
+        private OrderItem _currentOrder;
         private DishItem _curDishItem;
         // visual elements
         System.Windows.Shapes.Path _curGarnishBorder;
@@ -169,7 +171,6 @@ namespace WpfClient
 
             animDishRows = new List<double>();
             appInit();
-
         }
 
         private void appInit()
@@ -223,10 +224,22 @@ namespace WpfClient
                 Application.Current.Shutdown(1);
             }
 
+            // прочие настройки
+            AppLib.SaveAppSettingToProps("ssdID", null);   // идентификатор устройства самообслуживания
+            AppLib.SaveAppSettingToProps("CurrencyChar", null);   // символ денежной единицы
+            AppLib.SaveAppSettingToProps("BillPageWidht", typeof(int));
+            AppLib.SaveAppSettingToPropTypeBool("IsPrintBarCode");
+            
             // добавить некоторые постоянные тексты
             setAppLangString();
 
             if (mFolders != null) initUI(mFolders);
+
+            // создать текущий заказ
+            _currentOrder = new OrderItem();
+            AppLib.SetAppGlobalValue("currentOrder", _currentOrder);
+
+            updatePrice();
         }
 
         private void setAppLangString()
@@ -280,10 +293,6 @@ namespace WpfClient
 
             // установить язык UI
             selectAppLang(null);
-
-            // создать текущий заказ
-            OrderItem curOrder = new OrderItem();
-            AppLib.SetAppGlobalValue("currentOrder", curOrder);
 
             logger.Trace("Настраиваю визуальные элементы - READY");
         }
@@ -658,9 +667,8 @@ namespace WpfClient
             // если нет ингредиентов, то сразу в корзину
             if ((selDishItem.Ingredients == null) || (selDishItem.Ingredients.Count == 0))
             {
-                OrderItem curOrder = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
                 DishItem orderDish = selDishItem.GetCopyForOrder();
-                curOrder.Dishes.Add(orderDish);
+                _currentOrder.Dishes.Add(orderDish);
 
                 // снять выделение
                 this.clearSelectedDish();
@@ -669,52 +677,13 @@ namespace WpfClient
                 FrameworkElement dishPanel = AppLib.FindLogicalParentByName((FrameworkElement)sender, "dishItemBorder", 4);
                 if (dishPanel != null)
                 {
-                    Point fromCenterPoint, toCenterPoint;
-                    Point fromBasePoint = dishPanel.PointToScreen(new Point(0, 0));
-                    Size fromSize = dishPanel.RenderSize;
-                    fromCenterPoint = new Point(fromBasePoint.X + fromSize.Width / 2.0, fromBasePoint.Y + fromSize.Height / 2.0);
+                    System.Windows.Shapes.Path animPath = getAnimPath(dishPanel);
 
-                    Point toBasePoint = brdMakeOrder.PointToScreen(new Point(0, 0));
-                    Size toSize = brdMakeOrder.RenderSize;
-                    toCenterPoint = new Point(toBasePoint.X + toSize.Width / 2.0, toBasePoint.Y + toSize.Height / 2.0);
+                    //cnvAnim.Children.Add(animPath);
 
-                    Panel.SetZIndex(cnvAnim, 10);
-                    Ellipse spotFrom = new Ellipse();
-                    spotFrom.Height = 50;spotFrom.Width = 50;
-                    spotFrom.Fill = new SolidColorBrush(Colors.Aqua);
-                    cnvAnim.Children.Add(spotFrom);
-                    Canvas.SetLeft(spotFrom, fromCenterPoint.X - spotFrom.Width / 2f);
-                    Canvas.SetTop(spotFrom, fromCenterPoint.Y - spotFrom.Height / 2f);
-
-                    Ellipse spotTo = new Ellipse();
-                    spotTo.Height = 50; spotTo.Width = 50;
-                    spotTo.Fill = new SolidColorBrush(Colors.Aqua);
-                    cnvAnim.Children.Add(spotTo);
-                    Canvas.SetLeft(spotTo, toCenterPoint.X - spotTo.Width / 2f);
-                    Canvas.SetTop(spotTo, toCenterPoint.Y - spotTo.Height / 2f);
-
-                    PathGeometry path = new PathGeometry();
-                    PathFigure pathFigure = new PathFigure();
-                    pathFigure.StartPoint = fromCenterPoint;
-                    pathFigure.IsClosed = false;
-
-                    double dX = fromCenterPoint.X - toCenterPoint.X;
-                    double dY = toCenterPoint.Y - fromCenterPoint.Y;
-                    Point p1 = new Point(fromCenterPoint.X - 0.3*dX, fromCenterPoint.Y - 0.3*dY);
-                    Point p2 = new Point(toCenterPoint.X + 0.05*dX, toCenterPoint.Y - 0.8*dY);
-                    BezierSegment curve = new BezierSegment(p1, p2, toCenterPoint, true);
-                    pathFigure.Segments.Add(curve);
-                    path.Figures.Add(pathFigure);
-
-                    System.Windows.Shapes.Path p = new System.Windows.Shapes.Path();
-                    p.Stroke = Brushes.Red;
-                    p.StrokeThickness = 4f;
-                    p.Data = path;
-                    cnvAnim.Children.Add(p); // Here
-
-                    ColorAnimation colorAnim = new ColorAnimation(Colors.Aqua, Colors.Red, TimeSpan.FromMilliseconds(2000));
-                    colorAnim.Completed += ColorAnim_Completed;
-                    spotTo.Fill.BeginAnimation(SolidColorBrush.ColorProperty, colorAnim);
+                    //ColorAnimation colorAnim = new ColorAnimation(Colors.Aqua, Colors.Red, TimeSpan.FromMilliseconds(2000));
+                    //colorAnim.Completed += ColorAnim_Completed;
+                    //spotTo.Fill.BeginAnimation(SolidColorBrush.ColorProperty, colorAnim);
                     
                     //Storyboard sb = new Storyboard();
                     //PropertyPath colorTargetPath = new PropertyPath("(Ellipse.Fill).(SolidColorBrush.Color)");
@@ -732,7 +701,7 @@ namespace WpfClient
             else
             {
                 // иначе через "всплывашку"
-                DishPopup popupWin = new DishPopup();
+                DishPopup popupWin = new DishPopup(_curDishItem);
                 // размеры
                 FrameworkElement pnlClient = this.Content as FrameworkElement;
                 popupWin.Height = pnlClient.ActualHeight;
@@ -741,9 +710,6 @@ namespace WpfClient
                 Point p = this.PointToScreen(new Point(0, 0));
                 popupWin.Left = p.X;
                 popupWin.Top = p.Y;
-
-                // установить контекст окна - текущий DishItem
-                popupWin.DataContext = _curDishItem;  // контекст данных
 
                 popupWin.ShowDialog();
             }
@@ -754,13 +720,59 @@ namespace WpfClient
             cnvAnim.Children.Clear();
             Panel.SetZIndex(cnvAnim, -1);
         }
+        private System.Windows.Shapes.Path getAnimPath(FrameworkElement dishPanel)
+        {
+            Point fromCenterPoint, toCenterPoint;
+            Point fromBasePoint = dishPanel.PointToScreen(new Point(0, 0));
+            Size fromSize = dishPanel.RenderSize;
+            fromCenterPoint = new Point(fromBasePoint.X + fromSize.Width / 2.0, fromBasePoint.Y + fromSize.Height / 2.0);
+
+            Point toBasePoint = brdMakeOrder.PointToScreen(new Point(0, 0));
+            Size toSize = brdMakeOrder.RenderSize;
+            toCenterPoint = new Point(toBasePoint.X + toSize.Width / 2.0, toBasePoint.Y + toSize.Height / 2.0);
+
+            //Panel.SetZIndex(cnvAnim, 10);
+            Ellipse spotFrom = new Ellipse();
+            spotFrom.Height = 50; spotFrom.Width = 50;
+            spotFrom.Fill = new SolidColorBrush(Colors.Aqua);
+            //cnvAnim.Children.Add(spotFrom);
+            Canvas.SetLeft(spotFrom, fromCenterPoint.X - spotFrom.Width / 2f);
+            Canvas.SetTop(spotFrom, fromCenterPoint.Y - spotFrom.Height / 2f);
+
+            Ellipse spotTo = new Ellipse();
+            spotTo.Height = 50; spotTo.Width = 50;
+            spotTo.Fill = new SolidColorBrush(Colors.Aqua);
+            //cnvAnim.Children.Add(spotTo);
+            Canvas.SetLeft(spotTo, toCenterPoint.X - spotTo.Width / 2f);
+            Canvas.SetTop(spotTo, toCenterPoint.Y - spotTo.Height / 2f);
+
+            PathGeometry path = new PathGeometry();
+            PathFigure pathFigure = new PathFigure();
+            pathFigure.StartPoint = fromCenterPoint;
+            pathFigure.IsClosed = false;
+
+            double dX = fromCenterPoint.X - toCenterPoint.X;
+            double dY = toCenterPoint.Y - fromCenterPoint.Y;
+            Point p1 = new Point(fromCenterPoint.X - 0.3 * dX, fromCenterPoint.Y - 0.3 * dY);
+            Point p2 = new Point(toCenterPoint.X + 0.05 * dX, toCenterPoint.Y - 0.8 * dY);
+            BezierSegment curve = new BezierSegment(p1, p2, toCenterPoint, true);
+            pathFigure.Segments.Add(curve);
+            path.Figures.Add(pathFigure);
+
+            System.Windows.Shapes.Path p = new System.Windows.Shapes.Path();
+            p.Stroke = Brushes.Red;
+            p.StrokeThickness = 4f;
+            p.Data = path;
+
+            return p;
+        }
         #endregion
 
         #region btnShowDishDescriptionHandler
         private void btnShowDishDescription_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint) == false) { lastDragPoint = null; return; }
-
+            
             btnShowDishDescriptionHandler(sender);
         }
 
@@ -1019,8 +1031,7 @@ namespace WpfClient
         // обновить стоимость заказа
         public void updatePrice()
         {
-            BindingExpression be = this.txtOrderPrice.GetBindingExpression(TextBlock.TextProperty);
-            be.UpdateTarget();
+            txtOrderPrice.Text = AppLib.GetCostUIText(_currentOrder.GetOrderValue());
         }
 
         private void Image_MouseUp(object sender, MouseButtonEventArgs e)

@@ -24,14 +24,16 @@ namespace WpfClient
         // dragging
         Point? lastDragPoint, initDragPoint;
         protected DateTime _dateTime;
-        OrderItem _order;
+        OrderItem _currentOrder;
 
         public Cart()
         {
             InitializeComponent();
 
-            _order = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
-            this.lstDishes.ItemsSource = _order.Dishes;
+            _currentOrder = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
+            this.lstDishes.ItemsSource = _currentOrder.Dishes;
+
+            updatePriceOrder();
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
@@ -272,29 +274,18 @@ namespace WpfClient
             TakeOrderEnum takeMode = takeOrderWin.TakeOrderMode;
             takeOrderWin = null;
 
-            if (takeMode == TakeOrderEnum.TakeAway)
-            {
-
-            }
-            else if (takeMode == TakeOrderEnum.TakeInRestaurant)
-            {
-
-            }
-
-            PrintBill prn = new PrintBill(_order);
+            PrintBill prn = new PrintBill(_currentOrder, takeMode);
             string errMsg = null;
             bool result = prn.CreateBill(out errMsg);
         }
 
         private void updatePriceOrder()
         {
-            BindingExpression be = txtOrderPrice.GetBindingExpression(TextBlock.TextProperty);
-            be.UpdateTarget();
+            txtOrderPrice.Text = AppLib.GetCostUIText(_currentOrder.GetOrderValue());
 
             // также обновить на главном меню
             MainWindow mainWin = (MainWindow)Application.Current.MainWindow;
-            be = mainWin.txtOrderPrice.GetBindingExpression(TextBlock.TextProperty);
-            be.UpdateTarget();
+            mainWin.txtOrderPrice.Text = AppLib.GetCostUIText(_currentOrder.GetOrderValue());
         }
 
     }

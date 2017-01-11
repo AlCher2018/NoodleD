@@ -50,9 +50,6 @@
         <local:GarnishLangTextConverter x:Key="garnishLangTextConverter"/>
         <local:GarnishPriceConverter x:Key="garnishPriceConverter"/>
 
-        <local:GetDishPriceTotal x:Key="getDishPriceTotal"/>
-        <local:GetOrderPrice x:Key="getOrderPrice"/>
-
         <local:GetMargin x:Key="getMargin"/>
         <local:ConverterChain x:Key="converterChain"/>
 

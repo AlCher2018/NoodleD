@@ -4,6 +4,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Diagnostics;
 
 namespace AppModel
 {
@@ -49,14 +51,23 @@ namespace AppModel
         {
             ObservableCollection<MenuItem> retVal = new ObservableCollection<MenuItem>();
             int fieldTypeId = 1;
-            foreach (MenuFolder item in
-                from m in _listMenu orderby m.RowPosition where m.ParentId == 0 select m)
+            List<MenuFolder> lsort = (from m in _listMenu orderby m.RowPosition where m.ParentId == 0 select m).ToList();
+
+            foreach (MenuFolder item in lsort)
             {
                 MenuItem mi = new MenuItem() { MenuFolder = item };
                 mi.langNames = getLangTextDict(item.RowGUID, fieldTypeId);
 
                 // добавить блюда к пункту меню
-                mi.Dishes = getDishes(item.RowGUID, item.Id);
+                try
+                {
+                    mi.Dishes = getDishes(item.RowGUID, item.Id);
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show("Ошибка доступа к данным в MenuLib.GetMenuMainFolders()\n" + e.Message + "\n" + e.StackTrace + "\nПрограмма будет закрыта.");
+                    throw;
+                }
 
                 retVal.Add(mi);
             }
@@ -71,7 +82,7 @@ namespace AppModel
             foreach (StringValue item in
                 from val in _listStrVal where val.RowGUID == rowGuid && val.FieldType.Id == fieldTypeId select val)
             {
-                retVal.Add(item.Lang, item.Value);
+                if (retVal.Keys.Contains(item.Lang) == false) retVal.Add(item.Lang, item.Value);
             }
             return retVal;
         }
@@ -264,6 +275,8 @@ namespace AppModel
             return other;
         }
 
+        // стоимость блюда (самого блюда или блюда с гарниром) вместе с ингредиентами
+        // НО без заказанного количества!!!
         public decimal GetPrice()
         {
             decimal retVal = this.Price;
@@ -271,20 +284,13 @@ namespace AppModel
                 retVal = SelectedGarnishes[0].Price;
             // добавить ингредиенты
             if (SelectedIngredients != null) foreach (DishAdding item in this.SelectedIngredients) retVal += item.Price;
+
             return retVal;
         }
-
-        public decimal GetTotalPrice()
+        // стоимость блюда В ЗАКАЗЕ (с учетом заказанного количества порций)
+        public decimal GetValueInOrder()
         {
-            decimal retVal=this.GetPrice();
-            // добавить ингредиенты
-            if (SelectedIngredients != null) foreach (DishAdding item in this.SelectedIngredients) retVal += item.Price;
-            // добавить рекомендованные блюда
-            if (SelectedRecommends != null) foreach (DishItem item in this.SelectedRecommends) retVal += item.Price;
-
-            retVal *= Count;
-
-            return retVal;
+            return GetPrice()  * this.Count;
         }
 
     }  // class DishItem

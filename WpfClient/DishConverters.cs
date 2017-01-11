@@ -1,80 +1,40 @@
-﻿using System;
+﻿using AppModel;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
-using AppModel;
-using System.Windows;
 
 namespace WpfClient
 {
-
-    public class GetDishMargin : IValueConverter
+    [ValueConversion(typeof(DishItem), typeof(decimal))]
+    public class GetDishPrice : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            double marg = (double)AppLib.GetAppGlobalValue("dishPanelMargin");
-
-            return new Thickness(marg, 0, marg, 0);
+            return ((DishItem)value).GetPrice();
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            throw new NotImplementedException();
+            return value;
         }
     }
-
 
     [ValueConversion(typeof(DishItem), typeof(decimal))]
-    public class GetOrderPrice : IValueConverter
+    public class GetDishValueInOrder : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            decimal retVal = 0;
-
-            OrderItem curOrder = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
-            if (curOrder == null) return retVal;
-
-            if (curOrder.Dishes != null)
-            {
-                foreach (DishItem item in curOrder.Dishes)
-                {
-                    retVal += item.GetTotalPrice();
-                }
-            }
-
-            return retVal;
+            return ((DishItem)value).GetValueInOrder();
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            throw new NotImplementedException();
+            return value;
         }
     }
 
-
-    [ValueConversion(typeof(DishItem), typeof(decimal))]
-    public class GetDishPriceTotal : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            decimal retVal = 0;
-
-            if (value is DishItem)
-            {
-                DishItem currentDish = (DishItem)value;
-
-                retVal = currentDish.GetTotalPrice();
-            }
-
-            return retVal;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
 }

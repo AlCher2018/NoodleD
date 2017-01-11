@@ -22,11 +22,17 @@ namespace WpfClient
     public partial class DishPopup : Window
     {
         private bool _isClose;
+        private DishItem _currentDish;
 
-        public DishPopup()
+
+        public DishPopup(DishItem dishItem)
         {
             InitializeComponent();
+
             _isClose = true;
+            _currentDish = dishItem;
+            this.DataContext = _currentDish;
+            updatePriceControl();
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -65,36 +71,36 @@ namespace WpfClient
 
         private void listIngredients_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            DishItem dishItem = (DishItem)DataContext;
-
-            if (dishItem.SelectedIngredients == null) dishItem.SelectedIngredients = new List<DishAdding>();
-            else dishItem.SelectedIngredients.Clear();
+            if (_currentDish.SelectedIngredients == null) _currentDish.SelectedIngredients = new List<DishAdding>();
+            else _currentDish.SelectedIngredients.Clear();
 
             foreach (DishAdding item in listIngredients.SelectedItems)
             {
-                dishItem.SelectedIngredients.Add(item);
+                _currentDish.SelectedIngredients.Add(item);
             }
             updatePriceControl();
         }
 
         private void listRecommends_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            DishItem dishItem = (DishItem)DataContext;
-
-            if (dishItem.SelectedRecommends == null) dishItem.SelectedRecommends = new List<DishItem>();
-            else dishItem.SelectedRecommends.Clear();
+            if (_currentDish.SelectedRecommends == null) _currentDish.SelectedRecommends = new List<DishItem>();
+            else _currentDish.SelectedRecommends.Clear();
 
             foreach (DishItem item in listRecommends.SelectedItems)
             {
-                dishItem.SelectedRecommends.Add(item);
+                _currentDish.SelectedRecommends.Add(item);
             }
             updatePriceControl();
         }
 
         private void updatePriceControl()
         {
-            BindingExpression be = txtDishPrice.GetBindingExpression(TextBlock.TextProperty);
-            be.UpdateTarget();
+            decimal dishValue = _currentDish.GetPrice();  // цена блюда (самого или с гарниром) плюс ингредиенты
+            // в данном объекте добавить еще и рекомендации
+            if (_currentDish.SelectedRecommends != null)
+                foreach (DishItem item in _currentDish.SelectedRecommends) dishValue += item.Price;
+            
+            txtDishPrice.Text = AppLib.GetCostUIText(dishValue);
         }
 
         private void addDishToOrder()

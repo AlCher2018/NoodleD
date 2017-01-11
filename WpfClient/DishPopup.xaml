@@ -341,8 +341,7 @@
                         </Grid.ColumnDefinitions>
                         <Border Grid.Column="0" Background="{StaticResource addButtonBackgroundPriceColor}"
                                 CornerRadius="{Binding Converter={StaticResource cornerRadiusLeft}, Mode=OneWay}">
-                            <TextBlock x:Name="txtDishPrice" Style="{StaticResource addButtonTextStyle}"
-                                           Text="{Binding Converter={StaticResource getDishPriceTotal}, StringFormat={StaticResource priceFormatString}}" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize2, Mode=OneWay}"/>
+                            <TextBlock x:Name="txtDishPrice" Style="{StaticResource addButtonTextStyle}" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize2, Mode=OneWay}"/>
                         </Border>
                         <Border Grid.Column="1" Background="{StaticResource addButtonBackgroundTextColor}"  CornerRadius="{Binding Converter={StaticResource cornerRadiusRight}, Mode=OneWay}"
                                     MouseUp="btnAddDish_MouseUp">

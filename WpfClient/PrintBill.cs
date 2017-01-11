@@ -20,12 +20,14 @@ namespace WpfClient
         PrintDialog _dialog;
         private OrderItem _order;
         string _langId;
+        TakeOrderEnum _takeMode;
 
-        public PrintBill(OrderItem order)
+        public PrintBill(OrderItem order, TakeOrderEnum takeMode)
         {
             _dialog = new PrintDialog(); //'Used to perform printing
             _order = order;
             _langId = AppLib.AppLang;
+            _takeMode = takeMode;
         }
 
         public bool CreateBill(out string errMessage)
@@ -52,82 +54,68 @@ namespace WpfClient
 
             var doc = new FlowDocument();
             // ширина из config-файла
-            sBuf = AppLib.GetAppSetting("BillPageWidht");
-            if (sBuf == null)
+            doc.PageWidth = (int)AppLib.GetAppGlobalValue("BillPageWidht", 0);
+            if (doc.PageWidth == 0)
             {
                 errMessage = "В config-файле не указан элемент BillPageWidht с шириной отчета.";
                 return false;
             }
-            doc.PageWidth = double.Parse(sBuf);
+
+            // значения по умолчанию
+            doc.FontFamily = new FontFamily("Panton-Bold");
+            doc.FontSize = 12;
 
             // вставить изображение в заголовок
             addImageToDoc(textHeader, doc);
+            // метка, если заказ С СОБОЙ
+            if (_takeMode == TakeOrderEnum.TakeAway)
+            {
+                string langText = AppLib.GetLangText((Dictionary<string, string>)AppLib.GetAppGlobalValue("takeOrderOut"));
+                langText = string.Concat(" **** ", langText.ToUpper(), " ****");
+                addParagraph(doc, langText,20,FontWeights.Bold,FontStyles.Normal,new Thickness(0,20,0,10),TextAlignment.Center);
+            }
             // добавить форматированный заголовок
             addSectionToDoc(textHeader, doc);
 
             // добавить строки заказа
             string currencyName = AppLib.GetLangText((Dictionary<string,string>)AppLib.GetAppGlobalValue("CurrencyName"));
-            decimal totalPrice = 0;
-            string itemName;
+            decimal totalPrice = 0; string itemName, stringRow;
             foreach (DishItem item in _order.Dishes)
             {
                 // блюдо
                 itemName = AppLib.GetLangText(item.langNames);
-                string stringRow = itemName.Substring(0, itemName.Count() > 30 ? 30 : itemName.Count());
-                Run run = new Run(stringRow);
-                run.FontFamily = new FontFamily("Panton-Bold");
-                run.FontSize = 12;
-                Paragraph par = new Paragraph(run);
-                par.Margin = new Thickness(0, 0, 0, 0);
-                doc.Blocks.Add(par);
+                //string stringRow = itemName.Substring(0, itemName.Count() > 30 ? 30 : itemName.Count());
+                addParagraph(doc, itemName);
 
                 // стоимость блюда
                 decimal price = item.GetPrice();
                 string priceString = string.Format("{0} x {1:0.00} {3} = {2:0.00} {3}", item.Count, price, item.Count * price, currencyName);
-                run = new Run(priceString);
-                run.FontFamily = new FontFamily("Panton-Bold");
-                run.FontSize = 12;
-                par = new Paragraph(run);
-                par.TextAlignment = TextAlignment.Right;
-                par.Margin = new Thickness(0, 0, 130, 0);
-                doc.Blocks.Add(par);
+                addParagraph(doc, priceString, 12, null, null, null, TextAlignment.Right);
                 totalPrice += item.Count * price;
 
                 // добавить ингредиенты
                 if (item.SelectedIngredients != null)
+                {
+                    stringRow = "     ";
                     foreach (DishAdding ingr in item.SelectedIngredients)
                     {
                         itemName = AppLib.GetLangText(ingr.langNames);
-                        stringRow = "     " + itemName.Substring(0, itemName.Count() > 30 ? 30 : itemName.Count());
-                        run = new Run(stringRow);
-                        run.FontFamily = new FontFamily("Panton-Bold");
-                        run.FontSize = 10;
-                        run.FontStyle = FontStyles.Italic;
-                        par = new Paragraph(run);
-                        par.Margin = new Thickness(0, 0, 0, 0);
-                        doc.Blocks.Add(par);
+                        stringRow += itemName;
                     }
+                    addParagraph(doc, stringRow, 10, null, FontStyles.Italic);
+                }
             }
             // итог
-            Run run2 = new Run(string.Format("______________________"));
-            run2.FontFamily = new FontFamily("Panton-Bold");
-            run2.FontSize = 20;
-            Paragraph par2 = new Paragraph(run2);
-            par2.Margin = new Thickness(0, 0, 0, 0);
-            doc.Blocks.Add(par2);
-            //     price text
-            string totalText = AppLib.GetLangText((Dictionary<string, string>)AppLib.GetAppGlobalValue("lblTotalText"));
-            Run runTotal = new Run(string.Format("{2}:                          {0:0.00} {1}", totalPrice, currencyName, totalText.ToUpper()));
-            runTotal.FontSize = 12;
-            runTotal.FontFamily = new System.Windows.Media.FontFamily("Panton-Bold");
-            var parTotal = new Paragraph(runTotal);
-            parTotal.Margin = new Thickness(0, 0, 0, 0);
-            doc.Blocks.Add(parTotal);
+            addTotalLine(doc, totalPrice, currencyName);
 
             // добавить форматированный "подвал"
             addSectionToDoc(textFooter, doc);
             // вставить изображение в "подвал"
             addImageToDoc(textFooter, doc);
+
+            // печать штрих-кода
+            string devId = (string)AppLib.GetAppGlobalValue("ssdID");
+            //BarcodeLib.Barcode b = new BarcodeLib.Barcode("", BarcodeLib.TYPE.UPCA);
 
             _dialog.PageRange = new PageRange(1, 1);
             string printer = AppLib.GetAppSetting("PrinterName");
@@ -137,6 +125,19 @@ namespace WpfClient
             return retVal;
         }
 
+        private void addParagraph(FlowDocument doc, string text, double fontSize=12, FontWeight? fontWeight = null, FontStyle? fontStyle = null, Thickness? margin = null, TextAlignment alignment = TextAlignment.Left)
+        {
+            Run run = new Run(text);
+            run.FontSize = fontSize;
+            run.FontWeight = (fontWeight == null) ? FontWeights.Normal : (FontWeight)fontWeight;
+            run.FontStyle = (fontStyle == null) ? FontStyles.Normal : (FontStyle)fontStyle;
+
+            Paragraph par = new Paragraph(run);
+            par.Margin = (margin == null) ? new Thickness(0, 0, 0, 0) : (Thickness)margin;
+            par.TextAlignment = alignment;
+
+            doc.Blocks.Add(par);
+        }
         private Run getRunFromModel(ParagraphModel item, string text)
         {
             Run run = new Run(text);
@@ -231,6 +232,44 @@ namespace WpfClient
             }
         }
 
+        private void addTotalLine(FlowDocument doc, decimal totalPrice, string currencyName)
+        {
+            //            addParagraph(doc, string.Format("______________________"), 12);
+            Table t = new Table();
+            t.FontSize = 14;
+            t.CellSpacing = 0;
+            t.BorderThickness = new Thickness(0, 1, 0, 0);
+            t.BorderBrush = new SolidColorBrush(Colors.Black);
+            // две колонки
+            t.Columns.Add(new TableColumn() { Width = new GridLength(1, GridUnitType.Star) });
+            t.Columns.Add(new TableColumn() { Width = new GridLength(1, GridUnitType.Star) });
+            TableRowGroup rg = new TableRowGroup();
+            t.RowGroups.Add(rg);
+
+            string totalText = AppLib.GetLangText((Dictionary<string, string>)AppLib.GetAppGlobalValue("lblTotalText"));
+            Run r = new Run(totalText);
+            Paragraph p = new Paragraph(r);
+            p.Margin = new Thickness(0, 7, 0, 0);
+            p.TextAlignment = TextAlignment.Left;
+            TableCell totalTextCell = new TableCell();
+            totalTextCell.Blocks.Add(p);
+
+            string priceText = string.Format("{0:0.00} {1}", totalPrice, currencyName);
+            r = new Run(priceText);
+            r.FontWeight = FontWeights.Bold;
+            p = new Paragraph(r);
+            p.Margin = new Thickness(0, 7, 0, 0);
+            p.TextAlignment = TextAlignment.Right;
+            TableCell priceTextCell = new TableCell();
+            priceTextCell.Blocks.Add(p);
+
+            TableRow tr = new TableRow();
+            tr.Cells.Add(totalTextCell);
+            tr.Cells.Add(priceTextCell);
+            rg.Rows.Add(tr);
+
+            doc.Blocks.Add(t);
+        }
     }
 
 

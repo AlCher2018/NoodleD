@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -14,8 +15,11 @@ namespace WpfClient
 {
     public static class AppLib
     {
+        #region app settings
+        // получить настройки приложения
         public static string GetAppSetting(string key)
         {
+            // ... из config-файла
             if (ConfigurationManager.AppSettings.AllKeys.Any(k => k == key) == true)
                 return ConfigurationManager.AppSettings.Get(key);
             else
@@ -37,13 +41,14 @@ namespace WpfClient
             if (langDict.TryGetValue(langId, out retVal) == false) retVal = "no value";
             return retVal;
         }
-
+        // получить глобальное значение приложения из его свойств
         public static object GetAppGlobalValue(string key, object defaultValue = null)
         {
             IDictionary dict = Application.Current.Properties;
             if (dict.Contains(key) == false) return defaultValue;
             else return dict[key];
         }
+        // установить глобальное значение приложения (в свойствах приложения)
         public static void SetAppGlobalValue(string key, object value)
         {
             IDictionary dict = Application.Current.Properties;
@@ -56,6 +61,45 @@ namespace WpfClient
                 dict[key] = value;
             }
         }
+        // сохранить настройки приложения из config-файла в свойствах приложения
+        public static bool SaveAppSettingToProps(string settingName, Type settingType)
+        {
+            string settingValue = GetAppSetting(settingName);
+            if (settingValue == null) return false;
+
+            if (settingType == null)
+                SetAppGlobalValue(settingName, settingValue);   // по умолчанию сохраняется как строка
+            else
+            {
+                MethodInfo mi = settingType.GetMethods().FirstOrDefault(m => m.Name == "Parse");
+                // если у типа есть метод Parse
+                if (mi != null)  // то распарсить значение
+                {
+                    object classInstance = Activator.CreateInstance(settingType);
+                    object oVal = mi.Invoke(classInstance, new object[] { settingValue });
+                    SetAppGlobalValue(settingName, oVal);
+                }
+                else
+                    SetAppGlobalValue(settingName, settingValue);   // по умолчанию сохраняется как строка
+            }
+            return true;
+        }
+        // сохранить настройку приложения из config-файла в bool-свойство приложения
+        public static void SaveAppSettingToPropTypeBool(string settingName)
+        {
+            string settingValue = GetAppSetting(settingName);
+            if (settingValue == null) return;
+    
+            // если значение истина, true или 1, то сохранить в свойствах приложения True, иначе False
+            settingValue = settingValue.ToUpper();
+            if (settingValue.Equals("ИСТИНА") || settingValue.Equals("TRUE") || settingValue.Equals("1"))
+                SetAppGlobalValue(settingName, true);
+            else
+                SetAppGlobalValue(settingName, false);
+        }
+        #endregion
+
+        #region WPF UI interface
 
         public static IEnumerable<T> FindLogicalChildren<T>(DependencyObject depObj) where T : DependencyObject
         {
@@ -139,8 +183,9 @@ namespace WpfClient
 
             return null;
         }
+        #endregion
 
-
+        #region images func
         public static byte[] getImageFromFilePath(string filePath)
         {
             byte[] retVal;
@@ -161,7 +206,20 @@ namespace WpfClient
             image.EndInit();
             return image;
         }
+        #endregion
 
+        #region AppBL
+        public static string GetCostUIText(decimal cost)
+        {
+            string orderPriceText = cost.ToString("0");
+
+            string currencyChar = AppLib.GetAppGlobalValue("CurrencyChar") as string;
+            if (currencyChar != null) orderPriceText += " " + currencyChar;
+
+            return orderPriceText;
+        }
+
+        #endregion
 
     }
 }

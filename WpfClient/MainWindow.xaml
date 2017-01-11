@@ -11,7 +11,6 @@
 
     <Window.Resources>
         <local:MultiplyParamValueConverter x:Key="multiplyParamDefVal1Conv" DefaultValue="1"/>
-        <local:GetDishMargin x:Key="getDishMargin"/>
         <local:GarnishBrushConverter x:Key="garnishBackgroundConverter" Mode="Background"/>
         <local:GarnishBrushConverter x:Key="garnishForegroundConverter" Mode="Foreground"/>
         <local:GarnishVisibilityConverter x:Key="garnishVisibilityConverter"/>
@@ -218,7 +217,7 @@
             <Border x:Name="dishItemBorder"  
                     Background="Transparent"  BorderThickness="0"
                     Width="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=dishPanelWidth}" 
-                    Margin="{Binding Converter={StaticResource getDishMargin}}">
+                    Margin="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=dishPanelMargin}">
                 <Grid x:Name="gridDish">
                     <Grid.RowDefinitions>
                         <!-- 0. заголовок -->
@@ -611,7 +610,7 @@
             <Border x:Name="brdMakeOrder" Grid.Row="7" Background="{DynamicResource cartButtonBackgroundColor}" 
                     MouseUp="btnShowCart_MouseUp">
                 <StackPanel VerticalAlignment="Center">
-                    <TextBlock x:Name="txtOrderPrice" TextAlignment="Center" Foreground="{StaticResource addButtonBackgroundTextColor}" Text="{Binding {x:Null}, Converter={StaticResource getOrderPrice}, StringFormat={StaticResource priceFormatString}}" FontWeight="Bold"
+                    <TextBlock x:Name="txtOrderPrice" TextAlignment="Center" Foreground="{StaticResource addButtonBackgroundTextColor}" FontWeight="Bold" 
                          FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize1}">
                         <TextBlock.Effect>
                             <DropShadowEffect Direction="315" Color="DarkGreen" ShadowDepth="5" BlurRadius="10"/>
