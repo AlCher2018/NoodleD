@@ -17,5 +17,8 @@
         </ListBox>
         <TextBlock DockPanel.Dock="Top" Margin="10" Text="{Binding ElementName=test, Path=SelectedItem}"/>
         <TextBlock DockPanel.Dock="Top" Margin="10" Text="{Binding ElementName=test, Path=SelectedValue}"/>
+        <Border DockPanel.Dock="Top" Padding="10">
+            <Image x:Name="img"/>
+        </Border>
     </DockPanel>
 </Page>

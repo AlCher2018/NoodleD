@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,6 +24,20 @@ namespace WpfApplication1
         public Page1()
         {
             InitializeComponent();
+
+            Zen.Barcode.CodeEan13BarcodeDraw bc = Zen.Barcode.BarcodeDrawFactory.CodeEan13WithChecksum;
+            System.Drawing.Image imageBC = bc.Draw("012701110123", 50);
+
+            MemoryStream ms = new MemoryStream();
+            imageBC.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+            ms.Position = 0;
+            BitmapImage bi = new BitmapImage();
+            bi.BeginInit();
+            bi.StreamSource = ms;
+            bi.EndInit();
+
+            img.Source = bi;
+            //bmp.Dispose(); //if bmp is not used further. Thanks @Peter
         }
     }
 }

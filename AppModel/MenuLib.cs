@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Diagnostics;
+using System.ComponentModel;
 
 namespace AppModel
 {
@@ -206,7 +207,7 @@ namespace AppModel
     }  // class MenuItem
 
 
-    public class DishItem
+    public class DishItem : INotifyPropertyChanged
     {
         public int MenuId { get; set; }
         public int Id { get; set; }
@@ -238,6 +239,8 @@ namespace AppModel
         {
             this.Count = 1;
         }
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public DishItem GetCopyForOrder()
         {

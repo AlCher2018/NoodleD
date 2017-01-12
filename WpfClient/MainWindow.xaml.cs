@@ -62,9 +62,6 @@ namespace WpfClient
             dVar = 0.5 * screenWidth;
             AppLib.SetAppGlobalValue("maxDialogWindowWidth", dVar);
 
-            double dishesPanelWidth = (screenWidth / 6.0 * 5.0);
-            AppLib.SetAppGlobalValue("dishesPanelWidth", dVar);
-
             // РАЗМЕРЫ ШРИФТОВ
             double appFontSize0, appFontSize1, appFontSize2, appFontSize3, appFontSize4, appFontSize5, appFontSize6, appFontSize7;
             double minVal = Math.Min(screenWidth, screenHeight);
@@ -85,7 +82,10 @@ namespace WpfClient
             AppLib.SetAppGlobalValue("appFontSize6", appFontSize6);
             AppLib.SetAppGlobalValue("appFontSize7", appFontSize7);
 
-            //  РАЗМЕРЫ ПАНЕЛИ БЛЮДА
+            //  РАЗМЕРЫ ПАНЕЛИ БЛЮД(А)
+            double dishesPanelWidth = (screenWidth / 6.0 * 5.0);
+            AppLib.SetAppGlobalValue("dishesPanelWidth", dVar);
+            AppLib.SetAppGlobalValue("dishesPanelScrollButtonSize", 0.15 * dishesPanelWidth); 
             // расчет ширины панели блюда
             double dishPanelWidth;
             dishPanelWidth = 0.95 * dishesPanelWidth / 3.18;  // 3x + 6*0.03x - ширина панелей + отступ слева/справа 
@@ -229,6 +229,7 @@ namespace WpfClient
             AppLib.SaveAppSettingToProps("CurrencyChar", null);   // символ денежной единицы
             AppLib.SaveAppSettingToProps("BillPageWidht", typeof(int));
             AppLib.SaveAppSettingToPropTypeBool("IsPrintBarCode");
+            AppLib.SaveAppSettingToPropTypeBool("IsIncludeBarCodeLabel");
             
             // добавить некоторые постоянные тексты
             setAppLangString();
@@ -273,6 +274,11 @@ namespace WpfClient
         private void initUI(ObservableCollection<AppModel.MenuItem> mFolders)
         {
             logger.Trace("Настраиваю визуальные элементы...");
+
+            btnScrollDown.Width = (double)AppLib.GetAppGlobalValue("dishesPanelScrollButtonSize");
+            btnScrollDown.Height = (double)AppLib.GetAppGlobalValue("dishesPanelScrollButtonSize");
+            btnScrollUp.Width = (double)AppLib.GetAppGlobalValue("dishesPanelScrollButtonSize");
+            btnScrollUp.Height = (double)AppLib.GetAppGlobalValue("dishesPanelScrollButtonSize");
 
             // добавить к блюдам надписи на кнопках
             Dictionary<string, string> langSelGarnishDict = (Dictionary<string, string>)AppLib.GetAppGlobalValue("btnSelectGarnishText");
@@ -483,26 +489,71 @@ namespace WpfClient
         // боковое меню выбора категории блюд
         private void lstMenuFolders_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            clearSelectedDish();
-            try
-            {
-                lstDishes.ItemsSource = null;
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                GC.WaitForFullGCComplete(0);
+            ListBoxItem container;
 
-                lstDishes.ItemsSource = ((AppModel.MenuItem)lstMenuFolders.SelectedItem).Dishes;
-            }
-            catch (OutOfMemoryException outOfMemEx)
+            clearSelectedDish();
+
+            // заменить изображение категории
+            if (e.RemovedItems.Count > 0)
             {
-                
+                AppModel.MenuItem preItem = (AppModel.MenuItem)e.RemovedItems[0];
+                container = (ListBoxItem)lstMenuFolders.ItemContainerGenerator.ContainerFromItem(preItem);
+                IEnumerable<FrameworkElement> cpArr = AppLib.FindVisualChildren<FrameworkElement>(container);
             }
+            AppModel.MenuItem curItem = (AppModel.MenuItem)e.AddedItems[0];
+            container = (ListBoxItem)lstMenuFolders.ItemContainerGenerator.ContainerFromItem(curItem);
+
+            //< DataTrigger Binding = "{Binding IsSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBoxItem}}}" Value = "True" >
+
+            //       < Setter Property = "Source" Value = "{Binding MenuFolder.ImageInv}" />
+
+            //      </ DataTrigger >
+
+            //      < DataTrigger Binding = "{Binding IsSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBoxItem}}}" Value = "False" >
+
+            //             < Setter Property = "Source" Value = "{Binding MenuFolder.Image}" />
+
+            //            </ DataTrigger >
+
+            //        </ Style.Triggers >
+
+            // очистить привязку изображения  в списке блюд
+            if (lstDishes.ItemsSource != null)
+            {
+                foreach (var item in lstDishes.Items)
+                {
+                    container = (ListBoxItem)lstDishes.ItemContainerGenerator.ContainerFromItem(item);
+                    if (container != null)
+                    {
+                        IEnumerable<FrameworkElement> cpArr = AppLib.FindVisualChildren<FrameworkElement>(container);
+                        foreach (FrameworkElement fe in cpArr)
+                        {
+                            if (fe.Name == "rectDishImage")
+                            {
+                                Rectangle rect = (fe as Rectangle);
+                                rect.Fill.ClearValue(ImageBrush.ImageSourceProperty);
+                            }
+                            else if (fe.Name == "dishHeaderMarkImage")
+                            {
+                                Image img = (Image)fe;
+                                img.ClearValue(Image.SourceProperty);
+                            }
+                        }
+                    }
+                }
+            }
+
+            lstDishes.Items.DetachFromSourceCollection();
+            lstDishes.ItemsSource = null;
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+
+            lstDishes.ItemsSource = ((AppModel.MenuItem)lstMenuFolders.SelectedItem).Dishes;
             
             scrollDishes.ScrollToTop();
-            //            if (lstDishes.Items.Count > 0) lstDishes.ScrollIntoView(lstDishes.Items[0]);
             e.Handled = true;
         }
-
 
         #region кнопки гарниров
         // приходит Grid
@@ -791,43 +842,6 @@ namespace WpfClient
 
             string tagValue = (vBox.Tag ?? "0").ToString();
             vBox.Tag = (tagValue == "0") ? "1" : "0";
-
-            //DoubleAnimation blurAnim = new DoubleAnimation();
-            //blurAnim.To = 0;
-            //blurAnim.Duration = new Duration(TimeSpan.FromSeconds(2));
-            //blurAnim.AutoReverse = true;
-
-            //Storyboard sb = new Storyboard();
-            //sb.Children.Add(blurAnim);
-            //Storyboard.SetTarget(blurAnim, infSymbol);
-            //Storyboard.SetTargetProperty(blurAnim, new PropertyPath(BlurEffect.RadiusProperty));
-            //sb.Begin();
-
-
-
-            //int tagValue = (int)(vbButton.Tag ?? 0);   // переключатель в теге кнопки
-            //vbButton.Tag = (tagValue == 0) ? 1 : 0;
-
-            //if ((int)vbButton.Tag == 0)
-            //{
-            //    path.Fill = (SolidColorBrush)AppLib.GetAppGlobalValue("appNotSelectedItemColor");
-            //    //vbText.Visibility = Visibility.Collapsed;
-            //}
-            //else
-            //{
-            //    path.Fill = (SolidColorBrush)AppLib.GetAppGlobalValue("appSelectedItemColor");
-            //    //vbText.Visibility = Visibility.Visible;
-
-            //    //DoubleAnimation blurAnim = new DoubleAnimation();
-            //    //blurAnim.To = 0;
-            //    //blurAnim.Duration = new Duration(TimeSpan.FromMilliseconds(4000));
-
-            //    //Storyboard sb = new Storyboard();
-            //    //sb.Children.Add(blurAnim);
-            //    //Storyboard.SetTarget(blurAnim, vbText);
-            //    //Storyboard.SetTargetProperty(blurAnim, new PropertyPath(BlurEffect.RadiusProperty));
-            //    //sb.Begin();
-            //}
         }
 
         #endregion

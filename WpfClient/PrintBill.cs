@@ -114,8 +114,20 @@ namespace WpfClient
             addImageToDoc(textFooter, doc);
 
             // печать штрих-кода
+            //    идент.устройства - 2 символа
             string devId = (string)AppLib.GetAppGlobalValue("ssdID");
-            //BarcodeLib.Barcode b = new BarcodeLib.Barcode("", BarcodeLib.TYPE.UPCA);
+            if (devId.Length == 0) devId = "00";
+            else if (devId.Length == 1) devId = "0" + devId;
+            else devId = devId.Substring(0, 2);
+            //    дата заказа в формате yyMMdd - 6 символов
+            //    номер заказа (для печати - случайный) в формате 0000 - 4 символа
+            string bcValue = devId + _order.OrderDate.ToString("yyMMdd") + _order.OrderNumberForPrint.ToString("0000");
+            BarcodeLib.Barcode bc = new BarcodeLib.Barcode(bcValue, BarcodeLib.TYPE.EAN13);
+            bc.Width = (int)(0.8 * doc.PageWidth); bc.Height = (int)(0.2 * bc.Width);
+            bc.Alignment = BarcodeLib.AlignmentPositions.CENTER;
+            bc.IncludeLabel = (bool)AppLib.GetAppGlobalValue("IsIncludeBarCodeLabel");
+
+            //bc.BackColor = System.Drawing.Color.
 
             _dialog.PageRange = new PageRange(1, 1);
             string printer = AppLib.GetAppSetting("PrinterName");

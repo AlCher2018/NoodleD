@@ -93,7 +93,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="AniScrollViewer.cs" />
+    <Compile Include="Lib\AniScrollViewer.cs" />
     <Compile Include="Cart.xaml.cs">
       <DependentUpon>Cart.xaml</DependentUpon>
     </Compile>
@@ -102,7 +102,7 @@
       <DependentUpon>DishPopup.xaml</DependentUpon>
     </Compile>
     <Compile Include="GarnishConverters.cs" />
-    <Compile Include="ImageHelper.cs" />
+    <Compile Include="Lib\ImageHelper.cs" />
     <Compile Include="MessageBoxDialog.xaml.cs">
       <DependentUpon>MessageBoxDialog.xaml</DependentUpon>
     </Compile>
@@ -138,7 +138,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AppLib.cs" />
-    <Compile Include="ColorLib.cs" />
+    <Compile Include="Lib\ColorLib.cs" />
     <Compile Include="Converters.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -189,7 +189,7 @@
     <Content Include="PrinterBill\Footer-ru.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="PrinterBill\Footer-uk.xml">
+    <Content Include="PrinterBill\Footer-ua.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="PrinterBill\Header-en.xml">
@@ -198,7 +198,7 @@
     <Content Include="PrinterBill\Header-ru.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="PrinterBill\Header-uk.xml">
+    <Content Include="PrinterBill\Header-ua.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <EmbeddedResource Include="Properties\Resources.resx">
