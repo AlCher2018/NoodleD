@@ -7,10 +7,13 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Diagnostics;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Collections.Specialized;
 
 namespace AppModel
 {
-    public class MenuLib
+    // статический класс для обслуживания данных из БД
+    public static class MenuLib
     {
         private static List<MenuFolder> _listMenu;
         private static List<Dish> _listDish;
@@ -143,11 +146,11 @@ namespace AppModel
                 var lMark = _listMarks.Where(g => g.DishGUID == dishDb.RowGUID).ToList();
                 if (lMark.Count > 0)
                 {
-                    dishApp.Marks = new List<DishAddingImage>();
+                    dishApp.Marks = new List<DishAdding>();
                     foreach (DishMarks item in lMark)
                     {
                         DishMark dm = _listMark.FirstOrDefault(m => m.RowGUID == item.MarkGUID);
-                        DishAddingImage da = new DishAddingImage() { Id = item.Id, Image = dm.Image };
+                        DishAdding da = new DishAdding() { Id = item.Id, Image = dm.Image };
                         da.langNames = getLangTextDict(dm.RowGUID, 1);
                         dishApp.Marks.Add(da);
                     }
@@ -198,42 +201,226 @@ namespace AppModel
 
     }  // class MenuLib
 
-    public class MenuItem
+
+    public class MenuItem : INotifyPropertyChanged
     {
-        public MenuFolder MenuFolder { get; set; }
-        public Dictionary<string,string> langNames { get; set; }
-        //public List<DishItem> Dishes { get; set; }
-        public ObservableCollection<DishItem> Dishes { get; set; }
+        private MenuFolder _menuFolder;
+        private Dictionary<string, string> _langNames;
+        private ObservableCollection<DishItem> _dishes;
+
+        public MenuFolder MenuFolder
+        {
+            get { return _menuFolder; }
+            set
+            {
+                if (value == _menuFolder) return;
+                _menuFolder = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        public Dictionary<string,string> langNames
+        {
+            get { return _langNames; }
+            set
+            {
+                if (value == _langNames) return;
+                _langNames = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        public ObservableCollection<DishItem> Dishes
+        {
+            get { return _dishes; }
+            set
+            {
+                if (value == _dishes) return;
+                _dishes = value;
+//                NotifyPropertyChanged();
+            }
+        }
+
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void NotifyPropertyChanged([CallerMemberName] String propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+
     }  // class MenuItem
 
 
     public class DishItem : INotifyPropertyChanged
     {
+        private int _unitCount;
+        private decimal _price;
+        private int _count;
+        private Dictionary<string, string> _langNames;
+        private Dictionary<string, string> _langDescription;
+        private Dictionary<string, string> _langUnitNames;
+        private byte[] _image;
+        private List<DishAdding> _garnishes;
+        private List<DishAdding> _ingredients;
+        private List<DishAdding> _selectedGarnishes;
+        private List<DishAdding> _selectedIngredients;
+        private List<DishAdding> _marks;
+        private List<DishItem> _recommends;
+        private List<DishItem> _selectedRecommends;
+
+
         public int MenuId { get; set; }
         public int Id { get; set; }
         public Guid RowGUID { get; set; }
-        public int UnitCount { get; set; }
-        public decimal Price { get; set; }
-        public int Count { get; set; }
+        public int UnitCount
+        {
+            get { return _unitCount; }
+            set
+            {
+                if (value == _unitCount) return;
+                _unitCount = value;
+                NotifyPropertyChanged();
+            }
+        }
+        public decimal Price
+        {
+            get { return _price; }
+            set
+            {
+                if (value == _price) return;
+                _price = value;
+                NotifyPropertyChanged();
+            }
+        }
+        public int Count
+        {
+            get { return _count; }
+            set
+            {
+                if (value == _count) return;
+                _count = value;
+                NotifyPropertyChanged();
+            }
+        }
 
-        public Dictionary<string, string> langNames { get; set; }
-        public Dictionary<string, string> langDescriptions { get; set; }
-        public Dictionary<string, string> langUnitNames { get; set; }
+        public Dictionary<string, string> langNames
+        {
+            get { return _langNames; }
+            set
+            {
+                if (value == _langNames) return;
+                _langNames = value;
+                NotifyPropertyChanged();
+            }
+        }
+        public Dictionary<string, string> langDescriptions
+        {
+            get { return _langDescription; }
+            set
+            {
+                if (value == _langDescription) return;
+                _langDescription = value;
+                NotifyPropertyChanged();
+            }
+        }
+        public Dictionary<string, string> langUnitNames
+        {
+            get { return _langUnitNames; }
+            set
+            {
+                if (value == _langUnitNames) return;
+                _langUnitNames = value;
+                NotifyPropertyChanged();
+            }
+        }
 
-        public byte[] Image { get; set; }
+        public byte[] Image
+        {
+            get { return _image; }
+            set
+            {
+                if (value == _image) return;
+                _image = value;
+                NotifyPropertyChanged();
+            }
+        }
 
-        public List<DishAdding> Garnishes { get; set; }
-        public List<DishAdding> Ingredients { get; set; }
-        public List<DishAddingImage> Marks { get; set; }
-        public List<DishItem> Recommends { get; set; }
+        public List<DishAdding> Garnishes
+        {
+            get { return _garnishes; }
+            set
+            {
+                if (value == _garnishes) return;
+                _garnishes = value;
+                NotifyPropertyChanged();
+            }
+        }
+        public List<DishAdding> Ingredients
+        {
+            get { return _ingredients; }
+            set
+            {
+                if (value == _ingredients) return;
+                _ingredients = value;
+                NotifyPropertyChanged();
+            }
+        }
+        public List<DishAdding> Marks
+        {
+            get { return _marks; }
+            set
+            {
+                if (value == _marks) return;
+                _marks = value;
+                NotifyPropertyChanged();
+            }
+        }
+        public List<DishItem> Recommends
+        {
+            get { return _recommends; }
+            set
+            {
+                if (value == _recommends) return;
+                _recommends = value;
+                NotifyPropertyChanged();
+            }
+        }
 
-        public List<DishAdding> SelectedGarnishes { get; set; }
-        public List<DishAdding> SelectedIngredients { get; set; }
-        public List<DishItem> SelectedRecommends { get; set; }
+        public List<DishAdding> SelectedGarnishes
+        {
+            get { return _selectedGarnishes; }
+            set
+            {
+                if (value == _selectedGarnishes) return;
+                _selectedGarnishes = value;
+                NotifyPropertyChanged();
+            }
+        }
+        public List<DishAdding> SelectedIngredients
+        {
+            get { return _selectedIngredients; }
+            set
+            {
+                if (value == _selectedIngredients) return;
+                _selectedIngredients = value;
+                NotifyPropertyChanged();
+            }
+        }
+        public List<DishItem> SelectedRecommends
+        {
+            get { return _selectedRecommends; }
+            set
+            {
+                if (value == _selectedRecommends) return;
+                _selectedRecommends = value;
+                NotifyPropertyChanged();
+            }
+        }
 
-        // надписи на кнопках
-        public Dictionary<string, string> langBtnSelGarnishText { get; set; }
-        public Dictionary<string, string> langBtnAddDishText { get; set; }
 
         public DishItem()
         {
@@ -241,6 +428,13 @@ namespace AppModel
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+        private void NotifyPropertyChanged([CallerMemberName] String propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
 
         public DishItem GetCopyForOrder()
         {
@@ -250,9 +444,6 @@ namespace AppModel
             other.langDescriptions = this.langDescriptions;
             other.langNames = this.langNames;
             other.langUnitNames = this.langUnitNames;
-
-            other.langBtnAddDishText = null;
-            other.langBtnSelGarnishText = null;
 
             // скопировать гарниры
             if ((this.SelectedGarnishes != null) && (this.SelectedGarnishes.Count > 0))
@@ -271,8 +462,8 @@ namespace AppModel
             // ... маркеры
             if ((this.Marks != null) && (this.Marks.Count > 0))
             {
-                other.Marks = new List<DishAddingImage>();
-                foreach (DishAddingImage item in this.Marks) other.Marks.Add(item);
+                other.Marks = new List<DishAdding>();
+                foreach (DishAdding item in this.Marks) other.Marks.Add(item);
             }
 
             return other;
@@ -298,25 +489,66 @@ namespace AppModel
 
     }  // class DishItem
 
-    public class DishAdding
+    public class DishAdding : INotifyPropertyChanged
     {
+        private Dictionary<string, string> _langNames;
+        private decimal _price;
+        private byte[] _image;
+        private int _count;
+
         public int Id { get; set; }
         public Guid RowGUID { get; set; }
-        public Dictionary<string, string> langNames { get; set; }
-        public decimal Price { get; set; }
-        public byte[] Image { get; set; }
+        public Dictionary<string, string> langNames
+        {
+            get { return _langNames; }
+            set
+            {
+                if (value == _langNames) return;
+                _langNames = value;
+                NotifyPropertyChanged();
+            }
+        }
+        public decimal Price
+        {
+            get { return _price; }
+            set
+            {
+                if (value == _price) return;
+                _price = value;
+                NotifyPropertyChanged();
+            }
+        }
+        public byte[] Image
+        {
+            get { return _image; }
+            set
+            {
+                if (value == _image) return;
+                _image = value;
+                NotifyPropertyChanged();
+            }
+        }
         public string Uid { get; set; }
-        public int Count { get; set; }
-    }
+        public int Count
+        {
+            get { return _count ; }
+            set
+            {
+                if (value == _count) return;
+                _count = value;
+                NotifyPropertyChanged();
+            }
+        }
 
-    public class DishAddingImage
-    {
-        public int Id { get; set; }
-        public Guid RowGUID { get; set; }
-        public Dictionary<string, string> langNames { get; set; }
-        public byte[] Image { get; set; }
-        public int Count { get; set; }
-    }
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void NotifyPropertyChanged([CallerMemberName] String propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
 
+    }
 
 }  // namespace AppModel

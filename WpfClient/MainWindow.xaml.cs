@@ -88,18 +88,15 @@ namespace WpfClient
             AppLib.SetAppGlobalValue("dishesPanelScrollButtonSize", 0.15 * dishesPanelWidth); 
             // расчет ширины панели блюда
             double dishPanelWidth;
-            dishPanelWidth = 0.95 * dishesPanelWidth / 3.18;  // 3x + 6*0.03x - ширина панелей + отступ слева/справа 
+//            dishPanelWidth = 0.95 * dishesPanelWidth / 3.18;  // 3x + 6*0.03x - ширина панелей + отступ слева/справа 
+            dishPanelWidth = 0.95 * dishesPanelWidth / 3;
             AppLib.SetAppGlobalValue("dishPanelWidth", dishPanelWidth);
-            // расстояние между панелями
-            dVar = 0.03 * dishPanelWidth;
-            Thickness dishPanelMargin = new Thickness(dVar, 0, dVar, 0);
-            AppLib.SetAppGlobalValue("dishPanelMargin", dishPanelMargin);
 
             // высота строки заголовка
             dishPanelHeaderRowHeight = 0.15 * dishPanelWidth;
             AppLib.SetAppGlobalValue("dishPanelHeaderRowHeight", dishPanelHeaderRowHeight);
             // высота строки изображения
-            dishPanelImageRowHeight = 0.83 * dishPanelWidth;
+            dishPanelImageRowHeight = 0.7 * dishPanelWidth;
             AppLib.SetAppGlobalValue("dishPanelImageRowHeight", dishPanelImageRowHeight);
             // высота строки гарниров
             dishPanelGarnishesRowHeight = 0.2 * dishPanelWidth;
@@ -153,16 +150,14 @@ namespace WpfClient
         // visual elements
         System.Windows.Shapes.Path _curGarnishBorder;
         TextBlock _curGarnishTextBlock;
-        Border _curAddButton, _curAddButtonShadow;
+        Border _curAddButton;
         SolidColorBrush brushBlack;
         // scroll viewer animate
         List<double> animDishRows;
-        int animDishCurRow;
 
         // dragging
         Point? lastDragPoint, initDragPoint;
         protected DateTime _dateTime;
-        bool _isTouchHandled;
 
 
         public MainWindow()
@@ -283,14 +278,6 @@ namespace WpfClient
             // добавить к блюдам надписи на кнопках
             Dictionary<string, string> langSelGarnishDict = (Dictionary<string, string>)AppLib.GetAppGlobalValue("btnSelectGarnishText");
             Dictionary<string, string> langAddDishDict = (Dictionary<string, string>)AppLib.GetAppGlobalValue("btnSelectDishText");
-            foreach (AppModel.MenuItem menuItem in mFolders)
-            {
-                foreach (DishItem dishItem in menuItem.Dishes)
-                {
-                    dishItem.langBtnSelGarnishText = langSelGarnishDict;
-                    dishItem.langBtnAddDishText = langAddDishDict;
-                }
-            }
             brushBlack = new SolidColorBrush(Colors.Black);
 
             AppLib.SetAppGlobalValue("mainMenu", mFolders);
@@ -490,32 +477,11 @@ namespace WpfClient
         private void lstMenuFolders_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ListBoxItem container;
+            IEnumerable<FrameworkElement> visItems;
+            Image img;
 
             clearSelectedDish();
-
-            // заменить изображение категории
-            if (e.RemovedItems.Count > 0)
-            {
-                AppModel.MenuItem preItem = (AppModel.MenuItem)e.RemovedItems[0];
-                container = (ListBoxItem)lstMenuFolders.ItemContainerGenerator.ContainerFromItem(preItem);
-                IEnumerable<FrameworkElement> cpArr = AppLib.FindVisualChildren<FrameworkElement>(container);
-            }
-            AppModel.MenuItem curItem = (AppModel.MenuItem)e.AddedItems[0];
-            container = (ListBoxItem)lstMenuFolders.ItemContainerGenerator.ContainerFromItem(curItem);
-
-            //< DataTrigger Binding = "{Binding IsSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBoxItem}}}" Value = "True" >
-
-            //       < Setter Property = "Source" Value = "{Binding MenuFolder.ImageInv}" />
-
-            //      </ DataTrigger >
-
-            //      < DataTrigger Binding = "{Binding IsSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBoxItem}}}" Value = "False" >
-
-            //             < Setter Property = "Source" Value = "{Binding MenuFolder.Image}" />
-
-            //            </ DataTrigger >
-
-            //        </ Style.Triggers >
+            e.Handled = true;
 
             // очистить привязку изображения  в списке блюд
             if (lstDishes.ItemsSource != null)
@@ -535,7 +501,7 @@ namespace WpfClient
                             }
                             else if (fe.Name == "dishHeaderMarkImage")
                             {
-                                Image img = (Image)fe;
+                                img = (Image)fe;
                                 img.ClearValue(Image.SourceProperty);
                             }
                         }
@@ -543,7 +509,7 @@ namespace WpfClient
                 }
             }
 
-            lstDishes.Items.DetachFromSourceCollection();
+            lstDishes.ClearValue(ListBox.ItemsSourceProperty);
             lstDishes.ItemsSource = null;
 
             GC.Collect();
@@ -552,7 +518,6 @@ namespace WpfClient
             lstDishes.ItemsSource = ((AppModel.MenuItem)lstMenuFolders.SelectedItem).Dishes;
             
             scrollDishes.ScrollToTop();
-            e.Handled = true;
         }
 
         #region кнопки гарниров
@@ -581,7 +546,7 @@ namespace WpfClient
             System.Windows.Shapes.Path borderGarn = AppLib.FindLogicalChildren<System.Windows.Shapes.Path>(gridGarn).ToList()[0];  // кликнутый бордер
             TextBlock garnName = AppLib.FindLogicalChildren<TextBlock>(gridGarn).ToList()[0];
 
-            Grid gridGarnAll = (Grid)LogicalTreeHelper.GetParent(gridGarn);   // родительский грид, в котором все три гарнира
+            Grid gridGarnAll = (Grid)VisualTreeHelper.GetParent(gridGarn);   // родительский грид, в котором все три гарнира
             IEnumerable<Viewbox> bordersGarn = AppLib.FindVisualChildren<Viewbox>(gridGarnAll).ToList();  // все бордеры гарниров
             
             // родительский грид
@@ -590,8 +555,6 @@ namespace WpfClient
             Grid gridBigBut = (Grid)(AppLib.FindLogicalChildren<Grid>(gridPar).First(g => g.Name== "gridDishBottomButtons"));  
             // бордер кнопки добавления блюда
             Border borderAddBut = AppLib.FindVisualChildren<Border>(gridBigBut).First(g => g.Name=="txtDishWithIngr");  
-            // бордер тени кнопки добавления блюда
-            Border borderAddButShadow = AppLib.FindVisualChildren<Border>(gridBigBut).First(g => g.Name== "shadowedBorder");  
 
             if (_curDishItem == null)
             {
@@ -605,7 +568,6 @@ namespace WpfClient
                 _curGarnishBorder = borderGarn;
                 _curGarnishTextBlock = garnName;
                 _curAddButton = borderAddBut;
-                _curAddButtonShadow = borderAddButShadow;
 
                 updateVisualGarnish(true);
             }
@@ -654,7 +616,6 @@ namespace WpfClient
                     _curGarnishBorder = borderGarn;
                     _curGarnishTextBlock = garnName;
                     _curAddButton = borderAddBut;
-                    _curAddButtonShadow = borderAddButShadow;
 
                     updateVisualGarnish(true);
 
@@ -677,7 +638,6 @@ namespace WpfClient
                 if (isUpdAddBut)
                 {
                     _curAddButton.Visibility = Visibility.Hidden;
-                    _curAddButtonShadow.Visibility = Visibility.Hidden;
                 }
             }
             else
@@ -687,7 +647,6 @@ namespace WpfClient
                 if (isUpdAddBut)
                 {
                     _curAddButton.Visibility = Visibility.Visible;
-                    _curAddButtonShadow.Visibility = Visibility.Visible;
                 }
             }
         }
@@ -697,7 +656,7 @@ namespace WpfClient
         #region выбор блюда
         private void txtDishAdd_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.StylusDevice != null) return;
+//            if (e.StylusDevice != null) return;
             if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint) == false) { lastDragPoint = null; return; }
 
             txtDishWithIngrHandler(sender);
@@ -725,7 +684,7 @@ namespace WpfClient
                 this.clearSelectedDish();
 
                 // нарисовать путь
-                FrameworkElement dishPanel = AppLib.FindLogicalParentByName((FrameworkElement)sender, "dishItemBorder", 4);
+                FrameworkElement dishPanel = AppLib.FindLogicalParentByName((FrameworkElement)sender, "gridDish", 4);
                 if (dishPanel != null)
                 {
                     System.Windows.Shapes.Path animPath = getAnimPath(dishPanel);
