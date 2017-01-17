@@ -151,7 +151,7 @@ namespace WpfClient
         System.Windows.Shapes.Path _curGarnishBorder;
         TextBlock _curGarnishTextBlock;
         Border _curAddButton;
-        SolidColorBrush brushBlack;
+        SolidColorBrush _brushSelectedItem;
         // scroll viewer animate
         List<double> animDishRows;
 
@@ -168,7 +168,10 @@ namespace WpfClient
             
             animDishRows = new List<double>();
             _dishCanvas = new List<Canvas>();
+
             appInit();
+
+            _brushSelectedItem = (SolidColorBrush)AppLib.GetAppGlobalValue("appSelectedItemColor");
         }
 
         private void appInit()
@@ -281,7 +284,6 @@ namespace WpfClient
             // добавить к блюдам надписи на кнопках
             Dictionary<string, string> langSelGarnishDict = (Dictionary<string, string>)AppLib.GetAppGlobalValue("btnSelectGarnishText");
             Dictionary<string, string> langAddDishDict = (Dictionary<string, string>)AppLib.GetAppGlobalValue("btnSelectDishText");
-            brushBlack = new SolidColorBrush(Colors.Black);
 
             createDishesCanvas(mFolders);
 
@@ -301,6 +303,7 @@ namespace WpfClient
         // **************************************************************************************
         private void createDishesCanvas(ObservableCollection<AppModel.MenuItem> mFolders)
         {
+            #region privates vars
             double screenWidth, screenHeight;
             screenWidth = SystemParameters.PrimaryScreenWidth;
             screenHeight = SystemParameters.PrimaryScreenHeight;
@@ -337,12 +340,13 @@ namespace WpfClient
             double dishPanelHeaderFontSize = 0.06 * dishPanelWidth;
             double dishPanelTextFontSize = 0.8 * dishPanelHeaderFontSize;
             // размер кнопки описания блюда
-            double dishPanelDescrButtonSize = 0.1 * dishPanelWidth;
+            double dishPanelDescrButtonSize = 0.085 * dishPanelWidth;
 
             // высота панелей
             double dishPanelHeight, dishPanelHeightWithGarnish;
             dishPanelHeight = dishPanelHeaderRowHeight + dishPanelRowMargin1 + dishPanelImageRowHeight + dishPanelRowMargin2 + dishPanelAddButtonRowHeight;
             dishPanelHeightWithGarnish = dishPanelHeight + dishPanelGarnishesRowHeight + dishPanelRowMargin2;
+            #endregion
 
             Canvas canvas;
             double leftMargin = (dishesPanelWidth - 3 * dishPanelWidth) / 2;
@@ -381,7 +385,7 @@ namespace WpfClient
 
                         // панель содержания
                         Grid dGrid = new Grid();
-                        dGrid.Background = new SolidColorBrush(Colors.CadetBlue);
+                        dGrid.Background = Brushes.CadetBlue;
                         dGrid.Width = dishPanelWidth / 25d * 23d;
                         dGrid.SetValue(Canvas.LeftProperty, leftPos + (dishPanelWidth / 25d * 1d));
                         dGrid.Height = currentPanelHeight / 30d * 28d;
@@ -407,44 +411,44 @@ namespace WpfClient
 
 
                         // Заголовок панели
-                        Run r1 = new Run() {
-                            Text = AppLib.GetLangText(dish.langNames),
-                            FontWeight = FontWeights.Bold,
-                            FontSize = dishPanelHeaderFontSize
-                        };
-                        Run r2 = new Run()
+                        setDishPanelHeader(dish, dGrid, dishPanelHeaderFontSize, dishPanelTextFontSize);
+                        // изображение блюда и описание
+                        if (dish.Image != null)
                         {
-                            Text = "  " + dish.UnitCount.ToString(),
-                            FontStyle = FontStyles.Italic,
-                            FontSize = dishPanelTextFontSize
-                        };
-                        Run r3 = new Run()
-                        {
-                            Text = " " + AppLib.GetLangText(dish.langUnitNames),
-                            FontSize = dishPanelTextFontSize
-                        };
-                        TextBlock tb = new TextBlock() {
-                            Foreground = new SolidColorBrush(Colors.Black),
-                            TextWrapping = TextWrapping.Wrap,
-                            VerticalAlignment = VerticalAlignment.Center,
-                            TextAlignment = TextAlignment.Center
-                        };
-                        tb.Inlines.AddRange(new Inline[] { r1, r2, r3});
-                        Grid.SetRow(tb, 0);
-                        dGrid.Children.Add(tb);
- 
-                        //b1.SetValue(Grid.RowProperty, 0);
+                            Rect rect = new Rect(0, 0, dGrid.Width, dishPanelImageRowHeight);
+                            // изображение
+                            System.Windows.Shapes.Path pathImage = new System.Windows.Shapes.Path();
+                            pathImage.Data = new RectangleGeometry(rect, cornerRadiusDishPanel, cornerRadiusDishPanel);
+                            pathImage.Fill = new DrawingBrush(
+                                new ImageDrawing() { ImageSource = ImageHelper.ByteArrayToBitmapImage(dish.Image), Rect= rect }
+                                );
+                            Grid.SetRow(pathImage, 2);
+                            dGrid.Children.Add(pathImage);
 
-                        //tb.SetValue(Grid.RowProperty, 0);
-                        //                        Grid.SetRow(tb, 3);
+                            // кнопка отображения описания
+                            Grid canvDescr = new Grid() { Width = dishPanelDescrButtonSize, Height = dishPanelDescrButtonSize };
+                            canvDescr.Tag = 0;
+                            canvDescr.VerticalAlignment = VerticalAlignment.Top;
+                            canvDescr.HorizontalAlignment = HorizontalAlignment.Right;
+                            canvDescr.Margin = new Thickness(0, 0.3 * dishPanelDescrButtonSize, 0.3 * dishPanelDescrButtonSize, 0);
+                            canvDescr.PreviewMouseLeftButtonUp += CanvDescr_PreviewMouseLeftButtonUp;
+                            //canvDescr.Background = Brushes.Green;
+                            EllipseGeometry elGeom = new EllipseGeometry(new Rect(0, 0, dishPanelDescrButtonSize, dishPanelDescrButtonSize));
+                            System.Windows.Shapes.Path btnDescr = new System.Windows.Shapes.Path();
+                            btnDescr.Data = elGeom;
+                            btnDescr.Fill = Brushes.White;
+                            canvDescr.Children.Add(btnDescr);
+                            TextBlock btnDescrText = new TextBlock(new Run("i")) { FontSize = dishPanelHeaderFontSize};
+                            btnDescrText.HorizontalAlignment = HorizontalAlignment.Center;
+                            btnDescrText.VerticalAlignment = VerticalAlignment.Center;
+                            canvDescr.Children.Add(btnDescrText);
 
-                        //ItemsControl ic = new ItemsControl();
-                        //ic.ItemsSource = dish.Marks;
-                        //ic.Height = dishPanelHeaderFontSize;
-                        //DataTemplate dt = new DataTemplate() { };
-                        //ic.ItemTemplate = new DataTemplate();
+                            Grid.SetRow(canvDescr, 2);
+                            dGrid.Children.Add(canvDescr);
 
-                        //WrapPanel wp = new WrapPanel();
+                            //Grid.SetRow(btnDescr, 2);
+                            //dGrid.Children.Add(btnDescr);
+                        }
 
 
                         brd.Child = dGrid;
@@ -459,6 +463,66 @@ namespace WpfClient
                 _dishCanvas.Add(canvas);
             }
         }
+
+        private void CanvDescr_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            Grid canv = (Grid)sender;
+            System.Windows.Shapes.Path path = (System.Windows.Shapes.Path)canv.Children[0];
+            int tagVal = System.Convert.ToInt32(canv.Tag ?? 0);
+            tagVal = (tagVal == 0) ? 1 : 0;
+            canv.Tag = tagVal;
+            path.Fill = (tagVal == 0) ? Brushes.White : _brushSelectedItem;
+        }
+
+
+        private void setDishPanelHeader(DishItem dish, Grid dGrid, double dishPanelHeaderFontSize, double dishPanelTextFontSize)
+        {
+            List<Inline> inlines = new List<Inline>();
+            if (dish.Marks != null)
+            {
+                foreach (DishAdding markItem in dish.Marks)
+                {
+                    if (markItem.Image != null)
+                    {
+                        System.Windows.Controls.Image markImage = new System.Windows.Controls.Image();
+                        markImage.Width = dishPanelHeaderFontSize; markImage.Height = dishPanelHeaderFontSize;
+                        markImage.Source = ImageHelper.ByteArrayToBitmapImage(markItem.Image);
+                        InlineUIContainer iuc = new InlineUIContainer(markImage);
+                        markImage.Margin = new Thickness(0, 0, 5, 10);
+                        inlines.Add(iuc);
+                    }
+                }
+            }
+            inlines.Add(new Run()
+            {
+                Text = AppLib.GetLangText(dish.langNames),
+                FontWeight = FontWeights.Bold,
+                FontSize = dishPanelHeaderFontSize
+            });
+            inlines.Add(new Run()
+            {
+                Text = "  " + dish.UnitCount.ToString(),
+                FontStyle = FontStyles.Italic,
+                FontSize = dishPanelTextFontSize
+            });
+            inlines.Add(new Run()
+            {
+                Text = " " + AppLib.GetLangText(dish.langUnitNames),
+                FontSize = dishPanelTextFontSize
+            });
+            TextBlock tb = new TextBlock()
+            {
+                Foreground = new SolidColorBrush(Colors.Black),
+                TextWrapping = TextWrapping.Wrap,
+                VerticalAlignment = VerticalAlignment.Center,
+                TextAlignment = TextAlignment.Center
+            };
+            tb.Inlines.AddRange(inlines);
+
+            Grid.SetRow(tb, 0);
+            dGrid.Children.Add(tb);
+        }
+
 
         private void checkDBConnection()
         {
@@ -814,7 +878,7 @@ namespace WpfClient
             else
             {
                 _curGarnishBorder.Fill = selBase;
-                _curGarnishTextBlock.Foreground = brushBlack;
+                _curGarnishTextBlock.Foreground = Brushes.Black;
                 if (isUpdAddBut)
                 {
                     _curAddButton.Visibility = Visibility.Visible;

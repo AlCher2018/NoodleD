@@ -39,7 +39,7 @@ namespace WpfClient
 
         internal static void SaveImageFile(byte[] image,string filePath,string fileName )
         {
-            var im = byteArrayToImage(image);
+            var im = ByteArrayToImage(image);
             if (im != null)
             {
                 im.Save(fileName);
@@ -47,18 +47,38 @@ namespace WpfClient
             
         }
 
-        public static System.Drawing.Image byteArrayToImage(byte[] byteArrayIn)
+        public static System.Drawing.Image ByteArrayToImage(byte[] byteArrayIn)
         {
             if (byteArrayIn!=null)
             {
-                MemoryStream ms = new MemoryStream(byteArrayIn);
-                System.Drawing.Image returnImage = System.Drawing.Image.FromStream(ms);
-                ms.Dispose();
-                ms = null;
+                System.Drawing.Image returnImage;
+                using (MemoryStream ms = new MemoryStream(byteArrayIn))
+                {
+                    returnImage = System.Drawing.Image.FromStream(ms);
+                }
                 return returnImage;
             }
             return null;
         }
+
+        public static BitmapImage ByteArrayToBitmapImage(byte[] imageData)
+        {
+            if (imageData == null || imageData.Length == 0) return null;
+            var image = new BitmapImage();
+            using (var mem = new MemoryStream(imageData))
+            {
+                mem.Position = 0;
+                image.BeginInit();
+                image.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
+                image.CacheOption = BitmapCacheOption.OnLoad;
+                image.UriSource = null;
+                image.StreamSource = mem;
+                image.EndInit();
+            }
+            image.Freeze();
+            return image;
+        }
+
 
         //public static string GetFileNameBy(ExchangeModelLibrary.DataTools.Dish dish)
         //{
