@@ -112,12 +112,12 @@
                 </Viewbox>
             </Grid>
 
-            <DataTemplate.Triggers>
+            <!--<DataTemplate.Triggers>
                 <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsSelected}" Value="True">
                     <Setter TargetName="garnBaseColorBrush" Property="Visibility" Value="Visible"/>
                     <Setter TargetName="txtName" Property="Foreground" Value="{DynamicResource ResourceKey=addButtonBackgroundTextColor}"/>
                 </DataTrigger>
-            </DataTemplate.Triggers>
+            </DataTemplate.Triggers>-->
             
         </DataTemplate>
         <!-- стиль ListBoxItem-ов для добавок -->
@@ -302,12 +302,14 @@
                     </Grid>
                 </StackPanel>
 
-                <!--Раздел 2. ИНГРЕДИЕНТЫ -->
+                <!--Раздел 2. ИНГРЕДИЕНТЫ 
+                
+                -->
                 <TextBlock Grid.Column="1" Grid.Row="4" Style="{StaticResource sectionHeaderStyle}"
                         Text="{Binding {x:Null}, ConverterParameter=appSet.formPopUpHeaderText2, Converter={StaticResource langDictToText}}"/>
-                <ListBox x:Name="listIngredients" Grid.Column="1" Grid.Row="5" Style="{StaticResource addingsListBoxStyle}"
+                <ListBox x:Name="listIngredients" Grid.Column="1" Grid.Row="5" Style="{StaticResource addingsListBoxStyle}" SelectionChanged="listIngredients_SelectionChanged"
                              ItemsSource="{Binding Ingredients}"
-                             SelectionChanged="listIngredients_SelectionChanged"/>
+                             />
 
                 <!--Раздел 3. РЕКОМЕНДАЦИИ -->
                 <TextBlock Grid.Column="1" Grid.Row="7" Style="{StaticResource sectionHeaderStyle}"

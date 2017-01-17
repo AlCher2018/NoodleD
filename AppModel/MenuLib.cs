@@ -237,7 +237,7 @@ namespace AppModel
             {
                 if (value == _dishes) return;
                 _dishes = value;
-//                NotifyPropertyChanged();
+                NotifyPropertyChanged();
             }
         }
 

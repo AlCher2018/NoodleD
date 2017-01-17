@@ -91,6 +91,26 @@ namespace WpfClient
         }
     }
 
+
+    public class GetDishPanelRect : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values[0] == DependencyProperty.UnsetValue) return new Rect(0,0,0,0);
+
+            double v1 = System.Convert.ToDouble(values[0]);  // width
+            double v2 = System.Convert.ToDouble(values[1]);  // height
+
+            return new Rect(0,0,v1,v2);
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+
     // получить строку из связанного словаря по глобальному Ид языка
     [ValueConversion(typeof(Dictionary<string, string>), typeof(string))]
     public class LangDictToTextConverter : IValueConverter
@@ -162,7 +182,7 @@ namespace WpfClient
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             string[] param = ((string)parameter).Split(',');
-            double left = 0, top = 0, right = 0, bottom = 0, val = (double)value;
+            double left = 0.0, top = 0.0, right = 0.0, bottom = 0.0, val = (double)value;
 
             left = param[0].GetDoubleValue() * val;
             top = param[1].GetDoubleValue() * val;

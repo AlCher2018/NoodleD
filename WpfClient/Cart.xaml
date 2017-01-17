@@ -220,11 +220,16 @@
                                 <ColumnDefinition Width="3*"/>  <!-- 3. стоимость блюда -->
                                 <ColumnDefinition Width="*"/>  <!-- 4. кнопка удаления блюда из заказа -->
                             </Grid.ColumnDefinitions>
-                                <Image Grid.Column="0" Source="AppImages/Cart/-.png" Style="{StaticResource gridPortionButtonStyle}" MouseUp="portionCountDel_MouseUp"/>
+                            
+                                <Image Grid.Column="0" Source="AppImages/Cart/-.png" Style="{StaticResource gridPortionButtonStyle}" PreviewMouseUp="portionCountDel_MouseUp"/>
+                            
                             <TextBlock x:Name="txtDishCount" Grid.Column="1" Text="{Binding Count}" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize2, Mode=OneWay}" FontWeight="Bold"/>
-                                <Image Grid.Column="2" Source="AppImages/Cart/+.png" Style="{StaticResource gridPortionButtonStyle}" MouseUp="portionCountAdd_MouseUp"/>
+                            
+                                <Image Grid.Column="2" Source="AppImages/Cart/+.png" Style="{StaticResource gridPortionButtonStyle}" PreviewMouseUp="portionCountAdd_MouseUp"/>
+                            
                             <TextBlock x:Name="txtDishPrice" Grid.Column="3" Text="{Binding Converter={StaticResource getDishPrice}, StringFormat={StaticResource priceFormatString}, Mode=OneWay}" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize2, Mode=OneWay}" FontWeight="Bold"/>
-                                <Image Grid.Column="4" Source="AppImages/removeItem.png" VerticalAlignment="Center" Height="{Binding ElementName=gridPortion, Path=ActualHeight, Mode=OneWay, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.7}" MouseUp="dishDel_MouseUp"/>
+                            
+                                <Image Grid.Column="4" Source="AppImages/removeItem.png" VerticalAlignment="Center" Height="{Binding ElementName=gridPortion, Path=ActualHeight, Mode=OneWay, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.7}" PreviewMouseUp="dishDel_MouseUp"/>
                         </Grid>
                     </Grid>
                 </DockPanel>

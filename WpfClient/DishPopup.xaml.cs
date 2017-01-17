@@ -23,6 +23,10 @@ namespace WpfClient
     {
         private bool _isClose;
         private DishItem _currentDish;
+        List<TextBlock> tbList;
+        List<Viewbox> vbList;
+        SolidColorBrush notSelTextColor;
+        SolidColorBrush selTextColor;
 
 
         public DishPopup(DishItem dishItem)
@@ -33,6 +37,9 @@ namespace WpfClient
             _currentDish = dishItem;
             this.DataContext = _currentDish;
             updatePriceControl();
+
+            notSelTextColor = new SolidColorBrush(Colors.Black);
+            selTextColor = (SolidColorBrush)AppLib.GetAppGlobalValue("addButtonBackgroundTextColor");
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -71,6 +78,10 @@ namespace WpfClient
 
         private void listIngredients_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            // view level
+            changeViewAdding(listIngredients, e);
+
+            // model level
             if (_currentDish.SelectedIngredients == null) _currentDish.SelectedIngredients = new List<DishAdding>();
             else _currentDish.SelectedIngredients.Clear();
 
@@ -81,8 +92,39 @@ namespace WpfClient
             updatePriceControl();
         }
 
+        private void changeViewAdding(ListBox listBox, SelectionChangedEventArgs e)
+        {
+            TextBlock tbText;
+            Viewbox vBox;
+
+            foreach (var item in e.RemovedItems)
+            {
+                ListBoxItem vRemoved = (ListBoxItem)listBox.ItemContainerGenerator.ContainerFromItem(item);
+                tbList = AppLib.FindVisualChildren<TextBlock>(vRemoved).ToList();
+                vbList = AppLib.FindVisualChildren<Viewbox>(vRemoved).ToList();
+                tbText = tbList.Find(t => t.Name == "txtName");
+                tbText.Foreground = notSelTextColor;
+                vBox = vbList.Find(v => v.Name == "garnBaseColorBrush");
+                vBox.Visibility = Visibility.Hidden;
+            }
+            foreach (var item in e.AddedItems)
+            {
+                ListBoxItem vAdded = (ListBoxItem)listBox.ItemContainerGenerator.ContainerFromItem(item);
+                tbList = AppLib.FindVisualChildren<TextBlock>(vAdded).ToList();
+                vbList = AppLib.FindVisualChildren<Viewbox>(vAdded).ToList();
+                tbText = tbList.Find(t => t.Name == "txtName");
+                tbText.Foreground = selTextColor;
+                vBox = vbList.Find(v => v.Name == "garnBaseColorBrush");
+                vBox.Visibility = Visibility.Visible;
+            }
+        }
+
         private void listRecommends_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            // view level
+            changeViewAdding(listRecommends, e);
+
+            // model level
             if (_currentDish.SelectedRecommends == null) _currentDish.SelectedRecommends = new List<DishItem>();
             else _currentDish.SelectedRecommends.Clear();
 

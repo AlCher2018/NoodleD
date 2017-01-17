@@ -84,7 +84,7 @@ namespace WpfClient
 
             //  РАЗМЕРЫ ПАНЕЛИ БЛЮД(А)
             double dishesPanelWidth = (screenWidth / 6.0 * 5.0);
-            AppLib.SetAppGlobalValue("dishesPanelWidth", dVar);
+            AppLib.SetAppGlobalValue("dishesPanelWidth", dishesPanelWidth);
             AppLib.SetAppGlobalValue("dishesPanelScrollButtonSize", 0.15 * dishesPanelWidth); 
             // расчет ширины панели блюда
             double dishPanelWidth;
@@ -159,12 +159,15 @@ namespace WpfClient
         Point? lastDragPoint, initDragPoint;
         protected DateTime _dateTime;
 
+        private List<Canvas> _dishCanvas;
+
 
         public MainWindow()
         {
             InitializeComponent();
-
+            
             animDishRows = new List<double>();
+            _dishCanvas = new List<Canvas>();
             appInit();
         }
 
@@ -280,7 +283,10 @@ namespace WpfClient
             Dictionary<string, string> langAddDishDict = (Dictionary<string, string>)AppLib.GetAppGlobalValue("btnSelectDishText");
             brushBlack = new SolidColorBrush(Colors.Black);
 
+            createDishesCanvas(mFolders);
+
             AppLib.SetAppGlobalValue("mainMenu", mFolders);
+            lstMenuFolders.Focus();
             lstMenuFolders.ItemsSource = mFolders;
             lstMenuFolders.SelectedIndex = 0;
 
@@ -288,6 +294,107 @@ namespace WpfClient
             selectAppLang(null);
 
             logger.Trace("Настраиваю визуальные элементы - READY");
+        }
+
+        // **************************************************************************************
+        //       TO DO
+        // **************************************************************************************
+        private void createDishesCanvas(ObservableCollection<AppModel.MenuItem> mFolders)
+        {
+            double screenWidth, screenHeight;
+            screenWidth = SystemParameters.PrimaryScreenWidth;
+            screenHeight = SystemParameters.PrimaryScreenHeight;
+
+            // углы закругления
+            double dVar = 0.005 * screenWidth;
+            double cornerRadiusButton =dVar;
+            double cornerRadiusGarnish = 0.5 * dVar;
+            double cornerRadiusDishPanel = 2 * dVar;
+
+            //  РАЗМЕРЫ ПАНЕЛИ БЛЮД(А)
+            double dishesPanelWidth = (screenWidth / 6.0 * 5.0);
+            double dishPanelWidth = 0.95 * dishesPanelWidth / 3;
+            // высота строки заголовка
+            double dishPanelHeaderRowHeight = 0.15 * dishPanelWidth;
+            // высота строки изображения
+            double dishPanelImageRowHeight = 0.7 * dishPanelWidth;
+            // высота строки гарниров
+            double dishPanelGarnishesRowHeight = 0.2 * dishPanelWidth;
+            // ширина подложки гарнира (см. соотн.сторон в Canvas x:Key="garnBase" Width="130" Height="100")
+            double dishPanelGarnishBaseWidth = 1.3 * dishPanelGarnishesRowHeight;
+            // высота строки кнопки добавления
+            double dishPanelAddButtonRowHeight = 0.18 * dishPanelWidth;
+            double dishPanelAddButtonHeight = 0.6 * dishPanelAddButtonRowHeight;
+            double dishPanelAddButtonTextSize = 0.3 * dishPanelAddButtonRowHeight;
+            // размеры тени под кнопками (от высоты самой кнопки, dishPanelAddButtonHeight)
+            double dishPanelAddButtonShadowDepth = 0.15 * dishPanelAddButtonHeight;
+            double dishPanelAddButtonShadowBlurRadius = 0.6 * dishPanelAddButtonHeight;
+            double dishPanelAddButtonShadowCornerRadius = 0.25 * dishPanelWidth;
+            // расстояния между строками панели блюда
+            double dishPanelRowMargin1 = 0.01 * dishPanelWidth;
+            double dishPanelRowMargin2 = 0.02 * dishPanelWidth;
+            // размер шрифтов
+            double dishPanelHeaderFontSize = 0.06 * dishPanelWidth;
+            double dishPanelTextFontSize = 0.6 * dishPanelHeaderFontSize;
+            // размер кнопки описания блюда
+            double dishPanelDescrButtonSize = 0.1 * dishPanelWidth;
+
+            // высота панелей
+            double dishPanelHeight, dishPanelHeightWithGarnish;
+            dishPanelHeight = dishPanelHeaderRowHeight + dishPanelRowMargin1 + dishPanelImageRowHeight + dishPanelRowMargin2 + dishPanelAddButtonRowHeight;
+            dishPanelHeightWithGarnish = dishPanelHeight + dishPanelGarnishesRowHeight + dishPanelRowMargin2;
+
+            Canvas canvas;
+            double leftMargin = (dishesPanelWidth - 3 * dishPanelWidth) / 2;
+            double currentPanelHeight;
+
+            //Random rnd = new Random();
+
+            foreach (AppModel.MenuItem mItem in mFolders)
+            {
+                canvas = new Canvas();
+                if (mItem.Dishes.Count > 0)
+                {
+                    canvas.Width = dishesPanelWidth;
+                    int iRowsCount = ((mItem.Dishes.Count-1) / 3) + 1;
+                    bool isExistGarnishes = (mItem.Dishes[0].Garnishes != null);
+                    currentPanelHeight = ((isExistGarnishes) ? dishPanelHeightWithGarnish : dishPanelHeight);
+                    canvas.Height = iRowsCount * currentPanelHeight;
+
+                    int iRow, iCol;
+                    for (int i=0; i < mItem.Dishes.Count; i++)
+                    {
+                        // положение панели блюда
+                        iRow = i / 3; iCol = i % 3;
+                        double leftPos = (leftMargin + iCol * dishPanelWidth);
+                        double topPos = iRow * currentPanelHeight;
+
+                        // декоратор для панели блюда (должен быть для корректной работы ручного скроллинга)
+                        Border brd = new Border();
+                        //brd.BorderBrush = new SolidColorBrush(Colors.Red); brd.BorderThickness = new Thickness(2);
+                        brd.Width = dishPanelWidth;
+                        brd.Height = currentPanelHeight;
+                        brd.SetValue(Canvas.LeftProperty, leftPos);
+                        brd.SetValue(Canvas.TopProperty, topPos);
+
+                        // панель содержания
+                        Grid dGrid = new Grid();
+                        dGrid.Background = new SolidColorBrush(Colors.CadetBlue);
+                        dGrid.Width = dishPanelWidth / 25d * 23d;
+                        dGrid.SetValue(Canvas.LeftProperty, leftPos + (dishPanelWidth / 25d * 1d));
+                        dGrid.Height = currentPanelHeight / 30d * 28d;
+                        dGrid.SetValue(Canvas.TopProperty, topPos + (currentPanelHeight / 30d * 1d));
+                        brd.Child = dGrid;
+
+                        canvas.Children.Add(brd);
+                    }
+
+                }
+
+                //canvas.Background = new SolidColorBrush(new Color() { R = (byte)rnd.Next(0,254), G= (byte)rnd.Next(0, 254), B= (byte)rnd.Next(0, 254), A=0xFF });
+
+                _dishCanvas.Add(canvas);
+            }
         }
 
         private void checkDBConnection()
@@ -420,7 +527,7 @@ namespace WpfClient
             be.UpdateTarget();
 
             lstMenuFolders.Items.Refresh();
-            lstDishes.Items.Refresh();
+//            lstDishes.Items.Refresh();
 
             // сбросить выбор блюда
             clearSelectedDish();
@@ -476,48 +583,49 @@ namespace WpfClient
         // боковое меню выбора категории блюд
         private void lstMenuFolders_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            ListBoxItem container;
-            IEnumerable<FrameworkElement> visItems;
-            Image img;
-
-            clearSelectedDish();
+//            clearSelectedDish();
             e.Handled = true;
+            scrollDishes.Content = _dishCanvas[lstMenuFolders.SelectedIndex];
 
             // очистить привязку изображения  в списке блюд
-            if (lstDishes.ItemsSource != null)
-            {
-                foreach (var item in lstDishes.Items)
-                {
-                    container = (ListBoxItem)lstDishes.ItemContainerGenerator.ContainerFromItem(item);
-                    if (container != null)
-                    {
-                        IEnumerable<FrameworkElement> cpArr = AppLib.FindVisualChildren<FrameworkElement>(container);
-                        foreach (FrameworkElement fe in cpArr)
-                        {
-                            if (fe.Name == "rectDishImage")
-                            {
-                                Rectangle rect = (fe as Rectangle);
-                                rect.Fill.ClearValue(ImageBrush.ImageSourceProperty);
-                            }
-                            else if (fe.Name == "dishHeaderMarkImage")
-                            {
-                                img = (Image)fe;
-                                img.ClearValue(Image.SourceProperty);
-                            }
-                        }
-                    }
-                }
-            }
+            //ListBoxItem container;
+            //IEnumerable<FrameworkElement> visItems;
+            //Image img;
 
-            lstDishes.ClearValue(ListBox.ItemsSourceProperty);
-            lstDishes.ItemsSource = null;
+            //if (lstDishes.ItemsSource != null)
+            //{
+            //    foreach (var item in lstDishes.Items)
+            //    {
+            //        container = (ListBoxItem)lstDishes.ItemContainerGenerator.ContainerFromItem(item);
+            //        if (container != null)
+            //        {
+            //            IEnumerable<FrameworkElement> cpArr = AppLib.FindVisualChildren<FrameworkElement>(container);
+            //            foreach (FrameworkElement fe in cpArr)
+            //            {
+            //                if (fe.Name == "rectDishImage")
+            //                {
+            //                    Rectangle rect = (fe as Rectangle);
+            //                    rect.Fill.ClearValue(ImageBrush.ImageSourceProperty);
+            //                }
+            //                else if (fe.Name == "dishHeaderMarkImage")
+            //                {
+            //                    img = (Image)fe;
+            //                    img.ClearValue(Image.SourceProperty);
+            //                }
+            //            }
+            //        }
+            //    }
+            //}
 
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
+            //lstDishes.ClearValue(ListBox.ItemsSourceProperty);
+            //lstDishes.ItemsSource = null;
 
-            lstDishes.ItemsSource = ((AppModel.MenuItem)lstMenuFolders.SelectedItem).Dishes;
-            
-            scrollDishes.ScrollToTop();
+            //GC.Collect();
+            //GC.WaitForPendingFinalizers();
+
+//            lstDishes.ItemsSource = ((AppModel.MenuItem)lstMenuFolders.SelectedItem).Dishes;
+
+           scrollDishes.ScrollToTop();
         }
 
         #region кнопки гарниров
@@ -539,88 +647,88 @@ namespace WpfClient
         // клик по гарниру
         private void borderGarnisgHandler(object sender)
         {
-            // визуальные элементы
-            FrameworkElement gridGarn = (FrameworkElement)sender;   // кликнутый грид
-            int garnIndex = int.Parse(gridGarn.Uid);  // его индекс
-            // изменяемые элементы
-            System.Windows.Shapes.Path borderGarn = AppLib.FindLogicalChildren<System.Windows.Shapes.Path>(gridGarn).ToList()[0];  // кликнутый бордер
-            TextBlock garnName = AppLib.FindLogicalChildren<TextBlock>(gridGarn).ToList()[0];
+            //// визуальные элементы
+            //FrameworkElement gridGarn = (FrameworkElement)sender;   // кликнутый грид
+            //int garnIndex = int.Parse(gridGarn.Uid);  // его индекс
+            //// изменяемые элементы
+            //System.Windows.Shapes.Path borderGarn = AppLib.FindLogicalChildren<System.Windows.Shapes.Path>(gridGarn).ToList()[0];  // кликнутый бордер
+            //TextBlock garnName = AppLib.FindLogicalChildren<TextBlock>(gridGarn).ToList()[0];
 
-            Grid gridGarnAll = (Grid)VisualTreeHelper.GetParent(gridGarn);   // родительский грид, в котором все три гарнира
-            IEnumerable<Viewbox> bordersGarn = AppLib.FindVisualChildren<Viewbox>(gridGarnAll).ToList();  // все бордеры гарниров
+            //Grid gridGarnAll = (Grid)VisualTreeHelper.GetParent(gridGarn);   // родительский грид, в котором все три гарнира
+            //IEnumerable<Viewbox> bordersGarn = AppLib.FindVisualChildren<Viewbox>(gridGarnAll).ToList();  // все бордеры гарниров
             
-            // родительский грид
-            Grid gridPar = (Grid)LogicalTreeHelper.GetParent(gridGarnAll); 
-            // грид с большими кнопками
-            Grid gridBigBut = (Grid)(AppLib.FindLogicalChildren<Grid>(gridPar).First(g => g.Name== "gridDishBottomButtons"));  
-            // бордер кнопки добавления блюда
-            Border borderAddBut = AppLib.FindVisualChildren<Border>(gridBigBut).First(g => g.Name=="txtDishWithIngr");  
+            //// родительский грид
+            //Grid gridPar = (Grid)LogicalTreeHelper.GetParent(gridGarnAll); 
+            //// грид с большими кнопками
+            //Grid gridBigBut = (Grid)(AppLib.FindLogicalChildren<Grid>(gridPar).First(g => g.Name== "gridDishBottomButtons"));  
+            //// бордер кнопки добавления блюда
+            //Border borderAddBut = AppLib.FindVisualChildren<Border>(gridBigBut).First(g => g.Name=="txtDishWithIngr");  
 
-            if (_curDishItem == null)
-            {
-                _curDishItem = (DishItem)lstDishes.SelectedItem;
-                if (_curDishItem.SelectedGarnishes == null) _curDishItem.SelectedGarnishes = new List<DishAdding>();
+            //if (_curDishItem == null)
+            //{
+            //    _curDishItem = (DishItem)lstDishes.SelectedItem;
+            //    if (_curDishItem.SelectedGarnishes == null) _curDishItem.SelectedGarnishes = new List<DishAdding>();
 
-                DishAdding da = _curDishItem.Garnishes[garnIndex];
-                da.Uid = gridGarn.Uid;
-                _curDishItem.SelectedGarnishes.Add(da);
+            //    DishAdding da = _curDishItem.Garnishes[garnIndex];
+            //    da.Uid = gridGarn.Uid;
+            //    _curDishItem.SelectedGarnishes.Add(da);
 
-                _curGarnishBorder = borderGarn;
-                _curGarnishTextBlock = garnName;
-                _curAddButton = borderAddBut;
+            //    _curGarnishBorder = borderGarn;
+            //    _curGarnishTextBlock = garnName;
+            //    _curAddButton = borderAddBut;
 
-                updateVisualGarnish(true);
-            }
-            else
-            {
-                if ((_curDishItem == (DishItem)lstDishes.SelectedItem) && (_curDishItem.SelectedGarnishes != null))  // клик по гарниру в том же блюде
-                {
-                    DishAdding da = _curDishItem.SelectedGarnishes.FirstOrDefault(g => g.Uid == gridGarn.Uid);
-                    if (da == null)
-                    {
-                        if (_curDishItem.SelectedGarnishes.Count > 0)
-                        {
-                            _curDishItem.SelectedGarnishes.Clear();
-                            updateVisualGarnish(false);
-                        }
+            //    updateVisualGarnish(true);
+            //}
+            //else
+            //{
+            //    if ((_curDishItem == (DishItem)lstDishes.SelectedItem) && (_curDishItem.SelectedGarnishes != null))  // клик по гарниру в том же блюде
+            //    {
+            //        DishAdding da = _curDishItem.SelectedGarnishes.FirstOrDefault(g => g.Uid == gridGarn.Uid);
+            //        if (da == null)
+            //        {
+            //            if (_curDishItem.SelectedGarnishes.Count > 0)
+            //            {
+            //                _curDishItem.SelectedGarnishes.Clear();
+            //                updateVisualGarnish(false);
+            //            }
 
-                        da = _curDishItem.Garnishes[garnIndex];
-                        da.Uid = gridGarn.Uid;
-                        _curDishItem.SelectedGarnishes.Add(da);
+            //            da = _curDishItem.Garnishes[garnIndex];
+            //            da.Uid = gridGarn.Uid;
+            //            _curDishItem.SelectedGarnishes.Add(da);
 
-                        _curGarnishBorder = borderGarn;
-                        _curGarnishTextBlock = garnName;
-                        updateVisualGarnish(true);
-                    }
-                    else
-                    {
-                        _curDishItem.SelectedGarnishes.Clear();
-                        updateVisualGarnish(true);
-                    }
-                }
-                else  // клик по гарниру в другом блюде 
-                {
-                    if ((_curDishItem.SelectedGarnishes != null) && _curDishItem.SelectedGarnishes.Count > 0)
-                    {
-                        _curDishItem.SelectedGarnishes.Clear();
-                        updateVisualGarnish(true);
-                    }
+            //            _curGarnishBorder = borderGarn;
+            //            _curGarnishTextBlock = garnName;
+            //            updateVisualGarnish(true);
+            //        }
+            //        else
+            //        {
+            //            _curDishItem.SelectedGarnishes.Clear();
+            //            updateVisualGarnish(true);
+            //        }
+            //    }
+            //    else  // клик по гарниру в другом блюде 
+            //    {
+            //        if ((_curDishItem.SelectedGarnishes != null) && _curDishItem.SelectedGarnishes.Count > 0)
+            //        {
+            //            _curDishItem.SelectedGarnishes.Clear();
+            //            updateVisualGarnish(true);
+            //        }
 
-                    _curDishItem = (DishItem)lstDishes.SelectedItem;
-                    if (_curDishItem.SelectedGarnishes == null) _curDishItem.SelectedGarnishes = new List<DishAdding>();
+            //        _curDishItem = (DishItem)lstDishes.SelectedItem;
+            //        if (_curDishItem.SelectedGarnishes == null) _curDishItem.SelectedGarnishes = new List<DishAdding>();
 
-                    DishAdding da = _curDishItem.Garnishes[garnIndex];
-                    da.Uid = gridGarn.Uid;
-                    _curDishItem.SelectedGarnishes.Add(da);
+            //        DishAdding da = _curDishItem.Garnishes[garnIndex];
+            //        da.Uid = gridGarn.Uid;
+            //        _curDishItem.SelectedGarnishes.Add(da);
 
-                    _curGarnishBorder = borderGarn;
-                    _curGarnishTextBlock = garnName;
-                    _curAddButton = borderAddBut;
+            //        _curGarnishBorder = borderGarn;
+            //        _curGarnishTextBlock = garnName;
+            //        _curAddButton = borderAddBut;
 
-                    updateVisualGarnish(true);
+            //        updateVisualGarnish(true);
 
-                }
-            }
+            //    }
+            //}
         }
         private void updateVisualGarnish(bool isUpdAddBut)
         {
@@ -671,58 +779,58 @@ namespace WpfClient
         // клик по кнопке
         private void txtDishWithIngrHandler(object sender)
         {
-            DishItem selDishItem = (DishItem)lstDishes.SelectedItem;
-            if (selDishItem == null) return;
+            //DishItem selDishItem = (DishItem)lstDishes.SelectedItem;
+            //if (selDishItem == null) return;
 
-            // если нет ингредиентов, то сразу в корзину
-            if ((selDishItem.Ingredients == null) || (selDishItem.Ingredients.Count == 0))
-            {
-                DishItem orderDish = selDishItem.GetCopyForOrder();
-                _currentOrder.Dishes.Add(orderDish);
+            //// если нет ингредиентов, то сразу в корзину
+            //if ((selDishItem.Ingredients == null) || (selDishItem.Ingredients.Count == 0))
+            //{
+            //    DishItem orderDish = selDishItem.GetCopyForOrder();
+            //    _currentOrder.Dishes.Add(orderDish);
 
-                // снять выделение
-                this.clearSelectedDish();
+            //    // снять выделение
+            //    this.clearSelectedDish();
 
-                // нарисовать путь
-                FrameworkElement dishPanel = AppLib.FindLogicalParentByName((FrameworkElement)sender, "gridDish", 4);
-                if (dishPanel != null)
-                {
-                    System.Windows.Shapes.Path animPath = getAnimPath(dishPanel);
+            //    // нарисовать путь
+            //    FrameworkElement dishPanel = AppLib.FindLogicalParentByName((FrameworkElement)sender, "gridDish", 4);
+            //    if (dishPanel != null)
+            //    {
+            //        System.Windows.Shapes.Path animPath = getAnimPath(dishPanel);
 
-                    //cnvAnim.Children.Add(animPath);
+            //        //cnvAnim.Children.Add(animPath);
 
-                    //ColorAnimation colorAnim = new ColorAnimation(Colors.Aqua, Colors.Red, TimeSpan.FromMilliseconds(2000));
-                    //colorAnim.Completed += ColorAnim_Completed;
-                    //spotTo.Fill.BeginAnimation(SolidColorBrush.ColorProperty, colorAnim);
+            //        //ColorAnimation colorAnim = new ColorAnimation(Colors.Aqua, Colors.Red, TimeSpan.FromMilliseconds(2000));
+            //        //colorAnim.Completed += ColorAnim_Completed;
+            //        //spotTo.Fill.BeginAnimation(SolidColorBrush.ColorProperty, colorAnim);
                     
-                    //Storyboard sb = new Storyboard();
-                    //PropertyPath colorTargetPath = new PropertyPath("(Ellipse.Fill).(SolidColorBrush.Color)");
-                    //Storyboard.SetTarget(colorAnim, spotTo);
-                    //Storyboard.SetTargetProperty(colorAnim, colorTargetPath);
-                    //sb.Children.Add(colorAnim);
-                    //sb.AutoReverse = true;
-                    //sb.Begin();
+            //        //Storyboard sb = new Storyboard();
+            //        //PropertyPath colorTargetPath = new PropertyPath("(Ellipse.Fill).(SolidColorBrush.Color)");
+            //        //Storyboard.SetTarget(colorAnim, spotTo);
+            //        //Storyboard.SetTargetProperty(colorAnim, colorTargetPath);
+            //        //sb.Children.Add(colorAnim);
+            //        //sb.AutoReverse = true;
+            //        //sb.Begin();
 
-                }
+            //    }
 
-                // и обновить стоимость заказа
-                updatePrice();
-            }
-            else
-            {
-                // иначе через "всплывашку"
-                DishPopup popupWin = new DishPopup(_curDishItem);
-                // размеры
-                FrameworkElement pnlClient = this.Content as FrameworkElement;
-                popupWin.Height = pnlClient.ActualHeight;
-                popupWin.Width = pnlClient.ActualWidth;
-                // и положение
-                Point p = this.PointToScreen(new Point(0, 0));
-                popupWin.Left = p.X;
-                popupWin.Top = p.Y;
+            //    // и обновить стоимость заказа
+            //    updatePrice();
+            //}
+            //else
+            //{
+            //    // иначе через "всплывашку"
+            //    DishPopup popupWin = new DishPopup(_curDishItem);
+            //    // размеры
+            //    FrameworkElement pnlClient = this.Content as FrameworkElement;
+            //    popupWin.Height = pnlClient.ActualHeight;
+            //    popupWin.Width = pnlClient.ActualWidth;
+            //    // и положение
+            //    Point p = this.PointToScreen(new Point(0, 0));
+            //    popupWin.Left = p.X;
+            //    popupWin.Top = p.Y;
 
-                popupWin.ShowDialog();
-            }
+            //    popupWin.ShowDialog();
+            //}
         }
 
         private void ColorAnim_Completed(object sender, EventArgs e)
@@ -876,13 +984,15 @@ namespace WpfClient
         private void scrollDishes_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
             Visibility visButtonTop, visButtonBottom;
+            Canvas curCanvas = _dishCanvas[lstMenuFolders.SelectedIndex];
+
 
             if (e.VerticalOffset == 0)
             {
                 visButtonTop = Visibility.Hidden;
-                visButtonBottom = (lstDishes.ActualHeight == scrollDishes.ActualHeight)?Visibility.Hidden: Visibility.Visible;
+                visButtonBottom = (curCanvas.ActualHeight == scrollDishes.ActualHeight) ? Visibility.Hidden : Visibility.Visible;
             }
-            else if(e.VerticalOffset == (lstDishes.ActualHeight - scrollDishes.ActualHeight))
+            else if (e.VerticalOffset == (curCanvas.ActualHeight - scrollDishes.ActualHeight))
             {
                 visButtonTop = Visibility.Visible;
                 visButtonBottom = Visibility.Hidden;
@@ -918,34 +1028,38 @@ namespace WpfClient
         #region animated scrolling
         private void btnScrollUp_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (lstDishes.Items.Count == 0) return;
+            Canvas curCanvas = _dishCanvas[lstMenuFolders.SelectedIndex];
+            
+            if (curCanvas.Children.Count == 0) return;
 
-            int iRows = Convert.ToInt32(Math.Ceiling(lstDishes.Items.Count / 3.0));
+            int iRows = Convert.ToInt32(Math.Ceiling(curCanvas.Children.Count / 3.0));
             // высота панели блюда
-            double h1 = ((FrameworkElement)lstDishes.ItemContainerGenerator.ContainerFromIndex(0)).ActualHeight;
+            double h1 = ((Border)curCanvas.Children[0]).ActualHeight;
             // текущая строка
-            Point relativePoint = lstDishes.TransformToAncestor(scrollDishes).Transform(new Point(0, 0));
-            double dFrom = Math.Abs(relativePoint.Y), dTo;
+            Matrix matrix = (Matrix)curCanvas.TransformToVisual(scrollDishes).GetValue(MatrixTransform.MatrixProperty);
+            double dFrom = Math.Abs(matrix.OffsetY);
             int curRow = Convert.ToInt32(Math.Floor(dFrom / h1));
 
             if ((Convert.ToInt32((dFrom % h1)) == 0) && (curRow > 0)) curRow--;
-            dTo = curRow * h1;
+            double dTo = curRow * h1;
             animateDishesScroll(dFrom, dTo, Math.Abs(dTo - dFrom) >= h1);
         }
 
         private void btnScrollDown_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (lstDishes.Items.Count == 0) return;
+            Canvas curCanvas = _dishCanvas[lstMenuFolders.SelectedIndex];
+            if (curCanvas.Children.Count == 0) return;
 
-            int iRows = Convert.ToInt32(Math.Ceiling(lstDishes.Items.Count / 3.0));
+            int iRows = Convert.ToInt32(Math.Ceiling(curCanvas.Children.Count / 3.0));
             // высота панели блюда
-            double h1 = ((FrameworkElement)lstDishes.ItemContainerGenerator.ContainerFromIndex(0)).ActualHeight;
+            double h1 = ((Border)curCanvas.Children[0]).ActualHeight;
             // текущая строка
-            Point relativePoint = lstDishes.TransformToAncestor(scrollDishes).Transform(new Point(0, 0));
-            double dFrom = Math.Abs(relativePoint.Y), dTo;
+            Matrix matrix = (Matrix)curCanvas.TransformToVisual(scrollDishes).GetValue(MatrixTransform.MatrixProperty);
+            double dFrom = Math.Abs(matrix.OffsetY);
             int curRow = Convert.ToInt32(Math.Floor(dFrom / h1)) + 1;
 
             // переход к следующей строке
+            double dTo;
             if (curRow < (iRows - 1))
             {
                 dTo = (curRow) * h1;
@@ -954,7 +1068,7 @@ namespace WpfClient
             // или в конец списка
             else if (curRow == (iRows - 1))
             {
-                dTo = lstDishes.ActualHeight - scrollDishes.ActualHeight;
+                dTo = curCanvas.ActualHeight - scrollDishes.ActualHeight;
                 animateDishesScroll(dFrom, dTo, Math.Abs(dTo - dFrom) >= h1);
             }
         }

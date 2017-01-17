@@ -53,7 +53,7 @@
 
         <Viewbox x:Name="btnDishScroll" Grid.Column="2" Grid.Row="1" Stretch="Uniform">
             <Grid Width="100" Height="100">
-                <Image Source="e:\Чернов\NoodleD\дизайн\изображения блюд\EmptyName-1.jpg" Stretch="Fill"/>
+                <!--<Image Source="e:\Чернов\NoodleD\дизайн\изображения блюд\EmptyName-1.jpg" Stretch="Fill"/>-->
                 <Canvas MouseDown="Canvas_MouseDown">
                     <Path>
                         <Path.Fill>
@@ -125,6 +125,9 @@
                             </PathFigure>
                         </PathGeometry>
                     </Path.Data>
+                    <Path.Fill>
+                        <ImageBrush ImageSource="d:\NoodleD\тестовые изображение блюд\sup-lapsha-s-kuricej-po-domashnemu.jpg" Stretch="UniformToFill"/>
+                    </Path.Fill>
                 </Path>
             </Canvas>
         </Viewbox>
@@ -135,6 +138,9 @@
             </Canvas>
         </Viewbox>
 
-
+        <Path Grid.Row="2" Grid.Column="2">
+            
+        </Path>
+        
     </Grid>
 </Window>
