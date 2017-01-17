@@ -335,7 +335,7 @@ namespace WpfClient
             double dishPanelRowMargin2 = 0.02 * dishPanelWidth;
             // размер шрифтов
             double dishPanelHeaderFontSize = 0.06 * dishPanelWidth;
-            double dishPanelTextFontSize = 0.6 * dishPanelHeaderFontSize;
+            double dishPanelTextFontSize = 0.8 * dishPanelHeaderFontSize;
             // размер кнопки описания блюда
             double dishPanelDescrButtonSize = 0.1 * dishPanelWidth;
 
@@ -364,6 +364,8 @@ namespace WpfClient
                     int iRow, iCol;
                     for (int i=0; i < mItem.Dishes.Count; i++)
                     {
+                        DishItem dish = mItem.Dishes[i];
+
                         // положение панели блюда
                         iRow = i / 3; iCol = i % 3;
                         double leftPos = (leftMargin + iCol * dishPanelWidth);
@@ -384,6 +386,67 @@ namespace WpfClient
                         dGrid.SetValue(Canvas.LeftProperty, leftPos + (dishPanelWidth / 25d * 1d));
                         dGrid.Height = currentPanelHeight / 30d * 28d;
                         dGrid.SetValue(Canvas.TopProperty, topPos + (currentPanelHeight / 30d * 1d));
+                        //   Определение строк
+                        // строка заголовка
+                        dGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(dishPanelHeaderRowHeight, GridUnitType.Pixel) });
+                        // разделитель
+                        dGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(dishPanelRowMargin1, GridUnitType.Pixel) });
+                        // строка изображения
+                        dGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(dishPanelImageRowHeight, GridUnitType.Pixel) });
+                        // разделитель
+                        dGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(dishPanelRowMargin2, GridUnitType.Pixel) });
+                        if (isExistGarnishes)
+                        {
+                            // строка гарниров
+                            dGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(dishPanelGarnishesRowHeight, GridUnitType.Pixel) });
+                            // разделитель
+                            dGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(dishPanelRowMargin2, GridUnitType.Pixel) });
+                        }
+                        // строка кнопок
+                        dGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(dishPanelAddButtonRowHeight, GridUnitType.Pixel) });
+
+
+                        // Заголовок панели
+                        Run r1 = new Run() {
+                            Text = AppLib.GetLangText(dish.langNames),
+                            FontWeight = FontWeights.Bold,
+                            FontSize = dishPanelHeaderFontSize
+                        };
+                        Run r2 = new Run()
+                        {
+                            Text = "  " + dish.UnitCount.ToString(),
+                            FontStyle = FontStyles.Italic,
+                            FontSize = dishPanelTextFontSize
+                        };
+                        Run r3 = new Run()
+                        {
+                            Text = " " + AppLib.GetLangText(dish.langUnitNames),
+                            FontSize = dishPanelTextFontSize
+                        };
+                        TextBlock tb = new TextBlock() {
+                            Foreground = new SolidColorBrush(Colors.Black),
+                            TextWrapping = TextWrapping.Wrap,
+                            VerticalAlignment = VerticalAlignment.Center,
+                            TextAlignment = TextAlignment.Center
+                        };
+                        tb.Inlines.AddRange(new Inline[] { r1, r2, r3});
+                        Grid.SetRow(tb, 0);
+                        dGrid.Children.Add(tb);
+ 
+                        //b1.SetValue(Grid.RowProperty, 0);
+
+                        //tb.SetValue(Grid.RowProperty, 0);
+                        //                        Grid.SetRow(tb, 3);
+
+                        //ItemsControl ic = new ItemsControl();
+                        //ic.ItemsSource = dish.Marks;
+                        //ic.Height = dishPanelHeaderFontSize;
+                        //DataTemplate dt = new DataTemplate() { };
+                        //ic.ItemTemplate = new DataTemplate();
+
+                        //WrapPanel wp = new WrapPanel();
+
+
                         brd.Child = dGrid;
 
                         canvas.Children.Add(brd);
