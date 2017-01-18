@@ -16,14 +16,19 @@ namespace WpfClient
     public static class AppLib
     {
         #region app settings
-        // получить настройки приложения
+        // получить настройки приложения из config-файла
         public static string GetAppSetting(string key)
         {
-            // ... из config-файла
             if (ConfigurationManager.AppSettings.AllKeys.Any(k => k == key) == true)
                 return ConfigurationManager.AppSettings.Get(key);
             else
                 return null;
+        }
+
+        // возвращает ресурс приложения по имени ресурса, если ресурс не найден, возвращает null
+        public static object GetAppResource(string nameResource)
+        {
+            return Application.Current.TryFindResource(nameResource);
         }
 
         // return "ru", "ua" or "en"
@@ -97,6 +102,13 @@ namespace WpfClient
             else
                 SetAppGlobalValue(settingName, false);
         }
+
+        public static object GetUIElementFromPanel(System.Windows.Controls.Panel panel, string nameChild)
+        {
+            IEnumerable<FrameworkElement> iList = panel.Children.Cast<FrameworkElement>();
+            return iList.FirstOrDefault(el => el.Name == nameChild);
+        }
+
         #endregion
 
         #region WPF UI interface

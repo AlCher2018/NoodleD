@@ -148,10 +148,16 @@ namespace WpfClient
         private OrderItem _currentOrder;
         private DishItem _curDishItem;
         // visual elements
+        Border _curDescrBorder;
+        TextBlock _curDescrTextBlock;
         System.Windows.Shapes.Path _curGarnishBorder;
         TextBlock _curGarnishTextBlock;
         Border _curAddButton;
         SolidColorBrush _brushSelectedItem;
+        // animations
+        DoubleAnimation _daCommon1, _daCommon2;
+        DoubleAnimation _daDishDescrBackgroundOpacity;
+
         // scroll viewer animate
         List<double> animDishRows;
 
@@ -172,7 +178,17 @@ namespace WpfClient
             appInit();
 
             _brushSelectedItem = (SolidColorBrush)AppLib.GetAppGlobalValue("appSelectedItemColor");
+
+            _daDishDescrBackgroundOpacity = new DoubleAnimation()
+            {
+                Duration = new Duration(new TimeSpan(0, 0, 0, 1)),
+                EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseOut }
+            };
+            _daCommon1 = new DoubleAnimation() { Duration = new Duration(new TimeSpan(0, 0, 0, 1)), };
+            _daCommon2 = new DoubleAnimation() { Duration = new Duration(new TimeSpan(0, 0, 0, 1)), };
+
         }
+
 
         private void appInit()
         {
@@ -315,147 +331,168 @@ namespace WpfClient
             double cornerRadiusDishPanel = 2 * dVar;
 
             //  РАЗМЕРЫ ПАНЕЛИ БЛЮД(А)
-            double dishesPanelWidth = (screenWidth / 6.0 * 5.0);
-            double dishPanelWidth = 0.95 * dishesPanelWidth / 3;
+            double dishesPanelWidth = (screenWidth / 6d * 5d);
+            double dishPanelWidth = 0.95d * dishesPanelWidth / 3d;
+            double dKoefContentWidth = 0.9d;
+            double contentPanelWidth = dKoefContentWidth * dishPanelWidth;
             // высота строки заголовка
-            double dishPanelHeaderRowHeight = 0.15 * dishPanelWidth;
+            double dishPanelHeaderRowHeight = 0.17d * dishPanelWidth;
             // высота строки изображения
-            double dishPanelImageRowHeight = 0.7 * dishPanelWidth;
+            double dishPanelImageRowHeight = 0.7d * dishPanelWidth;
             // высота строки гарниров
-            double dishPanelGarnishesRowHeight = 0.2 * dishPanelWidth;
+            double dishPanelGarnishesRowHeight = 0.2d * dishPanelWidth;
             // ширина подложки гарнира (см. соотн.сторон в Canvas x:Key="garnBase" Width="130" Height="100")
-            double dishPanelGarnishBaseWidth = 1.3 * dishPanelGarnishesRowHeight;
+            double dishPanelGarnishBaseWidth = 1.3d * dishPanelGarnishesRowHeight;
             // высота строки кнопки добавления
-            double dishPanelAddButtonRowHeight = 0.18 * dishPanelWidth;
-            double dishPanelAddButtonHeight = 0.6 * dishPanelAddButtonRowHeight;
-            double dishPanelAddButtonTextSize = 0.3 * dishPanelAddButtonRowHeight;
+            double dishPanelAddButtonRowHeight = 0.15d * dishPanelWidth;
+            double dishPanelAddButtonTextSize = 0.3d * dishPanelAddButtonRowHeight;
             // размеры тени под кнопками (от высоты самой кнопки, dishPanelAddButtonHeight)
-            double dishPanelAddButtonShadowDepth = 0.15 * dishPanelAddButtonHeight;
-            double dishPanelAddButtonShadowBlurRadius = 0.6 * dishPanelAddButtonHeight;
-            double dishPanelAddButtonShadowCornerRadius = 0.25 * dishPanelWidth;
+            double addButtonShadowDepth = 0.1d * dishPanelAddButtonRowHeight;
+            double addButtonBlurRadius = 0.35d * dishPanelAddButtonRowHeight;
             // расстояния между строками панели блюда
-            double dishPanelRowMargin1 = 0.01 * dishPanelWidth;
-            double dishPanelRowMargin2 = 0.02 * dishPanelWidth;
+            double dishPanelRowMargin1 = 0.01d * dishPanelWidth;
+            double dishPanelRowMargin2 = 0.02d * dishPanelWidth;
             // размер шрифтов
-            double dishPanelHeaderFontSize = 0.06 * dishPanelWidth;
-            double dishPanelTextFontSize = 0.8 * dishPanelHeaderFontSize;
+            double dishPanelHeaderFontSize = 0.06d * dishPanelWidth;
+            double dishPanelTextFontSize = 0.8d * dishPanelHeaderFontSize;
             // размер кнопки описания блюда
-            double dishPanelDescrButtonSize = 0.085 * dishPanelWidth;
+            double dishPanelDescrButtonSize = 0.085d * dishPanelWidth;
 
             // высота панелей
             double dishPanelHeight, dishPanelHeightWithGarnish;
-            dishPanelHeight = dishPanelHeaderRowHeight + dishPanelRowMargin1 + dishPanelImageRowHeight + dishPanelRowMargin2 + dishPanelAddButtonRowHeight;
-            dishPanelHeightWithGarnish = dishPanelHeight + dishPanelGarnishesRowHeight + dishPanelRowMargin2;
+            dishPanelHeight = Math.Ceiling(dishPanelHeaderRowHeight + dishPanelRowMargin1 + dishPanelImageRowHeight + dishPanelRowMargin2 + dishPanelAddButtonRowHeight);
+            dishPanelHeightWithGarnish = Math.Ceiling(dishPanelHeight + dishPanelGarnishesRowHeight + dishPanelRowMargin2);
+            double dKoefContentHeight = 1d;
+            double contentPanelHeight = Math.Ceiling(dKoefContentHeight * dishPanelHeight);
+            double contentPanelHeightWithGarnish = Math.Ceiling(dKoefContentHeight * dishPanelHeightWithGarnish);
+
             #endregion
+
+            DropShadowEffect _shadowEffect = new DropShadowEffect() {
+                Direction = 270, Color = Color.FromArgb(0xFF, 0xCF, 0x44, 0x6B), Opacity=0.7,
+                ShadowDepth = addButtonShadowDepth,
+                BlurRadius = addButtonBlurRadius };
 
             Canvas canvas;
             double leftMargin = (dishesPanelWidth - 3 * dishPanelWidth) / 2;
-            double currentPanelHeight;
-
+            double currentPanelHeight, currentContentPanelHeight;
+            double leftPos, topPos;
+            double d1, d2;
             //Random rnd = new Random();
 
             foreach (AppModel.MenuItem mItem in mFolders)
             {
+                if (mItem.Dishes.Count == 0) continue;
                 canvas = new Canvas();
-                if (mItem.Dishes.Count > 0)
+                canvas.Width = dishesPanelWidth;
+                int iRowsCount = ((mItem.Dishes.Count-1) / 3) + 1;
+
+                int iRow, iCol;
+                for (int i=0; i < mItem.Dishes.Count; i++)
                 {
-                    canvas.Width = dishesPanelWidth;
-                    int iRowsCount = ((mItem.Dishes.Count-1) / 3) + 1;
-                    bool isExistGarnishes = (mItem.Dishes[0].Garnishes != null);
+                    DishItem dish = mItem.Dishes[i];
+                    bool isExistGarnishes = (dish.Garnishes != null);
                     currentPanelHeight = ((isExistGarnishes) ? dishPanelHeightWithGarnish : dishPanelHeight);
+                    currentContentPanelHeight = ((isExistGarnishes) ? contentPanelHeightWithGarnish : contentPanelHeight);
                     canvas.Height = iRowsCount * currentPanelHeight;
 
-                    int iRow, iCol;
-                    for (int i=0; i < mItem.Dishes.Count; i++)
+                    // положение панели блюда
+                    iRow = i / 3; iCol = i % 3;
+                    leftPos = (leftMargin + iCol * dishPanelWidth);
+                    topPos = iRow * currentPanelHeight;
+
+                    // декоратор для панели блюда (должен быть для корректной работы ручного скроллинга)
+                    Grid brd = new Grid();
+                    //brd.Background = new SolidColorBrush(Colors.LightCyan);
+                    brd.SnapsToDevicePixels = true;
+                    brd.Width = dishPanelWidth;
+                    brd.Height = currentPanelHeight;
+                    brd.SetValue(Canvas.LeftProperty, leftPos);
+                    brd.SetValue(Canvas.TopProperty, topPos);
+
+                    d1 = (dishPanelWidth - contentPanelWidth) / 2d;
+                    brd.ColumnDefinitions.Add(new ColumnDefinition() {Width = new GridLength(d1, GridUnitType.Pixel) });
+                    brd.ColumnDefinitions.Add(new ColumnDefinition() {Width = new GridLength(contentPanelWidth, GridUnitType.Pixel) });
+                    brd.ColumnDefinitions.Add(new ColumnDefinition() {Width = new GridLength(d1, GridUnitType.Pixel) });
+                    d1 = (currentPanelHeight - currentContentPanelHeight) / 2d;
+                    brd.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(d1, GridUnitType.Pixel) });
+                    brd.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(currentContentPanelHeight, GridUnitType.Pixel)});
+                    brd.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(d1, GridUnitType.Pixel) });
+
+                    // панель содержания
+                    Grid dGrid = new Grid();
+                    dGrid.Width = contentPanelWidth;
+                    dGrid.Height = currentContentPanelHeight;
+                    //dGrid.Background = Brushes.Blue;
+                    //   Определение строк
+                    // строка заголовка
+                    dGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(dKoefContentHeight * dishPanelHeaderRowHeight, GridUnitType.Pixel) });
+                    // разделитель
+                    dGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(dKoefContentHeight * dishPanelRowMargin1, GridUnitType.Pixel) });
+                    // строка изображения
+                    dGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(dKoefContentHeight * dishPanelImageRowHeight, GridUnitType.Pixel) });
+                    // разделитель
+                    dGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(dKoefContentHeight * dishPanelRowMargin2, GridUnitType.Pixel) });
+                    if (isExistGarnishes)
                     {
-                        DishItem dish = mItem.Dishes[i];
+                        // строка гарниров
+                        dGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(dKoefContentHeight * dishPanelGarnishesRowHeight, GridUnitType.Pixel) });
+                        //// разделитель
+                        dGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(dKoefContentHeight * dishPanelRowMargin2, GridUnitType.Pixel) });
+                    }
+                    // строка кнопок
+                    dGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(dKoefContentHeight * dishPanelAddButtonRowHeight, GridUnitType.Pixel) });
 
-                        // положение панели блюда
-                        iRow = i / 3; iCol = i % 3;
-                        double leftPos = (leftMargin + iCol * dishPanelWidth);
-                        double topPos = iRow * currentPanelHeight;
+                    // **********************************
+                    // Заголовок панели
+                    setDishPanelHeader(dish, dGrid, dishPanelHeaderFontSize, dishPanelTextFontSize);
 
-                        // декоратор для панели блюда (должен быть для корректной работы ручного скроллинга)
-                        Border brd = new Border();
-                        //brd.BorderBrush = new SolidColorBrush(Colors.Red); brd.BorderThickness = new Thickness(2);
-                        brd.Width = dishPanelWidth;
-                        brd.Height = currentPanelHeight;
-                        brd.SetValue(Canvas.LeftProperty, leftPos);
-                        brd.SetValue(Canvas.TopProperty, topPos);
+                    // изображение блюда и описание
+                    setDishDescription(dish, dGrid, cornerRadiusDishPanel, dishPanelDescrButtonSize, dishPanelTextFontSize, dishPanelHeaderFontSize);
 
-                        // панель содержания
-                        Grid dGrid = new Grid();
-                        dGrid.Background = Brushes.CadetBlue;
-                        dGrid.Width = dishPanelWidth / 25d * 23d;
-                        dGrid.SetValue(Canvas.LeftProperty, leftPos + (dishPanelWidth / 25d * 1d));
-                        dGrid.Height = currentPanelHeight / 30d * 28d;
-                        dGrid.SetValue(Canvas.TopProperty, topPos + (currentPanelHeight / 30d * 1d));
-                        //   Определение строк
-                        // строка заголовка
-                        dGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(dishPanelHeaderRowHeight, GridUnitType.Pixel) });
-                        // разделитель
-                        dGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(dishPanelRowMargin1, GridUnitType.Pixel) });
-                        // строка изображения
-                        dGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(dishPanelImageRowHeight, GridUnitType.Pixel) });
-                        // разделитель
-                        dGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(dishPanelRowMargin2, GridUnitType.Pixel) });
-                        if (isExistGarnishes)
-                        {
-                            // строка гарниров
-                            dGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(dishPanelGarnishesRowHeight, GridUnitType.Pixel) });
-                            // разделитель
-                            dGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(dishPanelRowMargin2, GridUnitType.Pixel) });
-                        }
-                        // строка кнопок
-                        dGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(dishPanelAddButtonRowHeight, GridUnitType.Pixel) });
+                    // изображения кнопок добавления
+                    // кнопка с тенью
+                    Border btnAddDish = new Border()
+                    {
+                        VerticalAlignment = VerticalAlignment.Top,
+                        Width = dGrid.Width,
+                        Height = 0.7d * dKoefContentHeight * dishPanelAddButtonRowHeight,
+                        CornerRadius = new CornerRadius(cornerRadiusButton),
+                        Background =  (Brush)AppLib.GetAppGlobalValue("addButtonBackgroundPriceColor"),
+                        Effect = _shadowEffect
+                    };
 
+                    if (isExistGarnishes == false)   // не Воки
+                    {
+                        Grid.SetRow(btnAddDish, 4); dGrid.Children.Add(btnAddDish);
 
-                        // Заголовок панели
-                        setDishPanelHeader(dish, dGrid, dishPanelHeaderFontSize, dishPanelTextFontSize);
-                        // изображение блюда и описание
-                        if (dish.Image != null)
-                        {
-                            Rect rect = new Rect(0, 0, dGrid.Width, dishPanelImageRowHeight);
-                            // изображение
-                            System.Windows.Shapes.Path pathImage = new System.Windows.Shapes.Path();
-                            pathImage.Data = new RectangleGeometry(rect, cornerRadiusDishPanel, cornerRadiusDishPanel);
-                            pathImage.Fill = new DrawingBrush(
-                                new ImageDrawing() { ImageSource = ImageHelper.ByteArrayToBitmapImage(dish.Image), Rect= rect }
-                                );
-                            Grid.SetRow(pathImage, 2);
-                            dGrid.Children.Add(pathImage);
+                        ////   буковка i
+                        //TextBlock btnDescrText = new TextBlock(new Run("i"))
+                        //{
+                        //    FontSize = dishPanelHeaderFontSize,
+                        //    HorizontalAlignment = HorizontalAlignment.Center,
+                        //    VerticalAlignment = VerticalAlignment.Center
+                        //};
+                        //btnDescr.Child = btnDescrText;
+                        // добавить в контейнер
+                    }
+                    else   // Воки
+                    {
+                        //TextBlock tb = new TextBlock()
+                        //{
+                        //    Text = AppLib.GetLangText((Dictionary<string,string>)AppLib.GetAppGlobalValue("btnSelectDishText")),
+                        //    FontSize = (double)AppLib.GetAppGlobalValue("appFontSize4"),
+                        //    Foreground = Brushes.White,
+                        //    VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Center
+                        //};
+                        //btnAddDish.Child = tb;
 
-                            // кнопка отображения описания
-                            Grid canvDescr = new Grid() { Width = dishPanelDescrButtonSize, Height = dishPanelDescrButtonSize };
-                            canvDescr.Tag = 0;
-                            canvDescr.VerticalAlignment = VerticalAlignment.Top;
-                            canvDescr.HorizontalAlignment = HorizontalAlignment.Right;
-                            canvDescr.Margin = new Thickness(0, 0.3 * dishPanelDescrButtonSize, 0.3 * dishPanelDescrButtonSize, 0);
-                            canvDescr.PreviewMouseLeftButtonUp += CanvDescr_PreviewMouseLeftButtonUp;
-                            //canvDescr.Background = Brushes.Green;
-                            EllipseGeometry elGeom = new EllipseGeometry(new Rect(0, 0, dishPanelDescrButtonSize, dishPanelDescrButtonSize));
-                            System.Windows.Shapes.Path btnDescr = new System.Windows.Shapes.Path();
-                            btnDescr.Data = elGeom;
-                            btnDescr.Fill = Brushes.White;
-                            canvDescr.Children.Add(btnDescr);
-                            TextBlock btnDescrText = new TextBlock(new Run("i")) { FontSize = dishPanelHeaderFontSize};
-                            btnDescrText.HorizontalAlignment = HorizontalAlignment.Center;
-                            btnDescrText.VerticalAlignment = VerticalAlignment.Center;
-                            canvDescr.Children.Add(btnDescrText);
-
-                            Grid.SetRow(canvDescr, 2);
-                            dGrid.Children.Add(canvDescr);
-
-                            //Grid.SetRow(btnDescr, 2);
-                            //dGrid.Children.Add(btnDescr);
-                        }
-
-
-                        brd.Child = dGrid;
-
-                        canvas.Children.Add(brd);
+                        // добавить в контейнер
+                        Grid.SetRow(btnAddDish, 6); dGrid.Children.Add(btnAddDish);
                     }
 
+                    brd.Children.Add(dGrid); Grid.SetRow(dGrid, 1); Grid.SetColumn(dGrid, 1);
+                    canvas.Children.Add(brd);
                 }
 
                 //canvas.Background = new SolidColorBrush(new Color() { R = (byte)rnd.Next(0,254), G= (byte)rnd.Next(0, 254), B= (byte)rnd.Next(0, 254), A=0xFF });
@@ -463,17 +500,6 @@ namespace WpfClient
                 _dishCanvas.Add(canvas);
             }
         }
-
-        private void CanvDescr_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            Grid canv = (Grid)sender;
-            System.Windows.Shapes.Path path = (System.Windows.Shapes.Path)canv.Children[0];
-            int tagVal = System.Convert.ToInt32(canv.Tag ?? 0);
-            tagVal = (tagVal == 0) ? 1 : 0;
-            canv.Tag = tagVal;
-            path.Fill = (tagVal == 0) ? Brushes.White : _brushSelectedItem;
-        }
-
 
         private void setDishPanelHeader(DishItem dish, Grid dGrid, double dishPanelHeaderFontSize, double dishPanelTextFontSize)
         {
@@ -485,6 +511,7 @@ namespace WpfClient
                     if (markItem.Image != null)
                     {
                         System.Windows.Controls.Image markImage = new System.Windows.Controls.Image();
+                        markImage.Effect = new DropShadowEffect() { Opacity=0.7};
                         markImage.Width = dishPanelHeaderFontSize; markImage.Height = dishPanelHeaderFontSize;
                         markImage.Source = ImageHelper.ByteArrayToBitmapImage(markItem.Image);
                         InlineUIContainer iuc = new InlineUIContainer(markImage);
@@ -521,6 +548,148 @@ namespace WpfClient
 
             Grid.SetRow(tb, 0);
             dGrid.Children.Add(tb);
+        }
+
+        private void setDishDescription(DishItem dish, Grid dGrid, double cornerRadiusDishPanel, double dishPanelDescrButtonSize, double dishPanelTextFontSize, double dishPanelHeaderFontSize)
+        {
+            if (dish.Image == null) return;
+
+            double dishPanelImageRowHeight = dGrid.RowDefinitions[2].Height.Value;
+            Rect rect = new Rect(0, 0, dGrid.Width, dishPanelImageRowHeight);
+            // изображение
+            System.Windows.Shapes.Path pathImage = new System.Windows.Shapes.Path();
+            pathImage.Data = new RectangleGeometry(rect, cornerRadiusDishPanel, cornerRadiusDishPanel);
+            pathImage.Fill = new DrawingBrush(
+                new ImageDrawing() { ImageSource = ImageHelper.ByteArrayToBitmapImage(dish.Image), Rect = rect }
+                );
+            pathImage.Effect = new DropShadowEffect();
+            // добавить в контейнер
+            Grid.SetRow(pathImage, 2); dGrid.Children.Add(pathImage);
+
+            // кнопка отображения описания
+            Border btnDescr = new Border()
+            {
+                Name = "btnDescr",
+                Width = dishPanelDescrButtonSize,
+                Height = dishPanelDescrButtonSize,
+                HorizontalAlignment = HorizontalAlignment.Right,
+                VerticalAlignment = VerticalAlignment.Top,
+                Tag = 0,
+                Background = Brushes.White,
+                CornerRadius = new CornerRadius(0.5 * dishPanelDescrButtonSize),
+                Margin = new Thickness(0, 0.3 * dishPanelDescrButtonSize, 0.3 * dishPanelDescrButtonSize, 0)
+            };
+            btnDescr.PreviewMouseLeftButtonUp += CanvDescr_PreviewMouseLeftButtonUp;
+            //   буковка i
+            TextBlock btnDescrText = new TextBlock(new Run("i"))
+            {
+                FontSize = dishPanelHeaderFontSize,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            btnDescr.Child = btnDescrText;
+            // добавить в контейнер
+            Grid.SetRow(btnDescr, 2); dGrid.Children.Add(btnDescr);
+            Grid.SetZIndex(btnDescr, 10);
+
+            // описание блюда
+            LinearGradientBrush lgBrush = new LinearGradientBrush()
+            {
+                StartPoint = new Point(0.5, 0),
+                EndPoint = new Point(0.5, 1)
+            };
+            lgBrush.GradientStops.Add(new GradientStop(Colors.Black, 0));
+            lgBrush.GradientStops.Add(new GradientStop(Colors.Black, 0.5));
+            lgBrush.GradientStops.Add(new GradientStop((Color)AppLib.GetAppResource("appColorDarkPink"), 1));
+            Border brdDescrText = new Border()
+            {
+                Name = "descrTextBorder",
+                Width = dGrid.Width,
+                Height = dishPanelImageRowHeight,
+                CornerRadius = new CornerRadius(cornerRadiusDishPanel),
+                Background = lgBrush,
+                Opacity = 0.01,
+                Visibility = Visibility.Hidden
+            };
+            // добавить в контейнер
+            Grid.SetRow(brdDescrText, 2); dGrid.Children.Add(brdDescrText);
+            TextBlock tbDescrText = new TextBlock()
+            {
+                Name = "descrText",
+                Width = dGrid.Width,
+                Opacity = 0.01,
+                Padding = new Thickness(dishPanelTextFontSize),
+                VerticalAlignment = VerticalAlignment.Center,
+                TextAlignment = TextAlignment.Center,
+                TextWrapping = TextWrapping.Wrap,
+                FontSize = dishPanelTextFontSize,
+                Foreground = Brushes.White,
+                Text = AppLib.GetLangText(dish.langDescriptions),
+                Visibility = Visibility.Hidden
+            };
+            tbDescrText.Effect = new BlurEffect() { Radius = 20 };
+            // добавить в контейнер
+            Grid.SetRow(tbDescrText, 2); dGrid.Children.Add(tbDescrText);
+        }
+
+        private void CanvDescr_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            Border btnDescr = (Border)sender;
+            Grid parentGrid = (Grid)btnDescr.Parent;
+
+            int tagVal = System.Convert.ToInt32(btnDescr.Tag ?? 0);
+            tagVal = (tagVal == 0) ? 1 : 0;
+            btnDescr.Tag = tagVal;
+
+            // цвет фона кнопки описания блюда
+            btnDescr.Background = (tagVal == 0) ? Brushes.White : _brushSelectedItem;
+
+            // видимость описания
+            var descrTextBorder = AppLib.GetUIElementFromPanel(parentGrid, "descrTextBorder");
+            var descrText = AppLib.GetUIElementFromPanel(parentGrid, "descrText");
+            if (descrTextBorder != null)
+            {
+                _curDescrBorder = descrTextBorder as Border;
+                // анимация
+                if (tagVal == 1)   // это уже новое значение
+                {
+                    // сделать видимым ДО анимации
+                    _curDescrBorder.Visibility = Visibility.Visible;
+                    _daDishDescrBackgroundOpacity.To = 0.6;
+                    _daDishDescrBackgroundOpacity.Completed -= _daDishDescrBackground_Completed;
+                }
+                else
+                {
+                    _daDishDescrBackgroundOpacity.To = 0.01;
+                    // сделать невидимым ПОСЛЕ анимации
+                    _daDishDescrBackgroundOpacity.Completed += _daDishDescrBackground_Completed;
+                }
+
+                _curDescrBorder.BeginAnimation(Border.OpacityProperty, _daDishDescrBackgroundOpacity);
+            }
+            if (descrText != null)
+            {
+                _curDescrTextBlock = (descrText as TextBlock);
+                // анимация
+                if (tagVal == 1)   // это уже новое значение
+                {
+                    // сделать видимым ДО анимации
+                    _curDescrTextBlock.Visibility = Visibility.Visible;
+                    _daCommon1.To = 0; _daCommon2.To = 1;
+                }
+                else
+                {
+                    _daCommon1.To = 20; _daCommon2.To = 0.01;
+                }
+                _curDescrTextBlock.Effect.BeginAnimation(BlurEffect.RadiusProperty, _daCommon1);
+                _curDescrTextBlock.BeginAnimation(TextBlock.OpacityProperty, _daCommon2);
+            }
+        }
+
+        private void _daDishDescrBackground_Completed(object sender, EventArgs e)
+        {
+            _curDescrBorder.Visibility = Visibility.Hidden;
+            _curDescrTextBlock.Visibility = Visibility.Hidden;
         }
 
 

@@ -575,7 +575,7 @@
                             </Grid.ColumnDefinitions>
                             <!-- бордер с ценой -->
                             <!-- Style="{StaticResource addButtonTextStyle}" -->
-                            <Border Grid.Column="0" Background="{StaticResource addButtonBackgroundPriceColor}"
+                            <Border Grid.Column="0" Background="#FF931D3F"
                                 CornerRadius="{Binding Converter={StaticResource cornerRadiusLeft}, Mode=OneWay}">
                                 <TextBlock x:Name="txtDishPrice" Text="{Binding Path=Price, StringFormat={StaticResource priceFormatString}}" Style="{StaticResource centeredElement}"/>
                             </Border>
@@ -696,7 +696,8 @@
                     <ColumnDefinition Width="0.5*"/>
                 </Grid.ColumnDefinitions>
                 <Border Grid.Column="1" x:Name="brdPromoCode" Background="{StaticResource appNotSelectedItemColor}"
-                        CornerRadius="{Binding Converter={StaticResource cornerRadiusLeft}, Mode=OneWay}"/>
+                        CornerRadius="{Binding Converter={StaticResource cornerRadiusLeft}, Mode=OneWay}">
+                </Border>
                 <TextBox x:Name="txtPromoCode" Grid.Column="1" Style="{StaticResource centeredElement}" Background="Transparent" BorderThickness="0" TextWrapping="Wrap" Foreground="Black" Opacity="0.6" Margin="5,0"
                          Text="{Binding {x:Null}, Converter={StaticResource langDictToText}, ConverterParameter=appSet.invitePromoText, Mode=OneWay}"
                          FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize5, Mode= OneWay}"/>

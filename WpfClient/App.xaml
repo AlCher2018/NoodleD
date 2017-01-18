@@ -26,7 +26,11 @@
         <SolidColorBrush x:Key="appSelectedItemColor" Color="{StaticResource appColorYellow}"/>
         <SolidColorBrush x:Key="mainMenuSelectedItemColor" Color="{StaticResource appColorDDarkPink}"/>
         <SolidColorBrush x:Key="addButtonBackgroundTextColor" Color="{StaticResource appColorSelectButton}"/>
-        <SolidColorBrush x:Key="addButtonBackgroundPriceColor" Color="#FF931D3F"/>
+        <SolidColorBrush x:Key="addButtonBackgroundPriceColor">
+            <SolidColorBrush.Color>
+                <Color R="147" G="29" B="63"/>
+            </SolidColorBrush.Color>
+        </SolidColorBrush>
         <SolidColorBrush x:Key="cartButtonBackgroundColor" Color="{StaticResource appColorCartButtom}"/>
         <SolidColorBrush x:Key="selectGarnishBackgroundColor" Color="{StaticResource appColorSelectGarnish}"/>
         <SolidColorBrush x:Key="winShadowColor" Color="#88000000"/>
