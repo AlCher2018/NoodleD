@@ -99,10 +99,10 @@ namespace WpfClient
 
                 // добавить маркеры
                 DishMark dm;
-                dm = new DishMark() { RowGUID = Guid.NewGuid(), Image = AppLib.getImageFromFilePath("AppImages\\dishMarks\\dishMark_chilli.png") };
+                dm = new DishMark() { RowGUID = Guid.NewGuid(), Image = ImageHelper.getImageFromFilePath("AppImages\\dishMarks\\dishMark_chilli.png") };
                 db.DishMark.Add(dm);
                 LangStringLib.SetValues(db, dm.RowGUID, 1, "острый", "гострий", "chilli");
-                dm = new DishMark() { RowGUID = Guid.NewGuid(), Image = AppLib.getImageFromFilePath("AppImages\\dishMarks\\dishMark_veg.png") };
+                dm = new DishMark() { RowGUID = Guid.NewGuid(), Image = ImageHelper.getImageFromFilePath("AppImages\\dishMarks\\dishMark_veg.png") };
                 LangStringLib.SetValues(db, dm.RowGUID, 1, "вег", "вег", "veg");
                 db.DishMark.Add(dm);
                 db.SaveChanges();
@@ -195,18 +195,18 @@ namespace WpfClient
             MenuFolder mf1, mf2, mf3, mf4, mf5, mf6;
             using (NoodleDContext db = new NoodleDContext())
             {
-                byte[] image1 = AppLib.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Combo.png");
-                byte[] image1Inv = AppLib.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Combo_inv.png");
-                byte[] image2 = AppLib.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Voki.png");
-                byte[] image2Inv = AppLib.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Voki_inv.png");
-                byte[] image3 = AppLib.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Salads.png");
-                byte[] image3Inv = AppLib.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Salads_inv.png");
-                byte[] image4 = AppLib.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Soups.png");
-                byte[] image4Inv = AppLib.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Soups_inv.png");
-                byte[] image5 = AppLib.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Desserts.png");
-                byte[] image5Inv = AppLib.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Desserts_inv.png");
-                byte[] image6 = AppLib.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Beverages.png");
-                byte[] image6Inv = AppLib.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Beverages_inv.png");
+                byte[] image1 = ImageHelper.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Combo.png");
+                byte[] image1Inv = ImageHelper.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Combo_inv.png");
+                byte[] image2 = ImageHelper.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Voki.png");
+                byte[] image2Inv = ImageHelper.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Voki_inv.png");
+                byte[] image3 = ImageHelper.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Salads.png");
+                byte[] image3Inv = ImageHelper.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Salads_inv.png");
+                byte[] image4 = ImageHelper.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Soups.png");
+                byte[] image4Inv = ImageHelper.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Soups_inv.png");
+                byte[] image5 = ImageHelper.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Desserts.png");
+                byte[] image5Inv = ImageHelper.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Desserts_inv.png");
+                byte[] image6 = ImageHelper.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Beverages.png");
+                byte[] image6Inv = ImageHelper.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Beverages_inv.png");
                 mf1 = new MenuFolder() { RowGUID = Guid.NewGuid(), Image = image1, ImageInv = image1Inv, ParentId = 0, RowPosition = 1 };
                 mf2 = new MenuFolder() { RowGUID = Guid.NewGuid(), Image = image2, ImageInv = image2Inv, ParentId = 0, RowPosition = 2 };
                 mf3 = new MenuFolder() { RowGUID = Guid.NewGuid(), Image = image3, ImageInv = image3Inv, ParentId = 0, RowPosition = 3 };
@@ -240,37 +240,37 @@ namespace WpfClient
             string imgPath = @"D:\NoodleD\дизайн\изображения блюд от 22.12.2016\";
             // 20 изображений блюд
             byte[][] imagesDish = new[] {
-                AppLib.getImageFromFilePath(imgPath + "EmptyName-1.png"),
-                AppLib.getImageFromFilePath(imgPath + "EmptyName-3.png"),
-                AppLib.getImageFromFilePath(imgPath + "EmptyName-5.png"),
-                AppLib.getImageFromFilePath(imgPath + "EmptyName-7.png"),
-                AppLib.getImageFromFilePath(imgPath + "EmptyName-9.png"),
-                AppLib.getImageFromFilePath(imgPath + "EmptyName-11.png"),
-                AppLib.getImageFromFilePath(imgPath + "EmptyName-13.png"),
-                AppLib.getImageFromFilePath(imgPath + "EmptyName-15.png"),
-                AppLib.getImageFromFilePath(imgPath + "EmptyName-17.png"),
-                AppLib.getImageFromFilePath(imgPath + "EmptyName-19.png"),
-                AppLib.getImageFromFilePath(imgPath + "EmptyName-21.png"),
-                AppLib.getImageFromFilePath(imgPath + "EmptyName-23.png"),
-                AppLib.getImageFromFilePath(imgPath + "EmptyName-25.png"),
-                AppLib.getImageFromFilePath(imgPath + "EmptyName-27.png"),
-                AppLib.getImageFromFilePath(imgPath + "EmptyName-29.png"),
-                AppLib.getImageFromFilePath(imgPath + "EmptyName-31.png"),
-                AppLib.getImageFromFilePath(imgPath + "EmptyName-33.png"),
-                AppLib.getImageFromFilePath(imgPath + "EmptyName-35.png"),
-                AppLib.getImageFromFilePath(imgPath + "EmptyName-37.png"),
-                AppLib.getImageFromFilePath(imgPath + "EmptyName-39.png")};
-            byte[] imageNoodles1 = AppLib.getImageFromFilePath(@"e:\Чернов\NoodleD\дизайн\NodDod\noodles1.png");
-            byte[] imageNoodles2 = AppLib.getImageFromFilePath(@"e:\Чернов\NoodleD\дизайн\NodDod\noodles2.png");
-            byte[] imageNoodles3 = AppLib.getImageFromFilePath(@"e:\Чернов\NoodleD\дизайн\NodDod\noodles3.png");
-            byte[] imageSalad1 = AppLib.getImageFromFilePath(@"e:\Чернов\NoodleD\дизайн\NodDod\salad1.png");
-            byte[] imageSalad2 = AppLib.getImageFromFilePath(@"e:\Чернов\NoodleD\дизайн\NodDod\salad2.png");
-            byte[] imageDessert1 = AppLib.getImageFromFilePath(@"D:\NoodleD\дизайн\изображения блюд от 22.12.2016\EmptyName-44.jpg");
-            byte[] imageDessert2 = AppLib.getImageFromFilePath(@"D:\NoodleD\дизайн\изображения блюд от 22.12.2016\EmptyName-45.jpg");
-            byte[] imageDessert3 = AppLib.getImageFromFilePath(@"D:\NoodleD\дизайн\изображения блюд от 22.12.2016\EmptyName-46.jpg");
-            byte[] imageBeverage1 = AppLib.getImageFromFilePath(@"D:\NoodleD\дизайн\изображения блюд от 22.12.2016\EmptyName-49.jpg");
-            byte[] imageBeverage2 = AppLib.getImageFromFilePath(@"D:\NoodleD\дизайн\изображения блюд от 22.12.2016\EmptyName-50.jpg");
-            byte[] imageBeverage3 = AppLib.getImageFromFilePath(@"D:\NoodleD\дизайн\изображения блюд от 22.12.2016\EmptyName-51.jpg");
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-1.png"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-3.png"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-5.png"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-7.png"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-9.png"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-11.png"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-13.png"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-15.png"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-17.png"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-19.png"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-21.png"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-23.png"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-25.png"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-27.png"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-29.png"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-31.png"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-33.png"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-35.png"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-37.png"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-39.png")};
+            byte[] imageNoodles1 = ImageHelper.getImageFromFilePath(@"e:\Чернов\NoodleD\дизайн\NodDod\noodles1.png");
+            byte[] imageNoodles2 = ImageHelper.getImageFromFilePath(@"e:\Чернов\NoodleD\дизайн\NodDod\noodles2.png");
+            byte[] imageNoodles3 = ImageHelper.getImageFromFilePath(@"e:\Чернов\NoodleD\дизайн\NodDod\noodles3.png");
+            byte[] imageSalad1 = ImageHelper.getImageFromFilePath(@"e:\Чернов\NoodleD\дизайн\NodDod\salad1.png");
+            byte[] imageSalad2 = ImageHelper.getImageFromFilePath(@"e:\Чернов\NoodleD\дизайн\NodDod\salad2.png");
+            byte[] imageDessert1 = ImageHelper.getImageFromFilePath(@"D:\NoodleD\дизайн\изображения блюд от 22.12.2016\EmptyName-44.jpg");
+            byte[] imageDessert2 = ImageHelper.getImageFromFilePath(@"D:\NoodleD\дизайн\изображения блюд от 22.12.2016\EmptyName-45.jpg");
+            byte[] imageDessert3 = ImageHelper.getImageFromFilePath(@"D:\NoodleD\дизайн\изображения блюд от 22.12.2016\EmptyName-46.jpg");
+            byte[] imageBeverage1 = ImageHelper.getImageFromFilePath(@"D:\NoodleD\дизайн\изображения блюд от 22.12.2016\EmptyName-49.jpg");
+            byte[] imageBeverage2 = ImageHelper.getImageFromFilePath(@"D:\NoodleD\дизайн\изображения блюд от 22.12.2016\EmptyName-50.jpg");
+            byte[] imageBeverage3 = ImageHelper.getImageFromFilePath(@"D:\NoodleD\дизайн\изображения блюд от 22.12.2016\EmptyName-51.jpg");
 
             // блюда для первого пункта меню (Комбо)
             namesList = new string[] { "Курица Кунпао", "Куриця Кунпао", "Cunpao chicken" };
@@ -572,11 +572,11 @@ namespace WpfClient
         public static void setInrgImages()
         {
             byte[][] images = new[] {
-                AppLib.getImageFromFilePath(@"d:\NoodleD\тестовые изображение блюд\ингредиенты\соус терияки.jpg"),
-                AppLib.getImageFromFilePath(@"d:\NoodleD\тестовые изображение блюд\ингредиенты\фасоль стручковая.jpg"),
-                AppLib.getImageFromFilePath(@"d:\NoodleD\тестовые изображение блюд\ингредиенты\курица.jpg"),
-                AppLib.getImageFromFilePath(@"d:\NoodleD\тестовые изображение блюд\ингредиенты\деревестный гриб.jpg"),
-                AppLib.getImageFromFilePath(@"d:\NoodleD\тестовые изображение блюд\ингредиенты\грибы шампиньоны.jpg")
+                ImageHelper.getImageFromFilePath(@"d:\NoodleD\тестовые изображение блюд\ингредиенты\соус терияки.jpg"),
+                ImageHelper.getImageFromFilePath(@"d:\NoodleD\тестовые изображение блюд\ингредиенты\фасоль стручковая.jpg"),
+                ImageHelper.getImageFromFilePath(@"d:\NoodleD\тестовые изображение блюд\ингредиенты\курица.jpg"),
+                ImageHelper.getImageFromFilePath(@"d:\NoodleD\тестовые изображение блюд\ингредиенты\деревестный гриб.jpg"),
+                ImageHelper.getImageFromFilePath(@"d:\NoodleD\тестовые изображение блюд\ингредиенты\грибы шампиньоны.jpg")
             };
             int idx = 0, i = 0;
             using (NoodleDContext db = new NoodleDContext())

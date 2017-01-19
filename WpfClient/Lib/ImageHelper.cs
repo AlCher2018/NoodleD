@@ -61,6 +61,27 @@ namespace WpfClient
             return null;
         }
 
+        public static byte[] getImageFromFilePath(string filePath)
+        {
+            byte[] retVal;
+            FileStream fs = File.Open(filePath, FileMode.Open);
+            BinaryReader reader = new BinaryReader(fs);
+            retVal = reader.ReadBytes((int)fs.Length);
+            reader.Close(); reader.Dispose();
+            fs.Close(); fs.Dispose();
+            return retVal;
+        }
+        public static BitmapImage ConvertByteArrayToBitmapImage(Byte[] bytes)
+        {
+            var stream = new MemoryStream(bytes);
+            stream.Seek(0, SeekOrigin.Begin);
+            var image = new BitmapImage();
+            image.BeginInit();
+            image.StreamSource = stream;
+            image.EndInit();
+            return image;
+        }
+
         public static BitmapImage ByteArrayToBitmapImage(byte[] imageData)
         {
             if (imageData == null || imageData.Length == 0) return null;

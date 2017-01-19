@@ -771,7 +771,7 @@
             </local:AniScrollViewer>
         </DockPanel>-->
 
-        <Viewbox x:Name="btnScrollDown" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Bottom" Visibility="Hidden">
+        <Viewbox x:Name="btnScrollDown" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Visibility="Hidden">
             <Canvas Width="100" Height="100" MouseDown="btnScrollDown_MouseDown">
                 <Path>
                     <Path.Fill>
@@ -793,7 +793,7 @@
             </Canvas>
         </Viewbox>
 
-        <Viewbox x:Name="btnScrollUp" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Top" Visibility="Hidden">
+        <Viewbox x:Name="btnScrollUp" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Visibility="Hidden">
             <Canvas Width="100" Height="100" MouseDown="btnScrollUp_MouseDown">
                 <Path>
                     <Path.Fill>

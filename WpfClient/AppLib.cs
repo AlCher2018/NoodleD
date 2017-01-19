@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AppModel;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
@@ -53,6 +54,7 @@ namespace WpfClient
             if (dict.Contains(key) == false) return defaultValue;
             else return dict[key];
         }
+        
         // установить глобальное значение приложения (в свойствах приложения)
         public static void SetAppGlobalValue(string key, object value)
         {
@@ -197,29 +199,6 @@ namespace WpfClient
         }
         #endregion
 
-        #region images func
-        public static byte[] getImageFromFilePath(string filePath)
-        {
-            byte[] retVal;
-            FileStream fs = File.Open(filePath, FileMode.Open);
-            BinaryReader reader = new BinaryReader(fs);
-            retVal = reader.ReadBytes((int)fs.Length);
-            reader.Close(); reader.Dispose();
-            fs.Close(); fs.Dispose();
-            return retVal;
-        }
-        public static BitmapImage ConvertByteArrayToBitmapImage(Byte[] bytes)
-        {
-            var stream = new MemoryStream(bytes);
-            stream.Seek(0, SeekOrigin.Begin);
-            var image = new BitmapImage();
-            image.BeginInit();
-            image.StreamSource = stream;
-            image.EndInit();
-            return image;
-        }
-        #endregion
-
         #region AppBL
         public static string GetCostUIText(decimal cost)
         {
@@ -229,6 +208,17 @@ namespace WpfClient
             if (currencyChar != null) orderPriceText += " " + currencyChar;
 
             return orderPriceText;
+        }
+
+        public static DishItem GetDishItemByRowGUID(string rowGuid)
+        {
+            IEnumerable<AppModel.MenuItem> mFolders = (IEnumerable<AppModel.MenuItem>)AppLib.GetAppGlobalValue("mainMenu");
+            DishItem retVal;
+            foreach (AppModel.MenuItem menuItem in mFolders)
+            {
+                if ((retVal = menuItem.Dishes.FirstOrDefault<DishItem>(d => d.RowGUID.ToString() == rowGuid)) != null) return retVal;
+            }
+            return null;
         }
 
         #endregion
