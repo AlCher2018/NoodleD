@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 using AppModel;
@@ -30,128 +26,15 @@ namespace WpfClient
     /// </summary>
     public partial class MainWindow : Window
     {
-        static MainWindow()
-        {
-            double dVar;
-            
-            double dishPanelHeaderFontSize, dishPanelTextFontSize;
-            double dishPanelDescrButtonSize;
-            double dishPanelHeaderRowHeight;
-            double dishPanelImageRowHeight;
-            double dishPanelGarnishesRowHeight, dishPanelGarnishBaseWidth;
-            double dishPanelAddButtonRowHeight, dishPanelAddButtonHeight, dishPanelAddButtonTextSize;
-            double dishPanelAddButtonShadowDepth, dishPanelAddButtonShadowBlurRadius, dishPanelAddButtonShadowCornerRadius;
-            double dishPanelRowMargin1, dishPanelRowMargin2;
-
-            double screenWidth, screenHeight;
-            screenWidth = SystemParameters.PrimaryScreenWidth;
-            //            screenWidth = SystemParameters.VirtualScreenWidth;
-            screenHeight = SystemParameters.PrimaryScreenHeight;
-            //            screenHeight = SystemParameters.VirtualScreenHeight;
-
-            AppLib.SetAppGlobalValue("screenWidth", screenWidth);
-            AppLib.SetAppGlobalValue("screenHeight", screenHeight);
-
-            // углы закругления
-            dVar = 0.005 * screenWidth;
-            AppLib.SetAppGlobalValue("cornerRadiusButton", dVar);
-            AppLib.SetAppGlobalValue("cornerRadiusGarnish", 0.5 * dVar);
-            AppLib.SetAppGlobalValue("cornerRadiusDishPanel", 2 * dVar);
-
-            dVar = 0.5 * screenWidth;
-            AppLib.SetAppGlobalValue("maxDialogWindowWidth", dVar);
-
-            // РАЗМЕРЫ ШРИФТОВ
-            double appFontSize0, appFontSize1, appFontSize2, appFontSize3, appFontSize4, appFontSize5, appFontSize6, appFontSize7;
-            double minVal = Math.Min(screenWidth, screenHeight);
-            appFontSize0 = 0.055 * minVal;
-            appFontSize1 = 0.04 * minVal;
-            appFontSize2 = 0.8 * appFontSize1;
-            appFontSize3 = 0.8 * appFontSize2;
-            appFontSize4 = 0.8 * appFontSize3;
-            appFontSize5 = 0.8 * appFontSize4;
-            appFontSize6 = 0.8 * appFontSize5;
-            appFontSize7 = 0.8 * appFontSize6;
-            AppLib.SetAppGlobalValue("appFontSize0", appFontSize0);
-            AppLib.SetAppGlobalValue("appFontSize1", appFontSize1);
-            AppLib.SetAppGlobalValue("appFontSize2", appFontSize2);
-            AppLib.SetAppGlobalValue("appFontSize3", appFontSize3);
-            AppLib.SetAppGlobalValue("appFontSize4", appFontSize4);
-            AppLib.SetAppGlobalValue("appFontSize5", appFontSize5);
-            AppLib.SetAppGlobalValue("appFontSize6", appFontSize6);
-            AppLib.SetAppGlobalValue("appFontSize7", appFontSize7);
-
-            //  РАЗМЕРЫ ПАНЕЛИ БЛЮД(А)
-            double dishesPanelWidth = (screenWidth / 6.0 * 5.0);
-            AppLib.SetAppGlobalValue("dishesPanelWidth", dishesPanelWidth);
-            AppLib.SetAppGlobalValue("dishesPanelScrollButtonSize", 0.15 * dishesPanelWidth); 
-            // расчет ширины панели блюда
-            double dishPanelWidth;
-//            dishPanelWidth = 0.95 * dishesPanelWidth / 3.18;  // 3x + 6*0.03x - ширина панелей + отступ слева/справа 
-            dishPanelWidth = 0.95 * dishesPanelWidth / 3;
-            AppLib.SetAppGlobalValue("dishPanelWidth", dishPanelWidth);
-
-            // высота строки заголовка
-            dishPanelHeaderRowHeight = 0.15 * dishPanelWidth;
-            AppLib.SetAppGlobalValue("dishPanelHeaderRowHeight", dishPanelHeaderRowHeight);
-            // высота строки изображения
-            dishPanelImageRowHeight = 0.7 * dishPanelWidth;
-            AppLib.SetAppGlobalValue("dishPanelImageRowHeight", dishPanelImageRowHeight);
-            // высота строки гарниров
-            dishPanelGarnishesRowHeight = 0.2 * dishPanelWidth;
-            AppLib.SetAppGlobalValue("dishPanelGarnishesRowHeight", dishPanelGarnishesRowHeight);
-            // ширина подложки гарнира (см. соотн.сторон в Canvas x:Key="garnBase" Width="130" Height="100")
-            dishPanelGarnishBaseWidth = 1.3 * dishPanelGarnishesRowHeight;
-            AppLib.SetAppGlobalValue("dishPanelGarnishBaseWidth", dishPanelGarnishBaseWidth);
-
-            // высота строки кнопки добавления
-            dishPanelAddButtonRowHeight = 0.18 * dishPanelWidth;
-            AppLib.SetAppGlobalValue("dishPanelAddButtonRowHeight", dishPanelAddButtonRowHeight);
-            dishPanelAddButtonHeight = 0.6 * dishPanelAddButtonRowHeight;
-            AppLib.SetAppGlobalValue("dishPanelAddButtonHeight", dishPanelAddButtonHeight);
-            dishPanelAddButtonTextSize = 0.3 * dishPanelAddButtonRowHeight;
-            AppLib.SetAppGlobalValue("dishPanelAddButtonTextSize", dishPanelAddButtonTextSize);
-            // размеры тени под кнопками (от высоты самой кнопки, dishPanelAddButtonHeight)
-            dishPanelAddButtonShadowDepth = 0.15 * dishPanelAddButtonHeight;
-            dishPanelAddButtonShadowBlurRadius = 0.6 * dishPanelAddButtonHeight;
-            dishPanelAddButtonShadowCornerRadius = 0.25 * dishPanelWidth;
-            AppLib.SetAppGlobalValue("dishPanelAddButtonShadowDepth", dishPanelAddButtonShadowDepth);
-            AppLib.SetAppGlobalValue("dishPanelAddButtonShadowBlurRadius", dishPanelAddButtonShadowBlurRadius);
-            AppLib.SetAppGlobalValue("dishPanelAddButtonShadowCornerRadius", dishPanelAddButtonShadowCornerRadius);
-
-            // расстояния между строками панели блюда
-            dishPanelRowMargin1 = 0.01 * dishPanelWidth;
-            dishPanelRowMargin2 = 0.02 * dishPanelWidth;
-            AppLib.SetAppGlobalValue("dishPanelRowMargin1", dishPanelRowMargin1);
-            AppLib.SetAppGlobalValue("dishPanelRowMargin2", dishPanelRowMargin2);
-            // размер шрифтов
-            dishPanelHeaderFontSize = 0.06 * dishPanelWidth;
-            AppLib.SetAppGlobalValue("dishPanelHeaderFontSize", dishPanelHeaderFontSize);
-            dishPanelTextFontSize = 0.6 * dishPanelHeaderFontSize;
-            AppLib.SetAppGlobalValue("dishPanelTextFontSize", dishPanelTextFontSize);
-            // размер кнопки описания блюда
-            dishPanelDescrButtonSize = 0.1 * dishPanelWidth;
-            AppLib.SetAppGlobalValue("dishPanelDescrButtonSize", dishPanelDescrButtonSize);
-
-            // высота панелей
-            double dishPanelHeight, dishPanelHeightWithGarnish;
-            dishPanelHeight = dishPanelHeaderRowHeight + dishPanelRowMargin1 + dishPanelImageRowHeight + dishPanelRowMargin2 + dishPanelAddButtonRowHeight;
-            dishPanelHeightWithGarnish = dishPanelHeight + dishPanelGarnishesRowHeight + dishPanelRowMargin2;
-            AppLib.SetAppGlobalValue("dishPanelHeight", dishPanelHeight);
-            AppLib.SetAppGlobalValue("dishPanelHeightWithGarnish", dishPanelHeightWithGarnish);
-        }
-
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
-        // runtime
-        private OrderItem _currentOrder;
-        private DishItem _curDishItem;
+        // подложка списка блюд
+        private List<Canvas> _dishCanvas;
+        // текущий заказ
+        private OrderItem _currentOrder;   
         // visual elements
         Border _curDescrBorder;
         TextBlock _curDescrTextBlock;
-        System.Windows.Shapes.Path _curGarnishBorder;
-        TextBlock _curGarnishTextBlock;
-        Border _curAddButton;
         SolidColorBrush _brushSelectedItem;
         // animations
         DoubleAnimation _daCommon1, _daCommon2;
@@ -164,20 +47,15 @@ namespace WpfClient
         Point? lastDragPoint, initDragPoint;
         protected DateTime _dateTime;
 
-        private List<Canvas> _dishCanvas;
-
 
         public MainWindow()
         {
             InitializeComponent();
-            
+
+            AppLib.SaveSizeVarsToAppProperties();
+
             animDishRows = new List<double>();
             _dishCanvas = new List<Canvas>();
-
-            appInit();
-
-            _brushSelectedItem = (SolidColorBrush)AppLib.GetAppGlobalValue("appSelectedItemColor");
-
             _daDishDescrBackgroundOpacity = new DoubleAnimation()
             {
                 Duration = new Duration(new TimeSpan(0, 0, 0, 1)),
@@ -186,17 +64,21 @@ namespace WpfClient
             _daCommon1 = new DoubleAnimation() { Duration = new Duration(new TimeSpan(0, 0, 0, 1)), };
             _daCommon2 = new DoubleAnimation() { Duration = new Duration(new TimeSpan(0, 0, 0, 1)), };
 
+            //TestData.mainProc();
+            appInit();
+
+            // выключить курсор мыши
+            if ((bool)AppLib.GetAppGlobalValue("MouseCursor") == false)
+            {
+                this.Cursor = Cursors.None;
+                Mouse.OverrideCursor = Cursors.None;
+            }
         }
 
+        #region Инициализация приложения
 
         private void appInit()
         {
-            //this.Cursor = Cursors.None;
-            //Mouse.OverrideCursor = Cursors.None;
-
-            //TestData.mainProc();
-            //TestData.setInrgImages();
-
             logger.Info("Start application");
 
             string logMsg = "Проверяю соединение с источником данных...";
@@ -212,55 +94,65 @@ namespace WpfClient
             }
             logger.Trace(logMsg + " Ok");
 
-            logger.Trace("Получаю данные от SQL Server...");
-            ObservableCollection<AppModel.MenuItem> mFolders = null;
-            try
+            logger.Trace("Получаю настройки приложения из таблицы Setting ...");
+            using (NoodleDContext db = new NoodleDContext())
             {
-                using (NoodleDContext db = new NoodleDContext())
+                logger.Trace("EntityFramework connection string: {0}", db.Database.Connection.ConnectionString);
+                try
                 {
-                    logger.Trace("EntityFramework connection string: {0}", db.Database.Connection.ConnectionString);
-                    logger.Trace("invoke initCurrentSettings(db)");
-                    initCurrentSettings(db);
+                    List<Setting> setList = db.Setting.ToList();
+                    List<StringValue> stringTable = db.StringValue.ToList();
 
-                    // получить язык UI из config-файла и сохранить его 
-                    AppLib.AppLang = AppLib.GetAppSetting("langDefault");
-
-                    // получить данные с SQL во внутренние объекты
-                    logger.Trace("invoke MenuLib.GetMenuMainFolders()");
-                    mFolders = MenuLib.GetMenuMainFolders();
-
-                    if (mFolders == null) throw new Exception("Ошибка создания меню");
+                    foreach (Setting item in setList)
+                    {
+                        AppLib.SetAppGlobalValue(item.UniqName, item.Value);
+                        if (item.UniqName.EndsWith("Color") == true)  // преобразовать и переопределить цвета
+                        {
+                            convertAppColor(item.UniqName);
+                            checkAppColor(item.UniqName);
+                        }
+                        if (item.Value == "StringValue")    // заменить в Application.Properties строку StringValue на словарь языковых строк
+                        {
+                            Dictionary<string, string> d = getLangTextDict(stringTable, item.RowGUID, 1);
+                            AppLib.SetAppGlobalValue(item.UniqName, d);
+                        }
+                    }
                 }
-                logger.Trace("Получаю данные от SQL Server - READY");
+                catch (Exception e)
+                {
+                    logger.Fatal("Fatal error: {0}\nSource: {1}\nStackTrace: {2}", e.Message, e.Source, e.StackTrace);
+                    MessageBox.Show("Ошибка доступа к данным: " + e.Message + "\nПрограмма будет закрыта.");
+                    Application.Current.Shutdown(1);
+                }
             }
-            catch (Exception e)
-            {
-                logger.Fatal("Fatal error: {0}\nSource: {1}\nStackTrace: {2}", e.Message, e.Source, e.StackTrace);
-                MessageBox.Show("Ошибка доступа к данным: " + e.Message + "\nПрограмма будет закрыта.");
-                Application.Current.Shutdown(1);
-            }
+            logger.Trace("Получаю настройки приложения из таблицы Setting ... READY");
+
+            // надписи на языковых кнопках
+            lblLangUa.Text = (string)AppLib.GetAppGlobalValue("langButtonTextUa");
+            lblLangRu.Text = (string)AppLib.GetAppGlobalValue("langButtonTextRu");
+            lblLangEng.Text = (string)AppLib.GetAppGlobalValue("langButtonTextEn");
+
+            // получить язык UI из config-файла и сохранить его 
+            AppLib.AppLang = AppLib.GetAppSetting("langDefault");
+
+            logger.Trace("Получаю из MS SQL главное меню...");
+            List<AppModel.MenuItem> mFolders = MenuLib.GetMenuMainFolders();
+            if (mFolders == null) throw new Exception("Ошибка создания меню");
+            // сохранить Главное Меню в свойствах приложения
+            AppLib.SetAppGlobalValue("mainMenu", mFolders);
+            logger.Trace("Получаю из MS SQL главное меню... - READY");
 
             // прочие настройки
             AppLib.SaveAppSettingToProps("ssdID", null);   // идентификатор устройства самообслуживания
             AppLib.SaveAppSettingToProps("CurrencyChar", null);   // символ денежной единицы
             AppLib.SaveAppSettingToProps("BillPageWidht", typeof(int));
+            AppLib.SaveAppSettingToProps("dishesPanelScrollButtonSize", typeof(double));
+            AppLib.SaveAppSettingToProps("dishesPanelScrollButtonHorizontalAlignment");
+            AppLib.SaveAppSettingToPropTypeBool("MouseCursor");
             AppLib.SaveAppSettingToPropTypeBool("IsPrintBarCode");
             AppLib.SaveAppSettingToPropTypeBool("IsIncludeBarCodeLabel");
-            
-            // добавить некоторые постоянные тексты
-            setAppLangString();
 
-            if (mFolders != null) initUI(mFolders);
-
-            // создать текущий заказ
-            _currentOrder = new OrderItem();
-            AppLib.SetAppGlobalValue("currentOrder", _currentOrder);
-
-            updatePrice();
-        }
-
-        private void setAppLangString()
-        {
+            // добавить некоторые постоянные тексты (заголовки, надписи на кнопках)
             parseAndSetAllLangString("dialogBoxYesText");
             parseAndSetAllLangString("dialogBoxNoText");
             parseAndSetAllLangString("cartDelIngrTitle");
@@ -270,8 +162,25 @@ namespace WpfClient
             parseAndSetAllLangString("wordOr");
             parseAndSetAllLangString("takeOrderOut");
             parseAndSetAllLangString("takeOrderIn");
-
             parseAndSetAllLangString("CurrencyName");
+
+            // настройка элементов UI
+            initUI();
+
+            // создать текущий заказ
+            _currentOrder = new OrderItem();
+            AppLib.SetAppGlobalValue("currentOrder", _currentOrder);
+            updatePrice();
+        }
+        private Dictionary<string, string> getLangTextDict(List<StringValue> stringTable, Guid rowGuid, int fieldTypeId)
+        {
+            Dictionary<string, string> retVal = new Dictionary<string, string>();
+            foreach (StringValue item in
+                from val in stringTable where val.RowGUID == rowGuid && val.FieldType.Id == fieldTypeId select val)
+            {
+                if (retVal.Keys.Contains(item.Lang) == false) retVal.Add(item.Lang, item.Value);
+            }
+            return retVal;
         }
 
         private void parseAndSetAllLangString(string resKey)
@@ -287,22 +196,24 @@ namespace WpfClient
             AppLib.SetAppGlobalValue(resKey, d);
         }
 
-        private void initUI(ObservableCollection<AppModel.MenuItem> mFolders)
+        private void initUI()
         {
             logger.Trace("Настраиваю визуальные элементы...");
+            _brushSelectedItem = (SolidColorBrush)AppLib.GetAppGlobalValue("appSelectedItemColor");
 
+            // большие кнопки скроллинга
+            var v = Enum.Parse(typeof(HorizontalAlignment), (string)AppLib.GetAppGlobalValue("dishesPanelScrollButtonHorizontalAlignment"));
             btnScrollDown.Width = (double)AppLib.GetAppGlobalValue("dishesPanelScrollButtonSize");
             btnScrollDown.Height = (double)AppLib.GetAppGlobalValue("dishesPanelScrollButtonSize");
+            btnScrollDown.HorizontalAlignment = (HorizontalAlignment)v;
             btnScrollUp.Width = (double)AppLib.GetAppGlobalValue("dishesPanelScrollButtonSize");
             btnScrollUp.Height = (double)AppLib.GetAppGlobalValue("dishesPanelScrollButtonSize");
+            btnScrollUp.HorizontalAlignment = (HorizontalAlignment)v;
 
-            // добавить к блюдам надписи на кнопках
-            Dictionary<string, string> langSelGarnishDict = (Dictionary<string, string>)AppLib.GetAppGlobalValue("btnSelectGarnishText");
-            Dictionary<string, string> langAddDishDict = (Dictionary<string, string>)AppLib.GetAppGlobalValue("btnSelectDishText");
-
+            List<AppModel.MenuItem> mFolders = (List<AppModel.MenuItem>)AppLib.GetAppGlobalValue("mainMenu");
+            // создать канву со списком блюд
             createDishesCanvas(mFolders);
-
-            AppLib.SetAppGlobalValue("mainMenu", mFolders);
+            
             lstMenuFolders.Focus();
             lstMenuFolders.ItemsSource = mFolders;
             lstMenuFolders.SelectedIndex = 0;
@@ -313,10 +224,73 @@ namespace WpfClient
             logger.Trace("Настраиваю визуальные элементы - READY");
         }
 
-        // **************************************************************************************
-        //       TO DO
-        // **************************************************************************************
-        private void createDishesCanvas(ObservableCollection<AppModel.MenuItem> mFolders)
+        private void checkDBConnection()
+        {
+            Configuration con = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+
+            string connectionName = null;
+            string connectionString = null;
+            foreach (ConnectionStringSettings item in ConfigurationManager.ConnectionStrings)
+            {
+                if (item.ProviderName == "System.Data.EntityClient")
+                {
+                    connectionString = item.ConnectionString;
+                    int i = connectionString.IndexOf("connection string=", 0);
+                    connectionString = connectionString.Substring(i + 19);
+                    connectionString = connectionString.Substring(0, connectionString.Length - 1);
+                    connectionName = item.Name; break;
+                }
+            }
+            if (connectionName == null)
+            {
+                throw new Exception("Cannot find EntityClient connection string in application config file.");
+            }
+
+            SqlConnection conn = new SqlConnection(connectionString);
+            conn.Open();
+            if (conn.State == ConnectionState.Open)
+            {
+                conn.Close();
+            }
+            else
+            {
+                throw new Exception("Cannot open EF connection " + connectionName + " by its connection string: " + connectionString);
+            }
+        }
+        // преобразование строки цветов (R,G,B) в SolidColorBrush
+        private void convertAppColor(string setName)
+        {
+            var buf = AppLib.GetAppGlobalValue(setName);
+            if ((buf is string) == false) return;
+
+            // если цвет задан строкой
+            string sBuf = (string)buf;
+            string[] sRGB = sBuf.Split(',');
+            byte r = 0, g = 0, b = 0;
+            byte.TryParse(sRGB[0], out r);
+            byte.TryParse(sRGB[1], out g);
+            byte.TryParse(sRGB[2], out b);
+            SolidColorBrush brush = new SolidColorBrush(new Color() { A = 255, R = r, G = g, B = b });
+
+            AppLib.SetAppGlobalValue(setName, brush);
+        }
+        // установка цвета ресурса приложения (Application.Resources) в цвет из свойств приложения (Application.Properties)
+        private void checkAppColor(string setName)
+        {
+            SolidColorBrush bRes = (SolidColorBrush)Application.Current.Resources[setName];
+            SolidColorBrush bProp = (SolidColorBrush)AppLib.GetAppGlobalValue(setName);
+
+            if (bRes.Color.Equals(bProp.Color) == false)  // если не равны
+            {
+                Application.Current.Resources[setName] = bProp;   // то переопределить ресурсную кисть
+            }
+        }
+
+        #endregion
+
+        #region работа со списком блюд
+
+        private void createDishesCanvas(List<AppModel.MenuItem> mFolders)
         {
             #region privates vars
             double screenWidth, screenHeight;
@@ -482,178 +456,7 @@ namespace WpfClient
                 //canvas.Background = new SolidColorBrush(new Color() { R = (byte)rnd.Next(0,254), G= (byte)rnd.Next(0, 254), B= (byte)rnd.Next(0, 254), A=0xFF });
                 _dishCanvas.Add(canvas);
             }
-        }
-
-
-        private void setDishAddButton(DishItem dish, Grid dGrid, double dishPanelAddButtonRowHeight, double dKoefContentHeight, double cornerRadiusButton, double dishPanelTextFontSize)
-        {
-            bool isExistGarnishes = (dish.Garnishes != null);
-
-            // размеры тени под кнопками (от высоты самой кнопки, dishPanelAddButtonHeight)
-            double addButtonShadowDepth = 0.1d * dishPanelAddButtonRowHeight;
-            double addButtonBlurRadius = 0.35d * dishPanelAddButtonRowHeight;
-            DropShadowEffect _shadowEffect = new DropShadowEffect()
-            {
-                Direction = 270,
-                Color = Color.FromArgb(0xFF, 0xCF, 0x44, 0x6B),
-                Opacity = 0.7,
-                ShadowDepth = addButtonShadowDepth,
-                BlurRadius = addButtonBlurRadius
-            };
-
-            // кнопка с тенью
-            Border btnAddDish = new Border()
-            {
-                Name = "btnAddDish",
-                Tag = dish.RowGUID.ToString(),
-                VerticalAlignment = VerticalAlignment.Top,
-                Width = dGrid.Width,
-                Height = Math.Floor(0.7d * dKoefContentHeight * dishPanelAddButtonRowHeight),
-                CornerRadius = new CornerRadius(cornerRadiusButton),
-                Background = (Brush)AppLib.GetAppGlobalValue("addButtonBackgroundTextColor"),
-                SnapsToDevicePixels = true,
-                Effect = _shadowEffect
-            };
-            btnAddDish.PreviewMouseLeftButtonUp += BtnAddDish_PreviewMouseLeftButtonUp;
-
-            TextBlock tbText = new TextBlock()
-            {
-                Text = (string)AppLib.GetLangText((Dictionary<string, string>)AppLib.GetAppGlobalValue("btnSelectDishText")),
-                VerticalAlignment = VerticalAlignment.Center,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                FontSize = dishPanelTextFontSize,
-                Foreground = Brushes.White
-            };
-
-            if (isExistGarnishes == false)   // не Воки
-            {
-                // грид с кнопками цены и строки "Добавить", две колонки: с ценой и текстом
-                Grid grdPrice = new Grid();
-                grdPrice.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(dGrid.Width / 3d, GridUnitType.Pixel) });
-                grdPrice.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(dGrid.Width * 2d / 3d, GridUnitType.Pixel) });
-
-                Border brdPrice = new Border()
-                {
-                    VerticalAlignment = VerticalAlignment.Top,
-                    Width = grdPrice.ColumnDefinitions[0].Width.Value,
-                    Height = btnAddDish.Height,
-                    CornerRadius = new CornerRadius(cornerRadiusButton, 0, 0, cornerRadiusButton),
-                    Background = (Brush)AppLib.GetAppGlobalValue("addButtonBackgroundPriceColor"),
-                };
-                TextBlock tbPrice = new TextBlock()
-                {
-                    Text = string.Format((string)AppLib.GetAppResource("priceFormatString"), dish.Price),
-                    VerticalAlignment = VerticalAlignment.Center,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    FontSize = dishPanelTextFontSize,
-                    Foreground = Brushes.White
-                };
-                brdPrice.Child = tbPrice;
-                Grid.SetColumn(brdPrice, 0); grdPrice.Children.Add(brdPrice);
-
-                Grid.SetColumn(tbText, 1); grdPrice.Children.Add(tbText);
-                btnAddDish.Child = grdPrice;
-
-                Grid.SetRow(btnAddDish, 4); dGrid.Children.Add(btnAddDish);
-            }
-
-            else   // Воки
-            {
-                // кнопка-приглашение
-                Border btnInvitation = new Border()
-                {
-                    Name = "btnInvitation",
-                    VerticalAlignment = VerticalAlignment.Top,
-                    Width = Math.Floor(dGrid.Width),
-                    Height = Math.Floor(0.7d * dKoefContentHeight * dishPanelAddButtonRowHeight),
-                    CornerRadius = new CornerRadius(cornerRadiusButton),
-                    Background = Brushes.White, BorderBrush = Brushes.Gray, BorderThickness = new Thickness(1),
-                    SnapsToDevicePixels = true
-                };
-                TextBlock tbInvitation = new TextBlock()
-                {
-                    Text = (string)AppLib.GetLangText((Dictionary<string, string>)AppLib.GetAppGlobalValue("btnSelectGarnishText")),
-                    VerticalAlignment = VerticalAlignment.Center,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    FontSize = dishPanelTextFontSize,
-                    Foreground = Brushes.Gray
-                };
-                btnInvitation.Child = tbInvitation;
-
-                btnAddDish.Child = tbText; btnAddDish.SetValue(Grid.RowProperty, 6);
-                btnAddDish.Visibility = Visibility.Hidden;
-                dGrid.Children.Add(btnAddDish);
-                // добавить в контейнер
-                btnInvitation.Child = tbInvitation; btnInvitation.SetValue(Grid.RowProperty, 6);
-                dGrid.Children.Add(btnInvitation);
-            }
-
-        }
-
-        //*************************************************
-        //  ADD DISH TO ORDER
-        //*************************************************
-        private void BtnAddDish_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            var tagValue = ((FrameworkElement)sender).Tag;
-            if (tagValue == null) return;
-
-            string sGuid = tagValue.ToString();
-
-            DishItem selDishItem = AppLib.GetDishItemByRowGUID(sGuid);
-
-            if (selDishItem == null) return;
-
-            // если нет ингредиентов, то сразу в корзину
-            if ((selDishItem.Ingredients == null) || (selDishItem.Ingredients.Count == 0))
-            {
-                DishItem orderDish = selDishItem.GetCopyForOrder();
-                _currentOrder.Dishes.Add(orderDish);
-
-                // снять выделение
-                this.clearSelectedDish();
-
-                // нарисовать путь
-                FrameworkElement dishPanel = AppLib.FindLogicalParentByName((FrameworkElement)sender, "gridDish", 4);
-                if (dishPanel != null)
-                {
-                    System.Windows.Shapes.Path animPath = getAnimPath(dishPanel);
-
-                    //cnvAnim.Children.Add(animPath);
-
-                    //ColorAnimation colorAnim = new ColorAnimation(Colors.Aqua, Colors.Red, TimeSpan.FromMilliseconds(2000));
-                    //colorAnim.Completed += ColorAnim_Completed;
-                    //spotTo.Fill.BeginAnimation(SolidColorBrush.ColorProperty, colorAnim);
-
-                    //Storyboard sb = new Storyboard();
-                    //PropertyPath colorTargetPath = new PropertyPath("(Ellipse.Fill).(SolidColorBrush.Color)");
-                    //Storyboard.SetTarget(colorAnim, spotTo);
-                    //Storyboard.SetTargetProperty(colorAnim, colorTargetPath);
-                    //sb.Children.Add(colorAnim);
-                    //sb.AutoReverse = true;
-                    //sb.Begin();
-
-                }
-
-                // и обновить стоимость заказа
-                updatePrice();
-            }
-            else
-            {
-                // иначе через "всплывашку"
-                DishPopup popupWin = new DishPopup(_curDishItem);
-                // размеры
-                FrameworkElement pnlClient = this.Content as FrameworkElement;
-                popupWin.Height = pnlClient.ActualHeight;
-                popupWin.Width = pnlClient.ActualWidth;
-                // и положение
-                Point p = this.PointToScreen(new Point(0, 0));
-                popupWin.Left = p.X;
-                popupWin.Top = p.Y;
-
-                popupWin.ShowDialog();
-            }
-        }
+        }  // createDishesCanvas
 
         private void setDishPanelHeader(DishItem dish, Grid dGrid, double dishPanelHeaderFontSize, double dishPanelTextFontSize)
         {
@@ -665,7 +468,7 @@ namespace WpfClient
                     if (markItem.Image != null)
                     {
                         System.Windows.Controls.Image markImage = new System.Windows.Controls.Image();
-                        markImage.Effect = new DropShadowEffect() { Opacity=0.7};
+                        markImage.Effect = new DropShadowEffect() { Opacity = 0.7 };
                         markImage.Width = dishPanelHeaderFontSize; markImage.Height = dishPanelHeaderFontSize;
                         markImage.Source = ImageHelper.ByteArrayToBitmapImage(markItem.Image);
                         InlineUIContainer iuc = new InlineUIContainer(markImage);
@@ -785,6 +588,114 @@ namespace WpfClient
             Grid.SetRow(tbDescrText, 2); dGrid.Children.Add(tbDescrText);
         }
 
+        private void setDishAddButton(DishItem dish, Grid dGrid, double dishPanelAddButtonRowHeight, double dKoefContentHeight, double cornerRadiusButton, double dishPanelTextFontSize)
+        {
+            bool isExistGarnishes = (dish.Garnishes != null);
+
+            // размеры тени под кнопками (от высоты самой кнопки, dishPanelAddButtonHeight)
+            double addButtonShadowDepth = 0.1d * dishPanelAddButtonRowHeight;
+            double addButtonBlurRadius = 0.35d * dishPanelAddButtonRowHeight;
+            DropShadowEffect _shadowEffect = new DropShadowEffect()
+            {
+                Direction = 270,
+                Color = Color.FromArgb(0xFF, 0xCF, 0x44, 0x6B),
+                Opacity = 0.7,
+                ShadowDepth = addButtonShadowDepth,
+                BlurRadius = addButtonBlurRadius
+            };
+
+            // кнопка с тенью
+            Border btnAddDish = new Border()
+            {
+                Name = "btnAddDish",
+                Tag = dish.RowGUID.ToString(),
+                VerticalAlignment = VerticalAlignment.Top,
+                Width = dGrid.Width,
+                Height = Math.Floor(0.7d * dKoefContentHeight * dishPanelAddButtonRowHeight),
+                CornerRadius = new CornerRadius(cornerRadiusButton),
+                Background = (Brush)AppLib.GetAppGlobalValue("addButtonBackgroundTextColor"),
+                SnapsToDevicePixels = true,
+                Effect = _shadowEffect
+            };
+            btnAddDish.PreviewMouseLeftButtonUp += BtnAddDish_PreviewMouseLeftButtonUp;
+
+            TextBlock tbText = new TextBlock()
+            {
+                Name = "tbAdd",
+                Text = (string)AppLib.GetLangText((Dictionary<string, string>)AppLib.GetAppGlobalValue("btnSelectDishText")),
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                FontSize = dishPanelTextFontSize,
+                Foreground = Brushes.White
+            };
+
+            if (isExistGarnishes == false)   // не Воки
+            {
+                // грид с кнопками цены и строки "Добавить", две колонки: с ценой и текстом
+                Grid grdPrice = new Grid();
+                grdPrice.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(dGrid.Width / 3d, GridUnitType.Pixel) });
+                grdPrice.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(dGrid.Width * 2d / 3d, GridUnitType.Pixel) });
+
+                Border brdPrice = new Border()
+                {
+                    VerticalAlignment = VerticalAlignment.Top,
+                    Width = grdPrice.ColumnDefinitions[0].Width.Value,
+                    Height = btnAddDish.Height,
+                    CornerRadius = new CornerRadius(cornerRadiusButton, 0, 0, cornerRadiusButton),
+                    Background = (Brush)AppLib.GetAppGlobalValue("addButtonBackgroundPriceColor"),
+                };
+                TextBlock tbPrice = new TextBlock()
+                {
+                    Text = string.Format((string)AppLib.GetAppResource("priceFormatString"), dish.Price),
+                    VerticalAlignment = VerticalAlignment.Center,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    FontSize = dishPanelTextFontSize,
+                    Foreground = Brushes.White
+                };
+                brdPrice.Child = tbPrice;
+                Grid.SetColumn(brdPrice, 0); grdPrice.Children.Add(brdPrice);
+
+                Grid.SetColumn(tbText, 1); grdPrice.Children.Add(tbText);
+                btnAddDish.Child = grdPrice;
+
+                Grid.SetRow(btnAddDish, 4); dGrid.Children.Add(btnAddDish);
+            }
+
+            else   // Воки
+            {
+                // кнопка-приглашение
+                Border btnInvitation = new Border()
+                {
+                    Name = "btnInvitation",
+                    VerticalAlignment = VerticalAlignment.Top,
+                    Width = Math.Floor(dGrid.Width),
+                    Height = Math.Floor(0.7d * dKoefContentHeight * dishPanelAddButtonRowHeight),
+                    CornerRadius = new CornerRadius(cornerRadiusButton),
+                    Background = Brushes.White, BorderBrush = Brushes.Gray, BorderThickness = new Thickness(1),
+                    SnapsToDevicePixels = true
+                };
+                TextBlock tbInvitation = new TextBlock()
+                {
+                    Name = "tbInvitation",
+                    Text = (string)AppLib.GetLangText((Dictionary<string, string>)AppLib.GetAppGlobalValue("btnSelectGarnishText")),
+                    VerticalAlignment = VerticalAlignment.Center,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    FontSize = dishPanelTextFontSize,
+                    Foreground = Brushes.Gray
+                };
+                btnInvitation.Child = tbInvitation;
+
+                btnAddDish.Child = tbText; btnAddDish.SetValue(Grid.RowProperty, 6);
+                btnAddDish.Visibility = Visibility.Hidden;
+                dGrid.Children.Add(btnAddDish);
+                // добавить в контейнер
+                btnInvitation.Child = tbInvitation; btnInvitation.SetValue(Grid.RowProperty, 6);
+                dGrid.Children.Add(btnInvitation);
+            }
+
+        }
+
+        //  обработка события нажатия на кнопку показа/скрытия описания блюда (с анимацией)
         private void CanvDescr_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             Border btnDescr = (Border)sender;
@@ -844,116 +755,72 @@ namespace WpfClient
             _curDescrBorder.Visibility = Visibility.Hidden;
             _curDescrTextBlock.Visibility = Visibility.Hidden;
         }
-
-
-        private void checkDBConnection()
+        private void resetDishesLang()
         {
-            Configuration con = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            List<AppModel.MenuItem> mFolders =  (List<AppModel.MenuItem>)AppLib.GetAppGlobalValue("mainMenu");
+            bool isExistGarnishes;
 
-            string connectionName = null;
-            string connectionString = null;
-            foreach (ConnectionStringSettings item in ConfigurationManager.ConnectionStrings)
+            AppModel.MenuItem mItem; DishItem dItem;
+            for (int iMenu = 0; iMenu < mFolders.Count; iMenu++)
             {
-                if (item.ProviderName == "System.Data.EntityClient")
+                mItem = mFolders[iMenu];
+                for (int iDish = 0; iDish < mItem.Dishes.Count; iDish++)
                 {
-                    connectionString = item.ConnectionString;
-                    int i = connectionString.IndexOf("connection string=", 0);
-                    connectionString = connectionString.Substring(i+19);
-                    connectionString = connectionString.Substring(0, connectionString.Length - 1);
-                    connectionName = item.Name; break;
-                }
-            }
-            if (connectionName == null)
-            {
-                throw new Exception("Cannot find EntityClient connection string in application config file.");
-            }
+                    dItem = mItem.Dishes[iDish];
+                    isExistGarnishes = (dItem.Garnishes != null);
 
-            SqlConnection conn = new SqlConnection(connectionString);
-            conn.Open();
-            if (conn.State == ConnectionState.Open)
-            {
-                conn.Close();
-            }
-            else
-            {
-                throw new Exception("Cannot open EF connection " + connectionName + " by its connection string: " + connectionString);
-            }
+                    // visual elements
+                    Grid dishPanel = ((_dishCanvas[iMenu] as Canvas).Children[iDish] as Grid);
+                    Grid panelContent = (dishPanel.Children[0] as Grid);
+                    List<TextBlock> tbList = AppLib.FindLogicalChildren<TextBlock>(panelContent).ToList();
+
+                    // заголовок (состоит из элементов Run)
+                    var hdRuns = tbList[0].Inlines.Where(t => (t is Run)).ToList();
+                    ((Run)hdRuns[0]).Text = AppLib.GetLangText(dItem.langNames);
+                    ((Run)hdRuns[2]).Text = " " + AppLib.GetLangText(dItem.langUnitNames);
+                    //setTextBoxLangText(tbList[0], );
+                    // tbList[1] - буковка i на кнопке отображения описания
+                    // описание блюда
+                    tbList[2].Text = AppLib.GetLangText(dItem.langDescriptions);
+                    // кнопка Добавить с тенью
+                    TextBlock tbAdd = tbList.First(t => t.Name == "tbAdd");
+                    if (tbAdd != null) tbAdd.Text = (string)AppLib.GetLangText((Dictionary<string, string>)AppLib.GetAppGlobalValue("btnSelectDishText"));
+                    
+                    if (isExistGarnishes == true)
+                    {
+                        TextBlock tbInv = tbList.First(t => t.Name == "tbInvitation");
+                        if (tbInv != null) tbInv.Text = (string)AppLib.GetLangText((Dictionary<string, string>)AppLib.GetAppGlobalValue("btnSelectGarnishText"));
+                        List<MainMenuGarnish> garnList = AppLib.FindLogicalChildren<MainMenuGarnish>(panelContent).ToList();
+                        foreach (MainMenuGarnish garn in garnList)
+                        {
+                            garn.ResetLangName();
+                        }
+                    }  //  if (isExistGarnishes == true)
+                }   // for DishItem
+            }  // for MenuItem
+
         }
-
-        private void initCurrentSettings(NoodleDContext db)
-        {
-            // получить настройки приложения из таблицы Setting
-            List<Setting> setList = db.Setting.ToList();
-            foreach (Setting item in setList)
-            {
-                AppLib.SetAppGlobalValue(item.UniqName, item.Value);
-                if (item.UniqName.EndsWith("Color") == true)  // преобразовать и переопределить цвета
-                {
-                    convertAppColor(item.UniqName);
-                    checkAppColor(item.UniqName);
-                }
-                if (item.Value == "StringValue")    // заменить в Application.Properties строку StringValue на словарь языковых строк
-                {
-                    Dictionary<string, string> d = MenuLib.getLangTextDict(item.RowGUID, 1);
-                    AppLib.SetAppGlobalValue(item.UniqName, d);
-                }
-            }
-
-            // надписи на языковых кнопках
-            lblLangUa.Text = (string)AppLib.GetAppGlobalValue("langButtonTextUa");
-            lblLangRu.Text = (string)AppLib.GetAppGlobalValue("langButtonTextRu");
-            lblLangEng.Text = (string)AppLib.GetAppGlobalValue("langButtonTextEn");
-        }
-
-        // преобразование строки цветов (R,G,B) в SolidColorBrush
-        private void convertAppColor(string setName)
-        {
-            var buf = AppLib.GetAppGlobalValue(setName);
-            if ((buf is string) == false) return;
-
-            // если цвет задан строкой
-            string sBuf = (string)buf;
-            string[] sRGB = sBuf.Split(',');
-            byte r= 0, g = 0, b = 0;
-            byte.TryParse(sRGB[0], out r);
-            byte.TryParse(sRGB[1], out g);
-            byte.TryParse(sRGB[2], out b);
-            SolidColorBrush brush = new SolidColorBrush(new Color() { A=255, R=r, G=g, B=b });
-
-            AppLib.SetAppGlobalValue(setName, brush);
-        }
-
-        // установка цвета ресурса приложения (Application.Resources) в цвет из свойств приложения (Application.Properties)
-        private void checkAppColor(string setName)
-        {
-            SolidColorBrush bRes= (SolidColorBrush)Application.Current.Resources[setName];
-            SolidColorBrush bProp = (SolidColorBrush)AppLib.GetAppGlobalValue(setName);
-
-            if (bRes.Color.Equals(bProp.Color) == false)  // если не равны
-            {
-                Application.Current.Resources[setName] = bProp;   // то переопределить ресурсную кисть
-            }
-        }
+        #endregion
 
         #region language bottons
 
         private void lblButtonLang_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.StylusDevice != null) return;
+//            if (e.StylusDevice != null) return;
 
             selectAppLang((FrameworkElement)sender);
         }
-        private void lblButtonLang_TouchDown(object sender, TouchEventArgs e)
-        {
-            selectAppLang((FrameworkElement)sender);
-        }
+        //private void lblButtonLang_TouchDown(object sender, TouchEventArgs e)
+        //{
+        //    selectAppLang((FrameworkElement)sender);
+        //}
 
         // установить язык по умолчанию или по имени элемента, или по Ид языка
         private void selectAppLang(FrameworkElement langControl)
         {
             // сохранить выбранный пункт меню
             int selMenuItem = lstMenuFolders.SelectedIndex;
-            AppLib.SetAppGlobalValue("selectedMenuIndex", lstMenuFolders.SelectedIndex);
+//            AppLib.SetAppGlobalValue("selectedMenuIndex", lstMenuFolders.SelectedIndex);
 
             if (langControl == null)  // установка языка из глобального свойства
             {
@@ -962,31 +829,28 @@ namespace WpfClient
             }
             else            // установка языка из имени нажатой кнопки
             {
-                setCheckedLangButton(false);
+                setLangButtonStyle(false);
                 string langId = getLangIdByButtonName(langControl.Name);
                 AppLib.AppLang = langId;
             }
 
-            // установка текстов на выбранном языке
-            setCheckedLangButton(true);
+            setLangButtonStyle(true);
 
+            // установка текстов на выбранном языке
             BindingExpression be = txtPromoCode.GetBindingExpression(TextBox.TextProperty);
             be.UpdateTarget();
             be = lblMakeOrderText.GetBindingExpression(TextBlock.TextProperty);
             be.UpdateTarget();
-
             lstMenuFolders.Items.Refresh();
-//            lstDishes.Items.Refresh();
+            resetDishesLang();
 
-            // сбросить выбор блюда
-            clearSelectedDish();
-            
             // восстановить выбранный пункт главного меню
-            if (selMenuItem >= 0) selMenuItem = 0;
-            lstMenuFolders.SelectedIndex = (int)(AppLib.GetAppGlobalValue("selectedMenuIndex")??0);
+            //if (selMenuItem >= 0) selMenuItem = 0;
+            //lstMenuFolders.SelectedIndex = (int)(AppLib.GetAppGlobalValue("selectedMenuIndex")??0);
+            lstMenuFolders.SelectedIndex = selMenuItem;
         }
 
-        private void setCheckedLangButton(bool checkedMode)
+        private void setLangButtonStyle(bool checkedMode)
         {
             Border langBorder = getInnerLangBorder();
             if (langBorder != null)
@@ -1029,257 +893,65 @@ namespace WpfClient
 
         #endregion
 
-        // боковое меню выбора категории блюд
-        private void lstMenuFolders_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        #region выбор блюда
+        // добавить блюдо к заказу
+        private void BtnAddDish_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-//            clearSelectedDish();
-            e.Handled = true;
-            scrollDishes.Content = _dishCanvas[lstMenuFolders.SelectedIndex];
+            var tagValue = ((FrameworkElement)sender).Tag;
+            if (tagValue == null) return;
 
-            // очистить привязку изображения  в списке блюд
-            //ListBoxItem container;
-            //IEnumerable<FrameworkElement> visItems;
-            //Image img;
+            string sGuid = tagValue.ToString();
 
-            //if (lstDishes.ItemsSource != null)
-            //{
-            //    foreach (var item in lstDishes.Items)
-            //    {
-            //        container = (ListBoxItem)lstDishes.ItemContainerGenerator.ContainerFromItem(item);
-            //        if (container != null)
-            //        {
-            //            IEnumerable<FrameworkElement> cpArr = AppLib.FindVisualChildren<FrameworkElement>(container);
-            //            foreach (FrameworkElement fe in cpArr)
-            //            {
-            //                if (fe.Name == "rectDishImage")
-            //                {
-            //                    Rectangle rect = (fe as Rectangle);
-            //                    rect.Fill.ClearValue(ImageBrush.ImageSourceProperty);
-            //                }
-            //                else if (fe.Name == "dishHeaderMarkImage")
-            //                {
-            //                    img = (Image)fe;
-            //                    img.ClearValue(Image.SourceProperty);
-            //                }
-            //            }
-            //        }
-            //    }
-            //}
+            DishItem curDishItem = AppLib.GetDishItemByRowGUID(sGuid);
 
-            //lstDishes.ClearValue(ListBox.ItemsSourceProperty);
-            //lstDishes.ItemsSource = null;
+            if (curDishItem == null) return;
 
-            //GC.Collect();
-            //GC.WaitForPendingFinalizers();
-
-//            lstDishes.ItemsSource = ((AppModel.MenuItem)lstMenuFolders.SelectedItem).Dishes;
-
-           scrollDishes.ScrollToTop();
-        }
-
-        #region кнопки гарниров
-        // приходит Grid
-        private void borderGarnish_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            if (e.StylusDevice != null) return;
-            if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint) == false) { lastDragPoint = null; return; }
-
-            borderGarnisgHandler(sender);
-        }
-        private void brdGarnish_TouchDown(object sender, TouchEventArgs e)
-        {
-            if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint) == false) { lastDragPoint = null; return; }
-
-            borderGarnisgHandler(sender);
-        }
-
-        // клик по гарниру
-        private void borderGarnisgHandler(object sender)
-        {
-            //// визуальные элементы
-            //FrameworkElement gridGarn = (FrameworkElement)sender;   // кликнутый грид
-            //int garnIndex = int.Parse(gridGarn.Uid);  // его индекс
-            //// изменяемые элементы
-            //System.Windows.Shapes.Path borderGarn = AppLib.FindLogicalChildren<System.Windows.Shapes.Path>(gridGarn).ToList()[0];  // кликнутый бордер
-            //TextBlock garnName = AppLib.FindLogicalChildren<TextBlock>(gridGarn).ToList()[0];
-
-            //Grid gridGarnAll = (Grid)VisualTreeHelper.GetParent(gridGarn);   // родительский грид, в котором все три гарнира
-            //IEnumerable<Viewbox> bordersGarn = AppLib.FindVisualChildren<Viewbox>(gridGarnAll).ToList();  // все бордеры гарниров
-            
-            //// родительский грид
-            //Grid gridPar = (Grid)LogicalTreeHelper.GetParent(gridGarnAll); 
-            //// грид с большими кнопками
-            //Grid gridBigBut = (Grid)(AppLib.FindLogicalChildren<Grid>(gridPar).First(g => g.Name== "gridDishBottomButtons"));  
-            //// бордер кнопки добавления блюда
-            //Border borderAddBut = AppLib.FindVisualChildren<Border>(gridBigBut).First(g => g.Name=="txtDishWithIngr");  
-
-            //if (_curDishItem == null)
-            //{
-            //    _curDishItem = (DishItem)lstDishes.SelectedItem;
-            //    if (_curDishItem.SelectedGarnishes == null) _curDishItem.SelectedGarnishes = new List<DishAdding>();
-
-            //    DishAdding da = _curDishItem.Garnishes[garnIndex];
-            //    da.Uid = gridGarn.Uid;
-            //    _curDishItem.SelectedGarnishes.Add(da);
-
-            //    _curGarnishBorder = borderGarn;
-            //    _curGarnishTextBlock = garnName;
-            //    _curAddButton = borderAddBut;
-
-            //    updateVisualGarnish(true);
-            //}
-            //else
-            //{
-            //    if ((_curDishItem == (DishItem)lstDishes.SelectedItem) && (_curDishItem.SelectedGarnishes != null))  // клик по гарниру в том же блюде
-            //    {
-            //        DishAdding da = _curDishItem.SelectedGarnishes.FirstOrDefault(g => g.Uid == gridGarn.Uid);
-            //        if (da == null)
-            //        {
-            //            if (_curDishItem.SelectedGarnishes.Count > 0)
-            //            {
-            //                _curDishItem.SelectedGarnishes.Clear();
-            //                updateVisualGarnish(false);
-            //            }
-
-            //            da = _curDishItem.Garnishes[garnIndex];
-            //            da.Uid = gridGarn.Uid;
-            //            _curDishItem.SelectedGarnishes.Add(da);
-
-            //            _curGarnishBorder = borderGarn;
-            //            _curGarnishTextBlock = garnName;
-            //            updateVisualGarnish(true);
-            //        }
-            //        else
-            //        {
-            //            _curDishItem.SelectedGarnishes.Clear();
-            //            updateVisualGarnish(true);
-            //        }
-            //    }
-            //    else  // клик по гарниру в другом блюде 
-            //    {
-            //        if ((_curDishItem.SelectedGarnishes != null) && _curDishItem.SelectedGarnishes.Count > 0)
-            //        {
-            //            _curDishItem.SelectedGarnishes.Clear();
-            //            updateVisualGarnish(true);
-            //        }
-
-            //        _curDishItem = (DishItem)lstDishes.SelectedItem;
-            //        if (_curDishItem.SelectedGarnishes == null) _curDishItem.SelectedGarnishes = new List<DishAdding>();
-
-            //        DishAdding da = _curDishItem.Garnishes[garnIndex];
-            //        da.Uid = gridGarn.Uid;
-            //        _curDishItem.SelectedGarnishes.Add(da);
-
-            //        _curGarnishBorder = borderGarn;
-            //        _curGarnishTextBlock = garnName;
-            //        _curAddButton = borderAddBut;
-
-            //        updateVisualGarnish(true);
-
-            //    }
-            //}
-        }
-        private void updateVisualGarnish(bool isUpdAddBut)
-        {
-            if ((_curGarnishBorder == null) || (_curGarnishTextBlock == null) || (_curAddButton == null)) return;
-
-            SolidColorBrush selBase = (SolidColorBrush)AppLib.GetAppGlobalValue("appSelectedItemColor");
-            SolidColorBrush notSelBase = (SolidColorBrush)AppLib.GetAppGlobalValue("selectGarnishBackgroundColor");
-            SolidColorBrush notSelText = (SolidColorBrush)AppLib.GetAppGlobalValue("appNotSelectedItemColor");
-
-            List<DishAdding> garList = _curDishItem.SelectedGarnishes;  // SelectedGarnishes
-            if (garList==null || garList.Count == 0)  // ничего не выбрано
+            // если нет ингредиентов, то сразу в корзину
+            if ((curDishItem.Ingredients == null) || (curDishItem.Ingredients.Count == 0))
             {
-                _curGarnishBorder.Fill = notSelBase;
-                _curGarnishTextBlock.Foreground = notSelText;
-                if (isUpdAddBut)
+                DishItem orderDish = curDishItem.GetCopyForOrder();
+                _currentOrder.Dishes.Add(orderDish);
+
+                // нарисовать путь
+                FrameworkElement dishPanel = AppLib.FindLogicalParentByName((FrameworkElement)sender, "gridDish", 4);
+                if (dishPanel != null)
                 {
-                    _curAddButton.Visibility = Visibility.Hidden;
+                    Path animPath = getAnimPath(dishPanel);
+
+                    //cnvAnim.Children.Add(animPath);
+
+                    //ColorAnimation colorAnim = new ColorAnimation(Colors.Aqua, Colors.Red, TimeSpan.FromMilliseconds(2000));
+                    //colorAnim.Completed += ColorAnim_Completed;
+                    //spotTo.Fill.BeginAnimation(SolidColorBrush.ColorProperty, colorAnim);
+
+                    //Storyboard sb = new Storyboard();
+                    //PropertyPath colorTargetPath = new PropertyPath("(Ellipse.Fill).(SolidColorBrush.Color)");
+                    //Storyboard.SetTarget(colorAnim, spotTo);
+                    //Storyboard.SetTargetProperty(colorAnim, colorTargetPath);
+                    //sb.Children.Add(colorAnim);
+                    //sb.AutoReverse = true;
+                    //sb.Begin();
+
                 }
+
+                // и обновить стоимость заказа
+                updatePrice();
             }
             else
             {
-                _curGarnishBorder.Fill = selBase;
-                _curGarnishTextBlock.Foreground = Brushes.Black;
-                if (isUpdAddBut)
-                {
-                    _curAddButton.Visibility = Visibility.Visible;
-                }
+                // иначе через "всплывашку"
+                DishPopup popupWin = new DishPopup(curDishItem);
+                // размеры
+                FrameworkElement pnlClient = this.Content as FrameworkElement;
+                popupWin.Height = pnlClient.ActualHeight;
+                popupWin.Width = pnlClient.ActualWidth;
+                // и положение
+                Point p = this.PointToScreen(new Point(0, 0));
+                popupWin.Left = p.X;
+                popupWin.Top = p.Y;
+
+                popupWin.ShowDialog();
             }
-        }
-
-        #endregion
-
-        #region выбор блюда
-        private void txtDishAdd_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-//            if (e.StylusDevice != null) return;
-            if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint) == false) { lastDragPoint = null; return; }
-
-            txtDishWithIngrHandler(sender);
-        }
-        private void txtDishAdd_TouchDown(object sender, TouchEventArgs e)
-        {
-            if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint) == false) { lastDragPoint = null; return; }
-
-            txtDishWithIngrHandler(sender);
-        }
-
-        // клик по кнопке
-        private void txtDishWithIngrHandler(object sender)
-        {
-            //DishItem selDishItem = (DishItem)lstDishes.SelectedItem;
-            //if (selDishItem == null) return;
-
-            //// если нет ингредиентов, то сразу в корзину
-            //if ((selDishItem.Ingredients == null) || (selDishItem.Ingredients.Count == 0))
-            //{
-            //    DishItem orderDish = selDishItem.GetCopyForOrder();
-            //    _currentOrder.Dishes.Add(orderDish);
-
-            //    // снять выделение
-            //    this.clearSelectedDish();
-
-            //    // нарисовать путь
-            //    FrameworkElement dishPanel = AppLib.FindLogicalParentByName((FrameworkElement)sender, "gridDish", 4);
-            //    if (dishPanel != null)
-            //    {
-            //        System.Windows.Shapes.Path animPath = getAnimPath(dishPanel);
-
-            //        //cnvAnim.Children.Add(animPath);
-
-            //        //ColorAnimation colorAnim = new ColorAnimation(Colors.Aqua, Colors.Red, TimeSpan.FromMilliseconds(2000));
-            //        //colorAnim.Completed += ColorAnim_Completed;
-            //        //spotTo.Fill.BeginAnimation(SolidColorBrush.ColorProperty, colorAnim);
-                    
-            //        //Storyboard sb = new Storyboard();
-            //        //PropertyPath colorTargetPath = new PropertyPath("(Ellipse.Fill).(SolidColorBrush.Color)");
-            //        //Storyboard.SetTarget(colorAnim, spotTo);
-            //        //Storyboard.SetTargetProperty(colorAnim, colorTargetPath);
-            //        //sb.Children.Add(colorAnim);
-            //        //sb.AutoReverse = true;
-            //        //sb.Begin();
-
-            //    }
-
-            //    // и обновить стоимость заказа
-            //    updatePrice();
-            //}
-            //else
-            //{
-            //    // иначе через "всплывашку"
-            //    DishPopup popupWin = new DishPopup(_curDishItem);
-            //    // размеры
-            //    FrameworkElement pnlClient = this.Content as FrameworkElement;
-            //    popupWin.Height = pnlClient.ActualHeight;
-            //    popupWin.Width = pnlClient.ActualWidth;
-            //    // и положение
-            //    Point p = this.PointToScreen(new Point(0, 0));
-            //    popupWin.Left = p.X;
-            //    popupWin.Top = p.Y;
-
-            //    popupWin.ShowDialog();
-            //}
         }
 
         private void ColorAnim_Completed(object sender, EventArgs e)
@@ -1287,7 +959,7 @@ namespace WpfClient
             cnvAnim.Children.Clear();
             Panel.SetZIndex(cnvAnim, -1);
         }
-        private System.Windows.Shapes.Path getAnimPath(FrameworkElement dishPanel)
+        private Path getAnimPath(FrameworkElement dishPanel)
         {
             Point fromCenterPoint, toCenterPoint;
             Point fromBasePoint = dishPanel.PointToScreen(new Point(0, 0));
@@ -1333,33 +1005,6 @@ namespace WpfClient
 
             return p;
         }
-        #endregion
-
-        #region btnShowDishDescriptionHandler
-        private void btnShowDishDescription_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint) == false) { lastDragPoint = null; return; }
-            
-            btnShowDishDescriptionHandler(sender);
-        }
-
-        private void btnShowDishDescriptionHandler(object sender)
-        {
-            FrameworkElement vBox = (FrameworkElement)sender;
-            if (vBox.Name != "vboxDishDescrButton")
-            {
-                FrameworkElement gridDescr = AppLib.FindLogicalParentByName(vBox, "gridDescr", 3);
-                Viewbox[] vbArr = AppLib.FindLogicalChildren<Viewbox>(gridDescr).ToArray();
-                Viewbox vbText = vbArr[0];
-                Viewbox vbButton = vbArr[1];
-
-                vBox = vbButton;
-            }
-
-            string tagValue = (vBox.Tag ?? "0").ToString();
-            vBox.Tag = (tagValue == "0") ? "1" : "0";
-        }
-
         #endregion
 
         #region dish list behaviour
@@ -1462,7 +1107,7 @@ namespace WpfClient
             double dY = posNow.Y - lastDragPoint.Value.Y;
 
             lastDragPoint = posNow;
-            Debug.Print(posNow.ToString());
+            //Debug.Print(posNow.ToString());
             scrollDishes.ScrollToHorizontalOffset(scrollDishes.HorizontalOffset - dX);
             scrollDishes.ScrollToVerticalOffset(scrollDishes.VerticalOffset - dY);
         }
@@ -1536,28 +1181,21 @@ namespace WpfClient
 
         #endregion
 
+        // боковое меню выбора категории блюд
+        private void lstMenuFolders_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            e.Handled = true;
+            scrollDishes.Content = _dishCanvas[lstMenuFolders.SelectedIndex];
+
+            scrollDishes.ScrollToTop();
+        }
+
         private void Window_Closed(object sender, EventArgs e)
         {
             logger.Info("End application");
         }
 
         // сбросить выбор блюда
-        public void clearSelectedDish()
-        {
-            if (_curDishItem != null)
-            {
-                if (_curDishItem.SelectedGarnishes != null && (_curDishItem.SelectedGarnishes.Count > 0))
-                {
-                    _curDishItem.SelectedGarnishes = null;
-                    updateVisualGarnish(true);
-                }
-                if (_curDishItem.SelectedIngredients != null) _curDishItem.SelectedIngredients.Clear();
-                if (_curDishItem.SelectedRecommends != null) _curDishItem.SelectedRecommends.Clear();
-
-                _curDishItem = null; _curGarnishBorder = null; _curAddButton = null;
-
-            }
-        }
         // обновить стоимость заказа
         public void updatePrice()
         {

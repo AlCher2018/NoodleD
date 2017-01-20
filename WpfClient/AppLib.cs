@@ -68,8 +68,9 @@ namespace WpfClient
                 dict[key] = value;
             }
         }
+
         // сохранить настройки приложения из config-файла в свойствах приложения
-        public static bool SaveAppSettingToProps(string settingName, Type settingType)
+        public static bool SaveAppSettingToProps(string settingName, Type settingType = null)
         {
             string settingValue = GetAppSetting(settingName);
             if (settingValue == null) return false;
@@ -91,6 +92,7 @@ namespace WpfClient
             }
             return true;
         }
+
         // сохранить настройку приложения из config-файла в bool-свойство приложения
         public static void SaveAppSettingToPropTypeBool(string settingName)
         {
@@ -200,6 +202,50 @@ namespace WpfClient
         #endregion
 
         #region AppBL
+
+        public static void SaveSizeVarsToAppProperties()
+        {
+            double dVar;
+
+            double screenWidth, screenHeight;
+            screenWidth = SystemParameters.PrimaryScreenWidth;
+            //            screenWidth = SystemParameters.VirtualScreenWidth;
+            screenHeight = SystemParameters.PrimaryScreenHeight;
+            //            screenHeight = SystemParameters.VirtualScreenHeight;
+
+            AppLib.SetAppGlobalValue("screenWidth", screenWidth);
+            AppLib.SetAppGlobalValue("screenHeight", screenHeight);
+
+            // углы закругления
+            dVar = 0.005 * screenWidth;
+            AppLib.SetAppGlobalValue("cornerRadiusButton", dVar);
+            AppLib.SetAppGlobalValue("cornerRadiusGarnish", 0.5 * dVar);
+            AppLib.SetAppGlobalValue("cornerRadiusDishPanel", 2 * dVar);
+
+            dVar = 0.5 * screenWidth;
+            AppLib.SetAppGlobalValue("maxDialogWindowWidth", dVar);
+
+            // РАЗМЕРЫ ШРИФТОВ
+            double appFontSize0, appFontSize1, appFontSize2, appFontSize3, appFontSize4, appFontSize5, appFontSize6, appFontSize7;
+            double minVal = Math.Min(screenWidth, screenHeight);
+            appFontSize0 = 0.055 * minVal;
+            appFontSize1 = 0.04 * minVal;
+            appFontSize2 = 0.8 * appFontSize1;
+            appFontSize3 = 0.8 * appFontSize2;
+            appFontSize4 = 0.8 * appFontSize3;
+            appFontSize5 = 0.8 * appFontSize4;
+            appFontSize6 = 0.8 * appFontSize5;
+            appFontSize7 = 0.8 * appFontSize6;
+            AppLib.SetAppGlobalValue("appFontSize0", appFontSize0);
+            AppLib.SetAppGlobalValue("appFontSize1", appFontSize1);
+            AppLib.SetAppGlobalValue("appFontSize2", appFontSize2);
+            AppLib.SetAppGlobalValue("appFontSize3", appFontSize3);
+            AppLib.SetAppGlobalValue("appFontSize4", appFontSize4);
+            AppLib.SetAppGlobalValue("appFontSize5", appFontSize5);
+            AppLib.SetAppGlobalValue("appFontSize6", appFontSize6);
+            AppLib.SetAppGlobalValue("appFontSize7", appFontSize7);
+        }
+
         public static string GetCostUIText(decimal cost)
         {
             string orderPriceText = cost.ToString("0");

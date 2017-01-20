@@ -1,3 +1,7 @@
+получить GUID в VS
+------------------
+Tools - Create GUID
+
 получить GUID в VBA
 -------------------
 Public Function GetGUID() As String 
@@ -8,3 +12,6 @@ End Function
 -----------------------------------
 update Dish Set Image = (SELECT MyImage.* from Openrowset(Bulk 'e:\Чернов\NoodleD\дизайн\NodDod\dish1.jpg', Single_Blob) MyImage) where id=1
 
+строка подключения к SQL Server
+-------------------------------
+data source=PRG01;initial catalog=NoodleD;persist security info=True;user id=sa;password=admin

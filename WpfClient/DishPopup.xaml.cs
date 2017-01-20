@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -23,10 +24,10 @@ namespace WpfClient
     {
         private bool _isClose;
         private DishItem _currentDish;
-        List<TextBlock> tbList;
-        List<Viewbox> vbList;
-        SolidColorBrush notSelTextColor;
-        SolidColorBrush selTextColor;
+        List<TextBlock> _tbList;
+        List<Viewbox> _vbList;
+        SolidColorBrush _notSelTextColor;
+        SolidColorBrush _selTextColor;
 
 
         public DishPopup(DishItem dishItem)
@@ -38,8 +39,28 @@ namespace WpfClient
             this.DataContext = _currentDish;
             updatePriceControl();
 
-            notSelTextColor = new SolidColorBrush(Colors.Black);
-            selTextColor = (SolidColorBrush)AppLib.GetAppGlobalValue("addButtonBackgroundTextColor");
+            _notSelTextColor = new SolidColorBrush(Colors.Black);
+            _selTextColor = (SolidColorBrush)AppLib.GetAppGlobalValue("addButtonBackgroundTextColor");
+        }
+
+        // после загрузки окна
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            // обновить ListBox-ы, если есть выбранные ингредиенты и рекомендации
+            if (_currentDish.SelectedIngredients != null)
+            {
+                foreach (DishAdding item in _currentDish.SelectedIngredients.ToList())
+                {
+                    listIngredients.SelectedItems.Add(item);
+                }
+            }
+            if (_currentDish.SelectedRecommends != null)
+            {
+                foreach (DishItem item in _currentDish.SelectedRecommends.ToList())
+                {
+                    listRecommends.SelectedItems.Add(item);
+                }
+            }
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -73,6 +94,7 @@ namespace WpfClient
         private void btnAddDish_MouseUp(object sender, MouseButtonEventArgs e)
         {
             addDishToOrder();
+            e.Handled = true;
         }
 
 
@@ -100,21 +122,21 @@ namespace WpfClient
             foreach (var item in e.RemovedItems)
             {
                 ListBoxItem vRemoved = (ListBoxItem)listBox.ItemContainerGenerator.ContainerFromItem(item);
-                tbList = AppLib.FindVisualChildren<TextBlock>(vRemoved).ToList();
-                vbList = AppLib.FindVisualChildren<Viewbox>(vRemoved).ToList();
-                tbText = tbList.Find(t => t.Name == "txtName");
-                tbText.Foreground = notSelTextColor;
-                vBox = vbList.Find(v => v.Name == "garnBaseColorBrush");
+                _tbList = AppLib.FindVisualChildren<TextBlock>(vRemoved).ToList();
+                _vbList = AppLib.FindVisualChildren<Viewbox>(vRemoved).ToList();
+                tbText = _tbList.Find(t => t.Name == "txtName");
+                tbText.Foreground = _notSelTextColor;
+                vBox = _vbList.Find(v => v.Name == "garnBaseColorBrush");
                 vBox.Visibility = Visibility.Hidden;
             }
             foreach (var item in e.AddedItems)
             {
                 ListBoxItem vAdded = (ListBoxItem)listBox.ItemContainerGenerator.ContainerFromItem(item);
-                tbList = AppLib.FindVisualChildren<TextBlock>(vAdded).ToList();
-                vbList = AppLib.FindVisualChildren<Viewbox>(vAdded).ToList();
-                tbText = tbList.Find(t => t.Name == "txtName");
-                tbText.Foreground = selTextColor;
-                vBox = vbList.Find(v => v.Name == "garnBaseColorBrush");
+                _tbList = AppLib.FindVisualChildren<TextBlock>(vAdded).ToList();
+                _vbList = AppLib.FindVisualChildren<Viewbox>(vAdded).ToList();
+                tbText = _tbList.Find(t => t.Name == "txtName");
+                tbText.Foreground = _selTextColor;
+                vBox = _vbList.Find(v => v.Name == "garnBaseColorBrush");
                 vBox.Visibility = Visibility.Visible;
             }
         }
@@ -151,6 +173,7 @@ namespace WpfClient
             DishItem curDish = (DishItem)DataContext;
             DishItem orderDish = curDish.GetCopyForOrder();
             curOrder.Dishes.Add(orderDish);
+
             // добавить в заказ рекомендации
             if ((curDish.SelectedRecommends != null) && (curDish.SelectedRecommends.Count > 0))
             {
@@ -161,8 +184,6 @@ namespace WpfClient
             }
 
             MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
-            // снять выделение
-            mainWindow.clearSelectedDish();
             // и обновить стоимость заказа
             mainWindow.updatePrice();
 

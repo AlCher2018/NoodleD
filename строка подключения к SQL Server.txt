@@ -1,1 +1,0 @@
-data source=PRG01;initial catalog=NoodleD;persist security info=True;user id=sa;password=admin

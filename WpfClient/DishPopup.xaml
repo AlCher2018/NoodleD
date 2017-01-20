@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:WpfClient"
         mc:Ignorable="d"
         Title="DishPopup" Height="300" Width="300"
-        PreviewKeyDown="Window_PreviewKeyDown"
+        PreviewKeyDown="Window_PreviewKeyDown" Loaded="Window_Loaded"
         WindowStyle="None" ResizeMode="NoResize"
         AllowsTransparency="True" Background="Transparent" 
         >
@@ -307,8 +307,9 @@
                 -->
                 <TextBlock Grid.Column="1" Grid.Row="4" Style="{StaticResource sectionHeaderStyle}"
                         Text="{Binding {x:Null}, ConverterParameter=appSet.formPopUpHeaderText2, Converter={StaticResource langDictToText}}"/>
-                <ListBox x:Name="listIngredients" Grid.Column="1" Grid.Row="5" Style="{StaticResource addingsListBoxStyle}" SelectionChanged="listIngredients_SelectionChanged"
-                             ItemsSource="{Binding Ingredients}"
+                <ListBox x:Name="listIngredients" Grid.Column="1" Grid.Row="5" Style="{StaticResource addingsListBoxStyle}" 
+                         ItemsSource="{Binding Ingredients}"
+                         SelectionChanged="listIngredients_SelectionChanged"
                              />
 
                 <!--Раздел 3. РЕКОМЕНДАЦИИ -->

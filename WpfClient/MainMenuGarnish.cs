@@ -65,6 +65,11 @@ namespace WpfClient
             base.PreviewMouseUp += MainMenuGarnish_PreviewMouseDown;
         }
 
+        public void ResetLangName()
+        {
+            _tbGarnishName.Text = (string)AppLib.GetLangText((Dictionary<string, string>)_garnItem.langNames);
+        }
+
         private void MainMenuGarnish_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             switchSelectModeByClicked();

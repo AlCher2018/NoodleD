@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -44,7 +45,7 @@ namespace AppModel
             decimal retVal = 0;
             if (this.Dishes != null)
                 foreach (DishItem item in Dishes) retVal += item.GetValueInOrder();
-
+            
             return retVal;
         }
 

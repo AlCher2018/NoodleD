@@ -12,51 +12,84 @@ using System.Collections.Specialized;
 
 namespace AppModel
 {
-    // статический класс для обслуживания данных из БД
+    // статический класс-оболочка для обслуживания данных из БД
     public static class MenuLib
     {
-        private static List<MenuFolder> _listMenu;
-        private static List<Dish> _listDish;
-        private static List<DishGarnish> _listGarn;
-        private static List<DishIngredient> _listIngr;
-        private static List<DishMarks> _listMarks;
-        private static List<DishMark> _listMark;
-        private static List<DishRecommends> _listRecom;
-        private static List<StringValue> _listStrVal;
-        private static List<DishUnit> _listUnit;
-        private static List<FieldType> _listFldType;
+        //// для постоянного доступа к таблице строк
+        //private static List<StringValue> _listStrVal;
+        //public static List<StringValue> StringValueTable { get { return _listStrVal; } }
 
-        static MenuLib()
-        {
-            using (NoodleDContext db = new NoodleDContext())
-            {
-                db.Configuration.LazyLoadingEnabled = true;  // отключить ленивую загрузку
-                _listMenu = db.MenuFolder.ToList();
-                _listDish = db.Dish.ToList();
-                _listStrVal = db.StringValue.ToList();
-                _listFldType = db.FieldType.ToList();
-                _listUnit = db.DishUnit.ToList();
-                _listGarn = db.DishGarnish.ToList();
-                _listIngr = db.DishIngredient.ToList();
-                _listMark = db.DishMark.ToList();
-                _listMarks = db.DishMarks.ToList();
-                _listRecom = db.DishRecommends.ToList();
-            }
-        }
-
-        //public static bool CheckDb()
+        //static MenuLib()
         //{
-
-        //    NoodleDContext db = new NoodleDContext();
-            
+        //    using (NoodleDContext db = new NoodleDContext())
+        //    {
+        //        _listStrVal = db.StringValue.ToList();
+        //    }
         //}
 
-        public static ObservableCollection<MenuItem> GetMenuMainFolders()
+        // статическая оболочка для получения меню
+        public static List<MenuItem> GetMenuMainFolders()
         {
-            ObservableCollection<MenuItem> retVal = new ObservableCollection<MenuItem>();
-            int fieldTypeId = 1;
-            List<MenuFolder> lsort = (from m in _listMenu orderby m.RowPosition where m.ParentId == 0 select m).ToList();
+            List<MenuItem> retVal = null;
+            using (MainMenu mm = new MainMenu())
+            {
+                retVal = mm.GetMenuItemsList();
+            }
 
+            return retVal;
+        }  //  GetMenuMainFolders
+    
+
+        //public static Dictionary<string,string> getLangTextDict(Guid rowGuid, int fieldTypeId)
+        //{
+        //    Dictionary<string, string> retVal = new Dictionary<string, string>();
+        //    foreach (StringValue item in
+        //        from val in _listStrVal where val.RowGUID == rowGuid && val.FieldType.Id == fieldTypeId select val)
+        //    {
+        //        if (retVal.Keys.Contains(item.Lang) == false) retVal.Add(item.Lang, item.Value);
+        //    }
+        //    return retVal;
+        //}
+
+        //// получить значение из StringValue, использую статический список
+        //public static string getLangStringValue(Guid rowGuid, int fieldTypeId, string langId, string defaultValue=null)
+        //{
+        //    string retVal = null;
+
+        //    StringValue sValDb = _listStrVal.FirstOrDefault(v => v.RowGUID == rowGuid && v.FieldType.Id == fieldTypeId && v.Lang == langId);
+
+        //    if (sValDb == null)
+        //    {
+        //        if (defaultValue != null) retVal = defaultValue;
+        //    }
+        //    else retVal = sValDb.Value;
+
+        //    return retVal;
+        //}
+
+    }  // class MenuLib
+
+
+    // экземплярный класс главного меню
+    public class MainMenu: IDisposable
+    {
+        NoodleDContext _db;
+        List<StringValue> _stringTable;
+
+        public MainMenu()
+        {
+            _db = new NoodleDContext();
+            _db.Configuration.LazyLoadingEnabled = true;  // отключить ленивую загрузку
+
+            _stringTable = _db.StringValue.ToList();
+        }
+
+        public List<MenuItem> GetMenuItemsList()
+        {
+            List<MenuItem> retVal = new List<MenuItem>();
+            int fieldTypeId = 1;
+
+            List<MenuFolder> lsort = (from m in _db.MenuFolder orderby m.RowPosition where m.ParentId == 0 select m).ToList();
             foreach (MenuFolder item in lsort)
             {
                 MenuItem mi = new MenuItem() { MenuFolder = item };
@@ -65,7 +98,7 @@ namespace AppModel
                 // добавить блюда к пункту меню
                 try
                 {
-                    mi.Dishes = getDishes(item.RowGUID, item.Id);
+                    mi.Dishes = getDishes(item);
                 }
                 catch (Exception e)
                 {
@@ -78,78 +111,64 @@ namespace AppModel
             if (retVal.Count == 0) retVal = null;
 
             return retVal;
-        }  //  GetMenuMainFolders(string langId)
+        }  // GetMenuItemList
 
-        public static Dictionary<string,string> getLangTextDict(Guid rowGuid, int fieldTypeId)
+        private List<DishItem> getDishes(MenuFolder menuFolder)
         {
-            Dictionary<string, string> retVal = new Dictionary<string, string>();
-            foreach (StringValue item in
-                from val in _listStrVal where val.RowGUID == rowGuid && val.FieldType.Id == fieldTypeId select val)
-            {
-                if (retVal.Keys.Contains(item.Lang) == false) retVal.Add(item.Lang, item.Value);
-            }
-            return retVal;
-        }
+            Guid menuGuid = menuFolder.RowGUID;
+            int menuId = menuFolder.Id;
 
-        // получить значение из StringVAlue
-        private static string getLangStringValue(NoodleDContext db, Guid rowGuid, int fieldTypeId, string langId, string defaultValue=null)
-        {
-            string retVal = null;
+            List<DishItem> retVal = new List<DishItem>();
 
-            StringValue sValDb = db.StringValue.FirstOrDefault(v => v.RowGUID == rowGuid && v.FieldType.Id == fieldTypeId && v.Lang == langId);
-
-            if (sValDb == null)
-            {
-                if (defaultValue != null) retVal = defaultValue;
-            }
-            else retVal = sValDb.Value;
-
-            return retVal;
-        }
-
-        private static ObservableCollection<DishItem> getDishes(Guid menuGuid, int menuId)
-        {
-            ObservableCollection<DishItem> retVal = new ObservableCollection<DishItem>();
+            List<Dish> listDish = _db.Dish.ToList();
+            List<DishGarnish> listGarn = _db.DishGarnish.ToList();
+            List<DishMarks> listMarks = _db.DishMarks.ToList();
+            List<DishMark> listMark = _db.DishMark.ToList();
+            List<DishIngredient> listIngr = _db.DishIngredient.ToList();
+            List<DishRecommends> listRecom = _db.DishRecommends.ToList();
+            List<DishUnit> listUnit = _db.DishUnit.ToList();
 
             foreach (Dish dishDb in
-                    from d in _listDish where d.MenuFolderGUID == menuGuid orderby d.Id select d)
+                    from d in listDish where d.MenuFolderGUID == menuGuid orderby d.Id select d)
             {
-                DishItem dishApp = getNewDishItem(dishDb);
+                DishItem dishApp = getNewDishItem(dishDb, listUnit);
                 dishApp.MenuId = menuId;
 
                 // гарниры
-                var lGarn = _listGarn.Where(g => g.DishGUID == dishDb.RowGUID).ToList();
-                if (lGarn.Count > 0) {
+                var lGarn = listGarn.Where(g => g.DishGUID == dishDb.RowGUID).ToList();
+                if (lGarn.Count > 0)
+                {
                     dishApp.Garnishes = new List<DishAdding>();
                     dishApp.SelectedGarnishes = new List<DishAdding>();
                     foreach (DishGarnish item in lGarn)
                     {
-                        DishAdding da = new DishAdding() { Id = item.Id, RowGUID=item.RowGUID, Price = item.Price };
+                        DishAdding da = new DishAdding() { Id = item.Id, RowGUID = item.RowGUID, Price = item.Price };
                         da.langNames = getLangTextDict(item.RowGUID, 1);
                         dishApp.Garnishes.Add(da);
                     }
                 }
 
                 // ингредиенты
-                var lIngr = _listIngr.Where(g => g.DishGUID == dishDb.RowGUID).ToList();
-                if (lIngr.Count > 0) {
+                var lIngr = listIngr.Where(g => g.DishGUID == dishDb.RowGUID).ToList();
+                if (lIngr.Count > 0)
+                {
                     dishApp.Ingredients = new List<DishAdding>();
                     foreach (DishIngredient item in lIngr)
                     {
-                        DishAdding da = new DishAdding() { Id = item.Id, RowGUID = item.RowGUID, Price = item.Price, Image=item.Image };
+                        DishAdding da = new DishAdding() { Id = item.Id, RowGUID = item.RowGUID, Price = item.Price, Image = item.Image };
                         da.langNames = getLangTextDict(item.RowGUID, 1);
                         dishApp.Ingredients.Add(da);
                     }
                 }
 
                 // маркеры
-                var lMark = _listMarks.Where(g => g.DishGUID == dishDb.RowGUID).ToList();
+                var lMark = listMarks.Where(g => g.DishGUID == dishDb.RowGUID).ToList();
                 if (lMark.Count > 0)
                 {
                     dishApp.Marks = new List<DishAdding>();
                     foreach (DishMarks item in lMark)
                     {
-                        DishMark dm = _listMark.FirstOrDefault(m => m.RowGUID == item.MarkGUID);
+                        DishMark dm = listMark.FirstOrDefault(m => m.RowGUID == item.MarkGUID);
                         DishAdding da = new DishAdding() { Id = item.Id, Image = dm.Image };
                         da.langNames = getLangTextDict(dm.RowGUID, 1);
                         dishApp.Marks.Add(da);
@@ -157,16 +176,16 @@ namespace AppModel
                 }
 
                 // рекомендации
-                var lRecom = _listRecom.Where(g => g.DishGUID == dishDb.RowGUID).ToList();
+                var lRecom = listRecom.Where(g => g.DishGUID == dishDb.RowGUID).ToList();
                 if (lRecom.Count > 0)
                 {
                     dishApp.Recommends = new List<DishItem>();
                     foreach (DishRecommends item in lRecom)
                     {
-                        Dish recomDb = _listDish.FirstOrDefault(d => d.RowGUID == item.RecommendGUID);
+                        Dish recomDb = listDish.FirstOrDefault(d => d.RowGUID == item.RecommendGUID);
                         if (recomDb != null)
                         {
-                            DishItem itemRecom = getNewDishItem(recomDb);
+                            DishItem itemRecom = getNewDishItem(recomDb, listUnit);
                             dishApp.Recommends.Add(itemRecom);
                         }
                     }
@@ -178,7 +197,7 @@ namespace AppModel
             return retVal;
         }  // GetDishes(Guid menuGuid)
 
-        private static DishItem getNewDishItem(Dish dishDb)
+        private DishItem getNewDishItem(Dish dishDb, List<DishUnit> listUnit)
         {
             DishItem dishApp = new DishItem();
             dishApp.Id = dishDb.Id;
@@ -190,7 +209,7 @@ namespace AppModel
             // единица измерения
             if (dishDb.UnitGUID != null)
             {
-                DishUnit du = _listUnit.FirstOrDefault(d => d.RowGUID == dishDb.UnitGUID);
+                DishUnit du = listUnit.FirstOrDefault(d => d.RowGUID == dishDb.UnitGUID);
                 if (du != null) dishApp.langUnitNames = getLangTextDict(du.RowGUID, 3);
             }
             dishApp.Price = dishDb.Price ?? 0;
@@ -198,14 +217,33 @@ namespace AppModel
             return dishApp;
         }
 
-    }  // class MenuLib
+        private Dictionary<string, string> getLangTextDict(Guid rowGuid, int fieldTypeId)
+        {
+            Dictionary<string, string> retVal = new Dictionary<string, string>();
+            foreach (StringValue item in
+                from val in _stringTable where val.RowGUID == rowGuid && val.FieldType.Id == fieldTypeId select val)
+            {
+                if (retVal.Keys.Contains(item.Lang) == false) retVal.Add(item.Lang, item.Value);
+            }
+            return retVal;
+        }
 
+
+        public void Dispose()
+        {
+           if (_db != null)
+            {
+                _stringTable = null;
+                _db.Dispose(); _db = null;
+            }
+        }
+    }
 
     public class MenuItem : INotifyPropertyChanged
     {
         private MenuFolder _menuFolder;
         private Dictionary<string, string> _langNames;
-        private ObservableCollection<DishItem> _dishes;
+        private List<DishItem> _dishes;
 
         public MenuFolder MenuFolder
         {
@@ -229,7 +267,7 @@ namespace AppModel
             }
         }
 
-        public ObservableCollection<DishItem> Dishes
+        public List<DishItem> Dishes
         {
             get { return _dishes; }
             set
@@ -252,7 +290,6 @@ namespace AppModel
 
 
     }  // class MenuItem
-
 
     public class DishItem : INotifyPropertyChanged
     {

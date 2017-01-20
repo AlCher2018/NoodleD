@@ -269,14 +269,20 @@ namespace WpfClient
         // ПЕЧАТЬ чека
         private void btnPrintCheck_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            // если стоимость чека == 0, то выйти
+            if (_currentOrder.GetOrderValue() == 0) return;
+
             TakeOrder takeOrderWin = new TakeOrder();
             takeOrderWin.ShowDialog();
             TakeOrderEnum takeMode = takeOrderWin.TakeOrderMode;
             takeOrderWin = null;
 
-            PrintBill prn = new PrintBill(_currentOrder, takeMode);
-            string errMsg = null;
-            bool result = prn.CreateBill(out errMsg);
+            if (takeMode != TakeOrderEnum.None)
+            {
+                PrintBill prn = new PrintBill(_currentOrder, takeMode);
+                string errMsg = null;
+                bool result = prn.CreateBill(out errMsg);
+            }
         }
 
         private void updatePriceOrder()
