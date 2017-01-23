@@ -15,18 +15,6 @@ namespace AppModel
     // статический класс-оболочка для обслуживания данных из БД
     public static class MenuLib
     {
-        //// для постоянного доступа к таблице строк
-        //private static List<StringValue> _listStrVal;
-        //public static List<StringValue> StringValueTable { get { return _listStrVal; } }
-
-        //static MenuLib()
-        //{
-        //    using (NoodleDContext db = new NoodleDContext())
-        //    {
-        //        _listStrVal = db.StringValue.ToList();
-        //    }
-        //}
-
         // статическая оболочка для получения меню
         public static List<MenuItem> GetMenuMainFolders()
         {
@@ -37,36 +25,8 @@ namespace AppModel
             }
 
             return retVal;
-        }  //  GetMenuMainFolders
+        } 
     
-
-        //public static Dictionary<string,string> getLangTextDict(Guid rowGuid, int fieldTypeId)
-        //{
-        //    Dictionary<string, string> retVal = new Dictionary<string, string>();
-        //    foreach (StringValue item in
-        //        from val in _listStrVal where val.RowGUID == rowGuid && val.FieldType.Id == fieldTypeId select val)
-        //    {
-        //        if (retVal.Keys.Contains(item.Lang) == false) retVal.Add(item.Lang, item.Value);
-        //    }
-        //    return retVal;
-        //}
-
-        //// получить значение из StringValue, использую статический список
-        //public static string getLangStringValue(Guid rowGuid, int fieldTypeId, string langId, string defaultValue=null)
-        //{
-        //    string retVal = null;
-
-        //    StringValue sValDb = _listStrVal.FirstOrDefault(v => v.RowGUID == rowGuid && v.FieldType.Id == fieldTypeId && v.Lang == langId);
-
-        //    if (sValDb == null)
-        //    {
-        //        if (defaultValue != null) retVal = defaultValue;
-        //    }
-        //    else retVal = sValDb.Value;
-
-        //    return retVal;
-        //}
-
     }  // class MenuLib
 
 
@@ -457,6 +417,17 @@ namespace AppModel
             }
         }
 
+        public void ClearAllSelections()
+        {
+            if (this.SelectedGarnishes != null)     clearList<DishAdding>(this.SelectedGarnishes);
+            if (this.SelectedIngredients != null)   clearList<DishAdding>(this.SelectedIngredients);
+            if (this.SelectedRecommends != null)    clearList<DishItem>(this.SelectedRecommends);
+        }
+        private void clearList<T>(List<T> list)
+        {
+            list.RemoveAll(d => true);
+            list = null;
+        }
 
         public DishItem()
         {

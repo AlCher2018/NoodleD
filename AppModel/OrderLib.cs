@@ -49,6 +49,18 @@ namespace AppModel
             return retVal;
         }
 
+        public void Clear()
+        {
+            OrderNumberForPrint = -1;
+            OrderDate = DateTime.MinValue;
+
+            if (_disheItems != null)
+            {
+                _disheItems.RemoveAll(d => true);
+                _disheItems = null;
+            }
+        }
+
     } // class CurrentOrder
 
 }

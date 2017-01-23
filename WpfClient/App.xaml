@@ -3,7 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:local="clr-namespace:WpfClient"
-             StartupUri="MainWindow.xaml">
+             >
+    <!-- StartupUri="MainWindow.xaml" -->
+    
     <Application.Resources>
         <!--цвета приложения по умолчанию-->
         <!-- COLOR1 - dark pink -->
@@ -61,12 +63,6 @@
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
-
-        <ResourceDictionary x:Key="dicDishCategories">
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="DictionaryDishCategories.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-        
+       
     </Application.Resources>
 </Application>

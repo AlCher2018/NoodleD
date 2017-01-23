@@ -11,8 +11,6 @@ using System.Windows.Shapes;
 
 using AppModel;
 using System.Configuration;
-using System.Collections.ObjectModel;
-using NLog;
 using System.Data.SqlClient;
 using System.Data;
 using System.Diagnostics;
@@ -26,8 +24,6 @@ namespace WpfClient
     /// </summary>
     public partial class MainWindow : Window
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
-
         // подложка списка блюд
         private List<Canvas> _dishCanvas;
         // текущий заказ
@@ -52,8 +48,7 @@ namespace WpfClient
         {
             InitializeComponent();
 
-            AppLib.SaveSizeVarsToAppProperties();
-
+            // инициализация локальных переменных
             animDishRows = new List<double>();
             _dishCanvas = new List<Canvas>();
             _daDishDescrBackgroundOpacity = new DoubleAnimation()
@@ -63,143 +58,25 @@ namespace WpfClient
             };
             _daCommon1 = new DoubleAnimation() { Duration = new Duration(new TimeSpan(0, 0, 0, 1)), };
             _daCommon2 = new DoubleAnimation() { Duration = new Duration(new TimeSpan(0, 0, 0, 1)), };
-
-            //TestData.mainProc();
-            appInit();
-
-            // выключить курсор мыши
-            if ((bool)AppLib.GetAppGlobalValue("MouseCursor") == false)
-            {
-                this.Cursor = Cursors.None;
-                Mouse.OverrideCursor = Cursors.None;
-            }
-        }
-
-        #region Инициализация приложения
-
-        private void appInit()
-        {
-            logger.Info("Start application");
-
-            string logMsg = "Проверяю соединение с источником данных...";
-            try
-            {
-                checkDBConnection();
-            }
-            catch (Exception e)
-            {
-                logger.Trace(logMsg);
-                logger.Fatal(e.Message);
-                throw;
-            }
-            logger.Trace(logMsg + " Ok");
-
-            logger.Trace("Получаю настройки приложения из таблицы Setting ...");
-            using (NoodleDContext db = new NoodleDContext())
-            {
-                logger.Trace("EntityFramework connection string: {0}", db.Database.Connection.ConnectionString);
-                try
-                {
-                    List<Setting> setList = db.Setting.ToList();
-                    List<StringValue> stringTable = db.StringValue.ToList();
-
-                    foreach (Setting item in setList)
-                    {
-                        AppLib.SetAppGlobalValue(item.UniqName, item.Value);
-                        if (item.UniqName.EndsWith("Color") == true)  // преобразовать и переопределить цвета
-                        {
-                            convertAppColor(item.UniqName);
-                            checkAppColor(item.UniqName);
-                        }
-                        if (item.Value == "StringValue")    // заменить в Application.Properties строку StringValue на словарь языковых строк
-                        {
-                            Dictionary<string, string> d = getLangTextDict(stringTable, item.RowGUID, 1);
-                            AppLib.SetAppGlobalValue(item.UniqName, d);
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    logger.Fatal("Fatal error: {0}\nSource: {1}\nStackTrace: {2}", e.Message, e.Source, e.StackTrace);
-                    MessageBox.Show("Ошибка доступа к данным: " + e.Message + "\nПрограмма будет закрыта.");
-                    Application.Current.Shutdown(1);
-                }
-            }
-            logger.Trace("Получаю настройки приложения из таблицы Setting ... READY");
-
-            // надписи на языковых кнопках
-            lblLangUa.Text = (string)AppLib.GetAppGlobalValue("langButtonTextUa");
-            lblLangRu.Text = (string)AppLib.GetAppGlobalValue("langButtonTextRu");
-            lblLangEng.Text = (string)AppLib.GetAppGlobalValue("langButtonTextEn");
-
-            // получить язык UI из config-файла и сохранить его 
-            AppLib.AppLang = AppLib.GetAppSetting("langDefault");
-
-            logger.Trace("Получаю из MS SQL главное меню...");
-            List<AppModel.MenuItem> mFolders = MenuLib.GetMenuMainFolders();
-            if (mFolders == null) throw new Exception("Ошибка создания меню");
-            // сохранить Главное Меню в свойствах приложения
-            AppLib.SetAppGlobalValue("mainMenu", mFolders);
-            logger.Trace("Получаю из MS SQL главное меню... - READY");
-
-            // прочие настройки
-            AppLib.SaveAppSettingToProps("ssdID", null);   // идентификатор устройства самообслуживания
-            AppLib.SaveAppSettingToProps("CurrencyChar", null);   // символ денежной единицы
-            AppLib.SaveAppSettingToProps("BillPageWidht", typeof(int));
-            AppLib.SaveAppSettingToProps("dishesPanelScrollButtonSize", typeof(double));
-            AppLib.SaveAppSettingToProps("dishesPanelScrollButtonHorizontalAlignment");
-            AppLib.SaveAppSettingToPropTypeBool("MouseCursor");
-            AppLib.SaveAppSettingToPropTypeBool("IsPrintBarCode");
-            AppLib.SaveAppSettingToPropTypeBool("IsIncludeBarCodeLabel");
-
-            // добавить некоторые постоянные тексты (заголовки, надписи на кнопках)
-            parseAndSetAllLangString("dialogBoxYesText");
-            parseAndSetAllLangString("dialogBoxNoText");
-            parseAndSetAllLangString("cartDelIngrTitle");
-            parseAndSetAllLangString("cartDelIngrQuestion");
-            parseAndSetAllLangString("cartDelDishTitle");
-            parseAndSetAllLangString("cartDelDishQuestion");
-            parseAndSetAllLangString("wordOr");
-            parseAndSetAllLangString("takeOrderOut");
-            parseAndSetAllLangString("takeOrderIn");
-            parseAndSetAllLangString("CurrencyName");
-
-            // настройка элементов UI
-            initUI();
+            _brushSelectedItem = (SolidColorBrush)AppLib.GetAppGlobalValue("appSelectedItemColor");
 
             // создать текущий заказ
             _currentOrder = new OrderItem();
             AppLib.SetAppGlobalValue("currentOrder", _currentOrder);
             updatePrice();
-        }
-        private Dictionary<string, string> getLangTextDict(List<StringValue> stringTable, Guid rowGuid, int fieldTypeId)
-        {
-            Dictionary<string, string> retVal = new Dictionary<string, string>();
-            foreach (StringValue item in
-                from val in stringTable where val.RowGUID == rowGuid && val.FieldType.Id == fieldTypeId select val)
-            {
-                if (retVal.Keys.Contains(item.Lang) == false) retVal.Add(item.Lang, item.Value);
-            }
-            return retVal;
-        }
 
-        private void parseAndSetAllLangString(string resKey)
-        {
-            string resValue = AppLib.GetAppSetting(resKey);
-            if (string.IsNullOrEmpty(resValue) == true) return;
-
-            string[] aStr = resValue.Split('|');
-            if (aStr.Length != 3) return;
-
-            Dictionary<string, string> d = new Dictionary<string, string>();
-            d.Add("ru", aStr[0]); d.Add("ua", aStr[1]); d.Add("en", aStr[2]);
-            AppLib.SetAppGlobalValue(resKey, d);
+            initUI();
         }
 
         private void initUI()
         {
-            logger.Trace("Настраиваю визуальные элементы...");
-            _brushSelectedItem = (SolidColorBrush)AppLib.GetAppGlobalValue("appSelectedItemColor");
+            AppLib.AppLogger.Trace("Настраиваю визуальные элементы...");
+            AppLib.AppLang = AppLib.GetAppSetting("langDefault");
+
+            // надписи на языковых кнопках
+            lblLangUa.Text = (string)AppLib.GetAppGlobalValue("langButtonTextUa");
+            lblLangRu.Text = (string)AppLib.GetAppGlobalValue("langButtonTextRu");
+            lblLangEng.Text = (string)AppLib.GetAppGlobalValue("langButtonTextEn");
 
             // большие кнопки скроллинга
             var v = Enum.Parse(typeof(HorizontalAlignment), (string)AppLib.GetAppGlobalValue("dishesPanelScrollButtonHorizontalAlignment"));
@@ -219,74 +96,19 @@ namespace WpfClient
             lstMenuFolders.SelectedIndex = 0;
 
             // установить язык UI
-            selectAppLang(null);
+            selectAppLang(AppLib.AppLang);
 
-            logger.Trace("Настраиваю визуальные элементы - READY");
+            // выключить курсор мыши
+            if ((bool)AppLib.GetAppGlobalValue("MouseCursor") == false)
+            {
+                this.Cursor = Cursors.None;
+                Mouse.OverrideCursor = Cursors.None;
+            }
+
+            AppLib.AppLogger.Trace("Настраиваю визуальные элементы - READY");
         }
 
-        private void checkDBConnection()
-        {
-            Configuration con = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-
-            string connectionName = null;
-            string connectionString = null;
-            foreach (ConnectionStringSettings item in ConfigurationManager.ConnectionStrings)
-            {
-                if (item.ProviderName == "System.Data.EntityClient")
-                {
-                    connectionString = item.ConnectionString;
-                    int i = connectionString.IndexOf("connection string=", 0);
-                    connectionString = connectionString.Substring(i + 19);
-                    connectionString = connectionString.Substring(0, connectionString.Length - 1);
-                    connectionName = item.Name; break;
-                }
-            }
-            if (connectionName == null)
-            {
-                throw new Exception("Cannot find EntityClient connection string in application config file.");
-            }
-
-            SqlConnection conn = new SqlConnection(connectionString);
-            conn.Open();
-            if (conn.State == ConnectionState.Open)
-            {
-                conn.Close();
-            }
-            else
-            {
-                throw new Exception("Cannot open EF connection " + connectionName + " by its connection string: " + connectionString);
-            }
-        }
-        // преобразование строки цветов (R,G,B) в SolidColorBrush
-        private void convertAppColor(string setName)
-        {
-            var buf = AppLib.GetAppGlobalValue(setName);
-            if ((buf is string) == false) return;
-
-            // если цвет задан строкой
-            string sBuf = (string)buf;
-            string[] sRGB = sBuf.Split(',');
-            byte r = 0, g = 0, b = 0;
-            byte.TryParse(sRGB[0], out r);
-            byte.TryParse(sRGB[1], out g);
-            byte.TryParse(sRGB[2], out b);
-            SolidColorBrush brush = new SolidColorBrush(new Color() { A = 255, R = r, G = g, B = b });
-
-            AppLib.SetAppGlobalValue(setName, brush);
-        }
-        // установка цвета ресурса приложения (Application.Resources) в цвет из свойств приложения (Application.Properties)
-        private void checkAppColor(string setName)
-        {
-            SolidColorBrush bRes = (SolidColorBrush)Application.Current.Resources[setName];
-            SolidColorBrush bProp = (SolidColorBrush)AppLib.GetAppGlobalValue(setName);
-
-            if (bRes.Color.Equals(bProp.Color) == false)  // если не равны
-            {
-                Application.Current.Resources[setName] = bProp;   // то переопределить ресурсную кисть
-            }
-        }
-
-        #endregion
+        public List<Canvas> DishesPanels { get { return _dishCanvas; } }
 
         #region работа со списком блюд
 
@@ -536,6 +358,7 @@ namespace WpfClient
                 Margin = new Thickness(0, 0.3 * dishPanelDescrButtonSize, 0.3 * dishPanelDescrButtonSize, 0)
             };
             btnDescr.PreviewMouseLeftButtonUp += CanvDescr_PreviewMouseLeftButtonUp;
+
             //   буковка i
             TextBlock btnDescrText = new TextBlock(new Run("i"))
             {
@@ -564,16 +387,17 @@ namespace WpfClient
                 Height = dishPanelImageRowHeight,
                 CornerRadius = new CornerRadius(cornerRadiusDishPanel),
                 Background = lgBrush,
-                Opacity = 0.01,
+                Opacity = 0,
                 Visibility = Visibility.Hidden
             };
+            brdDescrText.PreviewMouseLeftButtonUp += CanvDescr_PreviewMouseLeftButtonUp;
             // добавить в контейнер
             Grid.SetRow(brdDescrText, 2); dGrid.Children.Add(brdDescrText);
             TextBlock tbDescrText = new TextBlock()
             {
                 Name = "descrText",
                 Width = dGrid.Width,
-                Opacity = 0.01,
+                Opacity = 0,
                 Padding = new Thickness(dishPanelTextFontSize),
                 VerticalAlignment = VerticalAlignment.Center,
                 TextAlignment = TextAlignment.Center,
@@ -584,6 +408,8 @@ namespace WpfClient
                 Visibility = Visibility.Hidden
             };
             tbDescrText.Effect = new BlurEffect() { Radius = 20 };
+            tbDescrText.PreviewMouseLeftButtonUp += CanvDescr_PreviewMouseLeftButtonUp;
+
             // добавить в контейнер
             Grid.SetRow(tbDescrText, 2); dGrid.Children.Add(tbDescrText);
         }
@@ -698,19 +524,35 @@ namespace WpfClient
         //  обработка события нажатия на кнопку показа/скрытия описания блюда (с анимацией)
         private void CanvDescr_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            Border btnDescr = (Border)sender;
+            FrameworkElement btnDescr = (FrameworkElement)sender;
             Grid parentGrid = (Grid)btnDescr.Parent;
+
+            switchVisibleDishDescr(parentGrid, true);     // с анимацией
+            //switchVisibleDishDescr(parentGrid, false);   // без анимации
+        }
+
+        private void switchVisibleDishDescr(Grid gridContent, bool isAnimation)
+        {
+            Border btnDescr = (Border)AppLib.GetUIElementFromPanel(gridContent, "btnDescr");
+            Border descrTextBorder = (Border)AppLib.GetUIElementFromPanel(gridContent, "descrTextBorder");
+            TextBlock descrText = (TextBlock)AppLib.GetUIElementFromPanel(gridContent, "descrText");
 
             int tagVal = System.Convert.ToInt32(btnDescr.Tag ?? 0);
             tagVal = (tagVal == 0) ? 1 : 0;
             btnDescr.Tag = tagVal;
 
+            if (isAnimation == true)
+                _dishDescrWithAnimation(btnDescr, descrTextBorder, descrText, tagVal);
+            else
+                _dishDescrWithoutAnimation(btnDescr, descrTextBorder, descrText, tagVal);
+        }
+
+        private void _dishDescrWithAnimation(Border btnDescr, Border descrTextBorder, TextBlock descrText, int tagVal)
+        {
             // цвет фона кнопки описания блюда
             btnDescr.Background = (tagVal == 0) ? Brushes.White : _brushSelectedItem;
 
             // видимость описания
-            var descrTextBorder = AppLib.GetUIElementFromPanel(parentGrid, "descrTextBorder");
-            var descrText = AppLib.GetUIElementFromPanel(parentGrid, "descrText");
             if (descrTextBorder != null)
             {
                 _curDescrBorder = descrTextBorder as Border;
@@ -724,7 +566,7 @@ namespace WpfClient
                 }
                 else
                 {
-                    _daDishDescrBackgroundOpacity.To = 0.01;
+                    _daDishDescrBackgroundOpacity.To = 0;
                     // сделать невидимым ПОСЛЕ анимации
                     _daDishDescrBackgroundOpacity.Completed += _daDishDescrBackground_Completed;
                 }
@@ -743,10 +585,37 @@ namespace WpfClient
                 }
                 else
                 {
-                    _daCommon1.To = 20; _daCommon2.To = 0.01;
+                    _daCommon1.To = 20; _daCommon2.To = 0;
                 }
                 _curDescrTextBlock.Effect.BeginAnimation(BlurEffect.RadiusProperty, _daCommon1);
                 _curDescrTextBlock.BeginAnimation(TextBlock.OpacityProperty, _daCommon2);
+            }
+
+        }  // func
+
+        private void _dishDescrWithoutAnimation(Border btnDescr, Border descrTextBorder, TextBlock descrText, int tagVal)
+        {
+            if (tagVal == 0)
+            {
+                btnDescr.Background =  Brushes.White;
+                descrTextBorder.Visibility = Visibility.Hidden;
+                descrTextBorder.Opacity = 0;
+                descrText.Visibility = Visibility.Hidden;
+                descrText.Opacity = 0;
+            }
+            else
+            {
+                btnDescr.Background =  _brushSelectedItem;
+                descrTextBorder.Visibility = Visibility.Visible;
+                descrTextBorder.Opacity = 0.6;
+                descrText.Visibility = Visibility.Visible;
+                descrText.Opacity = 1;
+
+                if ((descrText.Effect != null) && (descrText.Effect is BlurEffect))
+                {
+                    BlurEffect be = (descrText.Effect as BlurEffect);
+                    if (be.Radius != 0) be.Radius = 0;
+                }
             }
         }
 
@@ -806,35 +675,25 @@ namespace WpfClient
 
         private void lblButtonLang_MouseDown(object sender, MouseButtonEventArgs e)
         {
-//            if (e.StylusDevice != null) return;
+            //            if (e.StylusDevice != null) return;
 
-            selectAppLang((FrameworkElement)sender);
+            string langId = getLangIdByButtonName(((FrameworkElement)sender).Name);
+            selectAppLang(langId);
         }
         //private void lblButtonLang_TouchDown(object sender, TouchEventArgs e)
         //{
         //    selectAppLang((FrameworkElement)sender);
         //}
 
-        // установить язык по умолчанию или по имени элемента, или по Ид языка
-        private void selectAppLang(FrameworkElement langControl)
+        // установить язык текстов на элементах
+        public void selectAppLang(string langId)
         {
             // сохранить выбранный пункт меню
             int selMenuItem = lstMenuFolders.SelectedIndex;
-//            AppLib.SetAppGlobalValue("selectedMenuIndex", lstMenuFolders.SelectedIndex);
 
-            if (langControl == null)  // установка языка из глобального свойства
-            {
-                langControl = getLangButton(AppLib.AppLang);
-                if (langControl == null) return;
-            }
-            else            // установка языка из имени нажатой кнопки
-            {
-                setLangButtonStyle(false);
-                string langId = getLangIdByButtonName(langControl.Name);
-                AppLib.AppLang = langId;
-            }
-
-            setLangButtonStyle(true);
+            setLangButtonStyle(false);  // "выключить" кнопку
+            AppLib.AppLang = langId;
+            setLangButtonStyle(true);   // "включить" кнопку
 
             // установка текстов на выбранном языке
             BindingExpression be = txtPromoCode.GetBindingExpression(TextBox.TextProperty);
@@ -854,7 +713,10 @@ namespace WpfClient
         {
             Border langBorder = getInnerLangBorder();
             if (langBorder != null)
-                langBorder.Style = (checkedMode) ? (Style)this.Resources["langButtonBorderCheckedStyle"] : (Style)this.Resources["langButtonBorderUncheckedStyle"];
+            {
+                Style newStyle = (checkedMode) ? (Style)this.Resources["langButtonBorderCheckedStyle"] : (Style)this.Resources["langButtonBorderUncheckedStyle"];
+                if (langBorder.Style.Equals(newStyle) == false) langBorder.Style = newStyle;
+            }
         }
         private Border getInnerLangBorder()
         {
@@ -900,8 +762,7 @@ namespace WpfClient
             var tagValue = ((FrameworkElement)sender).Tag;
             if (tagValue == null) return;
 
-            string sGuid = tagValue.ToString();
-
+            string sGuid = tagValue.ToString();  // GUID блюда в теге кнопки добавления
             DishItem curDishItem = AppLib.GetDishItemByRowGUID(sGuid);
 
             if (curDishItem == null) return;
@@ -937,10 +798,11 @@ namespace WpfClient
                 // и обновить стоимость заказа
                 updatePrice();
             }
+
+            // иначе через "всплывашку"
             else
             {
-                // иначе через "всплывашку"
-                DishPopup popupWin = new DishPopup(curDishItem);
+                DishPopup popupWin = new DishPopup(curDishItem);    // текущее блюдо передать в конструкторе
                 // размеры
                 FrameworkElement pnlClient = this.Content as FrameworkElement;
                 popupWin.Height = pnlClient.ActualHeight;
@@ -950,8 +812,29 @@ namespace WpfClient
                 popupWin.Left = p.X;
                 popupWin.Top = p.Y;
 
-                popupWin.ShowDialog();
-            }
+                bool? dialogResult = popupWin.ShowDialog();
+
+                if ((dialogResult??false) == true)
+                {
+                    // добавить блюдо в заказ
+                    OrderItem curOrder = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
+                    DishItem orderDish = curDishItem.GetCopyForOrder();   // сделать копию блюда со всеми добавками
+                    curOrder.Dishes.Add(orderDish);
+                    curDishItem.ClearAllSelections();   // очистить ингредиенты в текущем блюде
+
+                    // добавить в заказ рекомендации
+                    if ((curDishItem.SelectedRecommends != null) && (curDishItem.SelectedRecommends.Count > 0))
+                    {
+                        foreach (DishItem item in curDishItem.SelectedRecommends)
+                        {
+                            curOrder.Dishes.Add(item);
+                        }
+                    }
+                    // и обновить стоимость заказа
+                    updatePrice();
+                }   // if
+
+            } // if else
         }
 
         private void ColorAnim_Completed(object sender, EventArgs e)
@@ -1181,18 +1064,26 @@ namespace WpfClient
 
         #endregion
 
+        //*************************************
         // боковое меню выбора категории блюд
         private void lstMenuFolders_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             e.Handled = true;
-            scrollDishes.Content = _dishCanvas[lstMenuFolders.SelectedIndex];
 
+            // установить панель блюд
+            Canvas currentPanel = _dishCanvas[lstMenuFolders.SelectedIndex];
+            scrollDishes.Content = currentPanel;
             scrollDishes.ScrollToTop();
-        }
+            
+            // очистить выбор гарниров
+            List<DishItem> dishList  = ((AppModel.MenuItem)lstMenuFolders.SelectedItem).Dishes;
+            if (dishList != null && dishList.Count > 0)
+            {
+                if (dishList[0].Garnishes != null && dishList[0].Garnishes.Count > 0) AppLib.ClearSelectedGarnish(currentPanel);
+            }
 
-        private void Window_Closed(object sender, EventArgs e)
-        {
-            logger.Info("End application");
+            // убрать описания блюд
+            AppLib.ClearDescriptionsOnDishPanel(currentPanel);
         }
 
         // сбросить выбор блюда

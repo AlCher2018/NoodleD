@@ -14,6 +14,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.ComponentModel;
 
 namespace WpfClient
 {
@@ -22,7 +23,7 @@ namespace WpfClient
     /// </summary>
     public partial class DishPopup : Window
     {
-        private bool _isClose;
+        private bool _dialogResult;
         private DishItem _currentDish;
         List<TextBlock> _tbList;
         List<Viewbox> _vbList;
@@ -34,7 +35,6 @@ namespace WpfClient
         {
             InitializeComponent();
 
-            _isClose = true;
             _currentDish = dishItem;
             this.DataContext = _currentDish;
             updatePriceControl();
@@ -63,39 +63,48 @@ namespace WpfClient
             }
         }
 
+        #region все события закрытие всплывашки
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Escape) this.Close();
+            if (e.Key == Key.Escape) closeWin(false);
         }
 
-        #region закрытие всплывашки
-//    On Touch Devices:
-//TouchDown > PreviewMouseDown > TouchUp > PreviewMouseUp
-//    On Non Touch:
-//PreviewMouseDown > PreviewMouseUp
         private void btnClose_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
-            closeWin(e);
+            closeWin(false, e);
         }
 
+        // from XAML
         private void closeThisWindowHandler(object sender, MouseButtonEventArgs e)
         {
-            closeWin();
+            closeWin(false, e);
         }
-
-        private void closeWin(RoutedEventArgs e = null)
-        {
-            if (e != null) e.Handled = true;
-            this.Close();
-        }
-        #endregion
-
 
         private void btnAddDish_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            addDishToOrder();
-            e.Handled = true;
+            closeWin(true, e);
         }
+
+        private void closeWin(bool result, RoutedEventArgs e = null)
+        {
+            _dialogResult = result;
+
+            // если просто закрываем окно, то удалить из блюда выбранные добавки и рекомендации
+            if (_dialogResult == false)
+            {
+                _currentDish.ClearAllSelections();
+            }
+
+            if (e != null) e.Handled = true;
+            this.Close();
+        }
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            base.OnClosing(e);
+            this.DialogResult = _dialogResult;
+        }
+
+        #endregion
 
 
         private void listIngredients_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -167,28 +176,5 @@ namespace WpfClient
             txtDishPrice.Text = AppLib.GetCostUIText(dishValue);
         }
 
-        private void addDishToOrder()
-        {
-            OrderItem curOrder = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
-            DishItem curDish = (DishItem)DataContext;
-            DishItem orderDish = curDish.GetCopyForOrder();
-            curOrder.Dishes.Add(orderDish);
-
-            // добавить в заказ рекомендации
-            if ((curDish.SelectedRecommends != null) && (curDish.SelectedRecommends.Count > 0))
-            {
-                foreach (DishItem item in curDish.SelectedRecommends)
-                {
-                    curOrder.Dishes.Add(item);
-                }
-            }
-
-            MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
-            // и обновить стоимость заказа
-            mainWindow.updatePrice();
-
-            closeWin();
-        }
-
-    }
+    }  // class
 }

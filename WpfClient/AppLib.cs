@@ -9,13 +9,19 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
 
 namespace WpfClient
 {
     public static class AppLib
     {
+        // постоянные глобальные объекты
+        public static NLog.Logger AppLogger;
+        public static System.Timers.Timer IdleTimer;
+
         #region app settings
         // получить настройки приложения из config-файла
         public static string GetAppSetting(string key)
@@ -69,43 +75,6 @@ namespace WpfClient
             }
         }
 
-        // сохранить настройки приложения из config-файла в свойствах приложения
-        public static bool SaveAppSettingToProps(string settingName, Type settingType = null)
-        {
-            string settingValue = GetAppSetting(settingName);
-            if (settingValue == null) return false;
-
-            if (settingType == null)
-                SetAppGlobalValue(settingName, settingValue);   // по умолчанию сохраняется как строка
-            else
-            {
-                MethodInfo mi = settingType.GetMethods().FirstOrDefault(m => m.Name == "Parse");
-                // если у типа есть метод Parse
-                if (mi != null)  // то распарсить значение
-                {
-                    object classInstance = Activator.CreateInstance(settingType);
-                    object oVal = mi.Invoke(classInstance, new object[] { settingValue });
-                    SetAppGlobalValue(settingName, oVal);
-                }
-                else
-                    SetAppGlobalValue(settingName, settingValue);   // по умолчанию сохраняется как строка
-            }
-            return true;
-        }
-
-        // сохранить настройку приложения из config-файла в bool-свойство приложения
-        public static void SaveAppSettingToPropTypeBool(string settingName)
-        {
-            string settingValue = GetAppSetting(settingName);
-            if (settingValue == null) return;
-    
-            // если значение истина, true или 1, то сохранить в свойствах приложения True, иначе False
-            settingValue = settingValue.ToUpper();
-            if (settingValue.Equals("ИСТИНА") || settingValue.Equals("TRUE") || settingValue.Equals("1"))
-                SetAppGlobalValue(settingName, true);
-            else
-                SetAppGlobalValue(settingName, false);
-        }
 
         public static object GetUIElementFromPanel(System.Windows.Controls.Panel panel, string nameChild)
         {
@@ -202,48 +171,173 @@ namespace WpfClient
         #endregion
 
         #region AppBL
-
-        public static void SaveSizeVarsToAppProperties()
+        public static void GetSettingsFromConfigFile()
         {
-            double dVar;
+            // прочие настройки
+            saveAppSettingToProps("ssdID", null);   // идентификатор устройства самообслуживания
+            saveAppSettingToProps("CurrencyChar", null);   // символ денежной единицы
+            saveAppSettingToProps("UserIdleTime", typeof(int));        // время бездействия из config-файла, в сек
+            saveAppSettingToProps("BillPageWidht", typeof(int));
+            saveAppSettingToProps("dishesPanelScrollButtonSize", typeof(double));
+            saveAppSettingToProps("dishesPanelScrollButtonHorizontalAlignment");
+            saveAppSettingToPropTypeBool("MouseCursor");
+            saveAppSettingToPropTypeBool("IsPrintBarCode");
+            saveAppSettingToPropTypeBool("IsIncludeBarCodeLabel");
 
-            double screenWidth, screenHeight;
-            screenWidth = SystemParameters.PrimaryScreenWidth;
-            //            screenWidth = SystemParameters.VirtualScreenWidth;
-            screenHeight = SystemParameters.PrimaryScreenHeight;
-            //            screenHeight = SystemParameters.VirtualScreenHeight;
+            // добавить некоторые постоянные тексты (заголовки, надписи на кнопках)
+            parseAndSetAllLangString("dialogBoxYesText");
+            parseAndSetAllLangString("dialogBoxNoText");
+            parseAndSetAllLangString("cartDelIngrTitle");
+            parseAndSetAllLangString("cartDelIngrQuestion");
+            parseAndSetAllLangString("cartDelDishTitle");
+            parseAndSetAllLangString("cartDelDishQuestion");
+            parseAndSetAllLangString("wordOr");
+            parseAndSetAllLangString("takeOrderOut");
+            parseAndSetAllLangString("takeOrderIn");
+            parseAndSetAllLangString("CurrencyName");
+        }
 
-            AppLib.SetAppGlobalValue("screenWidth", screenWidth);
-            AppLib.SetAppGlobalValue("screenHeight", screenHeight);
+        // сохранить настройки приложения из config-файла в свойствах приложения
+        private static bool saveAppSettingToProps(string settingName, Type settingType = null)
+        {
+            string settingValue = AppLib.GetAppSetting(settingName);
+            if (settingValue == null) return false;
 
-            // углы закругления
-            dVar = 0.005 * screenWidth;
-            AppLib.SetAppGlobalValue("cornerRadiusButton", dVar);
-            AppLib.SetAppGlobalValue("cornerRadiusGarnish", 0.5 * dVar);
-            AppLib.SetAppGlobalValue("cornerRadiusDishPanel", 2 * dVar);
+            if (settingType == null)
+                AppLib.SetAppGlobalValue(settingName, settingValue);   // по умолчанию сохраняется как строка
+            else
+            {
+                MethodInfo mi = settingType.GetMethods().FirstOrDefault(m => m.Name == "Parse");
+                // если у типа есть метод Parse
+                if (mi != null)  // то распарсить значение
+                {
+                    object classInstance = Activator.CreateInstance(settingType);
+                    object oVal = mi.Invoke(classInstance, new object[] { settingValue });
+                    AppLib.SetAppGlobalValue(settingName, oVal);
+                }
+                else
+                    AppLib.SetAppGlobalValue(settingName, settingValue);   // по умолчанию сохраняется как строка
+            }
+            return true;
+        }
 
-            dVar = 0.5 * screenWidth;
-            AppLib.SetAppGlobalValue("maxDialogWindowWidth", dVar);
+        // сохранить настройку приложения из config-файла в bool-свойство приложения
+        private static void saveAppSettingToPropTypeBool(string settingName)
+        {
+            string settingValue = AppLib.GetAppSetting(settingName);
+            if (settingValue == null) return;
 
-            // РАЗМЕРЫ ШРИФТОВ
-            double appFontSize0, appFontSize1, appFontSize2, appFontSize3, appFontSize4, appFontSize5, appFontSize6, appFontSize7;
-            double minVal = Math.Min(screenWidth, screenHeight);
-            appFontSize0 = 0.055 * minVal;
-            appFontSize1 = 0.04 * minVal;
-            appFontSize2 = 0.8 * appFontSize1;
-            appFontSize3 = 0.8 * appFontSize2;
-            appFontSize4 = 0.8 * appFontSize3;
-            appFontSize5 = 0.8 * appFontSize4;
-            appFontSize6 = 0.8 * appFontSize5;
-            appFontSize7 = 0.8 * appFontSize6;
-            AppLib.SetAppGlobalValue("appFontSize0", appFontSize0);
-            AppLib.SetAppGlobalValue("appFontSize1", appFontSize1);
-            AppLib.SetAppGlobalValue("appFontSize2", appFontSize2);
-            AppLib.SetAppGlobalValue("appFontSize3", appFontSize3);
-            AppLib.SetAppGlobalValue("appFontSize4", appFontSize4);
-            AppLib.SetAppGlobalValue("appFontSize5", appFontSize5);
-            AppLib.SetAppGlobalValue("appFontSize6", appFontSize6);
-            AppLib.SetAppGlobalValue("appFontSize7", appFontSize7);
+            // если значение истина, true или 1, то сохранить в свойствах приложения True, иначе False
+            settingValue = settingValue.ToUpper();
+            if (settingValue.Equals("ИСТИНА") || settingValue.Equals("TRUE") || settingValue.Equals("1"))
+                AppLib.SetAppGlobalValue(settingName, true);
+            else
+                AppLib.SetAppGlobalValue(settingName, false);
+        }
+        private static void parseAndSetAllLangString(string resKey)
+        {
+            string resValue = AppLib.GetAppSetting(resKey);
+            if (string.IsNullOrEmpty(resValue) == true) return;
+
+            string[] aStr = resValue.Split('|');
+            if (aStr.Length != 3) return;
+
+            Dictionary<string, string> d = new Dictionary<string, string>();
+            d.Add("ru", aStr[0]); d.Add("ua", aStr[1]); d.Add("en", aStr[2]);
+            AppLib.SetAppGlobalValue(resKey, d);
+        }
+
+        public static void ReadSettingFromDB()
+        {
+            AppLib.AppLogger.Trace("Получаю настройки приложения из таблицы Setting ...");
+            using (NoodleDContext db = new NoodleDContext())
+            {
+                AppLib.AppLogger.Trace("EntityFramework connection string: {0}", db.Database.Connection.ConnectionString);
+                try
+                {
+                    List<Setting> setList = db.Setting.ToList();
+                    List<StringValue> stringTable = db.StringValue.ToList();
+
+                    foreach (Setting item in setList)
+                    {
+                        AppLib.SetAppGlobalValue(item.UniqName, item.Value);
+                        if (item.UniqName.EndsWith("Color") == true)  // преобразовать и переопределить цвета
+                        {
+                            convertAppColor(item.UniqName);
+                            checkAppColor(item.UniqName);
+                        }
+                        if (item.Value == "StringValue")    // заменить в Application.Properties строку StringValue на словарь языковых строк
+                        {
+                            Dictionary<string, string> d = getLangTextDict(stringTable, item.RowGUID, 1);
+                            AppLib.SetAppGlobalValue(item.UniqName, d);
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    AppLib.AppLogger.Fatal("Fatal error: {0}\nSource: {1}\nStackTrace: {2}", e.Message, e.Source, e.StackTrace);
+                    MessageBox.Show("Ошибка доступа к данным: " + e.Message + "\nПрограмма будет закрыта.");
+                    Application.Current.Shutdown(1);
+                }
+            }
+            AppLib.AppLogger.Trace("Получаю настройки приложения из таблицы Setting ... READY");
+
+        }
+
+        public static void ReadAppDataFromDB()
+        {
+            AppLib.AppLogger.Trace("Получаю из MS SQL главное меню...");
+
+            List<AppModel.MenuItem> newMenu = MenuLib.GetMenuMainFolders();
+            if (newMenu == null) throw new Exception("Ошибка создания меню");
+
+            // сохранить Главное Меню в свойствах приложения
+            List<AppModel.MenuItem> mainMenu = (List<AppModel.MenuItem>)AppLib.GetAppGlobalValue("mainMenu");
+            if (mainMenu != null) mainMenu.Clear();
+            mainMenu = newMenu;
+
+            AppLib.SetAppGlobalValue("mainMenu", mainMenu);
+
+            AppLib.AppLogger.Trace("Получаю из MS SQL главное меню... - READY");
+        }
+
+        // преобразование строки цветов (R,G,B) в SolidColorBrush
+        private static void convertAppColor(string setName)
+        {
+            var buf = AppLib.GetAppGlobalValue(setName);
+            if ((buf is string) == false) return;
+
+            // если цвет задан строкой
+            string sBuf = (string)buf;
+            string[] sRGB = sBuf.Split(',');
+            byte r = 0, g = 0, b = 0;
+            byte.TryParse(sRGB[0], out r);
+            byte.TryParse(sRGB[1], out g);
+            byte.TryParse(sRGB[2], out b);
+            SolidColorBrush brush = new SolidColorBrush(new Color() { A = 255, R = r, G = g, B = b });
+
+            AppLib.SetAppGlobalValue(setName, brush);
+        }
+        // установка цвета ресурса приложения (Application.Resources) в цвет из свойств приложения (Application.Properties)
+        private static void checkAppColor(string setName)
+        {
+            SolidColorBrush bRes = (SolidColorBrush)Application.Current.Resources[setName];
+            SolidColorBrush bProp = (SolidColorBrush)AppLib.GetAppGlobalValue(setName);
+
+            if (bRes.Color.Equals(bProp.Color) == false)  // если не равны
+            {
+                Application.Current.Resources[setName] = bProp;   // то переопределить ресурсную кисть
+            }
+        }
+        private static Dictionary<string, string> getLangTextDict(List<StringValue> stringTable, Guid rowGuid, int fieldTypeId)
+        {
+            Dictionary<string, string> retVal = new Dictionary<string, string>();
+            foreach (StringValue item in
+                from val in stringTable where val.RowGUID == rowGuid && val.FieldType.Id == fieldTypeId select val)
+            {
+                if (retVal.Keys.Contains(item.Lang) == false) retVal.Add(item.Lang, item.Value);
+            }
+            return retVal;
         }
 
         public static string GetCostUIText(decimal cost)
@@ -267,7 +361,122 @@ namespace WpfClient
             return null;
         }
 
+        public static void RestartIdleTimer()
+        {
+            if (AppLib.IdleTimer != null)
+            {
+                AppLib.IdleTimer.Stop();
+                AppLib.IdleTimer.Start();
+            }
+        }
+
+        // очистка заказа, закрытие всех окон и возврат в начальный экран
+        public static void ReDrawApp()
+        {
+            CloseAllSubWindows();
+            ClearGarnishesOnMainWindow();
+
+            WpfClient.MainWindow mainWin = (WpfClient.MainWindow)Application.Current.MainWindow;
+            mainWin.lstMenuFolders.SelectedIndex = 0;
+            // установить язык UI
+            string langDefault = AppLib.GetAppSetting("langDefault");
+            mainWin.selectAppLang(langDefault);
+
+            // очистить заказ
+            OrderItem curOrder = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
+            if (curOrder != null)
+            {
+                curOrder.Clear();
+                AppLib.SetAppGlobalValue("currentOrder", curOrder);
+            }
+            mainWin.updatePrice();
+        }
+
+        // закрыть все открытые окна, кроме главного окна
+        public static void CloseAllSubWindows()
+        {
+            foreach (Window win in Application.Current.Windows)
+            {
+                if ((win is WpfClient.MainWindow) == false) win.Close();
+            }
+            
+        }
+
+        // очистить выбор гарниров на всех панелях блюд
+        public static void ClearGarnishesOnMainWindow()
+        {
+            Window main = Application.Current.MainWindow;
+            List<Canvas> dishesPanels = ((WpfClient.MainWindow)main).DishesPanels;
+            foreach (Panel item in dishesPanels)
+            {
+                ClearSelectedGarnish(item);
+            }
+        }
+
+        // убрать все описания блюд
+        public static void HideAllDishDescription()
+        {
+            Window main = Application.Current.MainWindow;
+            List<Canvas> dishesPanels = ((WpfClient.MainWindow)main).DishesPanels;
+            foreach (Panel item in dishesPanels)
+            {
+                ClearDescriptionsOnDishPanel(item);
+            }
+        }
+
+
+        // очистить выбор гарнира на панели
+        public static void ClearSelectedGarnish(Panel dishesPanel)
+        {
+            foreach (UIElement dishPanel in dishesPanel.Children)
+            {
+                if ((dishPanel is Panel) && ((dishPanel as Panel).Children.Count > 0))
+                {
+                    UIElement dishContent = (dishPanel as Panel).Children[0];
+                    if ((dishContent is Panel) && ((dishContent as Panel).Children[5] is Grid))
+                    {
+                        Grid garnGrid = ((dishContent as Panel).Children[5] as Grid);
+                        foreach (MainMenuGarnish garn in garnGrid.Children)
+                        {
+                            if (garn.IsSelected == true) garn.IsSelected = false;
+                        }
+                    }
+                }
+            }  // foreach
+        }  //  end func
+
+        public static void ClearDescriptionsOnDishPanel(Panel dishesPanel)
+        {
+            foreach (UIElement dishPanel in dishesPanel.Children)
+            {
+                if ((dishPanel is Panel) && ((dishPanel as Panel).Children.Count > 0))
+                {
+                    Panel dishContent = ((dishPanel as Panel).Children[0]) as Panel;
+
+                    Border btnDescr = (Border)AppLib.GetUIElementFromPanel(dishContent, "btnDescr");
+                    Border descrTextBorder = (Border)AppLib.GetUIElementFromPanel(dishContent, "descrTextBorder");
+                    TextBlock descrText = (TextBlock)AppLib.GetUIElementFromPanel(dishContent, "descrText");
+
+                    int tagVal = System.Convert.ToInt32(btnDescr.Tag ?? 0);
+
+                    btnDescr.Background = Brushes.White;
+                    descrTextBorder.Visibility = Visibility.Hidden;
+                    descrTextBorder.Opacity = 0;
+                    descrText.Visibility = Visibility.Hidden;
+                    descrText.Opacity = 0;
+                    if ((descrText.Effect != null) && (descrText.Effect is BlurEffect))
+                    {
+                        BlurEffect be = (descrText.Effect as BlurEffect);
+                        if (be.Radius != 0) be.Radius = 20;
+                    }
+
+                }
+            }  // foreach
+        }  // end func
+
+
         #endregion
 
     }
+
 }

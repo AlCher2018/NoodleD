@@ -53,6 +53,9 @@
   <PropertyGroup>
     <ApplicationIcon>AppImages\icon.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>WpfClient.Startup</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="BarcodeLib">
       <HintPath>E:\Чернов\BarCode\barcode by Bred Barnhill\barcode_bin\BarcodeLib.dll</HintPath>
@@ -89,10 +92,11 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <ApplicationDefinition Include="App.xaml">
+    <Page Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </ApplicationDefinition>
+    </Page>
+    <Compile Include="AppEnums.cs" />
     <Compile Include="MainMenuGarnish.cs" />
     <Compile Include="Lib\AniScrollViewer.cs" />
     <Compile Include="Cart.xaml.cs">
@@ -114,6 +118,7 @@
       <DependentUpon>SplashWin.xaml</DependentUpon>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
+    <Compile Include="Startup.cs" />
     <Compile Include="TakeOrder.xaml.cs">
       <DependentUpon>TakeOrder.xaml</DependentUpon>
     </Compile>
@@ -123,10 +128,6 @@
       <DependentUpon>Window1.xaml</DependentUpon>
     </Compile>
     <Page Include="Cart.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="DictionaryDishCategories.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
