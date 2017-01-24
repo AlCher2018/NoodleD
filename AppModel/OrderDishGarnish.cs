@@ -18,5 +18,6 @@ namespace AppModel
         public System.Guid DishGUID { get; set; }
         public System.Guid GarnishGUID { get; set; }
         public int Count { get; set; }
+        public System.Guid OrderGUID { get; set; }
     }
 }

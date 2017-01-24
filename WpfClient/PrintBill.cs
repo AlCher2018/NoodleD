@@ -11,20 +11,21 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 using AppModel;
+using WpfClient.Lib;
 using System.Xml.Serialization;
 
 namespace WpfClient
 {
     public class PrintBill
     {
-        PrintDialog _dialog;
+        private const string UserErrMsgSuffix = "\nПечать чека невозможна.\nОбратитесь к администратору приложения.";
+
         private OrderItem _order;
         string _langId;
         TakeOrderEnum _takeMode;
 
         public PrintBill(OrderItem order, TakeOrderEnum takeMode)
         {
-            _dialog = new PrintDialog(); //'Used to perform printing
             _order = order;
             _langId = AppLib.AppLang;
             _takeMode = takeMode;
@@ -35,13 +36,72 @@ namespace WpfClient
             bool retVal = true;
             errMessage = null;
 
-            string sBuf = null;
+            // свойства заказа, созадаваемые перед печатью чека:
+            //      OrderNumberForPrint - номер чека для печати
+            //      BarCodeValue - значение штрих-кода, 12 цифр (2 - код источника, 6 - yymmdd, 4 - номер чека для печати)
 
-            // создать номер счета ДЛЯ печати случайным образом
-            Random rndGen = new Random();
-            _order.OrderNumberForPrint = rndGen.Next(256, 1024);
+            // создать номер счета для ПЕЧАТНОГО чека
+            string deviceName = (string)AppLib.GetAppGlobalValue("ssdID", string.Empty);
+            if (deviceName == string.Empty)
+            {
+                AppLib.AppLogger.Error("В config-файле не найден элемент \"ssdID\" - идентификатор терминала самообслуживания.\n\t\tTrace: PrintBill.cs, CreateBill()");
+                errMessage = "Ошибка конфигурации приложения!" + UserErrMsgSuffix;
+                return false;
+            }
+            int rndFrom = int.Parse(AppLib.GetAppSetting("RandomOrderNumFrom"));       // случайный номер заказа: От
+            int rndTo = int.Parse(AppLib.GetAppSetting("RandomOrderNumTo"));           // случайный номер заказа: До
+            _order.CreateOrderNumberForPrint(deviceName, rndFrom, rndTo);  // в свойстве OrderNumberForPrint
             _order.OrderDate = DateTime.Now;
+            if (_order.OrderNumberForPrint == -1)
+            {
+                AppLib.AppLogger.Error("Модуль OrderLib.cs, CreateOrderNumberForPrint() вернул -1 (признак ошибочного значения)");
+                errMessage = "Ошибка создания номера заказа для печати чека." + UserErrMsgSuffix;
+                return false;
+            }
+            // BarCodeValue
+            //    идент.устройства - 2 символа
+            if (deviceName.Length <= 2)
+                deviceName = string.Format("{0:D2}", deviceName);
+            else
+                deviceName = deviceName.Substring(0, 2);
+            //    дата заказа в формате yyMMdd - 6 символов
+            //    номер заказа (для печати - случайный) в формате 0000 - 4 символа
+            _order.BarCodeValue = deviceName + _order.OrderDate.ToString("yyMMdd") + _order.OrderNumberForPrint.ToString("0000");
 
+
+            // ширина из config-файла
+            int width = (int)AppLib.GetAppGlobalValue("BillPageWidht", 0);
+            if (width == 0)
+            {
+                AppLib.AppLogger.Error("В config-файле не указан элемент BillPageWidht с шириной чека.\n\t\tМодуль PrintBill.cs, CreateBill()");
+                errMessage = "Ошибка в конфигурации печати чека." + UserErrMsgSuffix;
+                return false;
+            }
+
+            // имя принтера для печати чека
+            string printerName = AppLib.GetAppSetting("PrinterName");
+            if (printerName == null)
+            {
+                AppLib.AppLogger.Error("В config-файле не указан элемент PrinterName - имя принтера в ОС для печати чеков.\n\t\tМодуль PrintBill.cs, CreateBill()");
+                errMessage = "Ошибка в конфигурации печати чека." + UserErrMsgSuffix;
+                return false;
+            }
+
+            FlowDocument doc = createDocument(width);
+            string prnTaskName = "bill " + _order.OrderNumberForPrint.ToString();
+
+            retVal = PrintHelper.PrintFlowDocument(doc, prnTaskName, printerName, out errMessage);
+            if (retVal == false)
+            {
+                AppLib.AppLogger.Error(errMessage + "\tМодуль PrintBill.cs, CreateBill()");
+                errMessage = "Ошибка печати чека.\nОбратитесь к администратору приложения.";
+            }
+
+            return retVal;
+        }
+
+        private FlowDocument createDocument(int width)
+        {
             // создать объекты верхнего и нижнего колонтитулов
             XmlDocument xmlHeader = new XmlDocument();
             xmlHeader.Load(AppDomain.CurrentDomain.BaseDirectory + string.Format(@"PrinterBill\Header-{0}.xml", _langId));
@@ -53,13 +113,7 @@ namespace WpfClient
             textFooter = DeSerialize<TextModel>(xmlFooter.OuterXml);
 
             var doc = new FlowDocument();
-            // ширина из config-файла
-            doc.PageWidth = (int)AppLib.GetAppGlobalValue("BillPageWidht", 0);
-            if (doc.PageWidth == 0)
-            {
-                errMessage = "В config-файле не указан элемент BillPageWidht с шириной отчета.";
-                return false;
-            }
+            doc.PageWidth = width;
 
             // значения по умолчанию
             doc.FontFamily = new FontFamily("Panton-Bold");
@@ -72,13 +126,13 @@ namespace WpfClient
             {
                 string langText = AppLib.GetLangText((Dictionary<string, string>)AppLib.GetAppGlobalValue("takeOrderOut"));
                 langText = string.Concat(" **** ", langText.ToUpper(), " ****");
-                addParagraph(doc, langText,20,FontWeights.Bold,FontStyles.Normal,new Thickness(0,20,0,10),TextAlignment.Center);
+                addParagraph(doc, langText, 20, FontWeights.Bold, FontStyles.Normal, new Thickness(0, 20, 0, 10), TextAlignment.Center);
             }
             // добавить форматированный заголовок
             addSectionToDoc(textHeader, doc);
 
             // добавить строки заказа
-            string currencyName = AppLib.GetLangText((Dictionary<string,string>)AppLib.GetAppGlobalValue("CurrencyName"));
+            string currencyName = AppLib.GetLangText((Dictionary<string, string>)AppLib.GetAppGlobalValue("CurrencyName"));
             decimal totalPrice = 0; string itemName, stringRow;
             foreach (DishItem item in _order.Dishes)
             {
@@ -96,11 +150,12 @@ namespace WpfClient
                 // добавить ингредиенты
                 if (item.SelectedIngredients != null)
                 {
-                    stringRow = "     ";
+                    stringRow = "     "; bool isFirst = true;
                     foreach (DishAdding ingr in item.SelectedIngredients)
                     {
                         itemName = AppLib.GetLangText(ingr.langNames);
-                        stringRow += itemName;
+                        stringRow += ((isFirst) ? "" : "; ") + itemName;
+                        isFirst = false;
                     }
                     addParagraph(doc, stringRow, 10, null, FontStyles.Italic);
                 }
@@ -114,28 +169,14 @@ namespace WpfClient
             addImageToDoc(textFooter, doc);
 
             // печать штрих-кода
-            //    идент.устройства - 2 символа
-            string devId = (string)AppLib.GetAppGlobalValue("ssdID");
-            if (devId.Length == 0) devId = "00";
-            else if (devId.Length == 1) devId = "0" + devId;
-            else devId = devId.Substring(0, 2);
-            //    дата заказа в формате yyMMdd - 6 символов
-            //    номер заказа (для печати - случайный) в формате 0000 - 4 символа
-            string bcValue = devId + _order.OrderDate.ToString("yyMMdd") + _order.OrderNumberForPrint.ToString("0000");
-            BarcodeLib.Barcode bc = new BarcodeLib.Barcode(bcValue, BarcodeLib.TYPE.EAN13);
+            BarcodeLib.Barcode bc = new BarcodeLib.Barcode(_order.BarCodeValue, BarcodeLib.TYPE.EAN13);
             bc.Width = (int)(0.8 * doc.PageWidth); bc.Height = (int)(0.2 * bc.Width);
             bc.Alignment = BarcodeLib.AlignmentPositions.CENTER;
             bc.IncludeLabel = (bool)AppLib.GetAppGlobalValue("IsIncludeBarCodeLabel");
 
-            //bc.BackColor = System.Drawing.Color.
-
-            _dialog.PageRange = new PageRange(1, 1);
-            string printer = AppLib.GetAppSetting("PrinterName");
-            _dialog.PrintQueue = new PrintQueue(new PrintServer(), printer);
-            _dialog.PrintDocument(((IDocumentPaginatorSource)doc).DocumentPaginator, "bill");
-
-            return retVal;
+            return doc;
         }
+
 
         private void addParagraph(FlowDocument doc, string text, double fontSize=12, FontWeight? fontWeight = null, FontStyle? fontStyle = null, Thickness? margin = null, TextAlignment alignment = TextAlignment.Left)
         {

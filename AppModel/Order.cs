@@ -15,7 +15,9 @@ namespace AppModel
     public partial class Order
     {
         public int Id { get; set; }
-        public Nullable<System.DateTime> OrderDate { get; set; }
+        public System.DateTime OrderDate { get; set; }
         public System.Guid RowGUID { get; set; }
+        public int OrderNumForPrint { get; set; }
+        public string BarCodeValue { get; set; }
     }
 }

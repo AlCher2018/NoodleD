@@ -97,6 +97,7 @@
       <SubType>Designer</SubType>
     </Page>
     <Compile Include="AppEnums.cs" />
+    <Compile Include="Lib\PrintHelper.cs" />
     <Compile Include="MainMenuGarnish.cs" />
     <Compile Include="Lib\AniScrollViewer.cs" />
     <Compile Include="Cart.xaml.cs">
@@ -108,6 +109,9 @@
     </Compile>
     <Compile Include="GarnishConverters.cs" />
     <Compile Include="Lib\ImageHelper.cs" />
+    <Compile Include="AppMsgBox.xaml.cs">
+      <DependentUpon>AppMsgBox.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MessageBoxDialog.xaml.cs">
       <DependentUpon>MessageBoxDialog.xaml</DependentUpon>
     </Compile>
@@ -124,9 +128,6 @@
     </Compile>
     <Compile Include="TestData.cs" />
     <Compile Include="TypeExtensions.cs" />
-    <Compile Include="Window1.xaml.cs">
-      <DependentUpon>Window1.xaml</DependentUpon>
-    </Compile>
     <Page Include="Cart.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -150,6 +151,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="AppMsgBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MessageBoxDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -160,10 +165,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Page>
     <Page Include="TakeOrder.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Window1.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

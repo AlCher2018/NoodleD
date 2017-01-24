@@ -116,13 +116,12 @@ namespace WpfClient
         {
             #region privates vars
             double screenWidth, screenHeight;
-            screenWidth = SystemParameters.PrimaryScreenWidth;
-            screenHeight = SystemParameters.PrimaryScreenHeight;
+            screenWidth = (double)AppLib.GetAppGlobalValue("screenWidth");
+            screenHeight = (double)AppLib.GetAppGlobalValue("screenHeight");
 
             // углы закругления
-            double dVar = 0.005 * screenWidth;
-            double cornerRadiusButton =dVar;
-            double cornerRadiusDishPanel = 2 * dVar;
+            double cornerRadiusButton = (double)AppLib.GetAppGlobalValue("cornerRadiusButton");
+            double cornerRadiusDishPanel = (double)AppLib.GetAppGlobalValue("cornerRadiusDishPanel");
 
             //  РАЗМЕРЫ ПАНЕЛИ БЛЮД(А)
             double dishesPanelWidth = (screenWidth / 6d * 5d);
@@ -820,8 +819,6 @@ namespace WpfClient
                     OrderItem curOrder = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
                     DishItem orderDish = curDishItem.GetCopyForOrder();   // сделать копию блюда со всеми добавками
                     curOrder.Dishes.Add(orderDish);
-                    curDishItem.ClearAllSelections();   // очистить ингредиенты в текущем блюде
-
                     // добавить в заказ рекомендации
                     if ((curDishItem.SelectedRecommends != null) && (curDishItem.SelectedRecommends.Count > 0))
                     {
@@ -830,6 +827,8 @@ namespace WpfClient
                             curOrder.Dishes.Add(item);
                         }
                     }
+
+                    curDishItem.ClearAllSelections();   // очистить добавки в текущем блюде
                     // и обновить стоимость заказа
                     updatePrice();
                 }   // if

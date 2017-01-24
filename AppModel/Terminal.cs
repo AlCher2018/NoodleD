@@ -19,5 +19,8 @@ namespace AppModel
         public Nullable<System.DateTime> TimeOn { get; set; }
         public Nullable<System.DateTime> TimeOff { get; set; }
         public Nullable<int> State { get; set; }
+        public Nullable<System.DateTime> RndOrderNum_Date { get; set; }
+        public Nullable<int> RndOrderNum_InitVal { get; set; }
+        public Nullable<int> RndOrderNum_NextVal { get; set; }
     }
 }

@@ -7,6 +7,8 @@ using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Media;
+using AppModel;
+
 
 namespace WpfClient
 {
@@ -20,8 +22,7 @@ namespace WpfClient
             // логгер приложения
             AppLib.AppLogger = NLog.LogManager.GetCurrentClassLogger();
             // таймер ожидания
-            int idleTime = 1000 * (int)AppLib.GetAppGlobalValue("UserIdleTime", 60);
-            AppLib.IdleTimer = new System.Timers.Timer((double)idleTime);
+            AppLib.IdleTimer = new System.Timers.Timer();
 
             // проверка соединения с БД
             AppLib.AppLogger.Info("Start application");
@@ -38,6 +39,8 @@ namespace WpfClient
             }
             AppLib.AppLogger.Trace(logMsg + " Ok");
 
+
+
             //******  СТАТИЧЕСКИЕ настройки  ******
             // создание и сохранение ресурсов приложения
             createAppResources(app);        // определенные в приложении
@@ -50,13 +53,6 @@ namespace WpfClient
             AppLib.ReadAppDataFromDB();             // определенные в MS SQL
 
             WpfClient.MainWindow mainWindow = new WpfClient.MainWindow();
-            AppLib.IdleTimer.Elapsed += (object sender, System.Timers.ElapsedEventArgs e) =>
-            {
-                if (mainWindow.Dispatcher.CheckAccess() == false) // CheckAccess returns true if you're on the dispatcher thread
-                {
-                    mainWindow.Dispatcher.Invoke(AppLib.ReDrawApp);
-                }
-            };
             mainWindow.Closed += (object sender, EventArgs e) =>
                 {
                     AppLib.AppLogger.Info("End application");
@@ -65,6 +61,16 @@ namespace WpfClient
                 {
                     AppLib.RestartIdleTimer();   // запустить таймер ожидания
                 };
+
+            int idleTime = 1000 * (int)AppLib.GetAppGlobalValue("UserIdleTime", 60);
+            AppLib.IdleTimer.Interval = (double)idleTime;
+            AppLib.IdleTimer.Elapsed += (object sender, System.Timers.ElapsedEventArgs e) =>
+            {
+                if (mainWindow.Dispatcher.CheckAccess() == false) // CheckAccess returns true if you're on the dispatcher thread
+                {
+                    //mainWindow.Dispatcher.Invoke(AppLib.ReDrawApp);
+                }
+            };
 
             app.Run(mainWindow);
         }

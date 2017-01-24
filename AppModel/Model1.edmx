@@ -95,7 +95,9 @@
           </Key>
           <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="RowGUID" Type="uniqueidentifier" Nullable="false" />
-          <Property Name="OrderDate" Type="datetime" />
+          <Property Name="OrderNumForPrint" Type="int" Nullable="false" />
+          <Property Name="OrderDate" Type="datetime" Nullable="false" />
+          <Property Name="BarCodeValue" Type="char" MaxLength="12" Nullable="false" />
         </EntityType>
         <EntityType Name="OrderDish">
           <Key>
@@ -111,6 +113,7 @@
             <PropertyRef Name="Id" />
           </Key>
           <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="OrderGUID" Type="uniqueidentifier" Nullable="false" />
           <Property Name="DishGUID" Type="uniqueidentifier" Nullable="false" />
           <Property Name="GarnishGUID" Type="uniqueidentifier" Nullable="false" />
           <Property Name="Count" Type="int" Nullable="false" />
@@ -120,6 +123,7 @@
             <PropertyRef Name="Id" />
           </Key>
           <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="OrderGUID" Type="uniqueidentifier" Nullable="false" />
           <Property Name="DishGUID" Type="uniqueidentifier" Nullable="false" />
           <Property Name="IngredientGUID" Type="uniqueidentifier" Nullable="false" />
           <Property Name="Count" Type="int" Nullable="false" />
@@ -151,6 +155,9 @@
           <Property Name="TimeOn" Type="datetime" />
           <Property Name="TimeOff" Type="datetime" />
           <Property Name="State" Type="int" />
+          <Property Name="RndOrderNum_Date" Type="date" />
+          <Property Name="RndOrderNum_InitVal" Type="int" />
+          <Property Name="RndOrderNum_NextVal" Type="int" />
         </EntityType>
         <!--Errors Found During Generation:
 warning 6035: The relationship 'FK_DishGarnish_Dish' has columns that are not part of the key of the table on the primary side of the relationship. The relationship was excluded.
@@ -167,15 +174,6 @@ warning 6035: The relationship 'FK_DishMarks_DishMark1' has columns that are not
         <!--Errors Found During Generation:
 warning 6035: The relationship 'FK_DishRecommends_Dish1' has columns that are not part of the key of the table on the primary side of the relationship. The relationship was excluded.
         <Association Name="FK_DishRecommends_Dish1" />-->
-        <!--Errors Found During Generation:
-warning 6035: The relationship 'FK_OrderDish_Order' has columns that are not part of the key of the table on the primary side of the relationship. The relationship was excluded.
-        <Association Name="FK_OrderDish_Order" />-->
-        <!--Errors Found During Generation:
-warning 6035: The relationship 'FK_OrderDishGarnish_OrderDish' has columns that are not part of the key of the table on the primary side of the relationship. The relationship was excluded.
-        <Association Name="FK_OrderDishGarnish_OrderDish" />-->
-        <!--Errors Found During Generation:
-warning 6035: The relationship 'FK_OrderDishIngredient_OrderDish' has columns that are not part of the key of the table on the primary side of the relationship. The relationship was excluded.
-        <Association Name="FK_OrderDishIngredient_OrderDish" />-->
         <Association Name="FK_StringValue_FieldType">
           <End Role="FieldType" Type="Self.FieldType" Multiplicity="1" />
           <End Role="StringValue" Type="Self.StringValue" Multiplicity="*" />
@@ -317,8 +315,10 @@ warning 6035: The relationship 'FK_OrderDishIngredient_OrderDish' has columns th
             <PropertyRef Name="Id" />
           </Key>
           <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="OrderDate" Type="DateTime" Precision="3" />
+          <Property Name="OrderDate" Type="DateTime" Precision="3" Nullable="false" />
           <Property Name="RowGUID" Type="Guid" Nullable="false" />
+          <Property Name="OrderNumForPrint" Type="Int32" Nullable="false" />
+          <Property Name="BarCodeValue" Type="String" Nullable="false" MaxLength="12" FixedLength="true" Unicode="false" />
         </EntityType>
         <EntityType Name="Setting">
           <Key>
@@ -348,6 +348,9 @@ warning 6035: The relationship 'FK_OrderDishIngredient_OrderDish' has columns th
           <Property Name="TimeOn" Type="DateTime" Precision="3" />
           <Property Name="TimeOff" Type="DateTime" Precision="3" />
           <Property Name="State" Type="Int32" />
+          <Property Name="RndOrderNum_Date" Type="DateTime" Precision="0" />
+          <Property Name="RndOrderNum_InitVal" Type="Int32" />
+          <Property Name="RndOrderNum_NextVal" Type="Int32" />
         </EntityType>
         <Association Name="FK_StringValue_FieldType">
           <End Type="NoodleDModel.FieldType" Role="FieldType" Multiplicity="1" />
@@ -387,6 +390,7 @@ warning 6035: The relationship 'FK_OrderDishIngredient_OrderDish' has columns th
           <Property Name="DishGUID" Type="Guid" Nullable="false" />
           <Property Name="GarnishGUID" Type="Guid" Nullable="false" />
           <Property Name="Count" Type="Int32" Nullable="false" />
+          <Property Name="OrderGUID" Type="Guid" Nullable="false" />
         </EntityType>
         <EntityType Name="OrderDishIngredient">
           <Key>
@@ -396,6 +400,7 @@ warning 6035: The relationship 'FK_OrderDishIngredient_OrderDish' has columns th
           <Property Name="DishGUID" Type="Guid" Nullable="false" />
           <Property Name="IngredientGUID" Type="Guid" Nullable="false" />
           <Property Name="Count" Type="Int32" Nullable="false" />
+          <Property Name="OrderGUID" Type="Guid" Nullable="false" />
         </EntityType>
         </Schema>
     </edmx:ConceptualModels>
@@ -489,6 +494,8 @@ warning 6035: The relationship 'FK_OrderDishIngredient_OrderDish' has columns th
           <EntitySetMapping Name="Order">
             <EntityTypeMapping TypeName="NoodleDModel.Order">
               <MappingFragment StoreEntitySet="Order">
+                <ScalarProperty Name="BarCodeValue" ColumnName="BarCodeValue" />
+                <ScalarProperty Name="OrderNumForPrint" ColumnName="OrderNumForPrint" />
                 <ScalarProperty Name="RowGUID" ColumnName="RowGUID" />
                 <ScalarProperty Name="OrderDate" ColumnName="OrderDate" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
@@ -518,6 +525,9 @@ warning 6035: The relationship 'FK_OrderDishIngredient_OrderDish' has columns th
           <EntitySetMapping Name="Terminal">
             <EntityTypeMapping TypeName="NoodleDModel.Terminal">
               <MappingFragment StoreEntitySet="Terminal">
+                <ScalarProperty Name="RndOrderNum_NextVal" ColumnName="RndOrderNum_NextVal" />
+                <ScalarProperty Name="RndOrderNum_InitVal" ColumnName="RndOrderNum_InitVal" />
+                <ScalarProperty Name="RndOrderNum_Date" ColumnName="RndOrderNum_Date" />
                 <ScalarProperty Name="State" ColumnName="State" />
                 <ScalarProperty Name="TimeOff" ColumnName="TimeOff" />
                 <ScalarProperty Name="TimeOn" ColumnName="TimeOn" />
@@ -549,6 +559,7 @@ warning 6035: The relationship 'FK_OrderDishIngredient_OrderDish' has columns th
           <EntitySetMapping Name="OrderDishGarnish">
             <EntityTypeMapping TypeName="NoodleDModel.OrderDishGarnish">
               <MappingFragment StoreEntitySet="OrderDishGarnish">
+                <ScalarProperty Name="OrderGUID" ColumnName="OrderGUID" />
                 <ScalarProperty Name="Count" ColumnName="Count" />
                 <ScalarProperty Name="GarnishGUID" ColumnName="GarnishGUID" />
                 <ScalarProperty Name="DishGUID" ColumnName="DishGUID" />
@@ -559,6 +570,7 @@ warning 6035: The relationship 'FK_OrderDishIngredient_OrderDish' has columns th
           <EntitySetMapping Name="OrderDishIngredient">
             <EntityTypeMapping TypeName="NoodleDModel.OrderDishIngredient">
               <MappingFragment StoreEntitySet="OrderDishIngredient">
+                <ScalarProperty Name="OrderGUID" ColumnName="OrderGUID" />
                 <ScalarProperty Name="Count" ColumnName="Count" />
                 <ScalarProperty Name="IngredientGUID" ColumnName="IngredientGUID" />
                 <ScalarProperty Name="DishGUID" ColumnName="DishGUID" />

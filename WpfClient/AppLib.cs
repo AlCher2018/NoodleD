@@ -53,6 +53,17 @@ namespace WpfClient
             if (langDict.TryGetValue(langId, out retVal) == false) retVal = "no value";
             return retVal;
         }
+
+        public static string GetLangTextFromAppProp(string key)
+        {
+            var dict = GetAppGlobalValue(key);
+            if (dict is Dictionary<string, string>)
+            {
+                return GetLangText(dict as Dictionary<string, string>);
+            }
+            else return null;
+        }
+
         // получить глобальное значение приложения из его свойств
         public static object GetAppGlobalValue(string key, object defaultValue = null)
         {
@@ -129,7 +140,6 @@ namespace WpfClient
             }
         }
 
-
         public static DependencyObject GetAncestorByType(DependencyObject element, Type type)
         {
             if (element == null) return null;
@@ -168,6 +178,12 @@ namespace WpfClient
 
             return null;
         }
+
+        public static void ShowMessage(string message)
+        {
+            (new AppMsgBox(message)).ShowDialog();
+        }
+
         #endregion
 
         #region AppBL
@@ -371,59 +387,50 @@ namespace WpfClient
         }
 
         // очистка заказа, закрытие всех окон и возврат в начальный экран
-        public static void ReDrawApp()
+        public static void ReDrawApp(bool isResetLang, bool isCloseChildWindow)
         {
-            CloseAllSubWindows();
-            ClearGarnishesOnMainWindow();
+            if (isCloseChildWindow == true) CloseChildWindows();
 
             WpfClient.MainWindow mainWin = (WpfClient.MainWindow)Application.Current.MainWindow;
+            List<Canvas> dishesPanels = mainWin.DishesPanels;
+            foreach (Panel item in dishesPanels)
+            {
+                // очистить выбор гарниров
+                ClearSelectedGarnish(item);
+                // убрать все описания блюд
+                ClearDescriptionsOnDishPanel(item);
+            }
+
             mainWin.lstMenuFolders.SelectedIndex = 0;
+            mainWin.scrollDishes.ScrollToTop();
+
             // установить язык UI
-            string langDefault = AppLib.GetAppSetting("langDefault");
-            mainWin.selectAppLang(langDefault);
+            if (isResetLang == true)
+            {
+                string langDefault = AppLib.GetAppSetting("langDefault");
+                mainWin.selectAppLang(langDefault);
+            }
 
             // очистить заказ
             OrderItem curOrder = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
-            if (curOrder != null)
-            {
-                curOrder.Clear();
-                AppLib.SetAppGlobalValue("currentOrder", curOrder);
-            }
+            if (curOrder != null) curOrder.Clear();
             mainWin.updatePrice();
         }
 
         // закрыть все открытые окна, кроме главного окна
-        public static void CloseAllSubWindows()
+        public static void CloseChildWindows()
         {
             foreach (Window win in Application.Current.Windows)
             {
-                if ((win is WpfClient.MainWindow) == false) win.Close();
+                if ((win is WpfClient.MainWindow) == false)
+                {
+                    Type t = win.GetType();
+                    PropertyInfo pInfo = t.GetProperty("Host");
+                    if (pInfo == null) win.Close();
+                }
             }
             
         }
-
-        // очистить выбор гарниров на всех панелях блюд
-        public static void ClearGarnishesOnMainWindow()
-        {
-            Window main = Application.Current.MainWindow;
-            List<Canvas> dishesPanels = ((WpfClient.MainWindow)main).DishesPanels;
-            foreach (Panel item in dishesPanels)
-            {
-                ClearSelectedGarnish(item);
-            }
-        }
-
-        // убрать все описания блюд
-        public static void HideAllDishDescription()
-        {
-            Window main = Application.Current.MainWindow;
-            List<Canvas> dishesPanels = ((WpfClient.MainWindow)main).DishesPanels;
-            foreach (Panel item in dishesPanels)
-            {
-                ClearDescriptionsOnDishPanel(item);
-            }
-        }
-
 
         // очистить выбор гарнира на панели
         public static void ClearSelectedGarnish(Panel dishesPanel)

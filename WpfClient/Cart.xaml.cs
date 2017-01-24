@@ -280,8 +280,36 @@ namespace WpfClient
             if (takeMode != TakeOrderEnum.None)
             {
                 PrintBill prn = new PrintBill(_currentOrder, takeMode);
-                string errMsg = null;
-                bool result = prn.CreateBill(out errMsg);
+                string userErrMsg = null;
+                bool result = prn.CreateBill(out userErrMsg);
+
+                // формирование чека и печать завершилась успешно - сохраняем заказ в БД
+                if (result == true)
+                {
+                    bool saveRes = _currentOrder.SaveToDB(out userErrMsg);
+                    if (saveRes == true)
+                    {
+                        string goText = (string)AppLib.GetLangTextFromAppProp("lblGoText");
+                        AppLib.ShowMessage(goText);
+
+                        // очистить заказ...
+                        _currentOrder.Clear();
+                        // вернуть интерфейс в исходное состояние
+                        AppLib.ReDrawApp(false, true);
+
+                    }
+                    // ошибка сохранения в БД
+                    else
+                    {
+                        AppLib.AppLogger.Error(userErrMsg);
+                        AppLib.ShowMessage("Ошибка сохранения заказа!\nЗаказ не был сохранен. Обратитесь к администратору приложения.");
+                    }
+                }
+                // ошибка формирования чека и/или печати - сообщение пользователю на экран и запись в лог
+                else
+                {
+                    AppLib.ShowMessage(userErrMsg);
+                }
             }
         }
 

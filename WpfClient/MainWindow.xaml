@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="MainWindow" 
         WindowStyle="None" WindowState="Maximized" WindowStartupLocation="CenterScreen" 
-        UseLayoutRounding ="True">
+        UseLayoutRounding ="True" Icon="AppImages/icon.ico">
     <!-- UseLayoutRounding ="True" - выравнивание элеметов по границе пикселей -->
     
     <Window.Resources>
