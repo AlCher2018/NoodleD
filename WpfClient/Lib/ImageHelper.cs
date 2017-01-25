@@ -4,13 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Media.Imaging;
 
 namespace WpfClient
 {
     public static class ImageHelper
     {
-        private static Dictionary<string, BitmapImage> _images = new Dictionary<string, BitmapImage>();
+        private static Dictionary<string, System.Windows.Media.Imaging.BitmapImage> _images = new Dictionary<string, System.Windows.Media.Imaging.BitmapImage>();
+
         internal static void CheckDirectory(bool isDeleteFiles)
         {
             var directoryName = AppDomain.CurrentDomain.BaseDirectory + "images\\";
@@ -37,22 +37,22 @@ namespace WpfClient
             di = null;
         }
 
-        internal static void SaveImageFile(byte[] image,string filePath,string fileName )
+        internal static void SaveImageFile(byte[] imageByteArr,string filePath,string fileName )
         {
-            var im = ByteArrayToImage(image);
+            System.Drawing.Image im = ImageHelper.FromByteArray(imageByteArr);
             if (im != null)
             {
                 im.Save(fileName);
             }
-            
+
         }
 
-        public static System.Drawing.Image ByteArrayToImage(byte[] byteArrayIn)
+        public static System.Drawing.Image FromByteArray(byte[] byteArrayIn)
         {
-            if (byteArrayIn!=null)
+            if (byteArrayIn != null)
             {
                 System.Drawing.Image returnImage;
-                using (MemoryStream ms = new MemoryStream(byteArrayIn))
+                using (System.IO.MemoryStream ms = new System.IO.MemoryStream(byteArrayIn))
                 {
                     returnImage = System.Drawing.Image.FromStream(ms);
                 }
@@ -71,52 +71,60 @@ namespace WpfClient
             fs.Close(); fs.Dispose();
             return retVal;
         }
-        public static BitmapImage ConvertByteArrayToBitmapImage(Byte[] bytes)
-        {
-            var stream = new MemoryStream(bytes);
-            stream.Seek(0, SeekOrigin.Begin);
-            var image = new BitmapImage();
-            image.BeginInit();
-            image.StreamSource = stream;
-            image.EndInit();
-            return image;
-        }
 
-        public static BitmapImage ByteArrayToBitmapImage(byte[] imageData)
+        public static System.Windows.Media.Imaging.BitmapImage ByteArrayToBitmapImage(byte[] imageData)
         {
             if (imageData == null || imageData.Length == 0) return null;
-            var image = new BitmapImage();
-            using (var mem = new MemoryStream(imageData))
+
+            var image = new System.Windows.Media.Imaging.BitmapImage();
+
+            using (var stream = new MemoryStream(imageData))
             {
-                mem.Position = 0;
+                stream.Seek(0, SeekOrigin.Begin);
+
                 image.BeginInit();
-                image.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
-                image.CacheOption = BitmapCacheOption.OnLoad;
+                image.CreateOptions = System.Windows.Media.Imaging.BitmapCreateOptions.PreservePixelFormat;
+                image.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
                 image.UriSource = null;
-                image.StreamSource = mem;
+                image.StreamSource = stream;
                 image.EndInit();
             }
+
             image.Freeze();
             return image;
         }
 
+        public static System.Windows.Media.Imaging.BitmapImage DrawingImageToBitmapImage(System.Drawing.Image dImage)
+        {
+            if (dImage == null) return null;
 
-        //public static string GetFileNameBy(ExchangeModelLibrary.DataTools.Dish dish)
-        //{
-        //    var imagePath = string.Format(@"{0}Images\{1}_{2}.png", AppDomain.CurrentDomain.BaseDirectory, dish.GroupTypeId, dish.Id);
-        //    if (@"E:\Projects\WinOs\_HG\RestaurantMenu_132\WPFMenu\bin\Debug\Images\1_2042.png"==imagePath)
-        //    {
-        //        var o="";
-        //    }
-        //    return imagePath;
-        //}
+            var image = new System.Windows.Media.Imaging.BitmapImage();
+
+            using (var stream = new MemoryStream())
+            {
+                dImage.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+
+                stream.Seek(0, SeekOrigin.Begin);
+
+                image.BeginInit();
+                image.CreateOptions = System.Windows.Media.Imaging.BitmapCreateOptions.PreservePixelFormat;
+                image.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                image.UriSource = null;
+                image.StreamSource = stream;
+                image.EndInit();
+            }
+
+            image.Freeze();
+            return image;
+        }
+
 
         public static void SetImageToCash(string imagePath)
         { 
             if (!_images.Any(i => i.Key == imagePath))
             {
                 _images.Add(imagePath,
-                    new BitmapImage(new Uri(imagePath, UriKind.Absolute)));
+                    new System.Windows.Media.Imaging.BitmapImage(new Uri(imagePath, UriKind.Absolute)));
             }
         }
 
@@ -156,7 +164,7 @@ namespace WpfClient
             else
             {
                 _images.Add(imagePath,
-                    new BitmapImage(new Uri(imagePath, UriKind.Absolute)));
+                    new System.Windows.Media.Imaging.BitmapImage(new Uri(imagePath, UriKind.Absolute)));
                 return _images[imagePath];
             }
                    

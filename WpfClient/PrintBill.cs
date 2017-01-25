@@ -87,9 +87,12 @@ namespace WpfClient
                 return false;
             }
 
+            // создание документа
             FlowDocument doc = createDocument(width);
-            string prnTaskName = "bill " + _order.OrderNumberForPrint.ToString();
 
+            // имя задания на принтер
+            string prnTaskName = "bill " + _order.OrderNumberForPrint.ToString();
+            // вывод документа на принтер
             retVal = PrintHelper.PrintFlowDocument(doc, prnTaskName, printerName, out errMessage);
             if (retVal == false)
             {
@@ -169,10 +172,18 @@ namespace WpfClient
             addImageToDoc(textFooter, doc);
 
             // печать штрих-кода
-            BarcodeLib.Barcode bc = new BarcodeLib.Barcode(_order.BarCodeValue, BarcodeLib.TYPE.EAN13);
-            bc.Width = (int)(0.8 * doc.PageWidth); bc.Height = (int)(0.2 * bc.Width);
-            bc.Alignment = BarcodeLib.AlignmentPositions.CENTER;
-            bc.IncludeLabel = (bool)AppLib.GetAppGlobalValue("IsIncludeBarCodeLabel");
+            string bcVal13 = _order.BarCodeValue + BarCodeLib.getUPCACheckDigit(_order.BarCodeValue);
+            Image imageBarCode = BarCodeLib.GetBarcodeImage(bcVal13, (int)(1.2 * doc.PageWidth), 50);
+            BlockUIContainer bcContainer = new BlockUIContainer()
+            {
+                Child = imageBarCode,
+                Margin = new Thickness(0,10,0,0)
+            };
+            doc.Blocks.Add(bcContainer);
+            // вывести значение баркода в чек
+            //string bcDisplay = string.Format("{0} {1} {2} {3}", bcVal13.Substring(0,2), bcVal13.Substring(2, 6), bcVal13.Substring(8, 4), bcVal13.Substring(12,1));
+            string bcDisplay = string.Format("{0}  {1}  {2}", bcVal13.Substring(0, 1), bcVal13.Substring(1, 6), bcVal13.Substring(7));
+            addParagraph(doc, bcDisplay, 9, FontWeights.Normal, FontStyles.Normal, new Thickness(0,5,0,0), TextAlignment.Center);
 
             return doc;
         }
@@ -191,6 +202,7 @@ namespace WpfClient
 
             doc.Blocks.Add(par);
         }
+
         private Run getRunFromModel(ParagraphModel item, string text)
         {
             Run run = new Run(text);

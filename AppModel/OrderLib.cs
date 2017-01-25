@@ -84,6 +84,7 @@ namespace AppModel
                 {
                     if (term.RndOrderNum_InitVal == null)
                     {
+                        term.RndOrderNum_Date = DateTime.Now;
                         term.RndOrderNum_InitVal = getNewRandomOrderNumber(rndFrom, rndTo);
                         term.RndOrderNum_NextVal = term.RndOrderNum_InitVal;
                     }
@@ -95,6 +96,7 @@ namespace AppModel
                     // новая дата для номера чека
                     if (compareDatesOnly(term.RndOrderNum_Date??DateTime.MinValue, DateTime.Now) == false)
                     {
+                        term.RndOrderNum_Date = DateTime.Now;
                         term.RndOrderNum_InitVal = getNewRandomOrderNumber(rndFrom, rndTo);
                         term.RndOrderNum_NextVal = term.RndOrderNum_InitVal;
                     }

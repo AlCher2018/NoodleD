@@ -8,7 +8,8 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Media;
 using AppModel;
-
+using WpfClient.Lib;
+using System.Diagnostics;
 
 namespace WpfClient
 {
@@ -38,8 +39,6 @@ namespace WpfClient
                 throw;
             }
             AppLib.AppLogger.Trace(logMsg + " Ok");
-
-
 
             //******  СТАТИЧЕСКИЕ настройки  ******
             // создание и сохранение ресурсов приложения
