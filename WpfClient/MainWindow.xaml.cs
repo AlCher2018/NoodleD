@@ -32,12 +32,13 @@ namespace WpfClient
         Border _curDescrBorder;
         TextBlock _curDescrTextBlock;
         SolidColorBrush _brushSelectedItem;
-        // animations
+        
+        // dish description animations
         DoubleAnimation _daCommon1, _daCommon2;
-        DoubleAnimation _daDishDescrBackgroundOpacity;
-
-        // scroll viewer animate
-        List<double> animDishRows;
+        DoubleAnimation _daDishDescrBackgroundOpacity;  // анимашка прозрачности описания блюда
+        // dish select animation
+        PathGeometry _animSelectDishPath;
+        Storyboard _animSelectDishStoryBoard;
 
         // dragging
         Point? lastDragPoint, initDragPoint;
@@ -48,8 +49,10 @@ namespace WpfClient
         {
             InitializeComponent();
 
+            // для настройки элементов после отрисовки окна
+            Loaded += MainWindow_Loaded;
+
             // инициализация локальных переменных
-            animDishRows = new List<double>();
             _dishCanvas = new List<Canvas>();
             _daDishDescrBackgroundOpacity = new DoubleAnimation()
             {
@@ -66,6 +69,18 @@ namespace WpfClient
             updatePrice();
 
             initUI();
+        }
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            //   конечный элемент анимации выбора блюда, это Point3 в BezierSegment
+            Point toBasePoint = brdMakeOrder.PointToScreen(new Point(0, 0));
+            Size toSize = brdMakeOrder.RenderSize;
+            Point endPoint = new Point(toBasePoint.X + toSize.Width / 2.0, toBasePoint.Y + toSize.Height / 2.0);
+            // установить для сегмента анимации конечную точку
+            PathFigure pf = _animSelectDishPath.Figures[0];
+            BezierSegment bs = (pf.Segments[0] as BezierSegment);
+            bs.Point3 = endPoint;
         }
 
         private void initUI()
@@ -97,6 +112,96 @@ namespace WpfClient
 
             // установить язык UI
             selectAppLang(AppLib.AppLang);
+
+            // анимация выбора блюда
+            // используется анимашка пути в панели анимации (cnvAnim)
+            //TransformGroup transGroup = new TransformGroup()
+            //{
+            //    Children = new TransformCollection {
+            //        new TranslateTransform(),
+            //        new RotateTransform(),
+            //        new ScaleTransform()
+            //    }
+            //};
+            // путь перемещения
+            _animSelectDishPath = new PathGeometry();
+            _animSelectDishPath.Figures.Add(new PathFigure()
+            {
+                IsClosed = false,
+                Segments = new PathSegmentCollection { new BezierSegment() { IsStroked = true } }
+            });
+            // отобразить путь перемещения на канве
+            Path visPath = new Path()
+            {
+                Data = _animSelectDishPath,
+                Stroke = Brushes.Red,
+                StrokeThickness = 1
+            };
+            cnvAnim.Children.Add(visPath);
+
+            //Path spotFrom = new Path()
+            //{
+            //    Fill = Brushes.Blue,
+            //    Data = new RectangleGeometry(new Rect(0,0,200,150), 10,10),
+            //    //RenderTransformOrigin = new Point(0.5,0.5),
+            //    RenderTransform = transGroup
+            //};
+            //Canvas.SetLeft(spotFrom, -100); Canvas.SetTop(spotFrom, -75);
+            //cnvAnim.Children.Add(spotFrom);
+
+            int animSpeed = int.Parse(AppLib.GetAppSetting("SelectDishAnimationSpeed"));  // in msec
+            TimeSpan ts = new TimeSpan(0, 0, 0, 0, animSpeed);
+
+            // создать две анимации перемещения, для координат X и Y
+            DoubleAnimationUsingPath daX = new DoubleAnimationUsingPath();
+            daX.PathGeometry = _animSelectDishPath;
+            daX.Duration = ts;
+            daX.Source = PathAnimationSource.X;
+            Storyboard.SetTarget(daX, animDishImage);
+            Storyboard.SetTargetProperty(daX, new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[0].(TranslateTransform.X)"));
+            DoubleAnimationUsingPath daY = new DoubleAnimationUsingPath();
+            daY.PathGeometry = _animSelectDishPath;
+            daY.Duration = ts;
+            daY.Source = PathAnimationSource.Y;
+            Storyboard.SetTarget(daY, animDishImage);
+            Storyboard.SetTargetProperty(daY, new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[0].(TranslateTransform.Y)"));
+
+            // анимация прозрачности
+            DoubleAnimation daOpacity = new DoubleAnimation(1, 0, ts);
+            Storyboard.SetTarget(daOpacity, animDishImage);
+            Storyboard.SetTargetProperty(daOpacity, new PropertyPath("(UIElement.Opacity)"));
+
+            // анимация масштабирования
+            DoubleAnimation daScaleX = new DoubleAnimation(1, 0.4, ts);
+            Storyboard.SetTarget(daScaleX, animDishImage);
+            Storyboard.SetTargetProperty(daScaleX, new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[2].(ScaleTransform.ScaleX)"));
+            //DoubleAnimation daScaleY = new DoubleAnimation(1, 0.4, ts);
+            //Storyboard.SetTarget(daScaleY, spotFrom);
+            //Storyboard.SetTargetProperty(daScaleY, new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[2].(ScaleTransform.ScaleY)"));
+
+
+            // создать две анимации масштабирования, для ширины и высоты
+            //DoubleAnimationUsingPath daX = new DoubleAnimationUsingPath();
+            //daX.PathGeometry = _animSelectDishPath;
+            //daX.Duration = new Duration(new TimeSpan(0, 0, 0, 0, animSpeed));
+            //daX.Source = PathAnimationSource.X;
+            //Storyboard.SetTarget(daX, spotFrom);
+            //Storyboard.SetTargetProperty(daX, new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[0].(TranslateTransform.X)"));
+            //DoubleAnimationUsingPath daY = new DoubleAnimationUsingPath();
+            //daY.PathGeometry = _animSelectDishPath;
+            //daY.Duration = new Duration(new TimeSpan(0, 0, 0, 0, animSpeed));
+            //daY.Source = PathAnimationSource.Y;
+            //Storyboard.SetTarget(daY, spotFrom);
+            //Storyboard.SetTargetProperty(daY, new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[0].(TranslateTransform.Y)"));
+
+            // создать раскладку и добавить в нее анимации
+            _animSelectDishStoryBoard = new Storyboard();
+            _animSelectDishStoryBoard.Children.Add(daX);
+            _animSelectDishStoryBoard.Children.Add(daY);
+            _animSelectDishStoryBoard.Children.Add(daOpacity);
+            //_animSelectDishStoryBoard.Children.Add(daScaleX);
+            //_animSelectDishStoryBoard.Children.Add(daScaleY);
+            _animSelectDishStoryBoard.Completed += animSelectDishStoryBoard_Completed;
 
             // выключить курсор мыши
             if ((bool)AppLib.GetAppGlobalValue("MouseCursor") == false)
@@ -334,7 +439,7 @@ namespace WpfClient
             double dishPanelImageRowHeight = dGrid.RowDefinitions[2].Height.Value;
             Rect rect = new Rect(0, 0, dGrid.Width, dishPanelImageRowHeight);
             // изображение
-            System.Windows.Shapes.Path pathImage = new System.Windows.Shapes.Path();
+            Path pathImage = new Path();
             pathImage.Data = new RectangleGeometry(rect, cornerRadiusDishPanel, cornerRadiusDishPanel);
             pathImage.Fill = new DrawingBrush(
                 new ImageDrawing() { ImageSource = ImageHelper.ByteArrayToBitmapImage(dish.Image), Rect = rect }
@@ -773,24 +878,50 @@ namespace WpfClient
                 _currentOrder.Dishes.Add(orderDish);
 
                 // нарисовать путь
-                FrameworkElement dishPanel = AppLib.FindLogicalParentByName((FrameworkElement)sender, "gridDish", 4);
-                if (dishPanel != null)
+                Grid gridContent = ((FrameworkElement)sender).Parent as Grid;
+                List<Path> pathArr = gridContent.Children.OfType<Path>().ToList();
+                FrameworkElement dishImage = pathArr[0];
+                if (dishImage != null)
                 {
-                    Path animPath = getAnimPath(dishPanel);
+                    // установить параметры пути движения изображения
+                    PathFigure pf = _animSelectDishPath.Figures[0];
+                    BezierSegment bezierSeg = (pf.Segments[0] as BezierSegment);
 
-                    //cnvAnim.Children.Add(animPath);
+                    // получить точку начала анимации: центр панели блюда
+                    Point fromBasePoint = dishImage.PointToScreen(new Point(0, 0));
+                    Size fromSize = dishImage.RenderSize;
+                    Point fromPoint = new Point(fromBasePoint.X + fromSize.Width / 2.0, fromBasePoint.Y + fromSize.Height / 2.0);
+                    Point toPoint = bezierSeg.Point3;
 
-                    //ColorAnimation colorAnim = new ColorAnimation(Colors.Aqua, Colors.Red, TimeSpan.FromMilliseconds(2000));
-                    //colorAnim.Completed += ColorAnim_Completed;
-                    //spotTo.Fill.BeginAnimation(SolidColorBrush.ColorProperty, colorAnim);
+                    // установить значения пути движения
+                    pf.StartPoint = fromPoint;   // начальная точка
+                    // и опорные точки кривой Безье
+                    double dX = fromPoint.X - toPoint.X;
+                    double dY = toPoint.Y - fromPoint.Y;
+                    Point p1 = new Point(fromPoint.X - 0.3 * dX, fromPoint.Y - 0.3 * dY);
+                    Point p2 = new Point(toPoint.X + 0.05 * dX, toPoint.Y - 0.8 * dY);
+                    bezierSeg.Point1 = p1;
+                    bezierSeg.Point2 = p2;
 
-                    //Storyboard sb = new Storyboard();
-                    //PropertyPath colorTargetPath = new PropertyPath("(Ellipse.Fill).(SolidColorBrush.Color)");
-                    //Storyboard.SetTarget(colorAnim, spotTo);
-                    //Storyboard.SetTargetProperty(colorAnim, colorTargetPath);
-                    //sb.Children.Add(colorAnim);
-                    //sb.AutoReverse = true;
-                    //sb.Begin();
+                    Rect rect = (animDishImage.Data as RectangleGeometry).Rect;
+                    rect.Width = 150; rect.Height = 100;
+                    animDishImage.Width = 150;
+                    animDishImage.Height = 100;
+
+                    cnvAnim.Visibility = Visibility.Visible;
+                    _animSelectDishStoryBoard.Begin();
+
+                    //            double dishPanelImageRowHeight = dGrid.RowDefinitions[2].Height.Value;
+                    //Rect rect = new Rect(0, 0, dGrid.Width, dishPanelImageRowHeight);
+                    //// изображение
+                    //System.Windows.Shapes.Path pathImage = new System.Windows.Shapes.Path();
+                    //pathImage.Data = new RectangleGeometry(rect, cornerRadiusDishPanel, cornerRadiusDishPanel);
+                    //pathImage.Fill = new DrawingBrush(
+                    //    new ImageDrawing() { ImageSource = ImageHelper.ByteArrayToBitmapImage(dish.Image), Rect = rect }
+                    //    );
+                    ////pathImage.Effect = new DropShadowEffect();
+                    //// добавить в контейнер
+                    //Grid.SetRow(pathImage, 2); dGrid.Children.Add(pathImage);
 
                 }
 
@@ -836,56 +967,10 @@ namespace WpfClient
             } // if else
         }
 
-        private void ColorAnim_Completed(object sender, EventArgs e)
+        // после завершения анимации выбора блюда скрыть панель анимации
+        private void animSelectDishStoryBoard_Completed(object sender, EventArgs e)
         {
-            cnvAnim.Children.Clear();
-            Panel.SetZIndex(cnvAnim, -1);
-        }
-        private Path getAnimPath(FrameworkElement dishPanel)
-        {
-            Point fromCenterPoint, toCenterPoint;
-            Point fromBasePoint = dishPanel.PointToScreen(new Point(0, 0));
-            Size fromSize = dishPanel.RenderSize;
-            fromCenterPoint = new Point(fromBasePoint.X + fromSize.Width / 2.0, fromBasePoint.Y + fromSize.Height / 2.0);
-
-            Point toBasePoint = brdMakeOrder.PointToScreen(new Point(0, 0));
-            Size toSize = brdMakeOrder.RenderSize;
-            toCenterPoint = new Point(toBasePoint.X + toSize.Width / 2.0, toBasePoint.Y + toSize.Height / 2.0);
-
-            //Panel.SetZIndex(cnvAnim, 10);
-            Ellipse spotFrom = new Ellipse();
-            spotFrom.Height = 50; spotFrom.Width = 50;
-            spotFrom.Fill = new SolidColorBrush(Colors.Aqua);
-            //cnvAnim.Children.Add(spotFrom);
-            Canvas.SetLeft(spotFrom, fromCenterPoint.X - spotFrom.Width / 2f);
-            Canvas.SetTop(spotFrom, fromCenterPoint.Y - spotFrom.Height / 2f);
-
-            Ellipse spotTo = new Ellipse();
-            spotTo.Height = 50; spotTo.Width = 50;
-            spotTo.Fill = new SolidColorBrush(Colors.Aqua);
-            //cnvAnim.Children.Add(spotTo);
-            Canvas.SetLeft(spotTo, toCenterPoint.X - spotTo.Width / 2f);
-            Canvas.SetTop(spotTo, toCenterPoint.Y - spotTo.Height / 2f);
-
-            PathGeometry path = new PathGeometry();
-            PathFigure pathFigure = new PathFigure();
-            pathFigure.StartPoint = fromCenterPoint;
-            pathFigure.IsClosed = false;
-
-            double dX = fromCenterPoint.X - toCenterPoint.X;
-            double dY = toCenterPoint.Y - fromCenterPoint.Y;
-            Point p1 = new Point(fromCenterPoint.X - 0.3 * dX, fromCenterPoint.Y - 0.3 * dY);
-            Point p2 = new Point(toCenterPoint.X + 0.05 * dX, toCenterPoint.Y - 0.8 * dY);
-            BezierSegment curve = new BezierSegment(p1, p2, toCenterPoint, true);
-            pathFigure.Segments.Add(curve);
-            path.Figures.Add(pathFigure);
-
-            System.Windows.Shapes.Path p = new System.Windows.Shapes.Path();
-            p.Stroke = Brushes.Red;
-            p.StrokeThickness = 4f;
-            p.Data = path;
-
-            return p;
+            cnvAnim.Visibility = Visibility.Hidden;
         }
         #endregion
 

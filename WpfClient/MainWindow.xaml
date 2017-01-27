@@ -121,7 +121,20 @@
             <ColumnDefinition Width="5*"/>
         </Grid.ColumnDefinitions>
 
-        <Canvas x:Name="cnvAnim" Grid.ColumnSpan="2" Background="Transparent"/>
+        <Canvas x:Name="cnvAnim" Grid.ColumnSpan="2" Background="Transparent" Panel.ZIndex="5" Visibility="Hidden">
+            <Path x:Name="animDishImage" Fill="Yellow">
+                <Path.Data>
+                    <RectangleGeometry Rect="0,0,300,200" RadiusX="10" RadiusY="10"/>
+                </Path.Data>
+                <Path.RenderTransform>
+                    <TransformGroup>
+                        <TranslateTransform/>
+                        <RotateTransform/>
+                        <ScaleTransform/>
+                    </TransformGroup>
+                </Path.RenderTransform>
+            </Path>
+        </Canvas>
 
         <Image Grid.Column="1" Source="AppImages\bg 3hor 1920x1080 gauss.png" Stretch="UniformToFill" Opacity="0.3"/>
 
