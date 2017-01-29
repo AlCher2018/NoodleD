@@ -37,8 +37,9 @@ namespace WpfClient
         DoubleAnimation _daCommon1, _daCommon2;
         DoubleAnimation _daDishDescrBackgroundOpacity;  // анимашка прозрачности описания блюда
         // dish select animation
-        PathGeometry _animSelectDishPath;
-        Storyboard _animSelectDishStoryBoard;
+        Path _animDishImage;                    // что перемещаем
+        PathGeometry _animSelectDishPath;       // путь перемещения
+        Storyboard _animSelectDishStoryBoard;   // раскадровка перемещения
 
         // dragging
         Point? lastDragPoint, initDragPoint;
@@ -114,15 +115,22 @@ namespace WpfClient
             selectAppLang(AppLib.AppLang);
 
             // анимация выбора блюда
+            createObjectsForDishAnimation();
+            createStoreboardForDishAnimation();
+
+            // выключить курсор мыши
+            if ((bool)AppLib.GetAppGlobalValue("MouseCursor") == false)
+            {
+                this.Cursor = Cursors.None;
+                Mouse.OverrideCursor = Cursors.None;
+            }
+
+            AppLib.AppLogger.Trace("Настраиваю визуальные элементы - READY");
+        }
+
+        private void createObjectsForDishAnimation()
+        {
             // используется анимашка пути в панели анимации (cnvAnim)
-            //TransformGroup transGroup = new TransformGroup()
-            //{
-            //    Children = new TransformCollection {
-            //        new TranslateTransform(),
-            //        new RotateTransform(),
-            //        new ScaleTransform()
-            //    }
-            //};
             // путь перемещения
             _animSelectDishPath = new PathGeometry();
             _animSelectDishPath.Figures.Add(new PathFigure()
@@ -139,16 +147,29 @@ namespace WpfClient
             };
             cnvAnim.Children.Add(visPath);
 
-            //Path spotFrom = new Path()
-            //{
-            //    Fill = Brushes.Blue,
-            //    Data = new RectangleGeometry(new Rect(0,0,200,150), 10,10),
-            //    //RenderTransformOrigin = new Point(0.5,0.5),
-            //    RenderTransform = transGroup
-            //};
-            //Canvas.SetLeft(spotFrom, -100); Canvas.SetTop(spotFrom, -75);
-            //cnvAnim.Children.Add(spotFrom);
+            // объект перемещения
+            // размеры прямоугольника и углы закругления для изображения и описания блюда берем из свойств приложения
+            double dishImageHeight = (double)AppLib.GetAppGlobalValue("dishImageHeight");
+            double dishImageWidth = (double)AppLib.GetAppGlobalValue("dishImageWidth");
+            double dishImageCornerRadius = (double)AppLib.GetAppGlobalValue("cornerRadiusDishPanel");
+            _animDishImage = new Path();
+            _animDishImage.Data = new RectangleGeometry(new Rect(0, 0, dishImageWidth, dishImageHeight), dishImageCornerRadius, dishImageCornerRadius);
+            _animDishImage.RenderTransform = new TransformGroup()
+            {
+                Children = new TransformCollection() {
+                        new TranslateTransform(),
+                        new RotateTransform(),
+                        new ScaleTransform()}
+            };
+            //_animDishImage.Fill = Brushes.Yellow;
+            _animDishImage.Fill = new VisualBrush();
 
+            Canvas.SetLeft(_animDishImage, -dishImageWidth / 2d); Canvas.SetTop(_animDishImage, -dishImageHeight / 2d);
+            cnvAnim.Children.Add(_animDishImage);
+        }
+
+        private void createStoreboardForDishAnimation()
+        {
             int animSpeed = int.Parse(AppLib.GetAppSetting("SelectDishAnimationSpeed"));  // in msec
             TimeSpan ts = new TimeSpan(0, 0, 0, 0, animSpeed);
 
@@ -157,42 +178,27 @@ namespace WpfClient
             daX.PathGeometry = _animSelectDishPath;
             daX.Duration = ts;
             daX.Source = PathAnimationSource.X;
-            Storyboard.SetTarget(daX, animDishImage);
+            Storyboard.SetTarget(daX, _animDishImage);
             Storyboard.SetTargetProperty(daX, new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[0].(TranslateTransform.X)"));
             DoubleAnimationUsingPath daY = new DoubleAnimationUsingPath();
             daY.PathGeometry = _animSelectDishPath;
             daY.Duration = ts;
             daY.Source = PathAnimationSource.Y;
-            Storyboard.SetTarget(daY, animDishImage);
+            Storyboard.SetTarget(daY, _animDishImage);
             Storyboard.SetTargetProperty(daY, new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[0].(TranslateTransform.Y)"));
 
             // анимация прозрачности
             DoubleAnimation daOpacity = new DoubleAnimation(1, 0, ts);
-            Storyboard.SetTarget(daOpacity, animDishImage);
+            Storyboard.SetTarget(daOpacity, _animDishImage);
             Storyboard.SetTargetProperty(daOpacity, new PropertyPath("(UIElement.Opacity)"));
 
             // анимация масштабирования
-            DoubleAnimation daScaleX = new DoubleAnimation(1, 0.4, ts);
-            Storyboard.SetTarget(daScaleX, animDishImage);
-            Storyboard.SetTargetProperty(daScaleX, new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[2].(ScaleTransform.ScaleX)"));
+            //DoubleAnimation daScaleX = new DoubleAnimation(1, 0.4, ts);
+            //Storyboard.SetTarget(daScaleX, _animDishImage);
+            //Storyboard.SetTargetProperty(daScaleX, new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[2].(ScaleTransform.ScaleX)"));
             //DoubleAnimation daScaleY = new DoubleAnimation(1, 0.4, ts);
             //Storyboard.SetTarget(daScaleY, spotFrom);
             //Storyboard.SetTargetProperty(daScaleY, new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[2].(ScaleTransform.ScaleY)"));
-
-
-            // создать две анимации масштабирования, для ширины и высоты
-            //DoubleAnimationUsingPath daX = new DoubleAnimationUsingPath();
-            //daX.PathGeometry = _animSelectDishPath;
-            //daX.Duration = new Duration(new TimeSpan(0, 0, 0, 0, animSpeed));
-            //daX.Source = PathAnimationSource.X;
-            //Storyboard.SetTarget(daX, spotFrom);
-            //Storyboard.SetTargetProperty(daX, new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[0].(TranslateTransform.X)"));
-            //DoubleAnimationUsingPath daY = new DoubleAnimationUsingPath();
-            //daY.PathGeometry = _animSelectDishPath;
-            //daY.Duration = new Duration(new TimeSpan(0, 0, 0, 0, animSpeed));
-            //daY.Source = PathAnimationSource.Y;
-            //Storyboard.SetTarget(daY, spotFrom);
-            //Storyboard.SetTargetProperty(daY, new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[0].(TranslateTransform.Y)"));
 
             // создать раскладку и добавить в нее анимации
             _animSelectDishStoryBoard = new Storyboard();
@@ -202,21 +208,19 @@ namespace WpfClient
             //_animSelectDishStoryBoard.Children.Add(daScaleX);
             //_animSelectDishStoryBoard.Children.Add(daScaleY);
             _animSelectDishStoryBoard.Completed += animSelectDishStoryBoard_Completed;
-
-            // выключить курсор мыши
-            if ((bool)AppLib.GetAppGlobalValue("MouseCursor") == false)
-            {
-                this.Cursor = Cursors.None;
-                Mouse.OverrideCursor = Cursors.None;
-            }
-
-            AppLib.AppLogger.Trace("Настраиваю визуальные элементы - READY");
+        }
+        // после завершения анимации выбора блюда скрыть панель анимации
+        private void animSelectDishStoryBoard_Completed(object sender, EventArgs e)
+        {
+            cnvAnim.Visibility = Visibility.Hidden;
         }
 
         public List<Canvas> DishesPanels { get { return _dishCanvas; } }
 
         #region работа со списком блюд
-
+        //*********************************
+        //     работа со списком блюд
+        //*********************************
         private void createDishesCanvas(List<AppModel.MenuItem> mFolders)
         {
             #region privates vars
@@ -226,17 +230,18 @@ namespace WpfClient
 
             // углы закругления
             double cornerRadiusButton = (double)AppLib.GetAppGlobalValue("cornerRadiusButton");
-            double cornerRadiusDishPanel = (double)AppLib.GetAppGlobalValue("cornerRadiusDishPanel");
 
             //  РАЗМЕРЫ ПАНЕЛИ БЛЮД(А)
             double dishesPanelWidth = (screenWidth / 6d * 5d);
             double dishPanelWidth = 0.95d * dishesPanelWidth / 3d;
             double dKoefContentWidth = 0.9d;
             double contentPanelWidth = dKoefContentWidth * dishPanelWidth;
+            AppLib.SetAppGlobalValue("dishImageWidth", contentPanelWidth);
             // высота строки заголовка
             double dishPanelHeaderRowHeight = 0.17d * dishPanelWidth;
             // высота строки изображения
             double dishPanelImageRowHeight = 0.7d * dishPanelWidth;
+            AppLib.SetAppGlobalValue("dishImageHeight", dishPanelHeaderRowHeight);
             // высота строки гарниров
             double dishPanelGarnishesRowHeight = 0.2d * dishPanelWidth;
             // высота строки кнопки добавления
@@ -336,7 +341,7 @@ namespace WpfClient
                     setDishPanelHeader(dish, dGrid, dishPanelHeaderFontSize, dishPanelTextFontSize);
 
                     // изображение блюда и описание
-                    setDishDescription(dish, dGrid, cornerRadiusDishPanel, dishPanelDescrButtonSize, dishPanelTextFontSize, dishPanelHeaderFontSize);
+                    setDishDescription(dish, dGrid, dishPanelDescrButtonSize, dishPanelTextFontSize, dishPanelHeaderFontSize);
 
                     // гарниры для Воков
                     if (isExistGarnishes == true)
@@ -432,15 +437,19 @@ namespace WpfClient
             Grid.SetRow(tb, 0); dGrid.Children.Add(tb);
         }
 
-        private void setDishDescription(DishItem dish, Grid dGrid, double cornerRadiusDishPanel, double dishPanelDescrButtonSize, double dishPanelTextFontSize, double dishPanelHeaderFontSize)
+        private void setDishDescription(DishItem dish, Grid dGrid, double dishPanelDescrButtonSize, double dishPanelTextFontSize, double dishPanelHeaderFontSize)
         {
             if (dish.Image == null) return;
 
-            double dishPanelImageRowHeight = dGrid.RowDefinitions[2].Height.Value;
-            Rect rect = new Rect(0, 0, dGrid.Width, dishPanelImageRowHeight);
+            // размеры прямоугольника и углы закругления для изображения и описания блюда
+            double dishImageHeight = (double)AppLib.GetAppGlobalValue("dishImageHeight");
+            double dishImageWidth = (double)AppLib.GetAppGlobalValue("dishImageWidth");
+            double dishImageCornerRadius = (double)AppLib.GetAppGlobalValue("cornerRadiusDishPanel");
+
+            Rect rect = new Rect(0, 0, dGrid.Width, dishImageHeight);
             // изображение
             Path pathImage = new Path();
-            pathImage.Data = new RectangleGeometry(rect, cornerRadiusDishPanel, cornerRadiusDishPanel);
+            pathImage.Data = new RectangleGeometry(rect, dishImageCornerRadius, dishImageCornerRadius);
             pathImage.Fill = new DrawingBrush(
                 new ImageDrawing() { ImageSource = ImageHelper.ByteArrayToBitmapImage(dish.Image), Rect = rect }
                 );
@@ -488,8 +497,8 @@ namespace WpfClient
             {
                 Name = "descrTextBorder",
                 Width = dGrid.Width,
-                Height = dishPanelImageRowHeight,
-                CornerRadius = new CornerRadius(cornerRadiusDishPanel),
+                Height = dishImageHeight,
+                CornerRadius = new CornerRadius(dishImageCornerRadius),
                 Background = lgBrush,
                 Opacity = 0,
                 Visibility = Visibility.Hidden
@@ -773,6 +782,7 @@ namespace WpfClient
             }  // for MenuItem
 
         }
+
         #endregion
 
         #region language bottons
@@ -877,24 +887,22 @@ namespace WpfClient
                 DishItem orderDish = curDishItem.GetCopyForOrder();
                 _currentOrder.Dishes.Add(orderDish);
 
-                // нарисовать путь
+                // анимировать перемещение блюда в корзину
                 Grid gridContent = ((FrameworkElement)sender).Parent as Grid;
                 List<Path> pathArr = gridContent.Children.OfType<Path>().ToList();
-                FrameworkElement dishImage = pathArr[0];
+                Path dishImage = pathArr[0];
                 if (dishImage != null)
                 {
-                    // установить параметры пути движения изображения
+                    // перемещаемое изображение
+                    (_animDishImage.Fill as VisualBrush).Visual = dishImage;
+
+                    // обновление пути анимации
                     PathFigure pf = _animSelectDishPath.Figures[0];
                     BezierSegment bezierSeg = (pf.Segments[0] as BezierSegment);
-
                     // получить точку начала анимации: центр панели блюда
-                    Point fromBasePoint = dishImage.PointToScreen(new Point(0, 0));
-                    Size fromSize = dishImage.RenderSize;
-                    Point fromPoint = new Point(fromBasePoint.X + fromSize.Width / 2.0, fromBasePoint.Y + fromSize.Height / 2.0);
+                    Point fromPoint = dishImage.PointToScreen(new Point(dishImage.ActualWidth / 2d, dishImage.ActualHeight / 2d));
                     Point toPoint = bezierSeg.Point3;
-
-                    // установить значения пути движения
-                    pf.StartPoint = fromPoint;   // начальная точка
+                    pf.StartPoint = fromPoint;   
                     // и опорные точки кривой Безье
                     double dX = fromPoint.X - toPoint.X;
                     double dY = toPoint.Y - fromPoint.Y;
@@ -903,26 +911,8 @@ namespace WpfClient
                     bezierSeg.Point1 = p1;
                     bezierSeg.Point2 = p2;
 
-                    Rect rect = (animDishImage.Data as RectangleGeometry).Rect;
-                    rect.Width = 150; rect.Height = 100;
-                    animDishImage.Width = 150;
-                    animDishImage.Height = 100;
-
                     cnvAnim.Visibility = Visibility.Visible;
                     _animSelectDishStoryBoard.Begin();
-
-                    //            double dishPanelImageRowHeight = dGrid.RowDefinitions[2].Height.Value;
-                    //Rect rect = new Rect(0, 0, dGrid.Width, dishPanelImageRowHeight);
-                    //// изображение
-                    //System.Windows.Shapes.Path pathImage = new System.Windows.Shapes.Path();
-                    //pathImage.Data = new RectangleGeometry(rect, cornerRadiusDishPanel, cornerRadiusDishPanel);
-                    //pathImage.Fill = new DrawingBrush(
-                    //    new ImageDrawing() { ImageSource = ImageHelper.ByteArrayToBitmapImage(dish.Image), Rect = rect }
-                    //    );
-                    ////pathImage.Effect = new DropShadowEffect();
-                    //// добавить в контейнер
-                    //Grid.SetRow(pathImage, 2); dGrid.Children.Add(pathImage);
-
                 }
 
                 // и обновить стоимость заказа
@@ -967,11 +957,6 @@ namespace WpfClient
             } // if else
         }
 
-        // после завершения анимации выбора блюда скрыть панель анимации
-        private void animSelectDishStoryBoard_Completed(object sender, EventArgs e)
-        {
-            cnvAnim.Visibility = Visibility.Hidden;
-        }
         #endregion
 
         #region dish list behaviour
