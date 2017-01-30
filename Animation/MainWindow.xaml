@@ -6,43 +6,48 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:Animation"
         mc:Ignorable="d"
-        Title="MainWindow" Height="671.428" Width="891.524">
+        Title="MainWindow" Height="671.428" Width="888.881">
 
     <Window.Resources>
         <local:GetCentralPointConverter x:Key="getCentralPointConverter"/>
         <local:StringToPointConverter x:Key="stringToPointConverter"/>
         <local:ControlToRectConverter x:Key="controlToRectConverter"/>
         <local:NumberToDurationConverter x:Key="numberToDurationConverter"/>
+        <local:BoolToOpacityConverter x:Key="boolToOpacityConverter"/>
 
         <PathGeometry x:Key="pathGeom">
             <PathFigure StartPoint="{Binding ElementName=img, Converter={StaticResource ResourceKey = getCentralPointConverter}}">
-                <BezierSegment Point1="600,100" Point2="400,0" 
-                                           Point3="{Binding Source='200;600', Converter={StaticResource ResourceKey=stringToPointConverter}, Mode=OneWay}"/>
+                <BezierSegment Point1="600,100" Point2="400,0" Point3="100,600"/>
             </PathFigure>
         </PathGeometry>
 
-        <Storyboard x:Key="sbTranslate" Completed="sbTranslate_Completed" FillBehavior="Stop" AutoReverse="True">
-            <DoubleAnimationUsingPath PathGeometry="{StaticResource pathGeom}" Duration="{Binding ElementName=listBox, Path=SelectedValue.Content, Converter={StaticResource numberToDurationConverter}}" Source="X" Storyboard.TargetName="imgMove" Storyboard.TargetProperty="(Path.RenderTransform).(TransformGroup.Children)[0].(TranslateTransform.X)"/>
-            <DoubleAnimationUsingPath PathGeometry="{StaticResource pathGeom}" Duration="{Binding ElementName=listBox, Path=SelectedValue.Content, Converter={StaticResource numberToDurationConverter}}" Source="Y" Storyboard.TargetName="imgMove" Storyboard.TargetProperty="(Path.RenderTransform).(TransformGroup.Children)[0].(TranslateTransform.Y)"/>
-            <DoubleAnimation From="1" To="0" Duration="{Binding ElementName=listBox, Path=SelectedValue.Content, Converter={StaticResource numberToDurationConverter}}" Storyboard.TargetName="imgMove" Storyboard.TargetProperty="(Path.Opacity)"/>
+        <Storyboard x:Key="sbTranslate" FillBehavior="Stop" Completed="sbAnim_Completed" DecelerationRatio="{Binding ElementName=txtDec, Path=Text}"  AccelerationRatio="{Binding ElementName=txtAcc, Path=Text}" AutoReverse="{Binding ElementName=chbReverse, Path=IsChecked}">
+            <DoubleAnimationUsingPath PathGeometry="{StaticResource pathGeom}" Duration="{Binding ElementName=listBox, Path=SelectedValue.Content, Converter={StaticResource numberToDurationConverter}}" Source="X" Storyboard.TargetName="canvasAnim" Storyboard.TargetProperty="RenderTransform.X"/>
+            <DoubleAnimationUsingPath PathGeometry="{StaticResource pathGeom}" Duration="{Binding ElementName=listBox, Path=SelectedValue.Content, Converter={StaticResource numberToDurationConverter}}" Source="Y" Storyboard.TargetName="canvasAnim" Storyboard.TargetProperty="RenderTransform.Y"/>
+
+            <DoubleAnimation From="1" To="{Binding ElementName=chbOpacity, Path=IsChecked, Converter={StaticResource boolToOpacityConverter}}" Duration="{Binding ElementName=listBox, Path=SelectedValue.Content, Converter={StaticResource numberToDurationConverter}}" Storyboard.TargetName="imgAnim" Storyboard.TargetProperty="(Path.Opacity)"/>
         </Storyboard>
 
-        <Storyboard x:Key="sbRotate" FillBehavior="Stop" AutoReverse="True" Completed="sbRotate_Completed">
-            <DoubleAnimation Storyboard.TargetName="imgRotate" Storyboard.TargetProperty="RenderTransform.Angle" From="0" To="360" Duration="{Binding ElementName=listBox, Path=SelectedValue.Content, Converter={StaticResource numberToDurationConverter}}"/>
-            <DoubleAnimationUsingPath PathGeometry="{StaticResource pathGeom}" Duration="{Binding ElementName=listBox, Path=SelectedValue.Content, Converter={StaticResource numberToDurationConverter}}" Source="X" Storyboard.TargetName="canvasRotate" Storyboard.TargetProperty="RenderTransform.X"/>
-            <DoubleAnimationUsingPath PathGeometry="{StaticResource pathGeom}" Duration="{Binding ElementName=listBox, Path=SelectedValue.Content, Converter={StaticResource numberToDurationConverter}}" Source="Y" Storyboard.TargetName="canvasRotate" Storyboard.TargetProperty="RenderTransform.Y"/>
-            <DoubleAnimation From="1" To="0" Duration="{Binding ElementName=listBox, Path=SelectedValue.Content, Converter={StaticResource numberToDurationConverter}}" Storyboard.TargetName="imgRotate" Storyboard.TargetProperty="(Path.Opacity)"/>
+        <Storyboard x:Key="sbRotate" FillBehavior="Stop" Completed="sbAnim_Completed" DecelerationRatio="{Binding ElementName=txtDec, Path=Text}"  AccelerationRatio="{Binding ElementName=txtAcc, Path=Text}" AutoReverse="{Binding ElementName=chbReverse, Path=IsChecked}">
+            <DoubleAnimationUsingPath PathGeometry="{StaticResource pathGeom}" Duration="{Binding ElementName=listBox, Path=SelectedValue.Content, Converter={StaticResource numberToDurationConverter}}" Source="X" Storyboard.TargetName="canvasAnim" Storyboard.TargetProperty="RenderTransform.X"/>
+            <DoubleAnimationUsingPath PathGeometry="{StaticResource pathGeom}" Duration="{Binding ElementName=listBox, Path=SelectedValue.Content, Converter={StaticResource numberToDurationConverter}}" Source="Y" Storyboard.TargetName="canvasAnim" Storyboard.TargetProperty="RenderTransform.Y"/>
+
+            <DoubleAnimation Storyboard.TargetName="imgAnim" Storyboard.TargetProperty="(Path.RenderTransform).(TransformGroup.Children)[0].Angle" From="0" To="360" Duration="{Binding ElementName=listBox, Path=SelectedValue.Content, Converter={StaticResource numberToDurationConverter}}"/>
+
+            <DoubleAnimation From="1" To="{Binding ElementName=chbOpacity, Path=IsChecked, Converter={StaticResource boolToOpacityConverter}}" Duration="{Binding ElementName=listBox, Path=SelectedValue.Content, Converter={StaticResource numberToDurationConverter}}" Storyboard.TargetName="imgAnim" Storyboard.TargetProperty="(Path.Opacity)"/>
         </Storyboard>
 
-        <Storyboard x:Key="sbScale" FillBehavior="Stop" AutoReverse="True" Completed="sbScale_Completed">
-            <DoubleAnimation Storyboard.TargetName="imgScale" Storyboard.TargetProperty="RenderTransform.ScaleX" From="1" To="0.2" Duration="{Binding ElementName=listBox, Path=SelectedValue.Content, Converter={StaticResource numberToDurationConverter}}"/>
-            <DoubleAnimation Storyboard.TargetName="imgScale" Storyboard.TargetProperty="RenderTransform.ScaleY" From="1" To="0.2" Duration="{Binding ElementName=listBox, Path=SelectedValue.Content, Converter={StaticResource numberToDurationConverter}}"/>
-            <DoubleAnimationUsingPath PathGeometry="{StaticResource pathGeom}" Duration="{Binding ElementName=listBox, Path=SelectedValue.Content, Converter={StaticResource numberToDurationConverter}}" Source="X" Storyboard.TargetName="canvasScale" Storyboard.TargetProperty="RenderTransform.X"/>
-            <DoubleAnimationUsingPath PathGeometry="{StaticResource pathGeom}" Duration="{Binding ElementName=listBox, Path=SelectedValue.Content, Converter={StaticResource numberToDurationConverter}}" Source="Y" Storyboard.TargetName="canvasScale" Storyboard.TargetProperty="RenderTransform.Y"/>
-            <DoubleAnimation From="1" To="0" Duration="{Binding ElementName=listBox, Path=SelectedValue.Content, Converter={StaticResource numberToDurationConverter}}" Storyboard.TargetName="imgScale" Storyboard.TargetProperty="(Path.Opacity)"/>
+        <Storyboard x:Key="sbScale" FillBehavior="Stop" Completed="sbAnim_Completed" DecelerationRatio="{Binding ElementName=txtDec, Path=Text}"  AccelerationRatio="{Binding ElementName=txtAcc, Path=Text}" AutoReverse="{Binding ElementName=chbReverse, Path=IsChecked}">
+            <DoubleAnimationUsingPath PathGeometry="{StaticResource pathGeom}" Duration="{Binding ElementName=listBox, Path=SelectedValue.Content, Converter={StaticResource numberToDurationConverter}}" Source="X" Storyboard.TargetName="canvasAnim" Storyboard.TargetProperty="RenderTransform.X"/>
+            <DoubleAnimationUsingPath PathGeometry="{StaticResource pathGeom}" Duration="{Binding ElementName=listBox, Path=SelectedValue.Content, Converter={StaticResource numberToDurationConverter}}" Source="Y" Storyboard.TargetName="canvasAnim" Storyboard.TargetProperty="RenderTransform.Y"/>
+
+            <DoubleAnimation Storyboard.TargetName="imgAnim" Storyboard.TargetProperty="(Path.RenderTransform).(TransformGroup.Children)[1].ScaleX" From="1" To="0.2" Duration="{Binding ElementName=listBox, Path=SelectedValue.Content, Converter={StaticResource numberToDurationConverter}}"/>
+            <DoubleAnimation Storyboard.TargetName="imgAnim" Storyboard.TargetProperty="(Path.RenderTransform).(TransformGroup.Children)[1].ScaleY" From="1" To="0.2" Duration="{Binding ElementName=listBox, Path=SelectedValue.Content, Converter={StaticResource numberToDurationConverter}}"/>
+
+            <DoubleAnimation From="1" To="{Binding ElementName=chbOpacity, Path=IsChecked, Converter={StaticResource boolToOpacityConverter}}" Duration="{Binding ElementName=listBox, Path=SelectedValue.Content, Converter={StaticResource numberToDurationConverter}}" Storyboard.TargetName="imgAnim" Storyboard.TargetProperty="(Path.Opacity)"/>
         </Storyboard>
 
-        <Storyboard x:Key="sbAnim" FillBehavior="Stop" Completed="sbAnim_Completed" DecelerationRatio="0.3"  AccelerationRatio="0.7">
+        <Storyboard x:Key="sbAnim" FillBehavior="Stop" Completed="sbAnim_Completed" DecelerationRatio="{Binding ElementName=txtDec, Path=Text}"  AccelerationRatio="{Binding ElementName=txtAcc, Path=Text}" AutoReverse="{Binding ElementName=chbReverse, Path=IsChecked}">
             <DoubleAnimationUsingPath PathGeometry="{StaticResource pathGeom}" Duration="{Binding ElementName=listBox, Path=SelectedValue.Content, Converter={StaticResource numberToDurationConverter}}" Source="X" Storyboard.TargetName="canvasAnim" Storyboard.TargetProperty="RenderTransform.X"/>
             <DoubleAnimationUsingPath PathGeometry="{StaticResource pathGeom}" Duration="{Binding ElementName=listBox, Path=SelectedValue.Content, Converter={StaticResource numberToDurationConverter}}" Source="Y" Storyboard.TargetName="canvasAnim" Storyboard.TargetProperty="RenderTransform.Y"/>
 
@@ -51,71 +56,21 @@
             <DoubleAnimation Storyboard.TargetName="imgAnim" Storyboard.TargetProperty="(Path.RenderTransform).(TransformGroup.Children)[1].ScaleX" From="1" To="0.2" Duration="{Binding ElementName=listBox, Path=SelectedValue.Content, Converter={StaticResource numberToDurationConverter}}"/>
             <DoubleAnimation Storyboard.TargetName="imgAnim" Storyboard.TargetProperty="(Path.RenderTransform).(TransformGroup.Children)[1].ScaleY" From="1" To="0.2" Duration="{Binding ElementName=listBox, Path=SelectedValue.Content, Converter={StaticResource numberToDurationConverter}}"/>
 
-            <DoubleAnimation From="1" To="0" Duration="{Binding ElementName=listBox, Path=SelectedValue.Content, Converter={StaticResource numberToDurationConverter}}" Storyboard.TargetName="imgAnim" Storyboard.TargetProperty="(Path.Opacity)"/>
+            <DoubleAnimation From="1" To="{Binding ElementName=chbOpacity, Path=IsChecked, Converter={StaticResource boolToOpacityConverter}}" Duration="{Binding ElementName=listBox, Path=SelectedValue.Content, Converter={StaticResource numberToDurationConverter}}" Storyboard.TargetName="imgAnim" Storyboard.TargetProperty="(Path.Opacity)"/>
         </Storyboard>
 
 
     </Window.Resources>
 
     <Grid x:Name="canvas">
-        <Canvas Background="AliceBlue" Margin="-10,0,10,0">
+        <Canvas Background="AliceBlue" >
             <Image x:Name="img" Source="суп харчо.jpg" Height="150" Width="200" Stretch="Fill" Canvas.Left="587" Canvas.Top="10"/>
-
-            <Path x:Name="imgMove" Stroke="Blue" StrokeThickness="2">
-                <Path.Data>
-                    <RectangleGeometry RadiusX="15" RadiusY="15" Rect="{Binding ElementName=img, Converter={StaticResource controlToRectConverter}}"/>
-                </Path.Data>
-                <Path.Fill>
-                    <VisualBrush Visual="{Binding ElementName=img}"/>
-                </Path.Fill>
-                <Path.RenderTransform>
-                    <TransformGroup>
-                        <TranslateTransform/>
-                        <RotateTransform/>
-                        <ScaleTransform/>
-                    </TransformGroup>
-                </Path.RenderTransform>
-            </Path>
-
-            <Canvas x:Name="canvasRotate">
-                <Canvas.RenderTransform>
-                    <TranslateTransform/>
-                </Canvas.RenderTransform>
-                <Path x:Name="imgRotate" Stroke="Magenta" StrokeThickness="2" RenderTransformOrigin="0.5,0.5">
-                    <Path.Data>
-                        <RectangleGeometry RadiusX="15" RadiusY="15" Rect="{Binding ElementName=img, Converter={StaticResource controlToRectConverter}}"/>
-                    </Path.Data>
-                    <Path.Fill>
-                        <VisualBrush Visual="{Binding ElementName=img}"/>
-                    </Path.Fill>
-                    <Path.RenderTransform>
-                        <RotateTransform/>
-                    </Path.RenderTransform>
-                </Path>
-            </Canvas>
-
-            <Canvas x:Name="canvasScale">
-                <Canvas.RenderTransform>
-                    <TranslateTransform/>
-                </Canvas.RenderTransform>
-                <Path x:Name="imgScale" Stroke="DarkGreen" StrokeThickness="2" RenderTransformOrigin="0.5,0.5">
-                    <Path.Data>
-                        <RectangleGeometry RadiusX="15" RadiusY="15" Rect="{Binding ElementName=img, Converter={StaticResource controlToRectConverter}}"/>
-                    </Path.Data>
-                    <Path.Fill>
-                        <VisualBrush Visual="{Binding ElementName=img}"/>
-                    </Path.Fill>
-                    <Path.RenderTransform>
-                        <ScaleTransform/>
-                    </Path.RenderTransform>
-                </Path>
-            </Canvas>
 
             <Canvas x:Name="canvasAnim">
                 <Canvas.RenderTransform>
                     <TranslateTransform/>
                 </Canvas.RenderTransform>
-                <Path x:Name="imgAnim" Stroke="Red" StrokeThickness="2" RenderTransformOrigin="0.5,0.5">
+                <Path x:Name="imgAnim" Stroke="Magenta" StrokeThickness="2" RenderTransformOrigin="0.5,0.5">
                     <Path.Data>
                         <RectangleGeometry RadiusX="15" RadiusY="15" Rect="{Binding ElementName=img, Converter={StaticResource controlToRectConverter}}"/>
                     </Path.Data>
@@ -131,22 +86,33 @@
                 </Path>
             </Canvas>
 
-
             <Path x:Name="animPath" Stroke="Green" StrokeThickness="2" Data="{StaticResource pathGeom}"/>
 
             <Button x:Name="btnTranslate" Content="перемещение" Canvas.Left="500" Canvas.Top="400" Click="btnTranslate_Click"/>
             <Button x:Name="btnRotate" Content="вращение" Canvas.Left="500" Canvas.Top="450" Click="btnRotate_Click"/>
             <Button x:Name="btnScale" Content="масштаб" Canvas.Left="500" Canvas.Top="500" Click="btnScale_Click"/>
             <Button x:Name="btnAnim" Content="все трансформации" Canvas.Left="500" Canvas.Top="550" Click="btnAnim_Click"/>
-            <ListBox x:Name="listBox" Height="100" Canvas.Left="737" Canvas.Top="472" Width="50" SelectedIndex="5">
+
+            <TextBlock Canvas.Left="680" Canvas.Top="430">sec</TextBlock>
+            <ListBox x:Name="listBox" Height="130" Canvas.Left="670" Canvas.Top="450" Width="60" SelectedIndex="5">
                 <ListBoxItem>0,5</ListBoxItem>
                 <ListBoxItem>1,0</ListBoxItem>
                 <ListBoxItem>1,5</ListBoxItem>
                 <ListBoxItem>2,0</ListBoxItem>
                 <ListBoxItem>2,5</ListBoxItem>
                 <ListBoxItem>3,0</ListBoxItem>
+                <ListBoxItem>5,0</ListBoxItem>
+                <ListBoxItem>7,0</ListBoxItem>
+                <ListBoxItem>10,0</ListBoxItem>
             </ListBox>
-            <TextBlock x:Name="textBlock" Canvas.Left="737" TextWrapping="Wrap" Text="sec" Canvas.Top="450"/>
+
+            <CheckBox x:Name="chbReverse" Canvas.Left="670" Canvas.Top="370" Content="AutoReverse"/>
+            <CheckBox x:Name="chbOpacity" Canvas.Left="670" Canvas.Top="400" Content="Opacity"/>
+
+            <Label Canvas.Left="670" Canvas.Top="308" Target="{Binding ElementName=txtAcc}">_AccelerationRatio</Label>
+            <TextBox x:Name="txtAcc" Canvas.Left="780"  Canvas.Top="312" Width="50" Text="0"/>
+            <Label Canvas.Left="670" Canvas.Top="335" Target="{Binding ElementName=txtDec}">_DecelerationRatio</Label>
+            <TextBox x:Name="txtDec" Canvas.Left="780"  Canvas.Top="339" Width="50" Text="0"/>
 
         </Canvas>
     </Grid>

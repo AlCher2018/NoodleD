@@ -315,11 +315,14 @@ namespace WpfClient
 
         private void updatePriceOrder()
         {
-            txtOrderPrice.Text = AppLib.GetCostUIText(_currentOrder.GetOrderValue());
+            decimal orderValue = _currentOrder.GetOrderValue();
+            txtOrderPrice.Text = AppLib.GetCostUIText(orderValue);
 
             // также обновить на главном меню
             MainWindow mainWin = (MainWindow)Application.Current.MainWindow;
             mainWin.txtOrderPrice.Text = AppLib.GetCostUIText(_currentOrder.GetOrderValue());
+
+            if (orderValue == 0) closeWin();
         }
 
     }

@@ -180,6 +180,40 @@
         </Grid.ColumnDefinitions>
         <Border Grid.Column="0" Background="#33000000" MouseUp="closeThisWindowHandler"/>
 
+        <!-- канва с анимацией -->
+        <Canvas x:Name="canvasAnim" Grid.ColumnSpan="2" Background="Transparent" Panel.ZIndex="5" Visibility="Hidden">
+            <!-- канва перемещения -->
+            <Canvas x:Name="canvasDish">
+                <Canvas.RenderTransform>
+                    <TranslateTransform/>
+                </Canvas.RenderTransform>
+                <Path x:Name="animImage" Stroke="Magenta" StrokeThickness="0" RenderTransformOrigin="0.5,0.5">
+                    <Path.Data>
+                        <RectangleGeometry/>
+                    </Path.Data>
+                    <Path.Fill>
+                        <VisualBrush/>
+                    </Path.Fill>
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <RotateTransform/>
+                            <ScaleTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+            </Canvas>
+            <!-- путь перемещения -->
+            <Path x:Name="animPath" Stroke="Red" StrokeThickness="2" Visibility="Hidden">
+                <Path.Data>
+                    <PathGeometry>
+                        <PathFigure IsClosed="False">
+                            <BezierSegment IsStroked="True"/>
+                        </PathFigure>
+                    </PathGeometry>
+                </Path.Data>
+            </Path>
+        </Canvas>
+
         <!--грид на блюдах-->
         <Grid Grid.Column="1" x:Name="gridWindow">
             <Grid.RowDefinitions>
@@ -234,7 +268,7 @@
                     Text="{Binding {x:Null}, ConverterParameter=appSet.formPopUpHeaderText1, Converter={StaticResource langDictToText}, Mode=OneWay}"/>
                 <!-- изображение и описание блюда -->
                 <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="2">
-                    <Rectangle DockPanel.Dock="Left" StrokeThickness="0" RadiusX="10" RadiusY="10" Margin="0"
+                    <Rectangle x:Name="dishImage" DockPanel.Dock="Left" StrokeThickness="0" RadiusX="10" RadiusY="10" Margin="0"
                                    Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}, Converter={StaticResource multiplyParamConv}, ConverterParameter=1.33}">
                         <Rectangle.Fill>
                             <ImageBrush ImageSource="{Binding Image}" Stretch="Fill"/>

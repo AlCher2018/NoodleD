@@ -121,7 +121,38 @@
             <ColumnDefinition Width="5*"/>
         </Grid.ColumnDefinitions>
 
-        <Canvas x:Name="cnvAnim" Grid.ColumnSpan="2" Background="Transparent" Panel.ZIndex="5" Visibility="Hidden">
+        <!-- канва с анимацией -->
+        <Canvas x:Name="canvasAnim" Grid.ColumnSpan="2" Background="Transparent" Panel.ZIndex="5" Visibility="Hidden">
+            <!-- канва перемещения -->
+            <Canvas x:Name="canvasDish">
+                <Canvas.RenderTransform>
+                    <TranslateTransform/>
+                </Canvas.RenderTransform>
+                <Path x:Name="animImage" Stroke="Magenta" StrokeThickness="0" RenderTransformOrigin="0.5,0.5">
+                    <Path.Data>
+                        <RectangleGeometry/>
+                    </Path.Data>
+                    <Path.Fill>
+                        <VisualBrush/>
+                    </Path.Fill>
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <RotateTransform/>
+                            <ScaleTransform/>
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+            </Canvas>
+            <!-- путь перемещения -->
+            <Path x:Name="animPath" Stroke="Red" StrokeThickness="2" Visibility="Hidden">
+                <Path.Data>
+                    <PathGeometry>
+                        <PathFigure IsClosed="False">
+                            <BezierSegment IsStroked="True"/>
+                        </PathFigure>
+                    </PathGeometry>
+                </Path.Data>
+            </Path>
         </Canvas>
 
         <Image Grid.Column="1" Source="AppImages\bg 3hor 1920x1080 gauss.png" Stretch="UniformToFill" Opacity="0.3"/>
@@ -205,9 +236,6 @@
                 <StackPanel VerticalAlignment="Center">
                     <TextBlock x:Name="txtOrderPrice" TextAlignment="Center" Foreground="{StaticResource addButtonBackgroundTextColor}" FontWeight="Bold" 
                          FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize1}">
-                        <TextBlock.Effect>
-                            <DropShadowEffect Direction="315" Color="DarkGreen" ShadowDepth="5" BlurRadius="10"/>
-                        </TextBlock.Effect>
                     </TextBlock>
                     <TextBlock x:Name="lblMakeOrderText" Foreground="Black" TextAlignment="Center"
                                Text="{Binding {x:Null}, Converter={StaticResource langDictToText}, ConverterParameter=appSet.btnCreateOrderText, Mode=OneWay}"
