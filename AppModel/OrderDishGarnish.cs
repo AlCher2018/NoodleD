@@ -19,5 +19,6 @@ namespace AppModel
         public System.Guid GarnishGUID { get; set; }
         public int Count { get; set; }
         public System.Guid OrderGUID { get; set; }
+        public Nullable<decimal> Price { get; set; }
     }
 }

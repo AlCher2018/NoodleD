@@ -19,5 +19,6 @@ namespace AppModel
         public System.Guid RowGUID { get; set; }
         public int OrderNumForPrint { get; set; }
         public string BarCodeValue { get; set; }
+        public string LanguageTypeId { get; set; }
     }
 }

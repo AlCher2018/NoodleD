@@ -42,14 +42,23 @@ namespace WpfClient
 
             //******  СТАТИЧЕСКИЕ настройки  ******
             // создание и сохранение ресурсов приложения
-            createAppResources(app);        // определенные в приложении
-            calculateAppSizes();            // вычислить размеры, хранимые в свойствах приложения
-            //******  ДИНАМИЧЕСКИЕ настройки  ******
-            // получение и сохранение внешних ресурсов приложения
-            AppLib.GetSettingsFromConfigFile();     // определенные в config-файле
-            AppLib.ReadSettingFromDB();             // определенные в MS SQL
-            //TestData.mainProc();
-            AppLib.ReadAppDataFromDB();             // определенные в MS SQL
+            try
+            {
+                createAppResources(app);        // определенные в приложении
+                calculateAppSizes();            // вычислить размеры, хранимые в свойствах приложения
+                //******  ДИНАМИЧЕСКИЕ настройки  ******
+                // получение и сохранение внешних ресурсов приложения
+                AppLib.GetSettingsFromConfigFile();     // определенные в config-файле
+                AppLib.ReadSettingFromDB();             // определенные в MS SQL
+
+                //TestData.mainProc();
+                AppLib.ReadAppDataFromDB();             // определенные в MS SQL
+            }
+            catch (Exception)
+            {
+                // сообщения об ошибках находятся в соотв.модулях, здесь только выход из приложения
+                Application.Current.Shutdown(1);
+            }
 
             WpfClient.MainWindow mainWindow = new WpfClient.MainWindow();
             mainWindow.Closed += (object sender, EventArgs e) =>

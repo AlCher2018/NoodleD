@@ -22,6 +22,26 @@ namespace WpfClient
         public static NLog.Logger AppLogger;
         public static System.Timers.Timer IdleTimer;
 
+        #region system info
+        public static string GetAppFileName()
+        {
+            var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            return assembly.ManifestModule.Name;
+        }
+
+        public static string GetAppFullFile()
+        {
+            var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            return assembly.Location;
+        }
+
+        public static string GetAppDirectory()
+        {
+            return AppDomain.CurrentDomain.BaseDirectory;
+        }
+
+        #endregion
+
         #region app settings
         // получить настройки приложения из config-файла
         public static string GetAppSetting(string key)
@@ -293,7 +313,7 @@ namespace WpfClient
                 {
                     AppLib.AppLogger.Fatal("Fatal error: {0}\nSource: {1}\nStackTrace: {2}", e.Message, e.Source, e.StackTrace);
                     MessageBox.Show("Ошибка доступа к данным: " + e.Message + "\nПрограмма будет закрыта.");
-                    Application.Current.Shutdown(1);
+                    throw;
                 }
             }
             AppLib.AppLogger.Trace("Получаю настройки приложения из таблицы Setting ... READY");
@@ -305,7 +325,12 @@ namespace WpfClient
             AppLib.AppLogger.Trace("Получаю из MS SQL главное меню...");
 
             List<AppModel.MenuItem> newMenu = MenuLib.GetMenuMainFolders();
-            if (newMenu == null) throw new Exception("Ошибка создания меню");
+            if (newMenu == null)
+            {
+                AppLib.AppLogger.Fatal("Fatal error: Ошибка создания Главного Меню. Меню не создано. Аварийное завершение приложения.");
+                MessageBox.Show("Ошибка создания меню\nПрограмма будет закрыта.");
+                throw new Exception("Ошибка создания меню");
+            }
 
             // сохранить Главное Меню в свойствах приложения
             List<AppModel.MenuItem> mainMenu = (List<AppModel.MenuItem>)AppLib.GetAppGlobalValue("mainMenu");

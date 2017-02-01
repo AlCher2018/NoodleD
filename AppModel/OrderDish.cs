@@ -18,5 +18,6 @@ namespace AppModel
         public System.Guid OrderGUID { get; set; }
         public System.Guid DishGUID { get; set; }
         public int Count { get; set; }
+        public Nullable<decimal> Price { get; set; }
     }
 }

@@ -103,9 +103,12 @@ namespace WpfClient
             btnScrollUp.HorizontalAlignment = (HorizontalAlignment)v;
 
             List<AppModel.MenuItem> mFolders = (List<AppModel.MenuItem>)AppLib.GetAppGlobalValue("mainMenu");
+
+            AppLib.AppLogger.Trace("- создаю списки блюд по категориям...");
             // создать канву со списком блюд
             createDishesCanvas(mFolders);
-            
+            AppLib.AppLogger.Trace("- создаю списки блюд по категориям... READY");
+
             lstMenuFolders.Focus();
             lstMenuFolders.ItemsSource = mFolders;
             lstMenuFolders.SelectedIndex = 0;
@@ -114,7 +117,9 @@ namespace WpfClient
             selectAppLang(AppLib.AppLang);
 
             // анимация выбора блюда
+            AppLib.AppLogger.Trace("- создаю Объекты анимации выбора блюда...");
             createObjectsForDishAnimation();
+            AppLib.AppLogger.Trace("- создаю Объекты анимации выбора блюда... READY");
 
             // выключить курсор мыши
             if ((bool)AppLib.GetAppGlobalValue("MouseCursor") == false)
@@ -300,11 +305,11 @@ namespace WpfClient
 
             foreach (AppModel.MenuItem mItem in mFolders)
             {
-                if (mItem.Dishes.Count == 0) continue;
                 canvas = new Canvas();
                 canvas.Width = dishesPanelWidth;
-                int iRowsCount = ((mItem.Dishes.Count-1) / 3) + 1;
 
+                int iRowsCount = 0; 
+                if (mItem.Dishes.Count > 0) iRowsCount = ((mItem.Dishes.Count - 1) / 3) + 1;
                 int iRow, iCol;
                 for (int i=0; i < mItem.Dishes.Count; i++)
                 {
@@ -400,14 +405,14 @@ namespace WpfClient
                         }
 
                         Grid.SetRow(grdGarnishes, 4); dGrid.Children.Add(grdGarnishes);
-                    }
+                    }  // if
 
                     // изображения кнопок добавления
                     setDishAddButton(dish, dGrid, dishPanelAddButtonRowHeight, dKoefContentHeight, cornerRadiusButton, dishPanelTextFontSize);
 
                     brd.Children.Add(dGrid); Grid.SetRow(dGrid, 1); Grid.SetColumn(dGrid, 1);
                     canvas.Children.Add(brd);
-                }
+                }  // for
 
                 //canvas.Background = new SolidColorBrush(new Color() { R = (byte)rnd.Next(0,254), G= (byte)rnd.Next(0, 254), B= (byte)rnd.Next(0, 254), A=0xFF });
                 _dishCanvas.Add(canvas);
@@ -781,9 +786,11 @@ namespace WpfClient
             AppModel.MenuItem mItem; DishItem dItem;
             for (int iMenu = 0; iMenu < mFolders.Count; iMenu++)
             {
+                if (iMenu >= _dishCanvas.Count) continue;
                 mItem = mFolders[iMenu];
                 for (int iDish = 0; iDish < mItem.Dishes.Count; iDish++)
                 {
+                    if (iDish >= (_dishCanvas[iMenu] as Canvas).Children.Count) continue;
                     dItem = mItem.Dishes[iDish];
                     isExistGarnishes = (dItem.Garnishes != null);
 
@@ -985,32 +992,13 @@ namespace WpfClient
 
                 bool? dialogResult = popupWin.ShowDialog();
 
-                if ((dialogResult??false) == true)
-                {
-                    // добавить блюдо в заказ
-                    OrderItem curOrder = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
-                    DishItem orderDish = curDishItem.GetCopyForOrder();   // сделать копию блюда со всеми добавками
-                    curOrder.Dishes.Add(orderDish);
-                    // добавить в заказ рекомендации
-                    if ((curDishItem.SelectedRecommends != null) && (curDishItem.SelectedRecommends.Count > 0))
-                    {
-                        foreach (DishItem item in curDishItem.SelectedRecommends)
-                        {
-                            curOrder.Dishes.Add(item);
-                        }
-                    }
-
-                    curDishItem.ClearAllSelections();   // очистить добавки в текущем блюде
-                }   // if
-
                 // очистить выбранный гарнир
                 foreach (MainMenuGarnish item in AppLib.FindVisualChildren<MainMenuGarnish>(gridContent))
                 {
                     if (item.IsSelected == true) item.IsSelected = false;
                 }
-                
-
             } // if else
+
         }
 
         #endregion

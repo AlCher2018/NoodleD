@@ -168,6 +168,21 @@ namespace WpfClient
         // выбор блюда
         private void btnAddDish_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            // добавить блюдо в заказ
+            OrderItem curOrder = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
+            DishItem orderDish = _currentDish.GetCopyForOrder();   // сделать копию блюда со всеми добавками
+            curOrder.Dishes.Add(orderDish);
+            // добавить в заказ рекомендации
+            if ((_currentDish.SelectedRecommends != null) && (_currentDish.SelectedRecommends.Count > 0))
+            {
+                foreach (DishItem item in _currentDish.SelectedRecommends)
+                {
+                    curOrder.Dishes.Add(item);
+                }
+            }
+            // очистить добавки в текущем блюде
+            _currentDish.ClearAllSelections();
+
             // закрыть окно после завершения анимации
             animateDishSelection();
         }

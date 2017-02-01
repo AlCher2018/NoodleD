@@ -37,8 +37,10 @@ namespace WpfClient
             errMessage = null;
 
             // свойства заказа, созадаваемые перед печатью чека:
-            //      OrderNumberForPrint - номер чека для печати
-            //      BarCodeValue - значение штрих-кода, 12 цифр (2 - код источника, 6 - yymmdd, 4 - номер чека для печати)
+            //      1. OrderNumberForPrint - номер чека для печати
+            //      2. BarCodeValue - значение штрих-кода, 12 цифр (6 - yymmdd, 2 - код источника, 4 - номер чека для печати)
+            //      3. LanguageTypeId - язык, который был выбран при создании чека (ua/en/ru)
+            //--------------------------------------------------
 
             // создать номер счета для ПЕЧАТНОГО чека
             string deviceName = (string)AppLib.GetAppGlobalValue("ssdID", string.Empty);
@@ -48,6 +50,7 @@ namespace WpfClient
                 errMessage = "Ошибка конфигурации приложения!" + UserErrMsgSuffix;
                 return false;
             }
+            // 1. OrderNumberForPrint
             int rndFrom = int.Parse(AppLib.GetAppSetting("RandomOrderNumFrom"));       // случайный номер заказа: От
             int rndTo = int.Parse(AppLib.GetAppSetting("RandomOrderNumTo"));           // случайный номер заказа: До
             _order.CreateOrderNumberForPrint(deviceName, rndFrom, rndTo);  // в свойстве OrderNumberForPrint
@@ -58,7 +61,8 @@ namespace WpfClient
                 errMessage = "Ошибка создания номера заказа для печати чека." + UserErrMsgSuffix;
                 return false;
             }
-            // BarCodeValue
+
+            // 2. BarCodeValue
             //    идент.устройства - 2 символа
             if (deviceName.Length <= 2)
                 deviceName = string.Format("{0:D2}", deviceName);
@@ -66,8 +70,11 @@ namespace WpfClient
                 deviceName = deviceName.Substring(0, 2);
             //    дата заказа в формате yyMMdd - 6 символов
             //    номер заказа (для печати - случайный) в формате 0000 - 4 символа
-            _order.BarCodeValue = deviceName + _order.OrderDate.ToString("yyMMdd") + _order.OrderNumberForPrint.ToString("0000");
+            // т.к. в формате EAN-13 если первый символ - 0, то он удаляется, используем в начале дату
+            _order.BarCodeValue = _order.OrderDate.ToString("yyMMdd") + deviceName + _order.OrderNumberForPrint.ToString("0000");
 
+            // 3. LanguageTypeId
+            _order.LanguageTypeId = AppLib.AppLang;
 
             // ширина из config-файла
             int width = (int)AppLib.GetAppGlobalValue("BillPageWidht", 0);

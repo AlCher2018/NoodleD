@@ -13,13 +13,13 @@
         <EntityTypeShape EntityType="NoodleDModel.DishUnit" Width="1.5" PointX="9.75" PointY="6.75" />
         <EntityTypeShape EntityType="NoodleDModel.FieldType" Width="1.5" PointX="0.75" PointY="7.25" />
         <EntityTypeShape EntityType="NoodleDModel.MenuFolder" Width="1.5" PointX="7.75" PointY="9.75" />
-        <EntityTypeShape EntityType="NoodleDModel.Order" Width="1.875" PointX="1.25" PointY="1.125" />
+        <EntityTypeShape EntityType="NoodleDModel.Order" Width="1.875" PointX="1.125" PointY="0.625" />
         <EntityTypeShape EntityType="NoodleDModel.Setting" Width="1.5" PointX="9.75" PointY="9.75" />
         <EntityTypeShape EntityType="NoodleDModel.StringValue" Width="1.5" PointX="3" PointY="6.875" />
         <EntityTypeShape EntityType="NoodleDModel.Terminal" Width="1.875" PointX="0.75" PointY="10.75" />
         <AssociationConnector Association="NoodleDModel.FK_StringValue_FieldType" />
         <EntityTypeShape EntityType="NoodleDModel.DishRecommends" Width="1.5" PointX="10.375" PointY="3.75" />
-        <EntityTypeShape EntityType="NoodleDModel.OrderDish" Width="1.5" PointX="3.875" PointY="0.625" />
+        <EntityTypeShape EntityType="NoodleDModel.OrderDish" Width="1.5" PointX="0.5" PointY="3.5" />
         <EntityTypeShape EntityType="NoodleDModel.OrderDishGarnish" Width="1.5" PointX="2.375" PointY="3.5" />
         <EntityTypeShape EntityType="NoodleDModel.OrderDishIngredient" Width="1.5" PointX="4.375" PointY="3.5" />
       </Diagram>

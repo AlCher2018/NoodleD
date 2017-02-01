@@ -122,10 +122,6 @@
     <Compile Include="PreventTouchToMousePromotion.cs" />
     <Compile Include="PrintBill.cs" />
     <Compile Include="Settings.cs" />
-    <Compile Include="SplashWin.xaml.cs">
-      <DependentUpon>SplashWin.xaml</DependentUpon>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Compile>
     <Compile Include="Startup.cs" />
     <Compile Include="TakeOrder.xaml.cs">
       <DependentUpon>TakeOrder.xaml</DependentUpon>
@@ -162,11 +158,6 @@
     <Page Include="MessageBoxDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="SplashWin.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Page>
     <Page Include="TakeOrder.xaml">
       <SubType>Designer</SubType>

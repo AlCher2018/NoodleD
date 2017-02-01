@@ -15,6 +15,7 @@ namespace AppModel
         public int OrderNumberForPrint { get { return _orderNumberForPrint; } }
 
         public string BarCodeValue { get; set; }
+        public string LanguageTypeId { get; set; }
 
         public DateTime OrderDate { get; set; }
 
@@ -132,7 +133,8 @@ namespace AppModel
                     RowGUID = Guid.NewGuid(),
                     OrderNumForPrint = this.OrderNumberForPrint,
                     OrderDate = this.OrderDate,
-                    BarCodeValue = this.BarCodeValue
+                    BarCodeValue = this.BarCodeValue,
+                    LanguageTypeId = this.LanguageTypeId
                 };
                 db.Order.Add(newOrder);
 
@@ -145,7 +147,8 @@ namespace AppModel
                         {
                             OrderGUID = newOrder.RowGUID,
                             DishGUID = dItem.RowGUID,
-                            Count = dItem.Count
+                            Count = dItem.Count,
+                            Price = dItem.Price
                         };
                         db.OrderDish.Add(oDish);
                         // гарниры
@@ -158,7 +161,8 @@ namespace AppModel
                                     OrderGUID = newOrder.RowGUID,
                                     DishGUID = dItem.RowGUID,
                                     GarnishGUID = garn.RowGUID,
-                                    Count = garn.Count
+                                    Count = garn.Count,
+                                    Price = garn.Price
                                 };
                                 db.OrderDishGarnish.Add(dGarn);
                             }
@@ -173,7 +177,8 @@ namespace AppModel
                                     OrderGUID = newOrder.RowGUID,
                                     DishGUID = dItem.RowGUID,
                                     IngredientGUID = ingr.RowGUID,
-                                    Count = ingr.Count
+                                    Count = ingr.Count,
+                                    Price = ingr.Price
                                 };
                                 db.OrderDishIngredient.Add(dIngr);
                             }  // foreach
