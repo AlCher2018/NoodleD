@@ -21,6 +21,13 @@ namespace WpfClient
             }
             return retVal;
         }
+
+        public static bool IsTrueString(this string src)
+        {
+            string s = src.ToUpper();
+            return (s.Equals("ИСТИНА") || s.Equals("TRUE") || s.Equals("1"));
+        }
+
     }
 
     // расширения класса System.Windows.Media.ImageSource / System.Windows.Controls.Image

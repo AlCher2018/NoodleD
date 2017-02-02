@@ -24,7 +24,6 @@ namespace WpfClient
     /// </summary>
     public partial class DishPopup : Window
     {
-        private bool _dialogResult;
         private DishItem _currentDish;
         List<TextBlock> _tbList;
         List<Viewbox> _vbList;
@@ -48,10 +47,20 @@ namespace WpfClient
 
         private void _animDishSelection_Completed(object sender, EventArgs e)
         {
-            WpfClient.MainWindow mm = (WpfClient.MainWindow)Application.Current.MainWindow;
-            mm.animateOrderPrice();
+            updatePriceAndClose(false);
+        }
 
-            closeWin(true);
+        private void updatePriceAndClose(bool isAnimate)
+        {
+            AppLib.AppLogger.Trace("Выбор Вока: обновление стоимости заказа в главном окне");
+            WpfClient.MainWindow mm = (WpfClient.MainWindow)Application.Current.MainWindow;
+            if (isAnimate == true)
+                mm.animateOrderPrice();
+            else
+                mm.updatePrice();
+
+            AppLib.AppLogger.Trace("Выбор Вока: закрытие всплывашки");
+            closeWin();
         }
 
         // после загрузки окна
@@ -150,28 +159,35 @@ namespace WpfClient
         #region все события закрытие всплывашки
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Escape) closeWin(false);
+            if (e.Key == Key.Escape) closeWin();
         }
 
         private void btnClose_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
-            closeWin(false, e);
+            closeWin(e);
         }
 
         // from XAML
         private void closeThisWindowHandler(object sender, MouseButtonEventArgs e)
         {
-            closeWin(false, e);
+            closeWin(e);
         }
 
 
         // выбор блюда
+        // ****** ??? процедура вызывается 2 раза!!!
+        // если это MouseUp, если PreviewMouseUp - то один раз!!
         private void btnAddDish_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            e.Handled = true;
+
             // добавить блюдо в заказ
             OrderItem curOrder = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
             DishItem orderDish = _currentDish.GetCopyForOrder();   // сделать копию блюда со всеми добавками
             curOrder.Dishes.Add(orderDish);
+
+            //Debug.Print("order.Dishes.Count = " + curOrder.Dishes.Count.ToString());
+
             // добавить в заказ рекомендации
             if ((_currentDish.SelectedRecommends != null) && (_currentDish.SelectedRecommends.Count > 0))
             {
@@ -180,30 +196,29 @@ namespace WpfClient
                     curOrder.Dishes.Add(item);
                 }
             }
-            // очистить добавки в текущем блюде
-            _currentDish.ClearAllSelections();
 
-            // закрыть окно после завершения анимации
-            animateDishSelection();
-        }
-
-        private void closeWin(bool result, RoutedEventArgs e = null)
-        {
-            _dialogResult = result;
-
-            // если просто закрываем окно, то удалить из блюда выбранные добавки и рекомендации
-            if (_dialogResult == false)
+            if ((bool)AppLib.GetAppGlobalValue("isAnimatedSelectVoki"))
             {
-                _currentDish.ClearAllSelections();
+                // закрыть окно после завершения анимации
+                animateDishSelection();
+            }
+            else
+            {
+                updatePriceAndClose(false);
             }
 
+        }
+
+        private void closeWin(RoutedEventArgs e = null)
+        {
             if (e != null) e.Handled = true;
             this.Close();
         }
+
         protected override void OnClosing(CancelEventArgs e)
         {
             base.OnClosing(e);
-            this.DialogResult = _dialogResult;
+            _currentDish.ClearAllSelections();
         }
 
         #endregion
@@ -212,6 +227,7 @@ namespace WpfClient
         // анимировать перемещение блюда в тележку
         private void animateDishSelection()
         {
+            AppLib.AppLogger.Trace("Выбор Вока: вычисление геометрии анимации");
             // перемещаемое изображение
             (animImage.Fill as VisualBrush).Visual = dishImage;
             //animImage.Fill = Brushes.Green;  // debug
@@ -231,9 +247,11 @@ namespace WpfClient
             bezierSeg.Point1 = p1;
             bezierSeg.Point2 = p2;
 
+            AppLib.AppLogger.Trace("Выбор Вока: сделать видимой панель анимации");
             canvasAnim.Visibility = Visibility.Visible;
 
             // установить скорость анимации
+            AppLib.AppLogger.Trace("Выбор Вока: установить скорость анимации");
             double animSpeed = double.Parse(AppLib.GetAppSetting("SelectDishAnimationSpeed"));  // in msec
             TimeSpan ts = TimeSpan.FromMilliseconds(animSpeed);
             foreach (Timeline item in _animDishSelection.Children)
@@ -241,6 +259,7 @@ namespace WpfClient
                 item.Duration = ts;
             }
             // обновление стоимости заказа в анимациях
+            AppLib.AppLogger.Trace("Выбор Вока: старт анимации");
             _animDishSelection.Begin();
 
         }

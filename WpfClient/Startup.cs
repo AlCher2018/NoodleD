@@ -10,6 +10,8 @@ using System.Windows.Media;
 using AppModel;
 using WpfClient.Lib;
 using System.Diagnostics;
+using UserActionLog;
+
 
 namespace WpfClient
 {
@@ -22,8 +24,6 @@ namespace WpfClient
 
             // логгер приложения
             AppLib.AppLogger = NLog.LogManager.GetCurrentClassLogger();
-            // таймер ожидания
-            AppLib.IdleTimer = new System.Timers.Timer();
 
             // проверка соединения с БД
             AppLib.AppLogger.Info("Start application");
@@ -60,25 +60,19 @@ namespace WpfClient
                 Application.Current.Shutdown(1);
             }
 
-            WpfClient.MainWindow mainWindow = new WpfClient.MainWindow();
-            mainWindow.Closed += (object sender, EventArgs e) =>
-                {
-                    AppLib.AppLogger.Info("End application");
-                };
-            mainWindow.Loaded += (object sender, RoutedEventArgs e) =>
-                {
-                    AppLib.RestartIdleTimer();   // запустить таймер ожидания
-                };
-
-            int idleTime = 1000 * (int)AppLib.GetAppGlobalValue("UserIdleTime", 60);
-            AppLib.IdleTimer.Interval = (double)idleTime;
-            AppLib.IdleTimer.Elapsed += (object sender, System.Timers.ElapsedEventArgs e) =>
+            // логгер действий пользователя
+            UserActionsWPF actionIdle = new UserActionsWPF(contentCtrl: null, classAction: ClassActionEnum.IdleEvent);
+            //actionIdle.IdleElapseEvent += AppLib.ActionLog_IdleElapseEvent;
+            string sBuf = AppLib.GetAppSetting("UserIdleTime");
+            if ((sBuf != null) && (sBuf != "0"))    // условия запуска таймера
             {
-                if (mainWindow.Dispatcher.CheckAccess() == false) // CheckAccess returns true if you're on the dispatcher thread
-                {
-                    //mainWindow.Dispatcher.Invoke(AppLib.ReDrawApp);
-                }
-            };
+                int idleSec = int.Parse(sBuf);
+                actionIdle.IdleSeconds = idleSec;
+            }
+            AppLib.SetAppGlobalValue("actionIdle", actionIdle);
+
+            // главное окно приложения
+            WpfClient.MainWindow mainWindow = new WpfClient.MainWindow();
 
             app.Run(mainWindow);
         }

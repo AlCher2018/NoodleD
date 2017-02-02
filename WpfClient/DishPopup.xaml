@@ -279,13 +279,12 @@
                             <!-- наименование, цена, маркеры -->
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
                                 <TextBlock x:Name="txtDishName" FontWeight="Bold"
-                                           Text="{Binding langNames, Converter={StaticResource langDictToText}}"
+                                           Text="{Binding langNames, Converter={StaticResource langDictToText}}" TextWrapping="Wrap"
                                            FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize3, Mode=OneWay}"/>
                                 <TextBlock x:Name="txtDishPrice1" FontWeight="Bold" Margin="6,0,0,0"
                                                            Text="{Binding SelectedGarnishes, Converter={StaticResource garnishPriceConverter}, ConverterParameter=1, StringFormat={StaticResource priceFormatString}, TargetNullValue=''}" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize3, Mode=OneWay}"/>
                                 <!--маркеры блюда-->
                                 <ListBox ItemsSource="{Binding Marks}" BorderThickness="0" Background="Transparent" Margin="10,0,0,10" SnapsToDevicePixels="True" Focusable="False" IsHitTestVisible="True" ScrollViewer.CanContentScroll="False" FocusVisualStyle="{x:Null}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                                 Height="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize4, Mode=OneWay}"
                                  >
                                     <ListBox.ItemContainerStyle>
                                         <Style TargetType="ListBoxItem">
@@ -297,7 +296,7 @@
                                     </ListBox.ItemContainerStyle>
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
-                                            <Image Source="{Binding Image}"/>
+                                            <Image Source="{Binding Image}" Width="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize2, Mode=OneWay}" Stretch="Uniform"/>
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
                                     <ListBox.ItemsPanel>
@@ -326,9 +325,7 @@
                                 <!-- количество и ед.изм -->
                                 <TextBlock Text="{Binding UnitCount}"
                                                            FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize4, Mode=OneWay}"/>
-                                <TextBlock Margin="6,0,0,0"
-                                                           Text="{Binding langUnitNames, Converter={StaticResource langDictToText}}"
-                                                           FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize4, Mode=OneWay}"/>
+                                <TextBlock Margin="6,0,0,0" Text="{Binding langUnitNames, Converter={StaticResource langDictToText}}" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize4, Mode=OneWay}"/>
                             </StackPanel>
                         </StackPanel>
                         <TextBlock Grid.Column="0" VerticalAlignment="Bottom" TextWrapping="Wrap" Margin="0,0,0,-5"           Text="{Binding langDescriptions, Converter={StaticResource langDictToText}}"
@@ -336,9 +333,7 @@
                     </Grid>
                 </StackPanel>
 
-                <!--Раздел 2. ИНГРЕДИЕНТЫ 
-                
-                -->
+                <!--Раздел 2. ИНГРЕДИЕНТЫ -->
                 <TextBlock Grid.Column="1" Grid.Row="4" Style="{StaticResource sectionHeaderStyle}"
                         Text="{Binding {x:Null}, ConverterParameter=appSet.formPopUpHeaderText2, Converter={StaticResource langDictToText}}"/>
                 <ListBox x:Name="listIngredients" Grid.Column="1" Grid.Row="5" Style="{StaticResource addingsListBoxStyle}" 
@@ -370,7 +365,7 @@
                         <ColumnDefinition Width="1.2*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <Grid x:Name="gridAddButton" Grid.Row="1" Grid.Column="1">
+                    <Grid x:Name="gridAddButton" Grid.Row="1" Grid.Column="1" PreviewMouseUp="btnAddDish_MouseUp">
                         <!-- грид отрисовки кнопки -->
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -380,8 +375,7 @@
                                 CornerRadius="{Binding Converter={StaticResource cornerRadiusLeft}, Mode=OneWay}">
                             <TextBlock x:Name="txtDishPrice" Style="{StaticResource addButtonTextStyle}" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize2, Mode=OneWay}"/>
                         </Border>
-                        <Border Grid.Column="1" Background="{StaticResource addButtonBackgroundTextColor}"  CornerRadius="{Binding Converter={StaticResource cornerRadiusRight}, Mode=OneWay}"
-                                    MouseUp="btnAddDish_MouseUp">
+                        <Border Grid.Column="1" Background="{StaticResource addButtonBackgroundTextColor}"  CornerRadius="{Binding Converter={StaticResource cornerRadiusRight}, Mode=OneWay}">
                             <TextBlock Style="{StaticResource addButtonTextStyle}"
                                 Text="{Binding {x:Null}, ConverterParameter=appSet.btnSelectDishText, Converter={StaticResource langDictToText}}" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize4, Mode=OneWay}"/>
                         </Border>

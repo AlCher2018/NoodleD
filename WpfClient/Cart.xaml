@@ -108,13 +108,14 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                            <!--1. описание, цена, маркеры, гарнир, колич.--> 
-                        <StackPanel Grid.Column="1" Grid.Row="0">
-                            <!--описание, цена, маркеры-->
-                            <WrapPanel Orientation="Horizontal" >
-                                <TextBlock FontWeight="Bold"
+                        
+                            <!--1. наименование, цена, маркеры, гарнир, колич.--> 
+                        <StackPanel Grid.Column="1" Grid.Row="0" HorizontalAlignment="Left">
+                            <!--наименование, цена, маркеры-->
+                            <WrapPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                <TextBlock FontWeight="Bold" TextWrapping="Wrap"
                                             Text="{Binding langNames, Converter={StaticResource langDictToText}}" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize3, Mode=OneWay}"/>
-                                <TextBlock FontWeight="Bold" Margin="6,0,0,0"
+                                <TextBlock FontWeight="Bold" Margin="6,0,0,0" TextWrapping="Wrap"
                                             Text="{Binding SelectedGarnishes, Converter={StaticResource garnishPriceConverter}, ConverterParameter=1, StringFormat={StaticResource priceFormatString}, TargetNullValue=''}" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize3, Mode=OneWay}"/>
                                 <!--маркеры блюда-->
                                 <ListBox ItemsSource="{Binding Marks}" BorderThickness="0" Background="Transparent" SnapsToDevicePixels="True" Focusable="False" IsHitTestVisible="True" ScrollViewer.CanContentScroll="False" FocusVisualStyle="{x:Null}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled"
@@ -142,6 +143,7 @@
                                 </ListBox>
 
                             </WrapPanel>
+                            
                             <!-- гарнир -->
                             <TextBlock Text="{Binding SelectedGarnishes, Converter={StaticResource garnishLangTextConverter}, ConverterParameter=1}" 
                                        FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize5, Mode=OneWay}">
@@ -158,6 +160,7 @@
                                     </Style>
                                 </TextBlock.Style>
                             </TextBlock>
+                            
                             <!-- количество и ед.изм -->
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="{Binding UnitCount}" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize5, Mode=OneWay}"/>

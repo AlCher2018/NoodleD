@@ -15,14 +15,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfApplication1", "WpfAppli
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{206466DD-58F0-4A56-9FCD-AE21A6F8903B}"
 	ProjectSection(SolutionItems) = preProject
-		Performance1.psess = Performance1.psess
-		..\..\..\SQL Server Management Studio\изменение изображения блюд в БД.sql = ..\..\..\SQL Server Management Studio\изменение изображения блюд в БД.sql
 		D:\NoodleD\настройки приложения из 1С.docx = D:\NoodleD\настройки приложения из 1С.docx
 		полезности.txt = полезности.txt
 		D:\NoodleD\Структура хранения меню для устройства самообслуживания.docx = D:\NoodleD\Структура хранения меню для устройства самообслуживания.docx
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Animation", "Animation\Animation.csproj", "{7F679288-C195-415B-8A67-68AD8F476B3B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserActionLog", "UserActionLog\UserActionLog.csproj", "{7D843AE8-A3ED-42AE-9EB7-22EA3C7EC733}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "NoodleDSetup", "NoodleDSetup\NoodleDSetup.vdproj", "{1AFE363F-C72A-44DE-AEAF-903BFA64668E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -54,6 +56,12 @@ Global
 		{7F679288-C195-415B-8A67-68AD8F476B3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7F679288-C195-415B-8A67-68AD8F476B3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7F679288-C195-415B-8A67-68AD8F476B3B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D843AE8-A3ED-42AE-9EB7-22EA3C7EC733}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D843AE8-A3ED-42AE-9EB7-22EA3C7EC733}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D843AE8-A3ED-42AE-9EB7-22EA3C7EC733}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D843AE8-A3ED-42AE-9EB7-22EA3C7EC733}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1AFE363F-C72A-44DE-AEAF-903BFA64668E}.Debug|Any CPU.ActiveCfg = Debug
+		{1AFE363F-C72A-44DE-AEAF-903BFA64668E}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

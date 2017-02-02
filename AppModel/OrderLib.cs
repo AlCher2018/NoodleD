@@ -151,6 +151,16 @@ namespace AppModel
                             Price = dItem.Price
                         };
                         db.OrderDish.Add(oDish);
+                        try
+                        {
+                            db.SaveChanges();
+                        }
+                        catch (Exception e)
+                        {
+                            errMsg = string.Format("Message: {0}\n\tStackTrace: {1}\n\tSource: {2}\n\tInnerException", e.Message, e.StackTrace, e.Source, e.InnerException.ToString());
+                            retVal = false;
+                        }
+
                         // гарниры
                         if (dItem.SelectedGarnishes != null)
                         {
@@ -162,7 +172,8 @@ namespace AppModel
                                     DishGUID = dItem.RowGUID,
                                     GarnishGUID = garn.RowGUID,
                                     Count = garn.Count,
-                                    Price = garn.Price
+                                    Price = garn.Price,
+                                    OrderDishId = oDish.Id
                                 };
                                 db.OrderDishGarnish.Add(dGarn);
                             }
@@ -178,7 +189,8 @@ namespace AppModel
                                     DishGUID = dItem.RowGUID,
                                     IngredientGUID = ingr.RowGUID,
                                     Count = ingr.Count,
-                                    Price = ingr.Price
+                                    Price = ingr.Price,
+                                    OrderDishId = oDish.Id
                                 };
                                 db.OrderDishIngredient.Add(dIngr);
                             }  // foreach

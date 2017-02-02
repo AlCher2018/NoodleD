@@ -39,7 +39,7 @@ namespace WpfClient
 
         private void btnOk_Click(object sender, RoutedEventArgs e)
         {
-            this.DialogResult = true;
+            this.DialogResult = true;  // установка DialogResult закрывает окно
         }
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)

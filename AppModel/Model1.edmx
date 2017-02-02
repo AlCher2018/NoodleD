@@ -120,6 +120,7 @@
           <Property Name="GarnishGUID" Type="uniqueidentifier" Nullable="false" />
           <Property Name="Count" Type="int" Nullable="false" />
           <Property Name="Price" Type="money" />
+          <Property Name="OrderDishId" Type="int" />
         </EntityType>
         <EntityType Name="OrderDishIngredient">
           <Key>
@@ -131,6 +132,7 @@
           <Property Name="IngredientGUID" Type="uniqueidentifier" Nullable="false" />
           <Property Name="Count" Type="int" Nullable="false" />
           <Property Name="Price" Type="money" />
+          <Property Name="OrderDishId" Type="int" />
         </EntityType>
         <EntityType Name="Setting">
           <Key>
@@ -398,6 +400,7 @@ warning 6035: The relationship 'FK_DishRecommends_Dish1' has columns that are no
           <Property Name="Count" Type="Int32" Nullable="false" />
           <Property Name="OrderGUID" Type="Guid" Nullable="false" />
           <Property Name="Price" Type="Decimal" Precision="19" Scale="4" />
+          <Property Name="OrderDishId" Type="Int32" />
         </EntityType>
         <EntityType Name="OrderDishIngredient">
           <Key>
@@ -409,6 +412,7 @@ warning 6035: The relationship 'FK_DishRecommends_Dish1' has columns that are no
           <Property Name="Count" Type="Int32" Nullable="false" />
           <Property Name="OrderGUID" Type="Guid" Nullable="false" />
           <Property Name="Price" Type="Decimal" Precision="19" Scale="4" />
+          <Property Name="OrderDishId" Type="Int32" />
         </EntityType>
         </Schema>
     </edmx:ConceptualModels>
@@ -569,6 +573,7 @@ warning 6035: The relationship 'FK_DishRecommends_Dish1' has columns that are no
           <EntitySetMapping Name="OrderDishGarnish">
             <EntityTypeMapping TypeName="NoodleDModel.OrderDishGarnish">
               <MappingFragment StoreEntitySet="OrderDishGarnish">
+                <ScalarProperty Name="OrderDishId" ColumnName="OrderDishId" />
                 <ScalarProperty Name="Price" ColumnName="Price" />
                 <ScalarProperty Name="OrderGUID" ColumnName="OrderGUID" />
                 <ScalarProperty Name="Count" ColumnName="Count" />
@@ -581,6 +586,7 @@ warning 6035: The relationship 'FK_DishRecommends_Dish1' has columns that are no
           <EntitySetMapping Name="OrderDishIngredient">
             <EntityTypeMapping TypeName="NoodleDModel.OrderDishIngredient">
               <MappingFragment StoreEntitySet="OrderDishIngredient">
+                <ScalarProperty Name="OrderDishId" ColumnName="OrderDishId" />
                 <ScalarProperty Name="Price" ColumnName="Price" />
                 <ScalarProperty Name="OrderGUID" ColumnName="OrderGUID" />
                 <ScalarProperty Name="Count" ColumnName="Count" />

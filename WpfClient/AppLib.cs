@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -20,7 +21,6 @@ namespace WpfClient
     {
         // постоянные глобальные объекты
         public static NLog.Logger AppLogger;
-        public static System.Timers.Timer IdleTimer;
 
         #region system info
         public static string GetAppFileName()
@@ -207,31 +207,6 @@ namespace WpfClient
         #endregion
 
         #region AppBL
-        public static void GetSettingsFromConfigFile()
-        {
-            // прочие настройки
-            saveAppSettingToProps("ssdID", null);   // идентификатор устройства самообслуживания
-            saveAppSettingToProps("CurrencyChar", null);   // символ денежной единицы
-            saveAppSettingToProps("UserIdleTime", typeof(int));        // время бездействия из config-файла, в сек
-            saveAppSettingToProps("BillPageWidht", typeof(int));
-            saveAppSettingToProps("dishesPanelScrollButtonSize", typeof(double));
-            saveAppSettingToProps("dishesPanelScrollButtonHorizontalAlignment");
-            saveAppSettingToPropTypeBool("MouseCursor");
-            saveAppSettingToPropTypeBool("IsPrintBarCode");
-            saveAppSettingToPropTypeBool("IsIncludeBarCodeLabel");
-
-            // добавить некоторые постоянные тексты (заголовки, надписи на кнопках)
-            parseAndSetAllLangString("dialogBoxYesText");
-            parseAndSetAllLangString("dialogBoxNoText");
-            parseAndSetAllLangString("cartDelIngrTitle");
-            parseAndSetAllLangString("cartDelIngrQuestion");
-            parseAndSetAllLangString("cartDelDishTitle");
-            parseAndSetAllLangString("cartDelDishQuestion");
-            parseAndSetAllLangString("wordOr");
-            parseAndSetAllLangString("takeOrderOut");
-            parseAndSetAllLangString("takeOrderIn");
-            parseAndSetAllLangString("CurrencyName");
-        }
 
         // сохранить настройки приложения из config-файла в свойствах приложения
         private static bool saveAppSettingToProps(string settingName, Type settingType = null)
@@ -257,6 +232,37 @@ namespace WpfClient
             return true;
         }
 
+        public static void GetSettingsFromConfigFile()
+        {
+            // прочие настройки
+            saveAppSettingToProps("ssdID", null);   // идентификатор устройства самообслуживания
+            saveAppSettingToProps("CurrencyChar", null);   // символ денежной единицы
+            saveAppSettingToProps("UserIdleTime", typeof(int));        // время бездействия из config-файла, в сек
+            saveAppSettingToProps("BillPageWidht", typeof(int));
+            saveAppSettingToProps("dishesPanelScrollButtonSize", typeof(double));
+            saveAppSettingToProps("dishesPanelScrollButtonHorizontalAlignment");
+            // размер шрифта заголовка панели блюда
+            saveAppSettingToProps("dishPanelHeaderFontSize", typeof(int));
+            saveAppSettingToPropTypeBool("MouseCursor");
+            saveAppSettingToPropTypeBool("IsPrintBarCode");
+            saveAppSettingToPropTypeBool("IsIncludeBarCodeLabel");
+            saveAppSettingToPropTypeBool("isAnimatedSelectVoki");
+
+            // добавить некоторые постоянные тексты (заголовки, надписи на кнопках)
+            parseAndSetAllLangString("dialogBoxYesText");
+            parseAndSetAllLangString("dialogBoxNoText");
+            parseAndSetAllLangString("cartDelIngrTitle");
+            parseAndSetAllLangString("cartDelIngrQuestion");
+            parseAndSetAllLangString("cartDelDishTitle");
+            parseAndSetAllLangString("cartDelDishQuestion");
+            parseAndSetAllLangString("wordOr");
+            parseAndSetAllLangString("takeOrderOut");
+            parseAndSetAllLangString("takeOrderIn");
+            parseAndSetAllLangString("CurrencyName");
+            parseAndSetAllLangString("withGarnish");
+            parseAndSetAllLangString("areYouHereQuestion");
+        }
+
         // сохранить настройку приложения из config-файла в bool-свойство приложения
         private static void saveAppSettingToPropTypeBool(string settingName)
         {
@@ -264,8 +270,7 @@ namespace WpfClient
             if (settingValue == null) return;
 
             // если значение истина, true или 1, то сохранить в свойствах приложения True, иначе False
-            settingValue = settingValue.ToUpper();
-            if (settingValue.Equals("ИСТИНА") || settingValue.Equals("TRUE") || settingValue.Equals("1"))
+            if (settingValue.IsTrueString() == true)
                 AppLib.SetAppGlobalValue(settingName, true);
             else
                 AppLib.SetAppGlobalValue(settingName, false);
@@ -402,15 +407,6 @@ namespace WpfClient
             return null;
         }
 
-        public static void RestartIdleTimer()
-        {
-            if (AppLib.IdleTimer != null)
-            {
-                AppLib.IdleTimer.Stop();
-                AppLib.IdleTimer.Start();
-            }
-        }
-
         // очистка заказа, закрытие всех окон и возврат в начальный экран
         public static void ReDrawApp(bool isResetLang, bool isCloseChildWindow)
         {
@@ -506,6 +502,28 @@ namespace WpfClient
             }  // foreach
         }  // end func
 
+        #endregion
+
+        #region работа с таймером бездействия
+
+        public static void ActionLog_IdleElapseEvent(ElapsedEventArgs e)
+        {
+            //Debug.Print("idle " + e.SignalTime.ToString());
+            AppLib.ShowIdleWindow();
+        }
+
+        public static void ShowIdleWindow()
+        {
+            MessageBoxDialog mb = new MessageBoxDialog();
+            mb.MessageText = AppLib.GetLangTextFromAppProp("areYouHereQuestion");
+            mb.ShowDialog();
+        }
+
+        public static void SetIdleWindow(Window idleWin)
+        {
+
+            //actionIdle.AnyActionWindow = Window;
+        }
 
         #endregion
 

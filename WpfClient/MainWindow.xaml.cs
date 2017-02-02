@@ -10,12 +10,14 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 
 using AppModel;
+using UserActionLog;
 using System.Configuration;
 using System.Data.SqlClient;
 using System.Data;
 using System.Diagnostics;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
+using System.Timers;
 
 namespace WpfClient
 {
@@ -71,6 +73,15 @@ namespace WpfClient
             initUI();
         }
 
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            AppLib.AppLogger.Info("End application");
+
+            UserActionsWPF actionIdle = (UserActionsWPF)AppLib.GetAppGlobalValue("actionIdle");
+            actionIdle.FinishLoggingUserActions();
+        }
+
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             //   конечный элемент анимации выбора блюда, это Point3 в BezierSegment
@@ -81,6 +92,15 @@ namespace WpfClient
             PathFigure pf = (animPath.Data as PathGeometry).Figures[0];
             BezierSegment bs = (pf.Segments[0] as BezierSegment);
             bs.Point3 = endPoint;
+
+            string sBuf = AppLib.GetAppSetting("UserIdleTime");
+            if ((sBuf != null) && (sBuf != "0"))
+            {
+                int idleSec = int.Parse(sBuf);
+                UserActionsWPF actionIdle = (UserActionsWPF)AppLib.GetAppGlobalValue("actionIdle");
+                actionIdle.AnyActionWindow = this;
+                actionIdle.IdleSeconds = idleSec;
+            }
         }
 
         private void initUI()
@@ -129,6 +149,7 @@ namespace WpfClient
             }
 
             AppLib.AppLogger.Trace("Настраиваю визуальные элементы - READY");
+            AppLib.AppLogger.Trace("AniScrollViewer.VerticalScrollBarVisibility = " +  scrollDishes.VerticalScrollBarVisibility.ToString());
         }
 
         private void createObjectsForDishAnimation()
@@ -281,7 +302,8 @@ namespace WpfClient
             double dishPanelRowMargin1 = 0.01d * dishPanelWidth;
             double dishPanelRowMargin2 = 0.02d * dishPanelWidth;
             // размер шрифтов
-            double dishPanelHeaderFontSize = 0.06d * dishPanelWidth;
+            //double dishPanelHeaderFontSize = 0.04d * dishPanelWidth;
+            double dishPanelHeaderFontSize =  Convert.ToDouble(AppLib.GetAppGlobalValue("dishPanelHeaderFontSize"));
             double dishPanelTextFontSize = 0.8d * dishPanelHeaderFontSize;
             // размер кнопки описания блюда
             double dishPanelDescrButtonSize = 0.085d * dishPanelWidth;
@@ -429,11 +451,13 @@ namespace WpfClient
                     if (markItem.Image != null)
                     {
                         System.Windows.Controls.Image markImage = new System.Windows.Controls.Image();
-                        markImage.Effect = new DropShadowEffect() { Opacity = 0.7 };
-                        markImage.Width = dishPanelHeaderFontSize; markImage.Height = dishPanelHeaderFontSize;
+                        //markImage.Effect = new DropShadowEffect() { Opacity = 0.7 };
+                        markImage.Width = 1.5 * dishPanelHeaderFontSize;
+                        //markImage.Height = 2*dishPanelHeaderFontSize;
                         markImage.Source = ImageHelper.ByteArrayToBitmapImage(markItem.Image);
+                        markImage.Stretch = Stretch.Uniform;
                         InlineUIContainer iuc = new InlineUIContainer(markImage);
-                        markImage.Margin = new Thickness(0, 0, 5, 10);
+                        markImage.Margin = new Thickness(0, 0, 5, 5);
                         inlines.Add(iuc);
                     }
                 }
@@ -990,7 +1014,7 @@ namespace WpfClient
                 popupWin.Left = p.X;
                 popupWin.Top = p.Y;
 
-                bool? dialogResult = popupWin.ShowDialog();
+                popupWin.ShowDialog();
 
                 // очистить выбранный гарнир
                 foreach (MainMenuGarnish item in AppLib.FindVisualChildren<MainMenuGarnish>(gridContent))

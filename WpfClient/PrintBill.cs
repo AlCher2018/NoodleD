@@ -134,7 +134,7 @@ namespace WpfClient
             // метка, если заказ С СОБОЙ
             if (_takeMode == TakeOrderEnum.TakeAway)
             {
-                string langText = AppLib.GetLangText((Dictionary<string, string>)AppLib.GetAppGlobalValue("takeOrderOut"));
+                string langText = AppLib.GetLangTextFromAppProp("takeOrderOut");
                 langText = string.Concat(" **** ", langText.ToUpper(), " ****");
                 addParagraph(doc, langText, 20, FontWeights.Bold, FontStyles.Normal, new Thickness(0, 20, 0, 10), TextAlignment.Center);
             }
@@ -142,25 +142,33 @@ namespace WpfClient
             addSectionToDoc(textHeader, doc);
 
             // добавить строки заказа
-            string currencyName = AppLib.GetLangText((Dictionary<string, string>)AppLib.GetAppGlobalValue("CurrencyName"));
+            string currencyName = AppLib.GetLangTextFromAppProp("CurrencyName");
             decimal totalPrice = 0; string itemName, stringRow;
             foreach (DishItem item in _order.Dishes)
             {
                 // блюдо
                 itemName = AppLib.GetLangText(item.langNames);
+                // c гарниром?
+                if ((item.SelectedGarnishes != null) && (item.SelectedGarnishes.Count > 0))
+                {
+                    DishAdding garn = item.SelectedGarnishes[0];
+                    string garnName =  AppLib.GetLangText(garn.langNames);
+                    // 2017-02-02 Формирование полного наименования блюда с гарниром
+                    // если DishFullNameInGargnish = true, то полное имя берем из гарнира, 
+                    // иначе к имени блюда добавляем имя гарнира
+                    string s = AppLib.GetAppSetting("DishFullNameInGarnish");
+                    if (s != null && s.IsTrueString())
+                        itemName = garnName;
+                    else
+                        itemName += " " + AppLib.GetLangTextFromAppProp("withGarnish") + " " + garnName;
+                } 
                 //string stringRow = itemName.Substring(0, itemName.Count() > 30 ? 30 : itemName.Count());
                 addParagraph(doc, itemName);
-
-                // стоимость блюда
-                decimal price = item.GetPrice();
-                string priceString = string.Format("{0} x {1:0.00} {3} = {2:0.00} {3}", item.Count, price, item.Count * price, currencyName);
-                addParagraph(doc, priceString, 12, null, null, null, TextAlignment.Right);
-                totalPrice += item.Count * price;
 
                 // добавить ингредиенты
                 if (item.SelectedIngredients != null)
                 {
-                    stringRow = "     "; bool isFirst = true;
+                    stringRow = "  + "; bool isFirst = true;
                     foreach (DishAdding ingr in item.SelectedIngredients)
                     {
                         itemName = AppLib.GetLangText(ingr.langNames);
@@ -169,6 +177,12 @@ namespace WpfClient
                     }
                     addParagraph(doc, stringRow, 10, null, FontStyles.Italic);
                 }
+
+                // стоимость блюда
+                decimal price = item.GetPrice();
+                string priceString = string.Format("{0} x {1:0.00} {3} = {2:0.00} {3}", item.Count, price, item.Count * price, currencyName);
+                addParagraph(doc, priceString, 12, null, null, null, TextAlignment.Right);
+                totalPrice += item.Count * price;
             }
             // итог
             addTotalLine(doc, totalPrice, currencyName);
