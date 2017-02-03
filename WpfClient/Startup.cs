@@ -20,44 +20,54 @@ namespace WpfClient
         [STAThread()]
         public static void Main()
         {
+            Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            string appProcName = assembly.FullName.Split(',')[0];
+            int instCount = Process.GetProcesses().Count(p => p.ProcessName == appProcName);
+            // проверка наличия экземпляра в памяти
+            if (instCount > 1)
+            {
+                MessageBox.Show("Application " + appProcName + " is already running.");
+                Process.GetCurrentProcess().Kill();
+            }
+
             Application app = new Application();
 
-            // логгер приложения
-            AppLib.AppLogger = NLog.LogManager.GetCurrentClassLogger();
+            //******  СТАТИЧЕСКИЕ настройки  ******
+            // создание и сохранение ресурсов приложения
+            createAppResources(app);        // определенные в приложении
+            calculateAppSizes();            // вычислить размеры, хранимые в свойствах приложения
+            //******  ДИНАМИЧЕСКИЕ настройки  ******
+            // получение и сохранение внешних ресурсов приложения
+            AppLib.GetSettingsFromConfigFile();     // определенные в config-файле
+
+            AppLib.WriteLogInfoMessage("************  Start application  **************");
+            foreach (Process pr in Process.GetProcesses())
+            {
+                AppLib.WriteLogInfoMessage("**" + pr.ProcessName);
+            }
+
+            // определенные в MS SQL
+            try
+            {
+                AppLib.ReadSettingFromDB();
+                //TestData.mainProc();
+                AppLib.ReadAppDataFromDB();
+            }
+            catch (Exception)
+            {
+                // сообщения об ошибках находятся в соотв.модулях, здесь только выход из приложения
+                Application.Current.Shutdown(1);
+            }
 
             // проверка соединения с БД
-            AppLib.AppLogger.Info("Start application");
-            string logMsg = "Проверяю соединение с источником данных...";
             try
             {
                 checkDBConnection();
             }
             catch (Exception e)
             {
-                AppLib.AppLogger.Trace(logMsg);
-                AppLib.AppLogger.Fatal(e.Message);
+                AppLib.WriteLogErrorMessage(e.Message);
                 throw;
-            }
-            AppLib.AppLogger.Trace(logMsg + " Ok");
-
-            //******  СТАТИЧЕСКИЕ настройки  ******
-            // создание и сохранение ресурсов приложения
-            try
-            {
-                createAppResources(app);        // определенные в приложении
-                calculateAppSizes();            // вычислить размеры, хранимые в свойствах приложения
-                //******  ДИНАМИЧЕСКИЕ настройки  ******
-                // получение и сохранение внешних ресурсов приложения
-                AppLib.GetSettingsFromConfigFile();     // определенные в config-файле
-                AppLib.ReadSettingFromDB();             // определенные в MS SQL
-
-                //TestData.mainProc();
-                AppLib.ReadAppDataFromDB();             // определенные в MS SQL
-            }
-            catch (Exception)
-            {
-                // сообщения об ошибках находятся в соотв.модулях, здесь только выход из приложения
-                Application.Current.Shutdown(1);
             }
 
             // логгер действий пользователя
@@ -79,6 +89,9 @@ namespace WpfClient
 
         private static void checkDBConnection()
         {
+            string logMsg = "Проверяю соединение с источником данных...";
+            AppLib.WriteLogTraceMessage(logMsg);
+
             Configuration con = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
 
             string connectionName = null;
@@ -99,6 +112,7 @@ namespace WpfClient
                 throw new Exception("Cannot find EntityClient connection string in application config file.");
             }
 
+            AppLib.WriteLogTraceMessage(" - connection string: " + connectionString);
             SqlConnection conn = new SqlConnection(connectionString);
             conn.Open();
             if (conn.State == ConnectionState.Open)
@@ -109,6 +123,7 @@ namespace WpfClient
             {
                 throw new Exception("Cannot open EF connection " + connectionName + " by its connection string: " + connectionString);
             }
+            AppLib.WriteLogTraceMessage(logMsg + " READY");
         }
 
 

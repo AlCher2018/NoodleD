@@ -46,7 +46,7 @@ namespace WpfClient
             string deviceName = (string)AppLib.GetAppGlobalValue("ssdID", string.Empty);
             if (deviceName == string.Empty)
             {
-                AppLib.AppLogger.Error("В config-файле не найден элемент \"ssdID\" - идентификатор терминала самообслуживания.\n\t\tTrace: PrintBill.cs, CreateBill()");
+                AppLib.WriteLogErrorMessage("В config-файле не найден элемент \"ssdID\" - идентификатор терминала самообслуживания.\n\t\tTrace: PrintBill.cs, CreateBill()");
                 errMessage = "Ошибка конфигурации приложения!" + UserErrMsgSuffix;
                 return false;
             }
@@ -57,7 +57,7 @@ namespace WpfClient
             _order.OrderDate = DateTime.Now;
             if (_order.OrderNumberForPrint == -1)
             {
-                AppLib.AppLogger.Error("Модуль OrderLib.cs, CreateOrderNumberForPrint() вернул -1 (признак ошибочного значения)");
+                AppLib.WriteLogErrorMessage("Модуль OrderLib.cs, CreateOrderNumberForPrint() вернул -1 (признак ошибочного значения)");
                 errMessage = "Ошибка создания номера заказа для печати чека." + UserErrMsgSuffix;
                 return false;
             }
@@ -80,7 +80,7 @@ namespace WpfClient
             int width = (int)AppLib.GetAppGlobalValue("BillPageWidht", 0);
             if (width == 0)
             {
-                AppLib.AppLogger.Error("В config-файле не указан элемент BillPageWidht с шириной чека.\n\t\tМодуль PrintBill.cs, CreateBill()");
+                AppLib.WriteLogErrorMessage("В config-файле не указан элемент BillPageWidht с шириной чека.\n\t\tМодуль PrintBill.cs, CreateBill()");
                 errMessage = "Ошибка в конфигурации печати чека." + UserErrMsgSuffix;
                 return false;
             }
@@ -89,7 +89,7 @@ namespace WpfClient
             string printerName = AppLib.GetAppSetting("PrinterName");
             if (printerName == null)
             {
-                AppLib.AppLogger.Error("В config-файле не указан элемент PrinterName - имя принтера в ОС для печати чеков.\n\t\tМодуль PrintBill.cs, CreateBill()");
+                AppLib.WriteLogErrorMessage("В config-файле не указан элемент PrinterName - имя принтера в ОС для печати чеков.\n\t\tМодуль PrintBill.cs, CreateBill()");
                 errMessage = "Ошибка в конфигурации печати чека." + UserErrMsgSuffix;
                 return false;
             }
@@ -103,7 +103,7 @@ namespace WpfClient
             retVal = PrintHelper.PrintFlowDocument(doc, prnTaskName, printerName, out errMessage);
             if (retVal == false)
             {
-                AppLib.AppLogger.Error(errMessage + "\tМодуль PrintBill.cs, CreateBill()");
+                AppLib.WriteLogErrorMessage(errMessage + "\tМодуль PrintBill.cs, CreateBill()");
                 errMessage = "Ошибка печати чека.\nОбратитесь к администратору приложения.";
             }
 
@@ -320,7 +320,6 @@ namespace WpfClient
 
         private void addTotalLine(FlowDocument doc, decimal totalPrice, string currencyName)
         {
-            //            addParagraph(doc, string.Format("______________________"), 12);
             Table t = new Table();
             t.FontSize = 14;
             t.CellSpacing = 0;

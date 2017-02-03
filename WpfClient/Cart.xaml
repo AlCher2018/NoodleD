@@ -72,10 +72,17 @@
             </Border>
         </ControlTemplate>
 
-        <Style x:Key="gridPortionButtonStyle">
-            <Setter Property="Control.VerticalAlignment" Value="Top"/>
+        <Style x:Key="gridPortionBorderStyle" TargetType="Border">
+            <Setter Property="BorderBrush" Value="Gray"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Panel.ZIndex" Value="5"/>
+        </Style>
+
+        <Style x:Key="gridPortionImageStyle">
+            <Setter Property="Control.VerticalAlignment" Value="Center"/>
             <Setter Property="Control.HorizontalAlignment" Value="Center"/>
-            <Setter Property="Control.Height" Value="{Binding ElementName=gridPortion, Path=ActualHeight, Mode=OneWay}"/>
+            <Setter Property="Control.Height" Value="{Binding ElementName=gridPortion, Path=ActualHeight, Mode=OneWay, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.5}"/>
         </Style>
         
         
@@ -100,9 +107,12 @@
                     <!--грид с текстами и контролами-->
                     <Grid x:Name="gridDishControls">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="0.05*"/>  <!--0. промеж. между изобр.и описанием--> 
-                            <ColumnDefinition Width="1.5*"/>   <!--1. описание, цена, маркеры, гарнир, колич.--> 
-                            <ColumnDefinition Width="*"/>  <!--2. редакт.количества порций--> 
+                            <!--0. промеж. между изобр.и описанием-->
+                            <ColumnDefinition Width="0.05*"/>
+                            <!--1. описание, цена, маркеры, гарнир, колич.-->
+                            <ColumnDefinition Width="1.5*"/>
+                            <!--2. редакт.количества порций-->
+                            <ColumnDefinition Width="1.2*"/>  
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -182,20 +192,22 @@
                                         <Setter Property="BorderThickness" Value="1"/>
                                         <Setter Property="HorizontalContentAlignment" Value="Left"/>
                                         <Setter Property="Padding" Value="0"/>
-                                        <Setter Property="Margin" Value="{Binding ElementName=gridDishControls, Path=ActualWidth, Converter={StaticResource getMargin}, ConverterParameter='0,0,0.045,0'}"/>
+                                        <Setter Property="Margin" Value="{Binding ElementName=gridDishControls, Path=ActualWidth, Converter={StaticResource getMargin}, ConverterParameter='0,0,0.02,0'}"/>
                                         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
                                         <Setter Property="Template" Value="{StaticResource ingrListBoxItemTemplate}"/>
                                     </Style>
                                 </ListBox.ItemContainerStyle>
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <StackPanel Orientation="Horizontal">
+                                        <StackPanel Orientation="Horizontal" Height="{Binding ElementName=leftSideGrid, Path=ActualWidth, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.15, Mode=OneWay}">
                                             <!--наименование ингредиента-->
-                                            <TextBlock Text="{Binding langNames, Converter={StaticResource langDictToText}, Mode=OneWay}"/>
+                                            <TextBlock Text="{Binding langNames, Converter={StaticResource langDictToText}, Mode=OneWay}" VerticalAlignment="Center"/>
                                             <!--стоимость ингредиента-->
-                                            <TextBlock Margin="10,0" FontWeight="Bold" Text="{Binding Price, StringFormat={StaticResource priceFormatString}, Mode=OneWay}"/>
+                                            <TextBlock Margin="10,0" FontWeight="Bold" Text="{Binding Price, StringFormat={StaticResource priceFormatString}, Mode=OneWay}" VerticalAlignment="Center"/>
                                             <!--кнопка удаления ингредиента-->
-                                            <Image Margin="8,0" Source="AppImages/removeItem.png" Width="{Binding ElementName=leftSideGrid, Path=ActualWidth, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.06, Mode=OneWay}" MouseUp="ingrDel_MouseUp"/>
+                                            <Border BorderBrush="Blue" BorderThickness="0" Width="{Binding ElementName=leftSideGrid, Path=ActualWidth, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.2, Mode=OneWay}" Background="Transparent" Panel.ZIndex="5" PreviewMouseUp="ingrDel_MouseUp" >
+                                                <Image Margin="8,0" Source="AppImages/removeItem.png" Height="{Binding ElementName=leftSideGrid, Path=ActualWidth, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.08, Mode=OneWay}"/>
+                                            </Border>
                                         </StackPanel>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
@@ -215,24 +227,31 @@
                         </StackPanel>
                             
                         <!--управление количеством порций-->
-                        <Grid x:Name="gridPortion" Grid.Column="2" Grid.Row="0" VerticalAlignment="Top" Margin="0,20,0,0" Height="{Binding ElementName=leftSideGrid, Path=ActualWidth, Mode=OneWay, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.15}">
+                        <Grid x:Name="gridPortion" Grid.Column="2" Grid.Row="0" VerticalAlignment="Top" 
+                           Margin="0" Height="{Binding ElementName=leftSideGrid, Path=ActualWidth, Mode=OneWay, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.3}">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>  <!-- 0. кнопка - -->
-                                <ColumnDefinition Width="2*"/>  <!-- 1. колич.порций -->
-                                <ColumnDefinition Width="*"/>  <!-- 2. кнопка + -->
-                                <ColumnDefinition Width="3*"/>  <!-- 3. стоимость блюда -->
-                                <ColumnDefinition Width="*"/>  <!-- 4. кнопка удаления блюда из заказа -->
+                                <ColumnDefinition Width="1.2*"/>  <!-- 0. кнопка - -->
+                                <ColumnDefinition Width="*"/>  <!-- 1. колич.порций -->
+                                <ColumnDefinition Width="1.2*"/>  <!-- 2. кнопка + -->
+                                <ColumnDefinition Width="2*"/>  <!-- 3. стоимость блюда -->
+                                <ColumnDefinition Width="2*"/>  <!-- 4. кнопка удаления блюда из заказа -->
                             </Grid.ColumnDefinitions>
-                            
-                                <Image Grid.Column="0" Source="AppImages/Cart/-.png" Style="{StaticResource gridPortionButtonStyle}" PreviewMouseUp="portionCountDel_MouseUp"/>
-                            
+
+                            <!-- для увеличения зоны нажатия добавим Border -->
+                            <Border Grid.Column="0" PreviewMouseUp="portionCountDel_MouseUp" Style="{StaticResource gridPortionBorderStyle}"/>
+                            <Image Grid.Column="0" Source="AppImages/Cart/-.png" Style="{StaticResource gridPortionImageStyle}"/>
+
                             <TextBlock x:Name="txtDishCount" Grid.Column="1" Text="{Binding Count}" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize2, Mode=OneWay}" FontWeight="Bold"/>
-                            
-                                <Image Grid.Column="2" Source="AppImages/Cart/+.png" Style="{StaticResource gridPortionButtonStyle}" PreviewMouseUp="portionCountAdd_MouseUp"/>
-                            
+
+                            <Border Grid.Column="2" PreviewMouseUp="portionCountAdd_MouseUp" 
+                                    Style="{StaticResource gridPortionBorderStyle}"/>
+                            <Image Grid.Column="2" Source="AppImages/Cart/+.png" Style="{StaticResource gridPortionImageStyle}"/>
+
                             <TextBlock x:Name="txtDishPrice" Grid.Column="3" Text="{Binding Converter={StaticResource getDishPrice}, StringFormat={StaticResource priceFormatString}, Mode=OneWay}" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize2, Mode=OneWay}" FontWeight="Bold"/>
                             
-                                <Image Grid.Column="4" Source="AppImages/removeItem.png" VerticalAlignment="Center" Height="{Binding ElementName=gridPortion, Path=ActualHeight, Mode=OneWay, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.7}" PreviewMouseUp="dishDel_MouseUp"/>
+                            <!-- кнопка удаления блюда -->
+                            <Border Grid.Column="4" PreviewMouseUp="dishDel_MouseUp" Style="{StaticResource gridPortionBorderStyle}" BorderThickness="0"/>
+                            <Image Grid.Column="4" Source="AppImages/removeItem.png" Style="{StaticResource gridPortionImageStyle}"/>
                         </Grid>
                     </Grid>
                 </DockPanel>
@@ -253,7 +272,7 @@
             <Setter Property="BorderThickness" Value="0,0,0,4"/>
             <Setter Property="BorderBrush" Value="DarkGray"/>
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-            <Setter Property="Padding" Value="{Binding ElementName=scrollDishes, Path=ActualHeight, Converter={StaticResource getMargin}, ConverterParameter='0.08,0.02,0.1,0.02', Mode=OneWay}"/>
+            <Setter Property="Padding" Value="{Binding ElementName=scrollDishes, Path=ActualHeight, Converter={StaticResource getMargin}, ConverterParameter='0.05,0.02,0.05,0.02', Mode=OneWay}"/>
             <Setter Property="Template" Value="{StaticResource dishListBoxItemTemplate}"/>
             <EventSetter Event="RequestBringIntoView" Handler="lstDishes_RequestBringIntoView"/>
         </Style>

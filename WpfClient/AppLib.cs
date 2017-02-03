@@ -19,10 +19,52 @@ namespace WpfClient
 {
     public static class AppLib
     {
-        // постоянные глобальные объекты
-        public static NLog.Logger AppLogger;
+        private static NLog.Logger AppLogger;
+        private static UserActionLog.UserActionsWPF UserActionLogger;
+        
+        /// <summary>
+        /// Static Ctor
+        /// </summary>
+        static AppLib()
+        {
+            // логгеры приложения
+            AppLogger = NLog.LogManager.GetCurrentClassLogger();
+            UserActionLogger = new UserActionLog.UserActionsWPF(contentCtrl: null, classAction: UserActionLog.ClassActionEnum.None);
+        }
+
+        #region App logger
+
+        public static void WriteLogTraceMessage(string msg)
+        {
+            if ((bool)AppLib.GetAppGlobalValue("IsWriteTraceMessages")) AppLogger.Trace(msg);
+        }
+        public static void WriteLogTraceMessage(string format, params string[] values)
+        {
+            if ((bool)AppLib.GetAppGlobalValue("IsWriteTraceMessages")) AppLogger.Trace(format, values);
+        }
+
+        public static void WriteLogInfoMessage(string msg)
+        {
+            AppLogger.Info(msg);
+        }
+        public static void WriteLogInfoMessage(string format, params string[] values)
+        {
+            AppLogger.Info(format, values);
+        }
+
+        public static void WriteLogErrorMessage(string msg)
+        {
+            AppLogger.Error(msg);
+        }
+        public static void WriteLogErrorMessage(string format, params string[] values)
+        {
+            AppLogger.Error(format, values);
+        }
+
+        #endregion
 
         #region system info
+
         public static string GetAppFileName()
         {
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();
@@ -199,9 +241,11 @@ namespace WpfClient
             return null;
         }
 
-        public static void ShowMessage(string message)
+        public static void ShowMessage(string message, int closeInterval = 0)
         {
-            (new AppMsgBox(message)).ShowDialog();
+            AppMsgBox mb = new AppMsgBox(message);
+            if (closeInterval != 0) mb.CloseInterval = closeInterval;
+            mb.ShowDialog();
         }
 
         #endregion
@@ -243,10 +287,12 @@ namespace WpfClient
             saveAppSettingToProps("dishesPanelScrollButtonHorizontalAlignment");
             // размер шрифта заголовка панели блюда
             saveAppSettingToProps("dishPanelHeaderFontSize", typeof(int));
+            saveAppSettingToProps("dishPanelFontSize", typeof(int));
             saveAppSettingToPropTypeBool("MouseCursor");
             saveAppSettingToPropTypeBool("IsPrintBarCode");
             saveAppSettingToPropTypeBool("IsIncludeBarCodeLabel");
             saveAppSettingToPropTypeBool("isAnimatedSelectVoki");
+            saveAppSettingToPropTypeBool("IsWriteTraceMessages");
 
             // добавить некоторые постоянные тексты (заголовки, надписи на кнопках)
             parseAndSetAllLangString("dialogBoxYesText");
@@ -290,10 +336,9 @@ namespace WpfClient
 
         public static void ReadSettingFromDB()
         {
-            AppLib.AppLogger.Trace("Получаю настройки приложения из таблицы Setting ...");
+            AppLib.WriteLogTraceMessage("Получаю настройки приложения из таблицы Setting ...");
             using (NoodleDContext db = new NoodleDContext())
             {
-                AppLib.AppLogger.Trace("EntityFramework connection string: {0}", db.Database.Connection.ConnectionString);
                 try
                 {
                     List<Setting> setList = db.Setting.ToList();
@@ -316,23 +361,23 @@ namespace WpfClient
                 }
                 catch (Exception e)
                 {
-                    AppLib.AppLogger.Fatal("Fatal error: {0}\nSource: {1}\nStackTrace: {2}", e.Message, e.Source, e.StackTrace);
+                    AppLib.WriteLogErrorMessage("Fatal error: {0}\nSource: {1}\nStackTrace: {2}", e.Message, e.Source, e.StackTrace);
                     MessageBox.Show("Ошибка доступа к данным: " + e.Message + "\nПрограмма будет закрыта.");
                     throw;
                 }
             }
-            AppLib.AppLogger.Trace("Получаю настройки приложения из таблицы Setting ... READY");
+            AppLib.WriteLogTraceMessage("Получаю настройки приложения из таблицы Setting ... READY");
 
         }
 
         public static void ReadAppDataFromDB()
         {
-            AppLib.AppLogger.Trace("Получаю из MS SQL главное меню...");
+            AppLib.WriteLogTraceMessage("Получаю из MS SQL главное меню...");
 
             List<AppModel.MenuItem> newMenu = MenuLib.GetMenuMainFolders();
             if (newMenu == null)
             {
-                AppLib.AppLogger.Fatal("Fatal error: Ошибка создания Главного Меню. Меню не создано. Аварийное завершение приложения.");
+                AppLib.WriteLogErrorMessage("Fatal error: Ошибка создания Главного Меню. Меню не создано. Аварийное завершение приложения.");
                 MessageBox.Show("Ошибка создания меню\nПрограмма будет закрыта.");
                 throw new Exception("Ошибка создания меню");
             }
@@ -344,7 +389,7 @@ namespace WpfClient
 
             AppLib.SetAppGlobalValue("mainMenu", mainMenu);
 
-            AppLib.AppLogger.Trace("Получаю из MS SQL главное меню... - READY");
+            AppLib.WriteLogTraceMessage("Получаю из MS SQL главное меню... - READY");
         }
 
         // преобразование строки цветов (R,G,B) в SolidColorBrush

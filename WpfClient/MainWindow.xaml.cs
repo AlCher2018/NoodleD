@@ -76,7 +76,7 @@ namespace WpfClient
         protected override void OnClosed(EventArgs e)
         {
             base.OnClosed(e);
-            AppLib.AppLogger.Info("End application");
+            AppLib.WriteLogInfoMessage("************  End application  ************");
 
             UserActionsWPF actionIdle = (UserActionsWPF)AppLib.GetAppGlobalValue("actionIdle");
             actionIdle.FinishLoggingUserActions();
@@ -105,7 +105,7 @@ namespace WpfClient
 
         private void initUI()
         {
-            AppLib.AppLogger.Trace("Настраиваю визуальные элементы...");
+            AppLib.WriteLogTraceMessage("Настраиваю визуальные элементы...");
             AppLib.AppLang = AppLib.GetAppSetting("langDefault");
 
             // надписи на языковых кнопках
@@ -124,10 +124,10 @@ namespace WpfClient
 
             List<AppModel.MenuItem> mFolders = (List<AppModel.MenuItem>)AppLib.GetAppGlobalValue("mainMenu");
 
-            AppLib.AppLogger.Trace("- создаю списки блюд по категориям...");
+            AppLib.WriteLogTraceMessage(" - создаю списки блюд по категориям...");
             // создать канву со списком блюд
             createDishesCanvas(mFolders);
-            AppLib.AppLogger.Trace("- создаю списки блюд по категориям... READY");
+            AppLib.WriteLogTraceMessage(" - создаю списки блюд по категориям... READY");
 
             lstMenuFolders.Focus();
             lstMenuFolders.ItemsSource = mFolders;
@@ -137,9 +137,9 @@ namespace WpfClient
             selectAppLang(AppLib.AppLang);
 
             // анимация выбора блюда
-            AppLib.AppLogger.Trace("- создаю Объекты анимации выбора блюда...");
+            AppLib.WriteLogTraceMessage(" - создаю Объекты анимации выбора блюда...");
             createObjectsForDishAnimation();
-            AppLib.AppLogger.Trace("- создаю Объекты анимации выбора блюда... READY");
+            AppLib.WriteLogTraceMessage(" - создаю Объекты анимации выбора блюда... READY");
 
             // выключить курсор мыши
             if ((bool)AppLib.GetAppGlobalValue("MouseCursor") == false)
@@ -148,8 +148,7 @@ namespace WpfClient
                 Mouse.OverrideCursor = Cursors.None;
             }
 
-            AppLib.AppLogger.Trace("Настраиваю визуальные элементы - READY");
-            AppLib.AppLogger.Trace("AniScrollViewer.VerticalScrollBarVisibility = " +  scrollDishes.VerticalScrollBarVisibility.ToString());
+            AppLib.WriteLogTraceMessage("Настраиваю визуальные элементы - READY");
         }
 
         private void createObjectsForDishAnimation()
@@ -302,9 +301,8 @@ namespace WpfClient
             double dishPanelRowMargin1 = 0.01d * dishPanelWidth;
             double dishPanelRowMargin2 = 0.02d * dishPanelWidth;
             // размер шрифтов
-            //double dishPanelHeaderFontSize = 0.04d * dishPanelWidth;
             double dishPanelHeaderFontSize =  Convert.ToDouble(AppLib.GetAppGlobalValue("dishPanelHeaderFontSize"));
-            double dishPanelTextFontSize = 0.8d * dishPanelHeaderFontSize;
+            double dishPanelTextFontSize = Convert.ToDouble(AppLib.GetAppGlobalValue("dishPanelFontSize"));
             // размер кнопки описания блюда
             double dishPanelDescrButtonSize = 0.085d * dishPanelWidth;
 
@@ -468,17 +466,22 @@ namespace WpfClient
                 FontWeight = FontWeights.Bold,
                 FontSize = dishPanelHeaderFontSize
             });
-            inlines.Add(new Run()
+
+            if (dish.UnitCount != 0)
             {
-                Text = "  " + dish.UnitCount.ToString(),
-                FontStyle = FontStyles.Italic,
-                FontSize = dishPanelTextFontSize
-            });
-            inlines.Add(new Run()
-            {
-                Text = " " + AppLib.GetLangText(dish.langUnitNames),
-                FontSize = dishPanelTextFontSize
-            });
+                inlines.Add(new Run()
+                {
+                    Text = "  " + dish.UnitCount.ToString(),
+                    FontStyle = FontStyles.Italic,
+                    FontSize = dishPanelTextFontSize
+                });
+                inlines.Add(new Run()
+                {
+                    Text = " " + AppLib.GetLangText(dish.langUnitNames),
+                    FontSize = dishPanelTextFontSize
+                });
+            }
+
             TextBlock tb = new TextBlock()
             {
                 Foreground = new SolidColorBrush(Colors.Black),
@@ -825,8 +828,14 @@ namespace WpfClient
 
                     // заголовок (состоит из элементов Run)
                     var hdRuns = tbList[0].Inlines.Where(t => (t is Run)).ToList();
-                    ((Run)hdRuns[0]).Text = AppLib.GetLangText(dItem.langNames);
-                    ((Run)hdRuns[2]).Text = " " + AppLib.GetLangText(dItem.langUnitNames);
+                    if (hdRuns.Count >= 0)
+                    {
+                        ((Run)hdRuns[0]).Text = AppLib.GetLangText(dItem.langNames);
+                    }
+                    if (hdRuns.Count >= 3)
+                    {
+                        ((Run)hdRuns[2]).Text = " " + AppLib.GetLangText(dItem.langUnitNames);
+                    }
                     //setTextBoxLangText(tbList[0], );
                     // tbList[1] - буковка i на кнопке отображения описания
                     // описание блюда

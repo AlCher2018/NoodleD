@@ -52,14 +52,14 @@ namespace WpfClient
 
         private void updatePriceAndClose(bool isAnimate)
         {
-            AppLib.AppLogger.Trace("Выбор Вока: обновление стоимости заказа в главном окне");
+            AppLib.WriteLogTraceMessage("Выбор Вока: обновление стоимости заказа в главном окне");
             WpfClient.MainWindow mm = (WpfClient.MainWindow)Application.Current.MainWindow;
             if (isAnimate == true)
                 mm.animateOrderPrice();
             else
                 mm.updatePrice();
 
-            AppLib.AppLogger.Trace("Выбор Вока: закрытие всплывашки");
+            AppLib.WriteLogTraceMessage("Выбор Вока: закрытие всплывашки");
             closeWin();
         }
 
@@ -227,7 +227,7 @@ namespace WpfClient
         // анимировать перемещение блюда в тележку
         private void animateDishSelection()
         {
-            AppLib.AppLogger.Trace("Выбор Вока: вычисление геометрии анимации");
+            AppLib.WriteLogTraceMessage("Выбор Вока: вычисление геометрии анимации");
             // перемещаемое изображение
             (animImage.Fill as VisualBrush).Visual = dishImage;
             //animImage.Fill = Brushes.Green;  // debug
@@ -247,11 +247,11 @@ namespace WpfClient
             bezierSeg.Point1 = p1;
             bezierSeg.Point2 = p2;
 
-            AppLib.AppLogger.Trace("Выбор Вока: сделать видимой панель анимации");
+            AppLib.WriteLogTraceMessage("Выбор Вока: сделать видимой панель анимации");
             canvasAnim.Visibility = Visibility.Visible;
 
             // установить скорость анимации
-            AppLib.AppLogger.Trace("Выбор Вока: установить скорость анимации");
+            AppLib.WriteLogTraceMessage("Выбор Вока: установить скорость анимации");
             double animSpeed = double.Parse(AppLib.GetAppSetting("SelectDishAnimationSpeed"));  // in msec
             TimeSpan ts = TimeSpan.FromMilliseconds(animSpeed);
             foreach (Timeline item in _animDishSelection.Children)
@@ -259,7 +259,7 @@ namespace WpfClient
                 item.Duration = ts;
             }
             // обновление стоимости заказа в анимациях
-            AppLib.AppLogger.Trace("Выбор Вока: старт анимации");
+            AppLib.WriteLogTraceMessage("Выбор Вока: старт анимации");
             _animDishSelection.Begin();
 
         }

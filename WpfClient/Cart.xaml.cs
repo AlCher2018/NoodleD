@@ -149,26 +149,42 @@ namespace WpfClient
         private void portionCountAdd_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint) == false) { lastDragPoint = null; return; }
-            portionCountAdd();
+            lock (this)
+            {
+                portionCountAdd();
+            }
+            e.Handled = true;
         }
 
         private void portionCountDel_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint) == false) { lastDragPoint = null; return; }
-            portionCountDel();
+            lock (this)
+            {
+                portionCountDel();
+            }
+            e.Handled = true;
         }
 
         private void dishDel_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint) == false) { lastDragPoint = null; return; }
-            dishDel();
+            lock (this)
+            {
+                dishDel();
+            }
+            e.Handled = true;
         }
 
         private void ingrDel_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint) == false) { lastDragPoint = null; return; }
+            lock (this)
+            {
+                ingrDel(sender);
+            }
+            e.Handled = true;
 
-            ingrDel(sender);
         }
 
         private void ingrDel(object sender)
@@ -290,18 +306,16 @@ namespace WpfClient
                     if (saveRes == true)
                     {
                         string goText = (string)AppLib.GetLangTextFromAppProp("lblGoText");
-                        AppLib.ShowMessage(goText);
+                        //AppLib.ShowMessage(goText, 2000);
 
-                        // очистить заказ...
-                        _currentOrder.Clear();
-                        // вернуть интерфейс в исходное состояние
+                        // вернуть интерфейс в исходное состояние и очистить заказ
                         AppLib.ReDrawApp(false, true);
 
                     }
                     // ошибка сохранения в БД
                     else
                     {
-                        AppLib.AppLogger.Error(userErrMsg);
+                        AppLib.WriteLogErrorMessage(userErrMsg);
                         AppLib.ShowMessage("Ошибка сохранения заказа!\nЗаказ не был сохранен. Обратитесь к администратору приложения.");
                     }
                 }
