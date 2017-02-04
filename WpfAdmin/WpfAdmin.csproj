@@ -112,6 +112,11 @@
       <Name>AppModel</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <SplashScreen Include="bg 3hor 1920x1080 gauss.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </SplashScreen>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

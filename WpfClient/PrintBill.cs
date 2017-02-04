@@ -124,7 +124,7 @@ namespace WpfClient
 
             var doc = new FlowDocument();
             doc.PageWidth = width;
-
+            
             // значения по умолчанию
             doc.FontFamily = new FontFamily("Panton-Bold");
             doc.FontSize = 12;

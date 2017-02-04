@@ -20,32 +20,42 @@ namespace WpfClient
         [STAThread()]
         public static void Main()
         {
+            System.Windows.SplashScreen splashScreen = new System.Windows.SplashScreen("AppImages/bg 3hor 1920x1080.png");
+            splashScreen.Show(true);
+
+            Application app = new Application();
+            //SplashScreen splash = new SplashScreen();
+            //app.Run(splash);
+
             Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            // проверка наличия экземпляра в памяти
             string appProcName = assembly.FullName.Split(',')[0];
             int instCount = Process.GetProcesses().Count(p => p.ProcessName == appProcName);
-            // проверка наличия экземпляра в памяти
             if (instCount > 1)
             {
                 MessageBox.Show("Application " + appProcName + " is already running.");
-                Process.GetCurrentProcess().Kill();
+                Environment.Exit(1);
+                //Process.GetCurrentProcess().Kill();
             }
 
-            Application app = new Application();
+            // объем доступной памяти
+            int freeMemory = AppLib.getAvailableRAM();   // in MB
+            if (freeMemory < 300)
+            {
+                MessageBox.Show("This computer has too low available memory.");
+                Environment.Exit(2);
+                //                Process.GetCurrentProcess().Kill();
+            }
 
             //******  СТАТИЧЕСКИЕ настройки  ******
             // создание и сохранение ресурсов приложения
-            createAppResources(app);        // определенные в приложении
+            createAppResources();        // определенные в приложении
             calculateAppSizes();            // вычислить размеры, хранимые в свойствах приложения
             //******  ДИНАМИЧЕСКИЕ настройки  ******
             // получение и сохранение внешних ресурсов приложения
             AppLib.GetSettingsFromConfigFile();     // определенные в config-файле
 
             AppLib.WriteLogInfoMessage("************  Start application  **************");
-            foreach (Process pr in Process.GetProcesses())
-            {
-                AppLib.WriteLogInfoMessage("**" + pr.ProcessName);
-            }
-
             // определенные в MS SQL
             try
             {
@@ -64,26 +74,24 @@ namespace WpfClient
             {
                 checkDBConnection();
             }
-            catch (Exception e)
+            catch (Exception eConnDB)
             {
-                AppLib.WriteLogErrorMessage(e.Message);
+                AppLib.WriteLogErrorMessage(eConnDB.Message);
                 throw;
             }
 
             // логгер действий пользователя
-            UserActionsWPF actionIdle = new UserActionsWPF(contentCtrl: null, classAction: ClassActionEnum.IdleEvent);
-            //actionIdle.IdleElapseEvent += AppLib.ActionLog_IdleElapseEvent;
-            string sBuf = AppLib.GetAppSetting("UserIdleTime");
-            if ((sBuf != null) && (sBuf != "0"))    // условия запуска таймера
-            {
-                int idleSec = int.Parse(sBuf);
-                actionIdle.IdleSeconds = idleSec;
-            }
-            AppLib.SetAppGlobalValue("actionIdle", actionIdle);
+            //UserActionsWPF actionIdle = new UserActionsWPF(contentCtrl: null, classAction: ClassActionEnum.IdleEvent);
+            ////actionIdle.IdleElapseEvent += AppLib.ActionLog_IdleElapseEvent;
+            //string sBuf = AppLib.GetAppSetting("UserIdleTime");
+            //if ((sBuf != null) && (sBuf != "0"))    // условия запуска таймера
+            //{
+            //    int idleSec = int.Parse(sBuf);
+            //    actionIdle.IdleSeconds = idleSec;
+            //}
 
             // главное окно приложения
             WpfClient.MainWindow mainWindow = new WpfClient.MainWindow();
-
             app.Run(mainWindow);
         }
 
@@ -127,8 +135,10 @@ namespace WpfClient
         }
 
 
-        private static void createAppResources(Application app)
+        private static void createAppResources()
         {
+            Application app = Application.Current;
+
             // ресурсы приложения
             //< !--цвета приложения по умолчанию-- >
             app.Resources.Add("appColorDarkPink", Color.FromArgb(255, 122, 34, 104)); // < !--COLOR1 - dark pink-- >
@@ -219,5 +229,5 @@ namespace WpfClient
         }
 
 
-    }
+    }  // class
 }

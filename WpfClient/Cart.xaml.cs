@@ -306,7 +306,8 @@ namespace WpfClient
                     if (saveRes == true)
                     {
                         string goText = (string)AppLib.GetLangTextFromAppProp("lblGoText");
-                        //AppLib.ShowMessage(goText, 2000);
+                        int delayInfoWin = (int)AppLib.GetAppGlobalValue("WindowDelayAfterPrint", 0);
+                        AppLib.ShowMessage(goText, delayInfoWin);
 
                         // вернуть интерфейс в исходное состояние и очистить заказ
                         AppLib.ReDrawApp(false, true);

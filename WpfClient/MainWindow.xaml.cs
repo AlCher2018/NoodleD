@@ -79,7 +79,10 @@ namespace WpfClient
             AppLib.WriteLogInfoMessage("************  End application  ************");
 
             UserActionsWPF actionIdle = (UserActionsWPF)AppLib.GetAppGlobalValue("actionIdle");
-            actionIdle.FinishLoggingUserActions();
+            if (actionIdle != null)
+            {
+                actionIdle.FinishLoggingUserActions();
+            }
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)

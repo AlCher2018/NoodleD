@@ -64,6 +64,21 @@ namespace WpfClient
         #endregion
 
         #region system info
+        // in Mb
+        public static int getAvailableRAM()
+        {
+            int retVal = 0;
+            // class get memory size in kB
+            System.Management.ManagementObjectSearcher mgmtObjects = new System.Management.ManagementObjectSearcher("Select * from Win32_OperatingSystem");
+            foreach (var item in mgmtObjects.Get())
+            {
+                //System.Diagnostics.Debug.Print("FreePhysicalMemory:" + item.Properties["FreeVirtualMemory"].Value);
+                //System.Diagnostics.Debug.Print("FreeVirtualMemory:" + item.Properties["FreeVirtualMemory"].Value);
+                //System.Diagnostics.Debug.Print("TotalVirtualMemorySize:" + item.Properties["TotalVirtualMemorySize"].Value);
+                retVal = (Convert.ToInt32(item.Properties["FreeVirtualMemory"].Value)) / 1024;
+            }
+            return retVal;
+        }
 
         public static string GetAppFileName()
         {
@@ -282,9 +297,13 @@ namespace WpfClient
             saveAppSettingToProps("ssdID", null);   // идентификатор устройства самообслуживания
             saveAppSettingToProps("CurrencyChar", null);   // символ денежной единицы
             saveAppSettingToProps("UserIdleTime", typeof(int));        // время бездействия из config-файла, в сек
-            saveAppSettingToProps("BillPageWidht", typeof(int));
+            // печать чека
+            saveAppSettingToProps("BillPageWidht", typeof(int));   // ширина в пикселях, для перевода в см надо / на 96 и * на 2,45
+            saveAppSettingToProps("WindowDelayAfterPrint", typeof(int));   // время показа информац.окна после печати
+            // большие кнопки прокрутки панели блюд
             saveAppSettingToProps("dishesPanelScrollButtonSize", typeof(double));
             saveAppSettingToProps("dishesPanelScrollButtonHorizontalAlignment");
+
             // размер шрифта заголовка панели блюда
             saveAppSettingToProps("dishPanelHeaderFontSize", typeof(int));
             saveAppSettingToProps("dishPanelFontSize", typeof(int));

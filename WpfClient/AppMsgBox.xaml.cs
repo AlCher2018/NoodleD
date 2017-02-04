@@ -28,21 +28,32 @@ namespace WpfClient
             set
             {
                 if (_closeInterval == value) return;
+
                 _closeInterval = value;
-                if (_timer == null)
+                if (_closeInterval == 0)
                 {
-                    _timer = new Timer(_closeInterval);
-                    _timer.Elapsed += _timer_Elapsed;
+                    if (_timer != null)
+                    {
+                        _timer.Elapsed -= _timer_Elapsed;
+                        _timer.Close(); _timer = null;
+                    }
                 }
-                _timer.Interval = _closeInterval;
-                _timer.Enabled = true;
+                else
+                {
+                    if (_timer == null)
+                    {
+                        _timer = new Timer(_closeInterval);
+                        _timer.Elapsed += _timer_Elapsed;
+                    }
+                    _timer.Interval = _closeInterval;
+                    _timer.Enabled = true;
+                }
             }
         }
 
         private void _timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-
-            this.Close();
+            this.Dispatcher.Invoke(() => this.Close());
         }
 
         public AppMsgBox(string messageText)
