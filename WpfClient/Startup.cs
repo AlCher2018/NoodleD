@@ -24,8 +24,6 @@ namespace WpfClient
             splashScreen.Show(true);
 
             Application app = new Application();
-            //SplashScreen splash = new SplashScreen();
-            //app.Run(splash);
 
             Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
             // проверка наличия экземпляра в памяти

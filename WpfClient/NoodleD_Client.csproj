@@ -56,7 +56,7 @@
     <ApplicationIcon>AppImages\icon.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>WpfClient.Startup</StartupObject>
+    <StartupObject>WpfClient.App</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
@@ -78,6 +78,7 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Management" />
     <Reference Include="System.Printing" />
+    <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -123,6 +124,7 @@
     <Compile Include="PreventTouchToMousePromotion.cs" />
     <Compile Include="PrintBill.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="SingleInstance.cs" />
     <Compile Include="SplashScreen.xaml.cs">
       <DependentUpon>SplashScreen.xaml</DependentUpon>
     </Compile>
