@@ -46,27 +46,40 @@
         </Style>
 
         <ControlTemplate x:Key="menuListBoxItemTemplate" TargetType="{x:Type ListBoxItem}">
-            <Border Background="{TemplateBinding Background}"
-                BorderThickness="{TemplateBinding BorderThickness}"
-                BorderBrush="{TemplateBinding BorderBrush}"
-                Padding="{TemplateBinding Padding}" CornerRadius="{TemplateBinding Property=Border.CornerRadius}">
-                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+            <Border x:Name="categoryBorder" Background="{TemplateBinding Background}"
+                BorderThickness="1" 
+                BorderBrush="{StaticResource appSelectedItemColor}"
+                CornerRadius="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=cornerRadiusButton}">
+                <ContentPresenter 
+                    Margin="{TemplateBinding Padding}"
+                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
             </Border>
         </ControlTemplate>
+
+        <Style x:Key="menuItemImageStyle" TargetType="Image">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Width" Value="{Binding Path=ActualWidth, ElementName=gridMenuSide, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.18,Mode=OneWay}"/>
+            <Setter Property="Height" Value="{Binding Path=ActualWidth, ElementName=gridMenuSide, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.18,Mode=OneWay}"/>
+        </Style>
+        <Style x:Key="menuItemTextStyle" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="FontSize" Value="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize3, Mode=OneWay}"/>
+        </Style>
         <DataTemplate x:Key="menuDataTemplate">
-            <Grid Margin="3">
+            <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="1.2*"/>   
+                    <ColumnDefinition Width="0.3*"/>
                     <ColumnDefinition Width="3*"/>
                 </Grid.ColumnDefinitions>
-                <Image x:Name="menuItemImage" Margin="5" Source="{Binding MenuFolder.Image}"
-                       Width="{Binding Path=ActualWidth, ElementName=gridMenuSide, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.15,Mode=OneWay}"
-                       Height="{Binding Path=ActualWidth, ElementName=gridMenuSide, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.15, Mode=OneWay}">
-                </Image>
-                <TextBlock Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,5,0,5"
-                           Text="{Binding langNames, Converter={StaticResource langDictToText}}"
-                           FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize3, Mode=OneWay}"/>
+                
+                <Image x:Name="menuItemImage" Source="{Binding MenuFolder.Image}" Style="{StaticResource menuItemImageStyle}"/>
+                
+                <TextBlock Grid.Column="2" Style="{StaticResource menuItemTextStyle}"
+                           Text="{Binding langNames, Converter={StaticResource langDictToText}}"/>
             </Grid>
             <DataTemplate.Triggers>
                 <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBoxItem}}}" Value="True">
@@ -79,12 +92,9 @@
         </DataTemplate>
 
         <Style x:Key="menuItemStyle" TargetType="{x:Type ListBoxItem}">
-            <Setter Property="Margin" Value="10,10" />
-            <Setter Property="Padding" Value="10,7" />
-            <Setter Property="Border.CornerRadius" Value="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=cornerRadiusButton}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="{StaticResource appSelectedItemColor}"/>
             <Setter Property="Foreground" Value="{StaticResource appNotSelectedItemColor}"/>
+            <Setter Property="Margin" Value="10,0,10,15"/>
+            <Setter Property="Padding" Value="10,12,10,12"/>
             <Setter Property="Template" Value="{StaticResource menuListBoxItemTemplate}"/>
             <Style.Triggers>
                 <!--<Trigger Property="IsMouseOver" Value="True">
@@ -115,7 +125,7 @@
 
     </Window.Resources>
 
-    <Grid UseLayoutRounding="True">
+    <Grid UseLayoutRounding="True" PreviewMouseUp="mainGrid_PreviewMouseUp">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="5*"/>
@@ -164,7 +174,7 @@
                 <RowDefinition Height="0.2*"/>
                 <RowDefinition Height="0.6*"/>    <!-- 2. языковые кнопки -->
                 <RowDefinition Height="0.2*"/> 
-                <RowDefinition Height="8*"/>   <!-- 4. ListBox категорий блюд -->
+                <RowDefinition x:Name="rowCatList" Height="8*"/>   <!-- 4. ListBox категорий блюд -->
                 <RowDefinition Height="0.6*"/> <!-- 5. промокод -->
                 <RowDefinition Height="0.6*"/> <!-- 6. промеж.между промокодом и кн.Оформить -->
                 <RowDefinition Height="1.8*"/>   <!-- 7. цена и кнопка Оформить -->
@@ -187,24 +197,27 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="0.3*"/>
                 </Grid.ColumnDefinitions>
-                <Border x:Name="btnLangUa" Grid.Column="1" Background="{StaticResource appBackgroundColor}" MouseUp="lblButtonLang_MouseDown">
+                <Border x:Name="btnLangUa" Grid.Column="1" Background="{StaticResource appBackgroundColor}" 
+                        MouseDown="lblButtonLang_MouseDown" MouseUp="lblButtonLang_MouseUp">
                     <Border x:Name="btnLangUaInner" Style="{StaticResource langButtonBorderUncheckedStyle}">
                         <TextBlock x:Name="lblLangUa" Text="Укр" Style="{StaticResource langTextStyle}"/>
                     </Border>
                 </Border>
-                <Border x:Name="btnLangRu" Grid.Column="3" Background="{StaticResource appBackgroundColor}" MouseUp="lblButtonLang_MouseDown">
+                <Border x:Name="btnLangRu" Grid.Column="3" Background="{StaticResource appBackgroundColor}" 
+                        MouseDown="lblButtonLang_MouseDown" MouseUp="lblButtonLang_MouseUp">
                     <Border x:Name="btnLangRuInner" Style="{StaticResource langButtonBorderUncheckedStyle}">
                         <TextBlock x:Name="lblLangRu" Text="Рус" Style="{StaticResource langTextStyle}"/>
                     </Border>
                 </Border>
-                <Border x:Name="btnLangEn" Grid.Column="5" Background="{StaticResource appBackgroundColor}" MouseUp="lblButtonLang_MouseDown">
+                <Border x:Name="btnLangEn" Grid.Column="5" Background="{StaticResource appBackgroundColor}" 
+                        MouseDown="lblButtonLang_MouseDown" MouseUp="lblButtonLang_MouseUp">
                     <Border x:Name="btnLangEnInner" Style="{StaticResource langButtonBorderUncheckedStyle}">
                         <TextBlock x:Name="lblLangEng" Text="Eng" Style="{StaticResource langTextStyle}"/>
                     </Border>
                 </Border>
             </Grid>
 
-            <ListBox x:Name="lstMenuFolders" Grid.Row="4" Margin="0,10" SelectionMode="Single" BorderThickness="0" HorizontalContentAlignment="Stretch" Background="{StaticResource appBackgroundColor}" 
+            <ListBox x:Name="lstMenuFolders" Grid.Row="4" Margin="0,10" SelectionMode="Single" BorderThickness="0" HorizontalContentAlignment="Stretch" Background="{StaticResource appBackgroundColor}" ScrollViewer.VerticalScrollBarVisibility="Auto"
                      ItemContainerStyle="{StaticResource menuItemStyle}"
                      ItemTemplate="{StaticResource menuDataTemplate}" 
                      SelectionChanged="lstMenuFolders_SelectionChanged"/>

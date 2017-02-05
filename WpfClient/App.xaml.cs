@@ -48,23 +48,23 @@ namespace WpfClient
                 App app = new App();
 
                 //******  СТАТИЧЕСКИЕ настройки  ******
-                
-                // создание и сохранение ресурсов приложения
-                //createAppResources(app);        // определенные в приложении
-                app.InitializeComponent();          // определенные в App.xaml
+
+                // ресурсы приложения
+                //createappresources(app);        // определенные в приложении
+                app.InitializeComponent();          // определенные в app.xaml
 
                 // вычислить размеры, хранимые в свойствах приложения
                 calculateAppSizes();
 
-                //******  ДИНАМИЧЕСКИЕ настройки  ******
+                //******  динамические настройки  ******
                 // получение и сохранение внешних ресурсов приложения
                 AppLib.GetSettingsFromConfigFile();     // определенные в config-файле
 
-                // определенные в MS SQL
+                // определенные в ms sql
                 try
                 {
                     AppLib.ReadSettingFromDB();
-                    //TestData.mainProc();
+                    //testdata.mainproc();
                     AppLib.ReadAppDataFromDB();
                 }
                 catch (Exception)
@@ -73,7 +73,7 @@ namespace WpfClient
                     Application.Current.Shutdown(1);
                 }
 
-                // проверка соединения с БД
+                // проверка соединения с бд
                 try
                 {
                     checkDBConnection();
@@ -212,6 +212,10 @@ namespace WpfClient
 
             AppLib.SetAppGlobalValue("screenWidth", screenWidth);
             AppLib.SetAppGlobalValue("screenHeight", screenHeight);
+
+            AppLib.SetAppGlobalValue("categoriesPanelWidth", (screenWidth / 6d * 1d));
+            AppLib.SetAppGlobalValue("dishesPanelWidth", (screenWidth / 6d * 5d));
+
 
             // углы закругления
             dVar = 0.005 * screenWidth;

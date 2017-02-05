@@ -28,12 +28,6 @@ namespace WpfClient
         public SplashScreen()
         {
             InitializeComponent();
-
-            this.Loaded += SplashScreen_Loaded;
-        }
-
-        private void SplashScreen_Loaded(object sender, RoutedEventArgs e)
-        {
         }
 
     }  // class

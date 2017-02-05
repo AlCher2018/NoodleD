@@ -1,17 +1,45 @@
+*********************
 получить GUID в VS
 ------------------
+In Visual Studio 2015
 Tools - Create GUID
 
-получить GUID в VBA
--------------------
+In VBA
 Public Function GetGUID() As String 
     GetGUID = Mid$(CreateObject("Scriptlet.TypeLib").GUID, 2, 36) 
 End Function 
 
+*************************************
 изменить изображение блюда в MS SQL
 -----------------------------------
 update Dish Set Image = (SELECT MyImage.* from Openrowset(Bulk 'e:\„ернов\NoodleD\дизайн\NodDod\dish1.jpg', Single_Blob) MyImage) where id=1
 
+
+*********************************
 строка подключени€ к SQL Server
 -------------------------------
 data source=PRG01;initial catalog=NoodleD;persist security info=True;user id=sa;password=admin
+
+
+********************************
+“екст по умолчанию в TextBox
+----------------------------
+http://jkshay.com/c-default-text-for-wpf-textbox/
+private void Search_TextChanged(object sender, TextChangedEventArgs e)
+{
+    if (((TextBox)sender).Text.Length == 0)
+        ((TextBox)sender).Text = ((TextBox)sender).Tag.ToString();
+}
+private void Search_PreviewTextInput(object sender, TextCompositionEventArgs e)
+{
+    if (((TextBox)sender).Text == ((TextBox)sender).Tag.ToString())
+    {
+        ((TextBox)sender).Text = e.Text;
+        e.Handled = true;
+        ((TextBox)sender).SelectionStart = 1;
+    }
+}
+...
+EASILY CREATE A WPF SPLASH SCREEN WITH STATUS UPDATES VIA MVVM
+http://jkshay.com/easily-create-wpf-splash-screen-status-updates-via-mvvm/
+

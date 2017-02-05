@@ -24,6 +24,8 @@ namespace WpfClient
 
         public static bool IsTrueString(this string src)
         {
+            if (string.IsNullOrEmpty(src) == true) return false;
+
             string s = src.ToUpper();
             return (s.Equals("ИСТИНА") || s.Equals("TRUE") || s.Equals("1"));
         }

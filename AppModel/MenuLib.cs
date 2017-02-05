@@ -52,13 +52,13 @@ namespace AppModel
             List<MenuFolder> lsort = (from m in _db.MenuFolder orderby m.RowPosition where m.ParentId == 0 select m).ToList();
             foreach (MenuFolder item in lsort)
             {
-                MenuItem mi = new MenuItem() { MenuFolder = item };
-                mi.langNames = getLangTextDict(item.RowGUID, fieldTypeId);
+                MenuItem newMenuItem = new MenuItem() { MenuFolder = item };
+                newMenuItem.langNames = getLangTextDict(item.RowGUID, fieldTypeId);
 
                 // добавить блюда к пункту меню
                 try
                 {
-                    mi.Dishes = getDishes(item);
+                    newMenuItem.Dishes = getDishes(item);
                 }
                 catch (Exception e)
                 {
@@ -66,8 +66,30 @@ namespace AppModel
                     throw;
                 }
 
-                retVal.Add(mi);
+                retVal.Add(newMenuItem);
             }
+
+            // DEBUG
+            // удалить категории
+            //retVal.RemoveAt(4);
+            //retVal.RemoveAt(4);
+            // добавить еще несколько категорий
+            //MenuFolder mi = lsort[0];
+            //retVal.Add(new MenuItem()
+            //{
+            //    MenuFolder = mi,
+            //    langNames = getLangTextDict(mi.RowGUID, fieldTypeId),
+            //    Dishes = getDishes(mi)
+            //});
+            //mi = lsort[1];
+            //retVal.Add(new MenuItem()
+            //{
+            //    MenuFolder = mi,
+            //    langNames = getLangTextDict(mi.RowGUID, fieldTypeId),
+            //    Dishes = getDishes(mi)
+            //});
+            // ~DEBUG
+
             if (retVal.Count == 0) retVal = null;
 
             return retVal;

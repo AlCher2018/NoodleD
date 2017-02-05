@@ -307,7 +307,6 @@ namespace WpfClient
             // размер шрифта заголовка панели блюда
             saveAppSettingToProps("dishPanelHeaderFontSize", typeof(int));
             saveAppSettingToProps("dishPanelFontSize", typeof(int));
-            saveAppSettingToPropTypeBool("MouseCursor");
             saveAppSettingToPropTypeBool("IsPrintBarCode");
             saveAppSettingToPropTypeBool("IsIncludeBarCodeLabel");
             saveAppSettingToPropTypeBool("isAnimatedSelectVoki");

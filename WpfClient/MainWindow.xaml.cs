@@ -29,23 +29,26 @@ namespace WpfClient
         // подложка списка блюд
         private List<Canvas> _dishCanvas;
         // текущий заказ
-        private OrderItem _currentOrder;   
+        private OrderItem _currentOrder;
         // visual elements
-        Border _curDescrBorder;
-        TextBlock _curDescrTextBlock;
-        SolidColorBrush _brushSelectedItem;
-        
+        private byte _langButtonPress = 0;
+        private Border _curDescrBorder;
+        private TextBlock _curDescrTextBlock;
+        private SolidColorBrush _brushSelectedItem;
+
         // dish description animations
-        DoubleAnimation _daCommon1, _daCommon2;
-        DoubleAnimation _daDishDescrBackgroundOpacity;  // анимашка прозрачности описания блюда
-        Storyboard _animDishSelection;
-        ColorAnimation _animOrderPriceBackgroundColor;
-        Effect _orderPriceEffectShadow;
-        Effect _orderPriceEffectBlur;
+        private DoubleAnimation _daCommon1, _daCommon2;
+        private DoubleAnimation _daDishDescrBackgroundOpacity;  // анимашка прозрачности описания блюда
+        private Storyboard _animDishSelection;
+        private ColorAnimation _animOrderPriceBackgroundColor;
+        private Effect _orderPriceEffectShadow;
+        private Effect _orderPriceEffectBlur;
 
         // dragging
-        Point? lastDragPoint, initDragPoint;
-        protected DateTime _dateTime;
+        private Point? lastDragPoint, initDragPoint;
+        private DateTime _dateTime;
+
+        public List<Canvas> DishesPanels { get { return _dishCanvas; } }
 
 
         public MainWindow()
@@ -127,6 +130,11 @@ namespace WpfClient
 
             List<AppModel.MenuItem> mFolders = (List<AppModel.MenuItem>)AppLib.GetAppGlobalValue("mainMenu");
 
+            // создать список категорий блюд
+            AppLib.WriteLogTraceMessage(" - создаю список категорий блюд...");
+            createCategoriesList();
+            AppLib.WriteLogTraceMessage(" - создаю список категорий блюд... READY");
+
             AppLib.WriteLogTraceMessage(" - создаю списки блюд по категориям...");
             // создать канву со списком блюд
             createDishesCanvas(mFolders);
@@ -145,7 +153,7 @@ namespace WpfClient
             AppLib.WriteLogTraceMessage(" - создаю Объекты анимации выбора блюда... READY");
 
             // выключить курсор мыши
-            if ((bool)AppLib.GetAppGlobalValue("MouseCursor") == false)
+            if (AppLib.GetAppSetting("MouseCursor").IsTrueString() == false)
             {
                 this.Cursor = Cursors.None;
                 Mouse.OverrideCursor = Cursors.None;
@@ -268,7 +276,64 @@ namespace WpfClient
             txtOrderPrice.Effect = _orderPriceEffectShadow;
         }
 
-        public List<Canvas> DishesPanels { get { return _dishCanvas; } }
+        private void createCategoriesList()
+        {
+            // стиль содержания пункта меню
+            bool isScrollingList = AppLib.GetAppSetting("IsAllowScrollingDishCategories").IsTrueString();
+            if (isScrollingList == true)
+            {
+
+            }
+            // без скроллинга, поэтому настраиваем поля и отступы
+            // если категорий меньше 6, то оставляем по умолчанию, из разметки
+            else
+            {
+                List<AppModel.MenuItem> mFolders = (List<AppModel.MenuItem>)AppLib.GetAppGlobalValue("mainMenu");
+                int iCatCount = mFolders.Count;
+                if (iCatCount > 6)
+                {
+                    Style brdStyle = (Style)this.Resources["menuItemStyle"];
+                    Style imgStyle = (Style)this.Resources["menuItemImageStyle"];
+                    Style txtStyle = (Style)this.Resources["menuItemTextStyle"];
+
+                    double listWidth = (double)AppLib.GetAppGlobalValue("categoriesPanelWidth");
+                    double listHeight = getHeightCatList();
+                    listHeight *= (double)AppLib.GetAppGlobalValue("screenHeight");
+                    double itemHeight = listHeight / iCatCount;
+                    double marginBase = 0.09 * itemHeight;
+                    double imageSize = 0.6 * itemHeight;
+                    double txtFontSize = 0.3 * itemHeight;
+
+                    // поле вокруг рамки
+                    SetterBase sb = brdStyle.Setters.FirstOrDefault(s => (s as Setter).Property.Name == "Margin");
+                    if (sb != null) (sb as Setter).Value = new Thickness(marginBase, 0, marginBase, 1.5 * marginBase);
+                    // отступ внутри рамки
+                    sb = brdStyle.Setters.FirstOrDefault(s => (s as Setter).Property.Name == "Padding");
+                    if (sb != null) (sb as Setter).Value = new Thickness(marginBase, marginBase, marginBase, marginBase);
+                    // размер изображения категории
+                    sb = imgStyle.Setters.FirstOrDefault(s => (s as Setter).Property.Name == "Width");
+                    if (sb != null) (sb as Setter).Value = imageSize;
+                    sb = imgStyle.Setters.FirstOrDefault(s => (s as Setter).Property.Name == "Height");
+                    if (sb != null) (sb as Setter).Value = imageSize;
+                    // размер текста
+                    sb = txtStyle.Setters.FirstOrDefault(s => (s as Setter).Property.Name == "FontSize");
+                    if (sb != null) (sb as Setter).Value = txtFontSize;
+                }  // if
+            }  // else
+        }  // method
+
+        private double getHeightCatList()
+        {
+            double iStarsSum = 0d, iStarCatListValue = 0d;
+            foreach (RowDefinition rowDef in gridMenuSide.RowDefinitions)
+            {
+                iStarsSum += rowDef.Height.Value;
+                if (rowDef.Name == "rowCatList") iStarCatListValue = rowDef.Height.Value;
+            }
+            if (iStarCatListValue != 0) return (iStarCatListValue / iStarsSum);
+            else return 0d;
+        }
+
 
         #region работа со списком блюд
         //*********************************
@@ -865,18 +930,26 @@ namespace WpfClient
         #endregion
 
         #region language bottons
-
         private void lblButtonLang_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            //            if (e.StylusDevice != null) return;
-
             string langId = getLangIdByButtonName(((FrameworkElement)sender).Name);
             selectAppLang(langId);
+            e.Handled = true;
+
+            switch (langId)
+            {
+                case "ua": _langButtonPress |= 1; break;
+                case "ru": _langButtonPress |= 2; break;
+                case "en": _langButtonPress |= 4; break;
+                default: break;
+            }
+            if (_langButtonPress == 7) App.Current.Shutdown(3);
         }
-        //private void lblButtonLang_TouchDown(object sender, TouchEventArgs e)
-        //{
-        //    selectAppLang((FrameworkElement)sender);
-        //}
+
+        private void lblButtonLang_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            _langButtonPress = 0;
+        }
 
         // установить язык текстов на элементах
         public void selectAppLang(string langId)
@@ -1244,6 +1317,11 @@ namespace WpfClient
         private void Image_MouseUp(object sender, MouseButtonEventArgs e)
         {
 //            this.Close();
+        }
+
+        private void mainGrid_PreviewMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            _langButtonPress = 0;
         }
 
         private void btnShowCart_MouseUp(object sender, MouseButtonEventArgs e)
