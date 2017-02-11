@@ -47,7 +47,7 @@ namespace AppModel
         public List<MenuItem> GetMenuItemsList()
         {
             List<MenuItem> retVal = new List<MenuItem>();
-            int fieldTypeId = 1;
+            FieldTypeIDEnum fieldTypeId = FieldTypeIDEnum.Name;
 
             List<MenuFolder> lsort = (from m in _db.MenuFolder orderby m.RowPosition where m.ParentId == 0 select m).ToList();
             foreach (MenuFolder item in lsort)
@@ -124,8 +124,12 @@ namespace AppModel
                     dishApp.SelectedGarnishes = new List<DishAdding>();
                     foreach (DishGarnish item in lGarn)
                     {
-                        DishAdding da = new DishAdding() { Id = item.Id, RowGUID = item.RowGUID, Price = item.Price };
-                        da.langNames = getLangTextDict(item.RowGUID, 1);
+                        DishAdding da = new DishAdding() {
+                            Id = item.Id, RowGUID = item.RowGUID, Price = item.Price,
+                            Image = item.Image, ImageDish = item.ImageDishWithGarnish,
+                            langNames = getLangTextDict(item.RowGUID, FieldTypeIDEnum.Name), 
+                            langDishDescr = getLangTextDict(item.RowGUID, FieldTypeIDEnum.Description)
+                        };
                         dishApp.Garnishes.Add(da);
                     }
                 }
@@ -138,7 +142,7 @@ namespace AppModel
                     foreach (DishIngredient item in lIngr)
                     {
                         DishAdding da = new DishAdding() { Id = item.Id, RowGUID = item.RowGUID, Price = item.Price, Image = item.Image };
-                        da.langNames = getLangTextDict(item.RowGUID, 1);
+                        da.langNames = getLangTextDict(item.RowGUID, FieldTypeIDEnum.Name);
                         dishApp.Ingredients.Add(da);
                     }
                 }
@@ -152,7 +156,7 @@ namespace AppModel
                     {
                         DishMark dm = listMark.FirstOrDefault(m => m.RowGUID == item.MarkGUID);
                         DishAdding da = new DishAdding() { Id = item.Id, Image = dm.Image };
-                        da.langNames = getLangTextDict(dm.RowGUID, 1);
+                        da.langNames = getLangTextDict(dm.RowGUID, FieldTypeIDEnum.Name);
                         dishApp.Marks.Add(da);
                     }
                 }
@@ -184,26 +188,26 @@ namespace AppModel
             DishItem dishApp = new DishItem();
             dishApp.Id = dishDb.Id;
             dishApp.RowGUID = dishDb.RowGUID;
-            dishApp.langNames = getLangTextDict(dishDb.RowGUID, 1);
-            dishApp.langDescriptions = getLangTextDict(dishDb.RowGUID, 2);
+            dishApp.langNames = getLangTextDict(dishDb.RowGUID, FieldTypeIDEnum.Name);
+            dishApp.langDescriptions = getLangTextDict(dishDb.RowGUID, FieldTypeIDEnum.Description);
             dishApp.Image = dishDb.Image;
             dishApp.UnitCount = dishDb.UnitCount ?? 0;
             // единица измерения
             if (dishDb.UnitGUID != null)
             {
                 DishUnit du = listUnit.FirstOrDefault(d => d.RowGUID == dishDb.UnitGUID);
-                if (du != null) dishApp.langUnitNames = getLangTextDict(du.RowGUID, 3);
+                if (du != null) dishApp.langUnitNames = getLangTextDict(du.RowGUID, FieldTypeIDEnum.UnitName);
             }
             dishApp.Price = dishDb.Price ?? 0;
 
             return dishApp;
         }
 
-        private Dictionary<string, string> getLangTextDict(Guid rowGuid, int fieldTypeId)
+        private Dictionary<string, string> getLangTextDict(Guid rowGuid, FieldTypeIDEnum fieldTypeId)
         {
             Dictionary<string, string> retVal = new Dictionary<string, string>();
             foreach (StringValue item in
-                from val in _stringTable where val.RowGUID == rowGuid && val.FieldType.Id == fieldTypeId select val)
+                from val in _stringTable where val.RowGUID == rowGuid && val.FieldType.Id == (int)fieldTypeId select val)
             {
                 if (retVal.Keys.Contains(item.Lang) == false) retVal.Add(item.Lang, item.Value);
             }
@@ -527,6 +531,8 @@ namespace AppModel
 
         public int Id { get; set; }
         public Guid RowGUID { get; set; }
+
+        // ONLY adding name (only adding (short) or dish with adding (full))
         public Dictionary<string, string> langNames
         {
             get { return _langNames; }
@@ -536,7 +542,9 @@ namespace AppModel
                 _langNames = value;
                 NotifyPropertyChanged();
             }
-        }
+        }   
+        public Dictionary<string, string> langDishDescr { get; set; }   // dish with adding description
+
         public decimal Price
         {
             get { return _price; }
@@ -556,7 +564,8 @@ namespace AppModel
                 _image = value;
                 NotifyPropertyChanged();
             }
-        }
+        }                   // ONLY adding image
+        public byte[] ImageDish { get; set; }   // dish WITH adding image
         public string Uid { get; set; }
         public int Count
         {
@@ -578,6 +587,11 @@ namespace AppModel
             }
         }
 
+    } // class DishAdding
+
+    public enum FieldTypeIDEnum
+    {
+        Name =1, Description = 2, UnitName = 3
     }
 
 }  // namespace AppModel

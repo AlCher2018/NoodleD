@@ -27,14 +27,14 @@ namespace AppModel
             return retVal;
         }
 
-        public static bool SetValues(NoodleDContext db, Guid rowGuid, int fieldTypeId, string strRu, string strUa, string strEn)
+        public static bool SetValues(NoodleDContext db, Guid rowGuid, FieldTypeIDEnum fieldTypeId, string strRu, string strUa, string strEn)
         {
             bool retVal = true;
             try
             {
-                setTextToTable(db,rowGuid,fieldTypeId, "ru", strRu);
-                setTextToTable(db,rowGuid,fieldTypeId, "ua", strUa);
-                setTextToTable(db,rowGuid,fieldTypeId, "en", strEn);
+                setTextToTable(db, rowGuid, (int)fieldTypeId, "ru", strRu);
+                setTextToTable(db, rowGuid, (int)fieldTypeId, "ua", strUa);
+                setTextToTable(db, rowGuid, (int)fieldTypeId, "en", strEn);
                 db.SaveChanges();
             }
             catch (Exception)

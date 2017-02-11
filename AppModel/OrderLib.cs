@@ -17,6 +17,8 @@ namespace AppModel
         public string BarCodeValue { get; set; }
         public string LanguageTypeId { get; set; }
 
+        public bool takeAway { get; set; }
+
         public DateTime OrderDate { get; set; }
 
         private List<DishItem> _dishItems;
@@ -134,7 +136,8 @@ namespace AppModel
                     OrderNumForPrint = this.OrderNumberForPrint,
                     OrderDate = this.OrderDate,
                     BarCodeValue = this.BarCodeValue,
-                    LanguageTypeId = this.LanguageTypeId
+                    LanguageTypeId = this.LanguageTypeId,
+                    takeAway = this.takeAway
                 };
                 db.Order.Add(newOrder);
 

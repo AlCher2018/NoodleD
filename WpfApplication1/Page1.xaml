@@ -6,19 +6,30 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:local="clr-namespace:WpfApplication1"
       mc:Ignorable="d" 
-      d:DesignHeight="300" d:DesignWidth="300"
-      Title="Page1">
+      Title="Page1" SnapsToDevicePixels="True"
+      x:Name="page1"
+      >
 
-    <DockPanel>
-        <ListBox DockPanel.Dock="Top" Margin="10" x:Name="test" SelectedValuePath="Length">
+    <StackPanel>
+        <ListBox Margin="10" x:Name="listBox1" SelectedValuePath="Length">
             <sys:String>Log</sys:String>
             <sys:String>DownloadRequest</sys:String>
             <sys:String>EmailRequest</sys:String>
         </ListBox>
-        <TextBlock DockPanel.Dock="Top" Margin="10" Text="{Binding ElementName=test, Path=SelectedItem}"/>
-        <TextBlock DockPanel.Dock="Top" Margin="10" Text="{Binding ElementName=test, Path=SelectedValue}"/>
-        <Border DockPanel.Dock="Top" Padding="10">
+
+        <StackPanel Orientation="Horizontal">
+            <TextBlock x:Name="txtBlock01" Margin="10" Text="{Binding ElementName=listBox1, Path=SelectedItem}"/>
+            <TextBlock x:Name="txtBlock02" Margin="10" Text="{Binding ElementName=listBox1, Path=SelectedValue}"/>
+            <TextBox x:Name="txtBox01" Text="promo-code" VerticalAlignment="Center" TextAlignment="Left" Padding="3" Width="150"/>
+        </StackPanel>
+        
+        <Border Padding="10" Height="300">
             <Image x:Name="img"/>
         </Border>
-    </DockPanel>
+        
+        <StackPanel Orientation="Horizontal" >
+            <Button x:Name="btnAddHandlers" Margin="10" Padding="10,3" Click="btnAddHandlers_Click">Add handlers</Button>
+            <Button x:Name="btnDelHandlers" Margin="10" Padding="10,3"  Click="btnDelHandlers_Click">Remove handles</Button>
+        </StackPanel>
+    </StackPanel>
 </Page>

@@ -1,5 +1,4 @@
-﻿using AppModel;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
@@ -15,21 +14,34 @@ using System.Windows.Media;
 using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
 
+using AppModel;
+using UserActionLog;
+
+
 namespace WpfClient
 {
     public static class AppLib
     {
+        // общий логгер
         private static NLog.Logger AppLogger;
-        private static UserActionLog.UserActionsWPF UserActionLogger;
         
         /// <summary>
         /// Static Ctor
         /// </summary>
         static AppLib()
         {
-            // логгеры приложения
+            // логгер приложения
             AppLogger = NLog.LogManager.GetCurrentClassLogger();
-            UserActionLogger = new UserActionLog.UserActionsWPF(contentCtrl: null, classAction: UserActionLog.ClassActionEnum.None);
+        }
+
+        public static void OnClosingApp()
+        {
+            UserActionsLog actionIdle = (UserActionsLog)AppLib.GetAppGlobalValue("actionIdle");
+            if (actionIdle != null)
+            {
+                actionIdle.FinishLoggingUserActions();
+            }
+
         }
 
         #region App logger
@@ -258,7 +270,7 @@ namespace WpfClient
 
         public static void ShowMessage(string message, int closeInterval = 0)
         {
-            AppMsgBox mb = new AppMsgBox(message);
+            MsgBoxOk mb = new MsgBoxOk(message);
             if (closeInterval != 0) mb.CloseInterval = closeInterval;
             mb.ShowDialog();
         }
@@ -306,6 +318,9 @@ namespace WpfClient
 
             // размер шрифта заголовка панели блюда
             saveAppSettingToProps("dishPanelHeaderFontSize", typeof(int));
+            saveAppSettingToProps("dishPanelUnitCountFontSize", typeof(int));
+            saveAppSettingToProps("dishPanelDescriptionFontSize", typeof(int));
+            saveAppSettingToProps("dishPanelAddButtoFontSize", typeof(int));
             saveAppSettingToProps("dishPanelFontSize", typeof(int));
             saveAppSettingToPropTypeBool("IsPrintBarCode");
             saveAppSettingToPropTypeBool("IsIncludeBarCodeLabel");
@@ -577,7 +592,7 @@ namespace WpfClient
 
         public static void ShowIdleWindow()
         {
-            MessageBoxDialog mb = new MessageBoxDialog();
+            MsgBoxYesNo mb = new MsgBoxYesNo();
             mb.MessageText = AppLib.GetLangTextFromAppProp("areYouHereQuestion");
             mb.ShowDialog();
         }

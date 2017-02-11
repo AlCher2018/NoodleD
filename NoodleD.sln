@@ -26,6 +26,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserActionLog", "UserAction
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "NoodleDSetup", "NoodleDSetup\NoodleDSetup.vdproj", "{1AFE363F-C72A-44DE-AEAF-903BFA64668E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiTouch", "MultiTouch\MultiTouch.csproj", "{301ABBF2-EE61-4DBA-B36A-07395A7017CD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MsgBoxTester", "MsgBoxTester\MsgBoxTester.csproj", "{4F290D62-6AA4-42C6-BF0E-8F85BF41B37E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +66,14 @@ Global
 		{7D843AE8-A3ED-42AE-9EB7-22EA3C7EC733}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1AFE363F-C72A-44DE-AEAF-903BFA64668E}.Debug|Any CPU.ActiveCfg = Debug
 		{1AFE363F-C72A-44DE-AEAF-903BFA64668E}.Release|Any CPU.ActiveCfg = Release
+		{301ABBF2-EE61-4DBA-B36A-07395A7017CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{301ABBF2-EE61-4DBA-B36A-07395A7017CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{301ABBF2-EE61-4DBA-B36A-07395A7017CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{301ABBF2-EE61-4DBA-B36A-07395A7017CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F290D62-6AA4-42C6-BF0E-8F85BF41B37E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F290D62-6AA4-42C6-BF0E-8F85BF41B37E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F290D62-6AA4-42C6-BF0E-8F85BF41B37E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F290D62-6AA4-42C6-BF0E-8F85BF41B37E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

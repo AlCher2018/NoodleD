@@ -16,9 +16,12 @@ using System.Windows.Shapes;
 namespace WpfClient
 {
     /// <summary>
-    /// Interaction logic for MessageBox.xaml
+    /// Диалоговое окно с единственной кнопкой Ок, подтверждающей окончание какой-либо операции, например
+    /// окончание печати чека, сообщения об ошибках в дизайне приложения
+    /// Класс имеет таймер, по истечении времени которого, окно может закрыться автоматически
+    /// (свойство CloseInterval)
     /// </summary>
-    public partial class AppMsgBox : Window
+    public partial class MsgBoxOk : Window
     {
         private Timer _timer;
         private int _closeInterval;   // in msec
@@ -56,7 +59,7 @@ namespace WpfClient
             this.Dispatcher.Invoke(() => this.Close());
         }
 
-        public AppMsgBox(string messageText)
+        public MsgBoxOk(string messageText)
         {
             InitializeComponent();
 

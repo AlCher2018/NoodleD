@@ -18,7 +18,7 @@ namespace WpfClient
     /// <summary>
     /// Interaction logic for MessageBoxDialog.xaml
     /// </summary>
-    public partial class MessageBoxDialog : Window
+    public partial class MsgBoxYesNo : Window
     {
         public new string Title
         {
@@ -32,7 +32,7 @@ namespace WpfClient
             set { this.txtMessage.Text = value; }
         }
 
-        public MessageBoxDialog()
+        public MsgBoxYesNo()
         {
             InitializeComponent();
         }

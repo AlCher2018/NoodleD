@@ -61,5 +61,5 @@ namespace Animation
             Canvas.SetTop(canvasAnim, 0);
         }
 
-    }
+    }  // class
 }

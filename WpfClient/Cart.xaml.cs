@@ -197,7 +197,7 @@ namespace WpfClient
             DishAdding ingrItem = (DishAdding)ingrList.SelectedItem;
             if (ingrItem == null) return;
 
-            MessageBoxDialog msg = new MessageBoxDialog();
+            MsgBoxYesNo msg = new MsgBoxYesNo();
             Dictionary<string, string> v = (Dictionary<string, string>)AppLib.GetAppGlobalValue("cartDelIngrTitle");
             msg.Title = AppLib.GetLangText(v);
             v = (Dictionary<string, string>)AppLib.GetAppGlobalValue("cartDelIngrQuestion");
@@ -220,7 +220,7 @@ namespace WpfClient
             if (dishItem == null) return;
             OrderItem order = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
 
-            MessageBoxDialog msg = new MessageBoxDialog();
+            MsgBoxYesNo msg = new MsgBoxYesNo();
             Dictionary<string, string> v = (Dictionary<string, string>)AppLib.GetAppGlobalValue("cartDelDishTitle");
             msg.Title = AppLib.GetLangText(v);
             v = (Dictionary<string, string>)AppLib.GetAppGlobalValue("cartDelDishQuestion");
@@ -295,6 +295,9 @@ namespace WpfClient
 
             if (takeMode != TakeOrderEnum.None)
             {
+                // сохранить в заказе флажок "с собой"
+                if (takeMode == TakeOrderEnum.TakeAway) _currentOrder.takeAway = true;
+
                 PrintBill prn = new PrintBill(_currentOrder, takeMode);
                 string userErrMsg = null;
                 bool result = prn.CreateBill(out userErrMsg);
@@ -325,7 +328,7 @@ namespace WpfClient
                 {
                     AppLib.ShowMessage(userErrMsg);
                 }
-            }
+            }  // if
         }
 
         private void updatePriceOrder()

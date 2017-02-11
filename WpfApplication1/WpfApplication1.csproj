@@ -121,7 +121,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <SplashScreen Include="SplashScreen1.png" />
+    <ProjectReference Include="..\UserActionLog\UserActionLog.csproj">
+      <Project>{7d843ae8-a3ed-42ae-9eb7-22ea3c7ec733}</Project>
+      <Name>UserActionLog</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

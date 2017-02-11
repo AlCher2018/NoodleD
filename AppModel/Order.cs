@@ -20,5 +20,6 @@ namespace AppModel
         public int OrderNumForPrint { get; set; }
         public string BarCodeValue { get; set; }
         public string LanguageTypeId { get; set; }
+        public bool takeAway { get; set; }
     }
 }

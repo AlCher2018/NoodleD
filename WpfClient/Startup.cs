@@ -58,8 +58,8 @@ namespace WpfClient
             try
             {
                 AppLib.ReadSettingFromDB();
-                //TestData.mainProc();
                 AppLib.ReadAppDataFromDB();
+                //TestData.mainProc();
             }
             catch (Exception)
             {

@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Navigation;
+using UserActionLog;
 
 namespace WpfClient
 {
@@ -17,6 +19,10 @@ namespace WpfClient
     public partial class App : Application, Microsoft.Shell.ISingleInstanceApp
     {
         private const string Unique = "My_Unique_Application_String";
+        
+        // специальные логгеры событий WPF
+        public static UserActionsLog UserActionHandler = null;
+        public static UserActionIdle IdleHandler = null;
 
         [STAThread]
         public static void Main()
@@ -42,7 +48,7 @@ namespace WpfClient
                     //                Process.GetCurrentProcess().Kill();
                 }
 
-                System.Windows.SplashScreen splashScreen = new System.Windows.SplashScreen("AppImages/bg 3hor 1920x1080.png");
+                System.Windows.SplashScreen splashScreen = new System.Windows.SplashScreen("AppImages/bg 3hor 1920x1080 — копия.png");
                 splashScreen.Show(true);
 
                 App app = new App();
@@ -59,12 +65,12 @@ namespace WpfClient
                 //******  динамические настройки  ******
                 // получение и сохранение внешних ресурсов приложения
                 AppLib.GetSettingsFromConfigFile();     // определенные в config-файле
+                //TestData.mainProc();
 
                 // определенные в ms sql
                 try
                 {
                     AppLib.ReadSettingFromDB();
-                    //testdata.mainproc();
                     AppLib.ReadAppDataFromDB();
                 }
                 catch (Exception)
@@ -84,6 +90,11 @@ namespace WpfClient
                     throw;
                 }
 
+                //UserActionHandler = new UserActionsLog();
+                // ожидашка
+                IdleHandler = new UserActionIdle() { IdleSeconds = (int)AppLib.GetAppGlobalValue("UserIdleTime") };
+                //IdleHandler.IdleElapseEvent += IdleHandler_IdleElapseEvent;
+
                 // главное окно приложения
                 WpfClient.MainWindow mainWindow = new WpfClient.MainWindow();
                 app.Run(mainWindow);
@@ -91,6 +102,20 @@ namespace WpfClient
                 // Allow single instance code to perform cleanup operations
                 Microsoft.Shell.SingleInstance<App>.Cleanup();
             }
+        }
+
+        private static void IdleHandler_IdleElapseEvent(System.Timers.ElapsedEventArgs obj)
+        {
+            App.Current.Dispatcher.Invoke(
+                () => {
+                    //Debug.Print("_IdleElapseEvent: " + obj.SignalTime.ToString());
+                    MsgBoxYesNo msgBox = new MsgBoxYesNo();
+                    msgBox.MessageText = AppLib.GetLangTextFromAppProp("areYouHereQuestion");
+                    if (msgBox.ShowDialog() == false)
+                    {
+                        // истекло время ожидания
+                    }
+                });
         }
 
         #region ISingleInstanceApp Members

@@ -16,18 +16,17 @@ namespace WpfClient
     public class MainMenuGarnish: Grid
     {
         private bool _isSelected;
-        private Brush _selectBrush;
-        private Brush _notSelectBrush;
+        //private Brush _selectBrush;
+        //private Brush _notSelectBrush;
         private Brush _selectTextBrush;
         double _fontSize, _fontSizeUp;
 
         private double _height, _width;
         private DishItem _dishItem;
         private DishAdding _garnItem;
-        private Path _path;
+        private Path _pathSelected;
         private TextBlock _tbGarnishName;
         private TextBlock _tbGarnishPrice;
-        private Canvas _canvas;
         private Grid _contentPanel;
 
         //private DropShadowEffect _shadow;
@@ -41,8 +40,6 @@ namespace WpfClient
             }
         }
 
-        //public event Action<Canvas> Selecting;
-
         public MainMenuGarnish(DishItem dishItem, int garnIndex, double garnHeight, double garnWidth, Grid dishContentPanel)
         {
             _dishItem = dishItem;
@@ -53,8 +50,8 @@ namespace WpfClient
 
             _fontSize = (double)AppLib.GetAppGlobalValue("appFontSize5");
             _fontSizeUp = (double)AppLib.GetAppGlobalValue("appFontSize4");
-            _notSelectBrush = (Brush)AppLib.GetAppGlobalValue("selectGarnishBackgroundColor");
-            _selectBrush = (Brush)AppLib.GetAppGlobalValue("appSelectedItemColor");
+
+            //_notSelectBrush = (Brush)AppLib.GetAppGlobalValue("selectGarnishBackgroundColor");
             _selectTextBrush = (Brush)AppLib.GetAppGlobalValue("addButtonBackgroundPriceColor");
             //_shadow = new DropShadowEffect() { BlurRadius = 5, Opacity = 0.5, ShadowDepth = 1 };
 
@@ -62,7 +59,7 @@ namespace WpfClient
 
             createGarnishButton();
 
-            base.PreviewMouseUp += MainMenuGarnish_PreviewMouseDown;
+            base.MouseDown += MainMenuGarnish_PreviewMouseDown;
         }
 
         public void ResetLangName()
@@ -104,7 +101,7 @@ namespace WpfClient
 
         private void switchSelectMode()
         {
-            _path.Fill = (_isSelected) ? _selectBrush : _notSelectBrush;
+            _pathSelected.Visibility = (_isSelected) ? Visibility.Visible : Visibility.Collapsed;
 
             _tbGarnishName.Foreground = (_isSelected) ? Brushes.Black : Brushes.White;
             _tbGarnishName.FontWeight = (_isSelected) ? FontWeights.Bold : FontWeights.Normal;
@@ -148,8 +145,20 @@ namespace WpfClient
         {
             base.Height = _height; base.Width = _width;
 
-            _path = getGarnPath(_height, _width);
+            Path _path = getGarnPath(_width, _height);
+            //_notSelectBrush = new ImageBrush() { ImageSource = ImageHelper.ByteArrayToBitmapImage(_garnItem.Image) };
+            //_path.Fill = _notSelectBrush;
+            //_path.Fill = new DrawingBrush( new ImageDrawing()
+            //    { ImageSource = ImageHelper.ByteArrayToBitmapImage(_garnItem.Image), Rect = new Rect(0,0,_width,_height) });
+            _path.Fill = new ImageBrush() { ImageSource = ImageHelper.ByteArrayToBitmapImage(_garnItem.Image) };
             base.Children.Add(_path);
+
+            _pathSelected = getGarnPath(_width, _height);
+            Color c = ((SolidColorBrush)AppLib.GetAppGlobalValue("appSelectedItemColor")).Color;
+            Color c1 = new Color(); c1.A = 0xAA; c1.R = c.R; c1.G = c.G; c1.B = c.B;
+            _pathSelected.Fill = new SolidColorBrush(c1);
+            _pathSelected.Visibility = Visibility.Collapsed;
+            base.Children.Add(_pathSelected);
 
             double dMarg = 0.05 * _width;
             string grnText = (string)AppLib.GetLangText((Dictionary<string, string>)_garnItem.langNames);
@@ -180,7 +189,7 @@ namespace WpfClient
             base.Children.Add(_tbGarnishPrice);
         }
 
-        private Path getGarnPath(double grnH, double grnW)
+        private Path getGarnPath(double grnW, double grnH)
         {
             Path grnPath = new Path();
             double grnBorderRadius = Math.Min(grnH, grnW) * 0.1;
@@ -191,7 +200,7 @@ namespace WpfClient
             CombinedGeometry combGeom = new CombinedGeometry(GeometryCombineMode.Exclude, rectGeom, ellGeom);
             grnPath.Data = combGeom;
             grnPath.Tag = 0;
-            grnPath.Fill = _notSelectBrush;
+
             //pathImage.Effect = new DropShadowEffect();
 
             return grnPath;

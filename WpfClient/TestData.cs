@@ -12,13 +12,13 @@ namespace WpfClient
     {
         public static void mainProc()
         {
-            //clearData();
-            //setAppGlobalData();
-            //setGlobalDataFrom1C();
+            clearData();
+            //setAppGlobalData();   // словари
+            setGlobalDataFrom1C();
 
-            //setMainMenu();          // главное меню
-            //setDishesTestData();    // блюда
-            //setRecommends();        // рекомендации
+            setMainMenu();          // главное меню
+            setDishesTestData();    // блюда
+            setRecommends();        // рекомендации
 
             setInrgImages();
         }
@@ -47,13 +47,11 @@ namespace WpfClient
                 db.Database.ExecuteSqlCommand("dbcc checkident('[Dish]', reseed, 0)");
 
                 db.StringValue.RemoveRange(db.StringValue);
-                db.FieldType.RemoveRange(db.FieldType);
                 db.MenuFolder.RemoveRange(db.MenuFolder);
                 db.Setting.RemoveRange(db.Setting);
                 db.Terminal.RemoveRange(db.Terminal);
                 db.SaveChanges();
                 db.Database.ExecuteSqlCommand("dbcc checkident('[StringValue]', reseed, 0)");
-                db.Database.ExecuteSqlCommand("dbcc checkident('[FieldType]', reseed, 0)");
                 db.Database.ExecuteSqlCommand("dbcc checkident('[MenuFolder]', reseed, 0)");
                 db.Database.ExecuteSqlCommand("dbcc checkident('[Terminal]', reseed, 0)");
 
@@ -90,20 +88,21 @@ namespace WpfClient
                 // гр
                 unit = new DishUnit() { RowGUID = Guid.NewGuid() };
                 db.DishUnit.Add(unit);
-                LangStringLib.SetValues(db, unit.RowGUID, 3, "г", "г", "gr");
+                LangStringLib.SetValues(db, unit.RowGUID, FieldTypeIDEnum.UnitName, "г", "г", "gr");
                 // мл
                 unit = new DishUnit() { RowGUID = Guid.NewGuid() };
                 db.DishUnit.Add(unit);
-                LangStringLib.SetValues(db, unit.RowGUID, 3, "мл", "мл", "ml");
+                LangStringLib.SetValues(db, unit.RowGUID, FieldTypeIDEnum.UnitName, "мл", "мл", "ml");
                 db.SaveChanges();
 
                 // добавить маркеры
                 DishMark dm;
-                dm = new DishMark() { RowGUID = Guid.NewGuid(), Image = ImageHelper.getImageFromFilePath("AppImages\\dishMarks\\dishMark_chilli.png") };
+                string filePath = @"d:\NoodleD\дизайн\testImages\dishMarks\";
+                dm = new DishMark() { RowGUID = Guid.NewGuid(), Image = ImageHelper.getImageFromFilePath(filePath + "chilli.jpg") };
                 db.DishMark.Add(dm);
-                LangStringLib.SetValues(db, dm.RowGUID, 1, "острый", "гострий", "chilli");
-                dm = new DishMark() { RowGUID = Guid.NewGuid(), Image = ImageHelper.getImageFromFilePath("AppImages\\dishMarks\\dishMark_veg.png") };
-                LangStringLib.SetValues(db, dm.RowGUID, 1, "вег", "вег", "veg");
+                LangStringLib.SetValues(db, dm.RowGUID, FieldTypeIDEnum.Name, "острый", "гострий", "chilli");
+                dm = new DishMark() { RowGUID = Guid.NewGuid(), Image = ImageHelper.getImageFromFilePath(filePath + "Red_Apple.jpg") };
+                LangStringLib.SetValues(db, dm.RowGUID, FieldTypeIDEnum.Name, "вег", "вег", "veg");
                 db.DishMark.Add(dm);
                 db.SaveChanges();
 
@@ -119,6 +118,7 @@ namespace WpfClient
                 appSet = new Setting() { UniqName = "mainMenuSelectedItemColor", RowGUID = Guid.NewGuid(), Value = "99,29,85" };
                 db.Setting.Add(appSet);
                 appSet = new Setting() { UniqName = "addButtonBackgroundTextColor", RowGUID = Guid.NewGuid(), Value = "173,32,72" };
+                appSet = new Setting() { UniqName = "addButtonBackgroundPriceColor", RowGUID = Guid.NewGuid(), Value = "147,29,63" };
                 db.Setting.Add(appSet);
                 appSet = new Setting() { UniqName = "cartButtonBackgroundColor", RowGUID = Guid.NewGuid(), Value = "214,244,36" };
                 db.Setting.Add(appSet);
@@ -141,49 +141,49 @@ namespace WpfClient
 
                 // Главное окно 
                 appSet = new Setting() { UniqName = "invitePromoText", RowGUID = Guid.NewGuid(), Value = "StringValue" };
-                LangStringLib.SetValues(db, appSet.RowGUID, 1, "Введите промо-код", "Введіть промо-код", "Enter the promo code");
+                LangStringLib.SetValues(db, appSet.RowGUID, FieldTypeIDEnum.Name, "Введите промо-код", "Введіть промо-код", "Enter the promo code");
                 db.Setting.Add(appSet);
                 appSet = new Setting() { UniqName = "btnCreateOrderText", RowGUID = Guid.NewGuid(), Value = "StringValue" };
-                LangStringLib.SetValues(db, appSet.RowGUID, 1, "ОФОРМИТЬ", "ОФОРМИТИ", "MAKE");
+                LangStringLib.SetValues(db, appSet.RowGUID, FieldTypeIDEnum.Name, "ОФОРМИТЬ", "ОФОРМИТИ", "MAKE");
                 db.Setting.Add(appSet);
                 appSet = new Setting() { UniqName = "btnSelectGarnishText", RowGUID = Guid.NewGuid(), Value = "StringValue" };
-                LangStringLib.SetValues(db, appSet.RowGUID, 1, "ВЫБЕРИТЕ ОСНОВУ", "ВИБЕРІТЬ ОСНОВУ", "SELECT BASE");
+                LangStringLib.SetValues(db, appSet.RowGUID, FieldTypeIDEnum.Name, "ВЫБЕРИТЕ ОСНОВУ", "ВИБЕРІТЬ ОСНОВУ", "SELECT BASE");
                 db.Setting.Add(appSet);
                 appSet = new Setting() { UniqName = "btnSelectDishText", RowGUID = Guid.NewGuid(), Value = "StringValue" };
-                LangStringLib.SetValues(db, appSet.RowGUID, 1, "ДОБАВИТЬ", "ДОДАТИ", "ADD");
+                LangStringLib.SetValues(db, appSet.RowGUID, FieldTypeIDEnum.Name, "ДОБАВИТЬ", "ДОДАТИ", "ADD");
                 db.Setting.Add(appSet);
                 db.SaveChanges();
 
                 // всплывашка
                 appSet = new Setting() { UniqName = "formPopUpHeaderText1", RowGUID = Guid.NewGuid(), Value = "StringValue" };
-                LangStringLib.SetValues(db, appSet.RowGUID, 1, "Вы выбрали блюдо", "Ви вибрали блюдо", "You have chosen a dish");
+                LangStringLib.SetValues(db, appSet.RowGUID, FieldTypeIDEnum.Name, "Вы выбрали блюдо", "Ви вибрали блюдо", "You have chosen a dish");
                 db.Setting.Add(appSet);
                 appSet = new Setting() { UniqName = "formPopUpHeaderText2", RowGUID = Guid.NewGuid(), Value = "StringValue" };
-                LangStringLib.SetValues(db, appSet.RowGUID, 1, "Удвоить ингредиенты", "Подвоїти інгредієнти", "Double the ingredients");
+                LangStringLib.SetValues(db, appSet.RowGUID, FieldTypeIDEnum.Name, "Удвоить ингредиенты", "Подвоїти інгредієнти", "Double the ingredients");
                 db.Setting.Add(appSet);
                 appSet = new Setting() { UniqName = "formPopUpHeaderText3", RowGUID = Guid.NewGuid(), Value = "StringValue" };
-                LangStringLib.SetValues(db, appSet.RowGUID, 1, "Рекомендуем к этому блюду", "Рекомендуємо до цієї страви", "We recommend this dish");
+                LangStringLib.SetValues(db, appSet.RowGUID, FieldTypeIDEnum.Name, "Рекомендуем к этому блюду", "Рекомендуємо до цієї страви", "We recommend this dish");
                 db.Setting.Add(appSet);
                 db.SaveChanges();
 
                 // корзина
                 appSet = new Setting() { UniqName = "formOrderHeaderText", RowGUID = Guid.NewGuid(), Value = "StringValue" };
-                LangStringLib.SetValues(db, appSet.RowGUID, 1, "Вы заказали", "Ви замовили", "You ordered");
+                LangStringLib.SetValues(db, appSet.RowGUID, FieldTypeIDEnum.Name, "Вы заказали", "Ви замовили", "You ordered");
                 db.Setting.Add(appSet);
                 appSet = new Setting() { UniqName = "btnBackToMenuText", RowGUID = Guid.NewGuid(), Value = "StringValue" };
-                LangStringLib.SetValues(db, appSet.RowGUID, 1, "Назад к меню", "Назад до меню", "Back to the menu");
+                LangStringLib.SetValues(db, appSet.RowGUID, FieldTypeIDEnum.Name, "Назад к меню", "Назад до меню", "Back to the menu");
                 db.Setting.Add(appSet);
                 appSet = new Setting() { UniqName = "btnTakeAwayText", RowGUID = Guid.NewGuid(), Value = "StringValue" };
-                LangStringLib.SetValues(db, appSet.RowGUID, 1, "С собой", "З собою", "Take away");
+                LangStringLib.SetValues(db, appSet.RowGUID, FieldTypeIDEnum.Name, "С собой", "З собою", "Take away");
                 db.Setting.Add(appSet);
                 appSet = new Setting() { UniqName = "btnPrintBillText", RowGUID = Guid.NewGuid(), Value = "StringValue" };
-                LangStringLib.SetValues(db, appSet.RowGUID, 1, "Распечатать чек", "Роздрукувати чек", "Print receipt");
+                LangStringLib.SetValues(db, appSet.RowGUID, FieldTypeIDEnum.Name, "Распечатать чек", "Роздрукувати чек", "Print receipt");
                 db.Setting.Add(appSet);
                 appSet = new Setting() { UniqName = "lblTotalText", RowGUID = Guid.NewGuid(), Value = "StringValue" };
-                LangStringLib.SetValues(db, appSet.RowGUID, 1, "Всего:", "Всього:", "Total:");
+                LangStringLib.SetValues(db, appSet.RowGUID, FieldTypeIDEnum.Name, "Всего:", "Всього:", "Total:");
                 db.Setting.Add(appSet);
                 appSet = new Setting() { UniqName = "lblGoText", RowGUID = Guid.NewGuid(), Value = "StringValue" };
-                LangStringLib.SetValues(db, appSet.RowGUID, 1, "Подходите с чеком к кассе для оплаты", "Підходьте з чеком до каси для оплати", "Come with a check to the cashier for payment");
+                LangStringLib.SetValues(db, appSet.RowGUID, FieldTypeIDEnum.Name, "Подходите с чеком к кассе для оплаты", "Підходьте з чеком до каси для оплати", "Come with a check to the cashier for payment");
                 db.Setting.Add(appSet);
                 db.SaveChanges();
             }
@@ -192,21 +192,22 @@ namespace WpfClient
 
         public static void setMainMenu()
         {
+            string filePath = @"d:\NoodleD\дизайн\testImages\dishCategories\";
             MenuFolder mf1, mf2, mf3, mf4, mf5, mf6;
             using (NoodleDContext db = new NoodleDContext())
             {
-                byte[] image1 = ImageHelper.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Combo.png");
-                byte[] image1Inv = ImageHelper.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Combo_inv.png");
-                byte[] image2 = ImageHelper.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Voki.png");
-                byte[] image2Inv = ImageHelper.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Voki_inv.png");
-                byte[] image3 = ImageHelper.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Salads.png");
-                byte[] image3Inv = ImageHelper.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Salads_inv.png");
-                byte[] image4 = ImageHelper.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Soups.png");
-                byte[] image4Inv = ImageHelper.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Soups_inv.png");
-                byte[] image5 = ImageHelper.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Desserts.png");
-                byte[] image5Inv = ImageHelper.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Desserts_inv.png");
-                byte[] image6 = ImageHelper.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Beverages.png");
-                byte[] image6Inv = ImageHelper.getImageFromFilePath("AppImages\\dishCategories\\dishCategory_Beverages_inv.png");
+                byte[] image1 = ImageHelper.getImageFromFilePath(filePath + "dishCategory_Combo.png");
+                byte[] image1Inv = ImageHelper.getImageFromFilePath(filePath + "dishCategory_Combo_inv.png");
+                byte[] image2 = ImageHelper.getImageFromFilePath(filePath + "dishCategory_Voki.png");
+                byte[] image2Inv = ImageHelper.getImageFromFilePath(filePath + "dishCategory_Voki_inv.png");
+                byte[] image3 = ImageHelper.getImageFromFilePath(filePath + "dishCategory_Salads.png");
+                byte[] image3Inv = ImageHelper.getImageFromFilePath(filePath + "dishCategory_Salads_inv.png");
+                byte[] image4 = ImageHelper.getImageFromFilePath(filePath + "dishCategory_Soups.png");
+                byte[] image4Inv = ImageHelper.getImageFromFilePath(filePath + "dishCategory_Soups_inv.png");
+                byte[] image5 = ImageHelper.getImageFromFilePath(filePath + "dishCategory_Desserts.png");
+                byte[] image5Inv = ImageHelper.getImageFromFilePath(filePath + "dishCategory_Desserts_inv.png");
+                byte[] image6 = ImageHelper.getImageFromFilePath(filePath + "dishCategory_Beverages.png");
+                byte[] image6Inv = ImageHelper.getImageFromFilePath(filePath + "dishCategory_Beverages_inv.png");
                 mf1 = new MenuFolder() { RowGUID = Guid.NewGuid(), Image = image1, ImageInv = image1Inv, ParentId = 0, RowPosition = 1 };
                 mf2 = new MenuFolder() { RowGUID = Guid.NewGuid(), Image = image2, ImageInv = image2Inv, ParentId = 0, RowPosition = 2 };
                 mf3 = new MenuFolder() { RowGUID = Guid.NewGuid(), Image = image3, ImageInv = image3Inv, ParentId = 0, RowPosition = 3 };
@@ -217,12 +218,12 @@ namespace WpfClient
 
                 db.SaveChanges();
 
-                LangStringLib.SetValues(db, mf1.RowGUID, 1, "Комбо", "Комбо", "Combo");
-                LangStringLib.SetValues(db, mf2.RowGUID, 1, "Воки", "Вокi", "Vocki");
-                LangStringLib.SetValues(db, mf3.RowGUID, 1, "Салаты", "Салати", "Salads");
-                LangStringLib.SetValues(db, mf4.RowGUID, 1, "Супы", "Супи", "Soups");
-                LangStringLib.SetValues(db, mf5.RowGUID, 1, "Десерты", "Десерти", "Desserts");
-                LangStringLib.SetValues(db, mf6.RowGUID, 1, "Напитки", "Напої", "Beverages");
+                LangStringLib.SetValues(db, mf1.RowGUID, FieldTypeIDEnum.Name, "Комбо", "Комбо", "Combo");
+                LangStringLib.SetValues(db, mf2.RowGUID, FieldTypeIDEnum.Name, "Воки", "Вокi", "Vocki");
+                LangStringLib.SetValues(db, mf3.RowGUID, FieldTypeIDEnum.Name, "Салаты", "Салати", "Salads");
+                LangStringLib.SetValues(db, mf4.RowGUID, FieldTypeIDEnum.Name, "Супы", "Супи", "Soups");
+                LangStringLib.SetValues(db, mf5.RowGUID, FieldTypeIDEnum.Name, "Десерты", "Десерти", "Desserts");
+                LangStringLib.SetValues(db, mf6.RowGUID, FieldTypeIDEnum.Name, "Напитки", "Напої", "Beverages");
                 db.SaveChanges();
             }
         }
@@ -237,40 +238,40 @@ namespace WpfClient
             Guid dMarkGuid1, dMarkGuid2;
             Random rnd = new Random(); int r;
 
-            string imgPath = @"D:\NoodleD\дизайн\изображения блюд от 22.12.2016\";
+            string imgPath = @"D:\NoodleD\дизайн\изображения блюд от 22.12.2016\изм\";
             // 20 изображений блюд
             byte[][] imagesDish = new[] {
-                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-1.png"),
-                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-3.png"),
-                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-5.png"),
-                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-7.png"),
-                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-9.png"),
-                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-11.png"),
-                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-13.png"),
-                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-15.png"),
-                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-17.png"),
-                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-19.png"),
-                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-21.png"),
-                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-23.png"),
-                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-25.png"),
-                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-27.png"),
-                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-29.png"),
-                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-31.png"),
-                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-33.png"),
-                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-35.png"),
-                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-37.png"),
-                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-39.png")};
-            byte[] imageNoodles1 = ImageHelper.getImageFromFilePath(@"e:\Чернов\NoodleD\дизайн\NodDod\noodles1.png");
-            byte[] imageNoodles2 = ImageHelper.getImageFromFilePath(@"e:\Чернов\NoodleD\дизайн\NodDod\noodles2.png");
-            byte[] imageNoodles3 = ImageHelper.getImageFromFilePath(@"e:\Чернов\NoodleD\дизайн\NodDod\noodles3.png");
-            byte[] imageSalad1 = ImageHelper.getImageFromFilePath(@"e:\Чернов\NoodleD\дизайн\NodDod\salad1.png");
-            byte[] imageSalad2 = ImageHelper.getImageFromFilePath(@"e:\Чернов\NoodleD\дизайн\NodDod\salad2.png");
-            byte[] imageDessert1 = ImageHelper.getImageFromFilePath(@"D:\NoodleD\дизайн\изображения блюд от 22.12.2016\EmptyName-44.jpg");
-            byte[] imageDessert2 = ImageHelper.getImageFromFilePath(@"D:\NoodleD\дизайн\изображения блюд от 22.12.2016\EmptyName-45.jpg");
-            byte[] imageDessert3 = ImageHelper.getImageFromFilePath(@"D:\NoodleD\дизайн\изображения блюд от 22.12.2016\EmptyName-46.jpg");
-            byte[] imageBeverage1 = ImageHelper.getImageFromFilePath(@"D:\NoodleD\дизайн\изображения блюд от 22.12.2016\EmptyName-49.jpg");
-            byte[] imageBeverage2 = ImageHelper.getImageFromFilePath(@"D:\NoodleD\дизайн\изображения блюд от 22.12.2016\EmptyName-50.jpg");
-            byte[] imageBeverage3 = ImageHelper.getImageFromFilePath(@"D:\NoodleD\дизайн\изображения блюд от 22.12.2016\EmptyName-51.jpg");
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-1.jpg"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-3.jpg"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-5.jpg"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-7.jpg"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-9.jpg"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-11.jpg"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-13.jpg"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-15.jpg"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-17.jpg"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-19.jpg"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-21.jpg"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-23.jpg"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-25.jpg"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-29.jpg"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-31.jpg"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-33.jpg"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-34.jpg"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-35.jpg"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-37.jpg"),
+                ImageHelper.getImageFromFilePath(imgPath + "EmptyName-39.jpg")};
+            byte[] imageNoodles1 = ImageHelper.getImageFromFilePath(@"D:\NoodleD\дизайн\NodDod\noodles1.png");
+            byte[] imageNoodles2 = ImageHelper.getImageFromFilePath(@"D:\NoodleD\дизайн\NodDod\noodles2.png");
+            byte[] imageNoodles3 = ImageHelper.getImageFromFilePath(@"D:\NoodleD\дизайн\NodDod\noodles3.png");
+            byte[] imageSalad1 = ImageHelper.getImageFromFilePath(@"D:\NoodleD\дизайн\NodDod\salad1.png");
+            byte[] imageSalad2 = ImageHelper.getImageFromFilePath(@"D:\NoodleD\дизайн\NodDod\salad2.png");
+            byte[] imageDessert1 = ImageHelper.getImageFromFilePath(imgPath + "EmptyName-44.jpg");
+            byte[] imageDessert2 = ImageHelper.getImageFromFilePath(imgPath + "EmptyName-45.jpg");
+            byte[] imageDessert3 = ImageHelper.getImageFromFilePath(imgPath + "EmptyName-46.jpg");
+            byte[] imageBeverage1 = ImageHelper.getImageFromFilePath(imgPath + "EmptyName-49.jpg");
+            byte[] imageBeverage2 = ImageHelper.getImageFromFilePath(imgPath + "EmptyName-50.jpg");
+            byte[] imageBeverage3 = ImageHelper.getImageFromFilePath(imgPath + "EmptyName-51.jpg");
 
             // блюда для первого пункта меню (Комбо)
             namesList = new string[] { "Курица Кунпао", "Куриця Кунпао", "Cunpao chicken" };
@@ -309,9 +310,9 @@ namespace WpfClient
                     db.SaveChanges();
 
                     // наименование
-                    LangStringLib.SetValues(db, dish.RowGUID, 1, namesList[0], namesList[1], namesList[2]);
+                    LangStringLib.SetValues(db, dish.RowGUID, FieldTypeIDEnum.Name, namesList[0], namesList[1], namesList[2]);
                     // описание
-                    LangStringLib.SetValues(db, dish.RowGUID, 2, descrList[0], descrList[1], descrList[2]);
+                    LangStringLib.SetValues(db, dish.RowGUID, FieldTypeIDEnum.Description, descrList[0], descrList[1], descrList[2]);
                 }
             }
 
@@ -348,15 +349,15 @@ namespace WpfClient
                     db.SaveChanges();
 
                     // добавить к блюду ВСЕ гарниры
-                    addGarnishes(db, dish);
+                    addGarnishes(db, dish, descrList);
                     // добавить к блюду ВСЕ ингредиенты
                     addIngredients(db, dish);
                     db.SaveChanges();
 
                     // наименование
-                    LangStringLib.SetValues(db, dish.RowGUID, 1, namesList[0], namesList[1], namesList[2]);
+                    LangStringLib.SetValues(db, dish.RowGUID, FieldTypeIDEnum.Name, namesList[0], namesList[1], namesList[2]);
                     // описание
-                    LangStringLib.SetValues(db, dish.RowGUID, 2, descrList[0], descrList[1], descrList[2]);
+                    LangStringLib.SetValues(db, dish.RowGUID, FieldTypeIDEnum.Description, descrList[0], descrList[1], descrList[2]);
                 }
             }
 
@@ -377,9 +378,9 @@ namespace WpfClient
                     db.SaveChanges();
 
                     // наименование
-                    LangStringLib.SetValues(db, dish.RowGUID, 1, namesList[0], namesList[1], namesList[2]);
+                    LangStringLib.SetValues(db, dish.RowGUID, FieldTypeIDEnum.Name, namesList[0], namesList[1], namesList[2]);
                     // описание
-                    LangStringLib.SetValues(db, dish.RowGUID, 2, descrList[0], descrList[1], descrList[2]);
+                    LangStringLib.SetValues(db, dish.RowGUID, FieldTypeIDEnum.Description, descrList[0], descrList[1], descrList[2]);
 
                 }
             }
@@ -399,9 +400,9 @@ namespace WpfClient
                     db.SaveChanges();
 
                     // наименование
-                    LangStringLib.SetValues(db, dish.RowGUID, 1, namesList[0], namesList[1], namesList[2]);
+                    LangStringLib.SetValues(db, dish.RowGUID, FieldTypeIDEnum.Name, namesList[0], namesList[1], namesList[2]);
                     // описание
-                    LangStringLib.SetValues(db, dish.RowGUID, 2, descrList[0], descrList[1], descrList[2]);
+                    LangStringLib.SetValues(db, dish.RowGUID, FieldTypeIDEnum.Description, descrList[0], descrList[1], descrList[2]);
                 }
             }
 
@@ -429,9 +430,9 @@ namespace WpfClient
                     db.SaveChanges();
 
                     // наименование
-                    LangStringLib.SetValues(db, dish.RowGUID, 1, namesList[0], namesList[1], namesList[2]);
+                    LangStringLib.SetValues(db, dish.RowGUID, FieldTypeIDEnum.Name, namesList[0], namesList[1], namesList[2]);
                     // описание
-                    LangStringLib.SetValues(db, dish.RowGUID, 2, descrList[0], descrList[1], descrList[2]);
+                    LangStringLib.SetValues(db, dish.RowGUID, FieldTypeIDEnum.Description, descrList[0], descrList[1], descrList[2]);
                 }
             }
 
@@ -459,9 +460,9 @@ namespace WpfClient
                     db.SaveChanges();
 
                     // наименование
-                    LangStringLib.SetValues(db, dish.RowGUID, 1, namesList[0], namesList[1], namesList[2]);
+                    LangStringLib.SetValues(db, dish.RowGUID, FieldTypeIDEnum.Name, namesList[0], namesList[1], namesList[2]);
                     // описание
-                    LangStringLib.SetValues(db, dish.RowGUID, 2, descrList[0], descrList[1], descrList[2]);
+                    LangStringLib.SetValues(db, dish.RowGUID, FieldTypeIDEnum.Description, descrList[0], descrList[1], descrList[2]);
                 }
             }
 
@@ -493,9 +494,9 @@ namespace WpfClient
                     db.SaveChanges();
 
                     // наименование
-                    LangStringLib.SetValues(db, dish.RowGUID, 1, namesList[0], namesList[1], namesList[2]);
+                    LangStringLib.SetValues(db, dish.RowGUID, FieldTypeIDEnum.Name, namesList[0], namesList[1], namesList[2]);
                     // описание
-                    LangStringLib.SetValues(db, dish.RowGUID, 2, descrList[0], descrList[1], descrList[2]);
+                    LangStringLib.SetValues(db, dish.RowGUID, FieldTypeIDEnum.Description, descrList[0], descrList[1], descrList[2]);
                 }
             }
         }
@@ -505,40 +506,60 @@ namespace WpfClient
             // добавить ингредиенты
             DishIngredient ingr;
             ingr = new DishIngredient() { RowGUID = Guid.NewGuid(), Price = 19, DishGUID = dish.RowGUID, RowPosition=1 };
-            LangStringLib.SetValues(db, ingr.RowGUID, 1, "Двойной соус терияки", "Подвійний соус теріякі", "Double teriyaki sauce");
+            LangStringLib.SetValues(db, ingr.RowGUID, FieldTypeIDEnum.Name, "Двойной соус терияки", "Подвійний соус теріякі", "Double teriyaki sauce");
             db.DishIngredient.Add(ingr);
 
             ingr = new DishIngredient() { RowGUID = Guid.NewGuid(), Price = 9, DishGUID = dish.RowGUID, RowPosition = 2 };
-            LangStringLib.SetValues(db, ingr.RowGUID, 1, "Двойная фасоль стручковая", "Подвійна квасоля стручкова", "Double runner beans");
+            LangStringLib.SetValues(db, ingr.RowGUID, FieldTypeIDEnum.Name, "Двойная фасоль стручковая", "Подвійна квасоля стручкова", "Double runner beans");
             db.DishIngredient.Add(ingr);
 
             ingr = new DishIngredient() { RowGUID = Guid.NewGuid(), Price = 23, DishGUID = dish.RowGUID, RowPosition = 3 };
-            LangStringLib.SetValues(db, ingr.RowGUID, 1, "Двойная курица", "Подвійна курка", "Double chicken");
+            LangStringLib.SetValues(db, ingr.RowGUID, FieldTypeIDEnum.Name, "Двойная курица", "Подвійна курка", "Double chicken");
             db.DishIngredient.Add(ingr);
 
             ingr = new DishIngredient() { RowGUID = Guid.NewGuid(), Price = 13, DishGUID = dish.RowGUID, RowPosition = 4 };
-            LangStringLib.SetValues(db, ingr.RowGUID, 1, "Двойной деревестный гриб", "Подвійний дерев'янистий гриб", "Double tree fungus");
+            LangStringLib.SetValues(db, ingr.RowGUID, FieldTypeIDEnum.Name, "Двойной деревестный гриб", "Подвійний дерев'янистий гриб", "Double tree fungus");
             db.DishIngredient.Add(ingr);
 
             ingr = new DishIngredient() { RowGUID = Guid.NewGuid(), Price = 18, DishGUID = dish.RowGUID, RowPosition = 5 };
-            LangStringLib.SetValues(db, ingr.RowGUID, 1, "Двойные грибы шампиньоны", "Подвійні гриби печериці", "Double champignons");
+            LangStringLib.SetValues(db, ingr.RowGUID, FieldTypeIDEnum.Name, "Двойные грибы шампиньоны", "Подвійні гриби печериці", "Double champignons");
             db.DishIngredient.Add(ingr);
         }
 
-        private static void addGarnishes(NoodleDContext db, Dish dish)
+        private static void addGarnishes(NoodleDContext db, Dish dish, string[] descrList)
         {
+            byte[] img1 = ImageHelper.getImageFromFilePath(@"D:\NoodleD\дизайн\NodDod\noodles1.png");
+            byte[] img2 = ImageHelper.getImageFromFilePath(@"D:\NoodleD\дизайн\NodDod\noodles2.png");
+            byte[] img3 = ImageHelper.getImageFromFilePath(@"D:\NoodleD\дизайн\NodDod\noodles3.png");
+
             // добавить гарниры
             DishGarnish garn;
-            garn = new DishGarnish() { RowGUID = Guid.NewGuid(), Price = 24, DishGUID = dish.RowGUID, RowPosition = 1 };
-            LangStringLib.SetValues(db, garn.RowGUID, 1, "Стеклянная лапша", "Cкляна локшина", "Glass noodles");
+
+            garn = new DishGarnish()
+            {
+                RowGUID = Guid.NewGuid(), Price = 34, DishGUID = dish.RowGUID, RowPosition = 1,
+                Image = img1, ImageDishWithGarnish = img1
+            };
+            LangStringLib.SetValues(db, garn.RowGUID, FieldTypeIDEnum.Name, "Яичная лапша", "Яєчна локшина", "Egg noodles");
+            LangStringLib.SetValues(db, garn.RowGUID, FieldTypeIDEnum.Description, descrList[0] + " с гарниром: Яичная лапша", descrList[1] + " з гарнiром: Яєчна локшина", descrList[2] + " with garnish: Egg noodles");
             db.DishGarnish.Add(garn);
 
-            garn = new DishGarnish() { RowGUID = Guid.NewGuid(), Price = 19, DishGUID = dish.RowGUID, RowPosition = 2 };
-            LangStringLib.SetValues(db, garn.RowGUID, 1, "Рис басмати", "Рис басматі", "Basmati rice");
+            garn = new DishGarnish()
+            {
+                RowGUID = Guid.NewGuid(), Price = 19, DishGUID = dish.RowGUID, RowPosition = 2,
+                Image = img2, ImageDishWithGarnish = img2
+            };
+            LangStringLib.SetValues(db, garn.RowGUID, FieldTypeIDEnum.Name, "Рис басмати", "Рис басматі", "Basmati rice");
+            LangStringLib.SetValues(db, garn.RowGUID, FieldTypeIDEnum.Description, descrList[0] + " с гарниром: Рис басмати", descrList[1] + " з гарнiром: Рис басматі", descrList[2] + " with garnish: Basmati rice");
             db.DishGarnish.Add(garn);
 
-            garn = new DishGarnish() { RowGUID = Guid.NewGuid(), Price = 34, DishGUID = dish.RowGUID, RowPosition = 3 };
-            LangStringLib.SetValues(db, garn.RowGUID, 1, "Яичная лапша", "Яєчна локшина", "Egg noodles");
+            garn = new DishGarnish()
+            {
+                RowGUID = Guid.NewGuid(), Price = 24, DishGUID = dish.RowGUID, RowPosition = 3,
+                Image = img3, ImageDishWithGarnish = img3
+            };
+            LangStringLib.SetValues(db, garn.RowGUID, FieldTypeIDEnum.Name, "Стеклянная лапша", "Cкляна локшина", "Glass noodles");
+            LangStringLib.SetValues(db, garn.RowGUID, FieldTypeIDEnum.Description, descrList[0] + " с гарниром: Стеклянная лапша", descrList[1] + " з гарнiром: Cкляна локшина", descrList[2] + " with garnish: Glass noodles");
             db.DishGarnish.Add(garn);
         }
 
@@ -571,12 +592,14 @@ namespace WpfClient
 
         public static void setInrgImages()
         {
+            string imgPath = @"d:\NoodleD\дизайн\testImages\ингредиенты\";
+
             byte[][] images = new[] {
-                ImageHelper.getImageFromFilePath(@"d:\NoodleD\тестовые изображение блюд\ингредиенты\соус терияки.jpg"),
-                ImageHelper.getImageFromFilePath(@"d:\NoodleD\тестовые изображение блюд\ингредиенты\фасоль стручковая.jpg"),
-                ImageHelper.getImageFromFilePath(@"d:\NoodleD\тестовые изображение блюд\ингредиенты\курица.jpg"),
-                ImageHelper.getImageFromFilePath(@"d:\NoodleD\тестовые изображение блюд\ингредиенты\деревестный гриб.jpg"),
-                ImageHelper.getImageFromFilePath(@"d:\NoodleD\тестовые изображение блюд\ингредиенты\грибы шампиньоны.jpg")
+                ImageHelper.getImageFromFilePath(imgPath + "соус терияки.jpg"),
+                ImageHelper.getImageFromFilePath(imgPath + "фасоль стручковая.jpg"),
+                ImageHelper.getImageFromFilePath(imgPath + "курица.jpg"),
+                ImageHelper.getImageFromFilePath(imgPath + "деревестный гриб.jpg"),
+                ImageHelper.getImageFromFilePath(imgPath + "грибы шампиньоны.jpg")
             };
             int idx = 0, i = 0;
             using (NoodleDContext db = new NoodleDContext())

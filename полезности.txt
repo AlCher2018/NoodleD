@@ -12,7 +12,7 @@ End Function
 *************************************
 изменить изображение блюда в MS SQL
 -----------------------------------
-update Dish Set Image = (SELECT MyImage.* from Openrowset(Bulk 'e:\Чернов\NoodleD\дизайн\NodDod\dish1.jpg', Single_Blob) MyImage) where id=1
+update Dish Set Image = (SELECT MyImage.* from Openrowset(Bulk 'D:\NoodleD\дизайн\NodDod\dish1.jpg', Single_Blob) MyImage) where id=1
 
 
 *********************************

@@ -113,7 +113,6 @@
             <TextBox x:Name="txtAcc" Canvas.Left="780"  Canvas.Top="312" Width="50" Text="0"/>
             <Label Canvas.Left="670" Canvas.Top="335" Target="{Binding ElementName=txtDec}">_DecelerationRatio</Label>
             <TextBox x:Name="txtDec" Canvas.Left="780"  Canvas.Top="339" Width="50" Text="0"/>
-
         </Canvas>
     </Grid>
 </Window>

@@ -27,6 +27,8 @@
           <Property Name="RowGUID" Type="uniqueidentifier" Nullable="false" />
           <Property Name="RowPosition" Type="int" Nullable="false" />
           <Property Name="Price" Type="money" Nullable="false" />
+          <Property Name="Image" Type="image" />
+          <Property Name="ImageDishWithGarnish" Type="image" />
         </EntityType>
         <EntityType Name="DishIngredient">
           <Key>
@@ -99,6 +101,7 @@
           <Property Name="OrderDate" Type="datetime" Nullable="false" />
           <Property Name="BarCodeValue" Type="char" MaxLength="12" Nullable="false" />
           <Property Name="LanguageTypeId" Type="char" MaxLength="2" />
+          <Property Name="takeAway" Type="bit" Nullable="false" />
         </EntityType>
         <EntityType Name="OrderDish">
           <Key>
@@ -262,6 +265,8 @@ warning 6035: The relationship 'FK_DishRecommends_Dish1' has columns that are no
           <Property Name="RowGUID" Type="Guid" Nullable="false" />
           <Property Name="RowPosition" Type="Int32" Nullable="false" />
           <Property Name="Price" Type="Decimal" Nullable="false" Precision="19" Scale="4" />
+          <Property Name="Image" Type="Binary" MaxLength="Max" FixedLength="false" />
+          <Property Name="ImageDishWithGarnish" Type="Binary" MaxLength="Max" FixedLength="false" />
         </EntityType>
         <EntityType Name="DishIngredient">
           <Key>
@@ -326,6 +331,7 @@ warning 6035: The relationship 'FK_DishRecommends_Dish1' has columns that are no
           <Property Name="OrderNumForPrint" Type="Int32" Nullable="false" />
           <Property Name="BarCodeValue" Type="String" Nullable="false" MaxLength="12" FixedLength="true" Unicode="false" />
           <Property Name="LanguageTypeId" Type="String" MaxLength="2" FixedLength="true" Unicode="false" />
+          <Property Name="takeAway" Type="Boolean" Nullable="false" />
         </EntityType>
         <EntityType Name="Setting">
           <Key>
@@ -437,6 +443,8 @@ warning 6035: The relationship 'FK_DishRecommends_Dish1' has columns that are no
           <EntitySetMapping Name="DishGarnish">
             <EntityTypeMapping TypeName="NoodleDModel.DishGarnish">
               <MappingFragment StoreEntitySet="DishGarnish">
+                <ScalarProperty Name="ImageDishWithGarnish" ColumnName="ImageDishWithGarnish" />
+                <ScalarProperty Name="Image" ColumnName="Image" />
                 <ScalarProperty Name="Price" ColumnName="Price" />
                 <ScalarProperty Name="RowPosition" ColumnName="RowPosition" />
                 <ScalarProperty Name="RowGUID" ColumnName="RowGUID" />
@@ -506,6 +514,7 @@ warning 6035: The relationship 'FK_DishRecommends_Dish1' has columns that are no
           <EntitySetMapping Name="Order">
             <EntityTypeMapping TypeName="NoodleDModel.Order">
               <MappingFragment StoreEntitySet="Order">
+                <ScalarProperty Name="takeAway" ColumnName="takeAway" />
                 <ScalarProperty Name="LanguageTypeId" ColumnName="LanguageTypeId" />
                 <ScalarProperty Name="BarCodeValue" ColumnName="BarCodeValue" />
                 <ScalarProperty Name="OrderNumForPrint" ColumnName="OrderNumForPrint" />

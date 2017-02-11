@@ -125,7 +125,7 @@
 
     </Window.Resources>
 
-    <Grid UseLayoutRounding="True" PreviewMouseUp="mainGrid_PreviewMouseUp">
+    <Grid UseLayoutRounding="True" PreviewTouchUp="Grid_TouchUp">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="5*"/>
@@ -198,19 +198,25 @@
                     <ColumnDefinition Width="0.3*"/>
                 </Grid.ColumnDefinitions>
                 <Border x:Name="btnLangUa" Grid.Column="1" Background="{StaticResource appBackgroundColor}" 
-                        MouseDown="lblButtonLang_MouseDown" MouseUp="lblButtonLang_MouseUp">
+                        MouseDown="lblButtonLang_MouseDown" MouseUp="lblButtonLang_MouseUp"
+                        TouchDown="btnLang_TouchDown" TouchUp="btnLang_TouchUp"
+                        >
                     <Border x:Name="btnLangUaInner" Style="{StaticResource langButtonBorderUncheckedStyle}">
                         <TextBlock x:Name="lblLangUa" Text="Укр" Style="{StaticResource langTextStyle}"/>
                     </Border>
                 </Border>
                 <Border x:Name="btnLangRu" Grid.Column="3" Background="{StaticResource appBackgroundColor}" 
-                        MouseDown="lblButtonLang_MouseDown" MouseUp="lblButtonLang_MouseUp">
+                        MouseDown="lblButtonLang_MouseDown" MouseUp="lblButtonLang_MouseUp"
+                        TouchDown="btnLang_TouchDown" TouchUp="btnLang_TouchUp"
+                        >
                     <Border x:Name="btnLangRuInner" Style="{StaticResource langButtonBorderUncheckedStyle}">
                         <TextBlock x:Name="lblLangRu" Text="Рус" Style="{StaticResource langTextStyle}"/>
                     </Border>
                 </Border>
                 <Border x:Name="btnLangEn" Grid.Column="5" Background="{StaticResource appBackgroundColor}" 
-                        MouseDown="lblButtonLang_MouseDown" MouseUp="lblButtonLang_MouseUp">
+                        MouseDown="lblButtonLang_MouseDown" MouseUp="lblButtonLang_MouseUp"
+                        TouchDown="btnLang_TouchDown" TouchUp="btnLang_TouchUp"
+                        >
                     <Border x:Name="btnLangEnInner" Style="{StaticResource langButtonBorderUncheckedStyle}">
                         <TextBlock x:Name="lblLangEng" Text="Eng" Style="{StaticResource langTextStyle}"/>
                     </Border>
