@@ -187,7 +187,7 @@ namespace WpfClient
             app.Resources.Add("appColorDDarkPink", Color.FromArgb(255, 99, 29, 85));        // < !--COLOR4 - dark - dark pink-- >
             app.Resources.Add("appColorSelectButton", Color.FromArgb(255, 173, 32, 72)); //< !--COLOR5 - dark - dark pink-- >
             app.Resources.Add("appColorCartButtom", Color.FromArgb(255, 214, 244, 36));  //< !--COLOR6 - green - yellow-- >
-            app.Resources.Add("appColorSelectGarnish", Color.FromArgb(255, 137, 137, 137));  //< !--COLOR7 - grey-- >
+            app.Resources.Add("appColorBackgroundGarnish", Color.FromArgb(255, 137, 137, 137));  //< !--COLOR7 - grey-- >
 
             // кисти
             app.Resources.Add("appBackgroundColor", new SolidColorBrush((Color)app.Resources["appColorDarkPink"]));
@@ -197,7 +197,7 @@ namespace WpfClient
             app.Resources.Add("addButtonBackgroundTextColor", new SolidColorBrush((Color)app.Resources["appColorSelectButton"]));
             app.Resources.Add("addButtonBackgroundPriceColor", new SolidColorBrush(Color.FromArgb(255, 147, 29, 63)));
             app.Resources.Add("cartButtonBackgroundColor", new SolidColorBrush((Color)app.Resources["appColorCartButtom"]));
-            app.Resources.Add("selectGarnishBackgroundColor", new SolidColorBrush((Color)app.Resources["appColorSelectGarnish"]));
+            app.Resources.Add("garnishBackgroundColor", new SolidColorBrush((Color)app.Resources["appColorSelectGarnish"]));
             app.Resources.Add("winShadowColor", new SolidColorBrush(Color.FromArgb(0x88, 0, 0, 0)));
 
             // конвертеры
@@ -239,8 +239,50 @@ namespace WpfClient
             AppLib.SetAppGlobalValue("screenHeight", screenHeight);
 
             AppLib.SetAppGlobalValue("categoriesPanelWidth", (screenWidth / 6d * 1d));
-            AppLib.SetAppGlobalValue("dishesPanelWidth", (screenWidth / 6d * 5d));
-
+            // панель блюд
+            double dishesPanelWidth = (screenWidth / 6d * 5d);
+            AppLib.SetAppGlobalValue("dishesPanelWidth", dishesPanelWidth);
+            // ***************
+            // панель блюда
+            double dishPanelWidth = 0.95d * dishesPanelWidth / 3d;
+            AppLib.SetAppGlobalValue("dishPanelWidth", dishPanelWidth);
+            double contentPanelWidth = 0.9d * dishPanelWidth;
+            AppLib.SetAppGlobalValue("dishImageWidth", contentPanelWidth);
+            AppLib.SetAppGlobalValue("contentPanelWidth", contentPanelWidth);
+            double dishPanelLeftMargin = (dishesPanelWidth - 3 * dishPanelWidth) / 2;
+            AppLib.SetAppGlobalValue("dishPanelLeftMargin", dishPanelLeftMargin);
+            // высота строки заголовка
+            double dishPanelHeaderRowHeight = 0.17d * dishPanelWidth;
+            AppLib.SetAppGlobalValue("dishPanelHeaderRowHeight", dishPanelHeaderRowHeight);
+            // высота строки изображения
+            double dishPanelImageRowHeight = 0.7d * dishPanelWidth;
+            AppLib.SetAppGlobalValue("dishPanelImageRowHeight", dishPanelImageRowHeight);
+            AppLib.SetAppGlobalValue("dishImageHeight", dishPanelImageRowHeight);
+            // высота строки гарниров
+            double dishPanelGarnishesRowHeight = 0.2d * dishPanelWidth;
+            AppLib.SetAppGlobalValue("dishPanelGarnishesRowHeight", dishPanelGarnishesRowHeight);
+            // высота строки кнопки добавления
+            double dishPanelAddButtonRowHeight = 0.15d * dishPanelWidth;
+            AppLib.SetAppGlobalValue("dishPanelAddButtonRowHeight", dishPanelAddButtonRowHeight);
+            AppLib.SetAppGlobalValue("dishPanelAddButtonTextSize", 0.3d * dishPanelAddButtonRowHeight);
+            // расстояния между строками панели блюда
+            double dishPanelRowMargin1 = 0.01d * dishPanelWidth;
+            double dishPanelRowMargin2 = 0.02d * dishPanelWidth;
+            AppLib.SetAppGlobalValue("dishPanelRowMargin1", dishPanelRowMargin1);
+            AppLib.SetAppGlobalValue("dishPanelRowMargin2", dishPanelRowMargin2);
+            // размер кнопки описания блюда
+            AppLib.SetAppGlobalValue("dishPanelDescrButtonSize", 0.085d * dishPanelWidth);
+            // высота панелей
+            double dishPanelHeight = Math.Ceiling(dishPanelHeaderRowHeight + dishPanelRowMargin1 + dishPanelImageRowHeight + dishPanelRowMargin2 + dishPanelAddButtonRowHeight);
+            double dishPanelHeightWithGarnish = Math.Ceiling(dishPanelHeight + dishPanelGarnishesRowHeight + dishPanelRowMargin2);
+            AppLib.SetAppGlobalValue("dishPanelHeight", dishPanelHeight);
+            AppLib.SetAppGlobalValue("dishPanelHeightWithGarnish", dishPanelHeightWithGarnish);
+            dVar = 1d;
+            double contentPanelHeight = Math.Ceiling(dVar * dishPanelHeight);
+            double contentPanelHeightWithGarnish = Math.Ceiling(dVar * dishPanelHeightWithGarnish);
+            AppLib.SetAppGlobalValue("contentPanelHeight", contentPanelHeight);
+            AppLib.SetAppGlobalValue("contentPanelHeightWithGarnish", contentPanelHeightWithGarnish);
+            // ***********
 
             // углы закругления
             dVar = 0.005 * screenWidth;

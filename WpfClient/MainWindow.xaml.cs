@@ -26,18 +26,16 @@ namespace WpfClient
     public partial class MainWindow : Window
     {
         // подложка списка блюд
-        private List<Canvas> _dishCanvas;
+        private List<MainMenuDishesCanvas> _dishCanvas;
         // текущий заказ
         private OrderItem _currentOrder;
         // visual elements
         private byte _langButtonPress = 0;
         private Border _curDescrBorder;
         private TextBlock _curDescrTextBlock;
-        private SolidColorBrush _brushSelectedItem;
 
         // dish description animations
         private DoubleAnimation _daCommon1, _daCommon2;
-        private DoubleAnimation _daDishDescrBackgroundOpacity;  // анимашка прозрачности описания блюда
         private Storyboard _animDishSelection;
         private ColorAnimation _animOrderPriceBackgroundColor;
         private Effect _orderPriceEffectShadow;
@@ -47,7 +45,7 @@ namespace WpfClient
         private Point? lastDragPoint, initDragPoint;
         private DateTime _dateTime;
 
-        public List<Canvas> DishesPanels { get { return _dishCanvas; } }
+        public List<MainMenuDishesCanvas> DishesPanels { get { return _dishCanvas; } }
 
 
         public MainWindow()
@@ -58,14 +56,9 @@ namespace WpfClient
             Loaded += MainWindow_Loaded;
 
             // инициализация локальных переменных
-            _dishCanvas = new List<Canvas>();
-            _daDishDescrBackgroundOpacity = new DoubleAnimation()
-            {
-                EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseOut }
-            };
+            _dishCanvas = new List<MainMenuDishesCanvas>();
             _daCommon1 = new DoubleAnimation();
             _daCommon2 = new DoubleAnimation();
-            _brushSelectedItem = (SolidColorBrush)AppLib.GetAppGlobalValue("appSelectedItemColor");
 
             // создать текущий заказ
             _currentOrder = new OrderItem();
@@ -91,7 +84,7 @@ namespace WpfClient
             Size toSize = brdMakeOrder.RenderSize;
             Point endPoint = new Point(toBasePoint.X + toSize.Width / 2.0, toBasePoint.Y + toSize.Height / 2.0);
             // установить для сегмента анимации конечную точку
-            PathFigure pf = (animPath.Data as PathGeometry).Figures[0];
+            PathFigure pf = (this.animPath.Data as PathGeometry).Figures[0];
             BezierSegment bs = (pf.Segments[0] as BezierSegment);
             bs.Point3 = endPoint;
 
@@ -155,131 +148,13 @@ namespace WpfClient
             AppLib.WriteLogTraceMessage("Настраиваю визуальные элементы - READY");
         }
 
-        private void createObjectsForDishAnimation()
-        {
-            // объект перемещения
-            // размеры прямоугольника и углы закругления для изображения и описания блюда берем из свойств приложения
-            double dishImageHeight = (double)AppLib.GetAppGlobalValue("dishImageHeight");
-            double dishImageWidth = (double)AppLib.GetAppGlobalValue("dishImageWidth");
-            double dishImageCornerRadius = (double)AppLib.GetAppGlobalValue("cornerRadiusDishPanel");
-            RectangleGeometry r = (animImage.Data as RectangleGeometry);
-            r.Rect = new Rect(0, 0, dishImageWidth, dishImageHeight);
-            r.RadiusX = dishImageCornerRadius;
-            r.RadiusY = dishImageCornerRadius;
-            Canvas.SetLeft(canvasDish, -dishImageWidth / 2d);
-            Canvas.SetTop(canvasDish, -dishImageHeight / 2d);
-
-            // раскадровка
-            _animDishSelection = new Storyboard() { FillBehavior= FillBehavior.Stop, AccelerationRatio=1, AutoReverse=false};
-            _animDishSelection.Completed += _aminDishSelection_Completed;
-
-            PathGeometry pGeom = animPath.Data as PathGeometry;
-            // анимации перемещения
-            DoubleAnimationUsingPath aMoveX = new DoubleAnimationUsingPath()
-            {
-                Source = PathAnimationSource.X,
-                PathGeometry = pGeom
-            };
-            Storyboard.SetTarget(aMoveX, canvasDish);
-            Storyboard.SetTargetProperty(aMoveX, new PropertyPath("RenderTransform.X"));
-            _animDishSelection.Children.Add(aMoveX);
-            DoubleAnimationUsingPath aMoveY = new DoubleAnimationUsingPath()
-            {
-                Source = PathAnimationSource.Y,
-                PathGeometry = pGeom
-            };
-            Storyboard.SetTarget(aMoveY, canvasDish);
-            Storyboard.SetTargetProperty(aMoveY, new PropertyPath("RenderTransform.Y"));
-            _animDishSelection.Children.Add(aMoveY);
-            // анимация вращения
-            //DoubleAnimation aRotate = new DoubleAnimation() { From=0, To=360};
-            //Storyboard.SetTarget(aRotate, animImage);
-            //Storyboard.SetTargetProperty(aRotate, new PropertyPath("(Path.RenderTransform).(TransformGroup.Children)[0].Angle"));
-            //_animDishSelection.Children.Add(aRotate);
-            // анимация масштабирования
-            DoubleAnimation aScaleX = new DoubleAnimation() { From=1, To = 0.2};
-            Storyboard.SetTarget(aScaleX, animImage);
-            Storyboard.SetTargetProperty(aScaleX, new PropertyPath("(Path.RenderTransform).(TransformGroup.Children)[1].ScaleX"));
-            _animDishSelection.Children.Add(aScaleX);
-            DoubleAnimation aScaleY = new DoubleAnimation() { From = 1, To = 0.2 };
-            Storyboard.SetTarget(aScaleY, animImage);
-            Storyboard.SetTargetProperty(aScaleY, new PropertyPath("(Path.RenderTransform).(TransformGroup.Children)[1].ScaleY"));
-            _animDishSelection.Children.Add(aScaleY);
-            // анимация прозрачности
-            DoubleAnimation aOpacity = new DoubleAnimation() { From=1, To = 0.2};
-            Storyboard.SetTarget(aOpacity, animImage);
-            Storyboard.SetTargetProperty(aOpacity, new PropertyPath("(Path.Opacity)"));
-            _animDishSelection.Children.Add(aOpacity);
-
-            // для анимации фона с ценой заказа
-            _animOrderPriceBackgroundColor = new ColorAnimation(Colors.Magenta, TimeSpan.FromMilliseconds(50), FillBehavior.Stop) { AutoReverse = true, RepeatBehavior = new RepeatBehavior(5)};
-            _orderPriceEffectShadow = new DropShadowEffect() { Direction=315, Color = Colors.DarkGreen, ShadowDepth=5, BlurRadius=10 };
-            _orderPriceEffectBlur = new BlurEffect() { Radius = 0}; 
-            txtOrderPrice.Effect = _orderPriceEffectShadow;
-            Color c = ((SolidColorBrush)Application.Current.Resources["cartButtonBackgroundColor"]).Color;
-            brdMakeOrder.Background = new SolidColorBrush(c); //Do not use a frozen instance  (Colors.Orange)
-        }
-
-        private void _aminDishSelection_Completed(object sender, EventArgs e)
-        {
-            canvasAnim.Visibility = Visibility.Hidden;
-
-            animateOrderPrice();
-        }
-
-        public void animateOrderPrice()
-        {
-            // анимация фона
-            if (_currentOrder.GetOrderValue() == 0)
-            {
-                brdMakeOrder.Background.BeginAnimation(SolidColorBrush.ColorProperty, _animOrderPriceBackgroundColor);
-            }
-            // анимация цены
-            else
-            {
-                //   размер шрифта
-                _daCommon1.Duration = TimeSpan.FromMilliseconds(400);
-                _daCommon1.To = 1.5 * txtOrderPrice.FontSize;
-                txtOrderPrice.BeginAnimation(TextBlock.FontSizeProperty, _daCommon1);
-                //   расплывчатость текста
-                txtOrderPrice.Effect = _orderPriceEffectBlur;
-                _daCommon2.Duration = TimeSpan.FromMilliseconds(400);
-                _daCommon2.To = 80;
-                _daCommon2.Completed += _daCommon1_Completed;
-                txtOrderPrice.Effect.BeginAnimation(BlurEffect.RadiusProperty, _daCommon2);
-            }
-        }
-
-        private void _daCommon1_Completed(object sender, EventArgs e)
-        {
-            updatePrice();
-
-            _daCommon1.To = (double)AppLib.GetAppGlobalValue("appFontSize1");
-            txtOrderPrice.BeginAnimation(TextBlock.FontSizeProperty, _daCommon1);
-
-            _daCommon2.To = 0;
-            _daCommon2.Completed -= _daCommon1_Completed;
-            _daCommon2.Completed += _daCommon2_Completed;
-            txtOrderPrice.Effect.BeginAnimation(BlurEffect.RadiusProperty, _daCommon2);
-        }
-
-        private void _daCommon2_Completed(object sender, EventArgs e)
-        {
-            _daCommon2.Completed -= _daCommon2_Completed;
-            txtOrderPrice.Effect = _orderPriceEffectShadow;
-        }
-
         private void createCategoriesList()
         {
             // стиль содержания пункта меню
             bool isScrollingList = AppLib.GetAppSetting("IsAllowScrollingDishCategories").IsTrueString();
-            if (isScrollingList == true)
-            {
-
-            }
             // без скроллинга, поэтому настраиваем поля и отступы
             // если категорий меньше 6, то оставляем по умолчанию, из разметки
-            else
+            if (isScrollingList == false)
             {
                 List<AppModel.MenuItem> mFolders = (List<AppModel.MenuItem>)AppLib.GetAppGlobalValue("mainMenu");
                 int iCatCount = mFolders.Count;
@@ -337,6 +212,7 @@ namespace WpfClient
             foreach (AppModel.MenuItem mItem in mFolders)
             {
                 MainMenuDishesCanvas canvas = new MainMenuDishesCanvas(mItem);
+
                 _dishCanvas.Add(canvas);
             }
         }  // createDishesCanvas
@@ -344,148 +220,28 @@ namespace WpfClient
 
         //  обработка события нажатия на кнопку показа/скрытия описания блюда (с анимацией)
 
-        private void _dishDescrWithAnimation(Border btnDescr, Border descrTextBorder, TextBlock descrText, int tagVal)
-        {
-            // цвет фона кнопки описания блюда
-            btnDescr.Background = (tagVal == 0) ? Brushes.White : _brushSelectedItem;
-
-            // прочитать и установить длительность анимации
-            string settingValue = AppLib.GetAppSetting("ShowDishDescrAnimationSpeed");
-            if (settingValue != null)
-            {
-                double cfgDuration = double.Parse(settingValue);
-                TimeSpan ts = TimeSpan.FromMilliseconds(cfgDuration);
-                _daDishDescrBackgroundOpacity.Duration = ts;
-                _daCommon1.Duration = ts;
-                _daCommon2.Duration = ts;
-            }
-
-            // видимость описания
-            if (descrTextBorder != null)
-            {
-                _curDescrBorder = descrTextBorder as Border;
-                // анимация
-                if (tagVal == 1)   // это уже новое значение
-                {
-                    // сделать видимым ДО анимации
-                    _curDescrBorder.Visibility = Visibility.Visible;
-                    _daDishDescrBackgroundOpacity.To = 0.6;
-                    _daDishDescrBackgroundOpacity.Completed -= _daDishDescrBackground_Completed;
-                }
-                else
-                {
-                    _daDishDescrBackgroundOpacity.To = 0;
-                    // сделать невидимым ПОСЛЕ анимации
-                    _daDishDescrBackgroundOpacity.Completed += _daDishDescrBackground_Completed;
-                }
-
-                _curDescrBorder.BeginAnimation(Border.OpacityProperty, _daDishDescrBackgroundOpacity);
-            }
-            if (descrText != null)
-            {
-                _curDescrTextBlock = (descrText as TextBlock);
-                // анимация
-                if (tagVal == 1)   // это уже новое значение
-                {
-                    // сделать видимым ДО анимации
-                    _curDescrTextBlock.Visibility = Visibility.Visible;
-                    _daCommon1.To = 0; _daCommon2.To = 1;
-                }
-                else
-                {
-                    _daCommon1.To = 20; _daCommon2.To = 0;
-                }
-                _curDescrTextBlock.Effect.BeginAnimation(BlurEffect.RadiusProperty, _daCommon1);
-                _curDescrTextBlock.BeginAnimation(TextBlock.OpacityProperty, _daCommon2);
-            }
-
-        }  // func
-
-        private void _dishDescrWithoutAnimation(Border btnDescr, Border descrTextBorder, TextBlock descrText, int tagVal)
-        {
-            if (tagVal == 0)
-            {
-                btnDescr.Background =  Brushes.White;
-                descrTextBorder.Visibility = Visibility.Hidden;
-                descrTextBorder.Opacity = 0;
-                descrText.Visibility = Visibility.Hidden;
-                descrText.Opacity = 0;
-            }
-            else
-            {
-                btnDescr.Background =  _brushSelectedItem;
-                descrTextBorder.Visibility = Visibility.Visible;
-                descrTextBorder.Opacity = 0.6;
-                descrText.Visibility = Visibility.Visible;
-                descrText.Opacity = 1;
-
-                if ((descrText.Effect != null) && (descrText.Effect is BlurEffect))
-                {
-                    BlurEffect be = (descrText.Effect as BlurEffect);
-                    if (be.Radius != 0) be.Radius = 0;
-                }
-            }
-        }
-
-        private void _daDishDescrBackground_Completed(object sender, EventArgs e)
-        {
-            _curDescrBorder.Visibility = Visibility.Hidden;
-            _curDescrTextBlock.Visibility = Visibility.Hidden;
-        }
         private void resetDishesLang()
         {
-            List<AppModel.MenuItem> mFolders =  (List<AppModel.MenuItem>)AppLib.GetAppGlobalValue("mainMenu");
-            bool isExistGarnishes;
-
-            AppModel.MenuItem mItem; DishItem dItem;
-            for (int iMenu = 0; iMenu < mFolders.Count; iMenu++)
+            foreach (MainMenuDishesCanvas dCanv in _dishCanvas)
             {
-                if (iMenu >= _dishCanvas.Count) continue;
-                mItem = mFolders[iMenu];
-                for (int iDish = 0; iDish < mItem.Dishes.Count; iDish++)
-                {
-                    if (iDish >= (_dishCanvas[iMenu] as Canvas).Children.Count) continue;
-                    dItem = mItem.Dishes[iDish];
-                    isExistGarnishes = (dItem.Garnishes != null);
-
-                    // visual elements
-                    Grid dishPanel = ((_dishCanvas[iMenu] as Canvas).Children[iDish] as Grid);
-                    Grid panelContent = (dishPanel.Children[0] as Grid);
-                    List<TextBlock> tbList = AppLib.FindLogicalChildren<TextBlock>(panelContent).ToList();
-
-                    // заголовок (состоит из элементов Run)
-                    var hdRuns = tbList[0].Inlines.Where(t => (t is Run)).ToList();
-                    if (hdRuns.Count >= 0)
-                    {
-                        ((Run)hdRuns[0]).Text = AppLib.GetLangText(dItem.langNames);
-                    }
-                    if (hdRuns.Count >= 3)
-                    {
-                        ((Run)hdRuns[2]).Text = " " + AppLib.GetLangText(dItem.langUnitNames);
-                    }
-                    //setTextBoxLangText(tbList[0], );
-                    // tbList[1] - буковка i на кнопке отображения описания
-                    // описание блюда
-                    tbList[2].Text = AppLib.GetLangText(dItem.langDescriptions);
-                    // кнопка Добавить с тенью
-                    TextBlock tbAdd = tbList.First(t => t.Name == "tbAdd");
-                    if (tbAdd != null) tbAdd.Text = (string)AppLib.GetLangText((Dictionary<string, string>)AppLib.GetAppGlobalValue("btnSelectDishText"));
-                    
-                    if (isExistGarnishes == true)
-                    {
-                        TextBlock tbInv = tbList.First(t => t.Name == "tbInvitation");
-                        if (tbInv != null) tbInv.Text = (string)AppLib.GetLangText((Dictionary<string, string>)AppLib.GetAppGlobalValue("btnSelectGarnishText"));
-                        List<MainMenuGarnish> garnList = AppLib.FindLogicalChildren<MainMenuGarnish>(panelContent).ToList();
-                        foreach (MainMenuGarnish garn in garnList)
-                        {
-                            garn.ResetLangName();
-                        }
-                    }  //  if (isExistGarnishes == true)
-                }   // for DishItem
-            }  // for MenuItem
-
+                dCanv.ResetLang();
+            }
         }
 
+        public void ClearSelectedGarnish()
+        {
+            foreach (MainMenuDishesCanvas dCanv in _dishCanvas)
+            {
+                dCanv.ClearSelectedGarnish();
+            }
+        }
+        public void HideDishesDescriptions()
+        {
+            foreach (MainMenuDishesCanvas dCanv in _dishCanvas)
+            {
+                dCanv.HideDishesDescriptions();
+            }
+        }
         #endregion
 
         #region language bottons
@@ -574,93 +330,153 @@ namespace WpfClient
 
         #endregion
 
-        #region выбор блюда
-        // добавить блюдо к заказу
-        private void BtnAddDish_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        #region анимация выбора блюда и стоимости заказа
+
+        private void createObjectsForDishAnimation()
         {
-            var tagValue = ((FrameworkElement)sender).Tag;
-            if (tagValue == null) return;
+            // объект перемещения
+            // размеры прямоугольника и углы закругления для изображения и описания блюда берем из свойств приложения
+            double dishImageHeight = (double)AppLib.GetAppGlobalValue("dishImageHeight");
+            double dishImageWidth = (double)AppLib.GetAppGlobalValue("dishImageWidth");
+            double dishImageCornerRadius = (double)AppLib.GetAppGlobalValue("cornerRadiusDishPanel");
+            RectangleGeometry r = (animImage.Data as RectangleGeometry);
+            r.Rect = new Rect(0, 0, dishImageWidth, dishImageHeight);
+            r.RadiusX = dishImageCornerRadius;
+            r.RadiusY = dishImageCornerRadius;
+            Canvas.SetLeft(canvasDish, -dishImageWidth / 2d);
+            Canvas.SetTop(canvasDish, -dishImageHeight / 2d);
 
-            // визуальный элемент (View layer)
-            Grid gridContent = ((FrameworkElement)sender).Parent as Grid;
+            // раскадровка
+            _animDishSelection = new Storyboard() { FillBehavior = FillBehavior.Stop, AccelerationRatio = 1, AutoReverse = false };
+            _animDishSelection.Completed += _aminDishSelection_Completed;
 
-            // model layer
-            string sGuid = tagValue.ToString();  // GUID блюда в теге кнопки добавления
-            DishItem curDishItem = AppLib.GetDishItemByRowGUID(sGuid);
-
-            if (curDishItem == null) return;
-
-            // если нет ингредиентов, то сразу в корзину
-            if ((curDishItem.Ingredients == null) || (curDishItem.Ingredients.Count == 0))
+            PathGeometry pGeom = animPath.Data as PathGeometry;
+            // анимации перемещения
+            DoubleAnimationUsingPath aMoveX = new DoubleAnimationUsingPath()
             {
-                DishItem orderDish = curDishItem.GetCopyForOrder();
-                _currentOrder.Dishes.Add(orderDish);
+                Source = PathAnimationSource.X,
+                PathGeometry = pGeom
+            };
+            Storyboard.SetTarget(aMoveX, canvasDish);
+            Storyboard.SetTargetProperty(aMoveX, new PropertyPath("RenderTransform.X"));
+            _animDishSelection.Children.Add(aMoveX);
+            DoubleAnimationUsingPath aMoveY = new DoubleAnimationUsingPath()
+            {
+                Source = PathAnimationSource.Y,
+                PathGeometry = pGeom
+            };
+            Storyboard.SetTarget(aMoveY, canvasDish);
+            Storyboard.SetTargetProperty(aMoveY, new PropertyPath("RenderTransform.Y"));
+            _animDishSelection.Children.Add(aMoveY);
+            // анимация вращения
+            //DoubleAnimation aRotate = new DoubleAnimation() { From=0, To=360};
+            //Storyboard.SetTarget(aRotate, animImage);
+            //Storyboard.SetTargetProperty(aRotate, new PropertyPath("(Path.RenderTransform).(TransformGroup.Children)[0].Angle"));
+            //_animDishSelection.Children.Add(aRotate);
+            // анимация масштабирования
+            DoubleAnimation aScaleX = new DoubleAnimation() { From = 1, To = 0.2 };
+            Storyboard.SetTarget(aScaleX, animImage);
+            Storyboard.SetTargetProperty(aScaleX, new PropertyPath("(Path.RenderTransform).(TransformGroup.Children)[1].ScaleX"));
+            _animDishSelection.Children.Add(aScaleX);
+            DoubleAnimation aScaleY = new DoubleAnimation() { From = 1, To = 0.2 };
+            Storyboard.SetTarget(aScaleY, animImage);
+            Storyboard.SetTargetProperty(aScaleY, new PropertyPath("(Path.RenderTransform).(TransformGroup.Children)[1].ScaleY"));
+            _animDishSelection.Children.Add(aScaleY);
+            // анимация прозрачности
+            DoubleAnimation aOpacity = new DoubleAnimation() { From = 1, To = 0.2 };
+            Storyboard.SetTarget(aOpacity, animImage);
+            Storyboard.SetTargetProperty(aOpacity, new PropertyPath("(Path.Opacity)"));
+            _animDishSelection.Children.Add(aOpacity);
 
-                // анимировать перемещение блюда в корзину
-                List<Path> pathArr = gridContent.Children.OfType<Path>().ToList();
-                Path dishImage = pathArr[0];
-                if (dishImage != null)
-                {
-                    // перемещаемое изображение
-                    (animImage.Fill as VisualBrush).Visual = dishImage;
-                    //animImage.Fill = Brushes.Green;  // debug
+            // для анимации фона с ценой заказа
+            _animOrderPriceBackgroundColor = new ColorAnimation(Colors.Magenta, TimeSpan.FromMilliseconds(50), FillBehavior.Stop) { AutoReverse = true, RepeatBehavior = new RepeatBehavior(5) };
+            _orderPriceEffectShadow = new DropShadowEffect() { Direction = 315, Color = Colors.DarkGreen, ShadowDepth = 5, BlurRadius = 10 };
+            _orderPriceEffectBlur = new BlurEffect() { Radius = 0 };
+            txtOrderPrice.Effect = _orderPriceEffectShadow;
+            Color c = ((SolidColorBrush)Application.Current.Resources["cartButtonBackgroundColor"]).Color;
+            brdMakeOrder.Background = new SolidColorBrush(c); //Do not use a frozen instance  (Colors.Orange)
+        }
 
-                    // обновление пути анимации
-                    PathFigure pf = (animPath.Data as PathGeometry).Figures[0];
-                    BezierSegment bezierSeg = (pf.Segments[0] as BezierSegment);
-                    // получить точку начала анимации: центр панели блюда
-                    Point fromPoint = dishImage.PointToScreen(new Point(dishImage.ActualWidth / 2d, dishImage.ActualHeight / 2d));
-                    Point toPoint = bezierSeg.Point3;
-                    pf.StartPoint = fromPoint;   
-                    // и опорные точки кривой Безье
-                    double dX = fromPoint.X - toPoint.X;
-                    double dY = toPoint.Y - fromPoint.Y;
-                    Point p1 = new Point(fromPoint.X - 0.3 * dX, 0.3 * fromPoint.Y);
-                    Point p2 = new Point(toPoint.X + 0.05 * dX, toPoint.Y - 0.8 * dY);
-                    bezierSeg.Point1 = p1;
-                    bezierSeg.Point2 = p2;
+        private void _aminDishSelection_Completed(object sender, EventArgs e)
+        {
+            canvasAnim.Visibility = Visibility.Hidden;
 
-                    canvasAnim.Visibility = Visibility.Visible;
+            animateOrderPrice();
+        }
 
-                    // установить скорость анимации
-                    double animSpeed = double.Parse(AppLib.GetAppSetting("SelectDishAnimationSpeed"));  // in msec
-                    TimeSpan ts = TimeSpan.FromMilliseconds(animSpeed);
-                    foreach (Timeline item in _animDishSelection.Children)
-                    {
-                        item.Duration = ts;
-                    }
-                    // обновление стоимости заказа в анимациях
-                    _animDishSelection.Begin();
-                }
-                // иначе просто обновить стоимость заказа
-                else
-                {
-                    updatePrice();
-                }
+        public void animateSelectDish(Path pathImage)
+        {
+            (animImage.Fill as VisualBrush).Visual = pathImage;
+
+            // обновление пути анимации
+            PathFigure pf = (animPath.Data as PathGeometry).Figures[0];
+            BezierSegment bezierSeg = (pf.Segments[0] as BezierSegment);
+            // получить точку начала анимации: центр панели блюда
+            Point fromPoint = pathImage.PointToScreen(new Point(pathImage.ActualWidth / 2d, pathImage.ActualHeight / 2d));
+            Point toPoint = bezierSeg.Point3;
+            pf.StartPoint = fromPoint;
+            // и опорные точки кривой Безье
+            double dX = fromPoint.X - toPoint.X;
+            double dY = toPoint.Y - fromPoint.Y;
+            Point p1 = new Point(fromPoint.X - 0.3 * dX, 0.3 * fromPoint.Y);
+            Point p2 = new Point(toPoint.X + 0.05 * dX, toPoint.Y - 0.8 * dY);
+            bezierSeg.Point1 = p1;
+            bezierSeg.Point2 = p2;
+
+            canvasAnim.Visibility = Visibility.Visible;
+
+            // установить скорость анимации
+            double animSpeed = double.Parse(AppLib.GetAppSetting("SelectDishAnimationSpeed"));  // in msec
+            TimeSpan ts = TimeSpan.FromMilliseconds(animSpeed);
+            foreach (Timeline item in _animDishSelection.Children)
+            {
+                item.Duration = ts;
             }
+            // обновление стоимости заказа в анимациях
+            _animDishSelection.Begin();
 
-            // иначе через "всплывашку"
+        }
+
+        public void animateOrderPrice()
+        {
+            // анимация фона
+            if (_currentOrder.GetOrderValue() == 0)
+            {
+                brdMakeOrder.Background.BeginAnimation(SolidColorBrush.ColorProperty, _animOrderPriceBackgroundColor);
+            }
+            // анимация цены
             else
             {
-                DishPopup popupWin = new DishPopup(curDishItem);    // текущее блюдо передать в конструкторе
-                // размеры
-                FrameworkElement pnlClient = this.Content as FrameworkElement;
-                popupWin.Height = pnlClient.ActualHeight;
-                popupWin.Width = pnlClient.ActualWidth;
-                // и положение
-                Point p = this.PointToScreen(new Point(0, 0));
-                popupWin.Left = p.X;
-                popupWin.Top = p.Y;
+                //   размер шрифта
+                _daCommon1.Duration = TimeSpan.FromMilliseconds(400);
+                _daCommon1.To = 1.5 * txtOrderPrice.FontSize;
+                txtOrderPrice.BeginAnimation(TextBlock.FontSizeProperty, _daCommon1);
+                //   расплывчатость текста
+                txtOrderPrice.Effect = _orderPriceEffectBlur;
+                _daCommon2.Duration = TimeSpan.FromMilliseconds(400);
+                _daCommon2.To = 80;
+                _daCommon2.Completed += _daCommon1_Completed;
+                txtOrderPrice.Effect.BeginAnimation(BlurEffect.RadiusProperty, _daCommon2);
+            }
+        }
 
-                popupWin.ShowDialog();
+        private void _daCommon1_Completed(object sender, EventArgs e)
+        {
+            updatePrice();
 
-                // очистить выбранный гарнир
-                foreach (MainMenuGarnish item in AppLib.FindVisualChildren<MainMenuGarnish>(gridContent))
-                {
-                    if (item.IsSelected == true) item.IsSelected = false;
-                }
-            } // if else
+            _daCommon1.To = (double)AppLib.GetAppGlobalValue("appFontSize1");
+            txtOrderPrice.BeginAnimation(TextBlock.FontSizeProperty, _daCommon1);
 
+            _daCommon2.To = 0;
+            _daCommon2.Completed -= _daCommon1_Completed;
+            _daCommon2.Completed += _daCommon2_Completed;
+            txtOrderPrice.Effect.BeginAnimation(BlurEffect.RadiusProperty, _daCommon2);
+        }
+
+        private void _daCommon2_Completed(object sender, EventArgs e)
+        {
+            _daCommon2.Completed -= _daCommon2_Completed;
+            txtOrderPrice.Effect = _orderPriceEffectShadow;
         }
 
         #endregion
@@ -845,20 +661,18 @@ namespace WpfClient
         {
             e.Handled = true;
 
-            // установить панель блюд
-            Canvas currentPanel = _dishCanvas[lstMenuFolders.SelectedIndex];
-            scrollDishes.Content = currentPanel;
-            scrollDishes.ScrollToTop();
-            
-            // очистить выбор гарниров
-            List<DishItem> dishList  = ((AppModel.MenuItem)lstMenuFolders.SelectedItem).Dishes;
-            if (dishList != null && dishList.Count > 0)
+            if ((_dishCanvas.Count > 0) && (lstMenuFolders.SelectedIndex <= (_dishCanvas.Count-1)))
             {
-                if (dishList[0].Garnishes != null && dishList[0].Garnishes.Count > 0) AppLib.ClearSelectedGarnish(currentPanel);
-            }
+                // установить панель блюд
+                MainMenuDishesCanvas currentPanel = _dishCanvas[lstMenuFolders.SelectedIndex];
+                // очистить выбор гарниров
+                currentPanel.ClearSelectedGarnish();
+                // убрать описания блюд
+                currentPanel.HideDishesDescriptions();
 
-            // убрать описания блюд
-            AppLib.ClearDescriptionsOnDishPanel(currentPanel);
+                scrollDishes.Content = currentPanel;
+                scrollDishes.ScrollToTop();
+            }
         }
 
         // обновить стоимость заказа

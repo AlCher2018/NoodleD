@@ -105,6 +105,7 @@
     <Compile Include="Lib\BarCodeLib.cs" />
     <Compile Include="Lib\PrintHelper.cs" />
     <Compile Include="MainMenuDishesCanvas.cs" />
+    <Compile Include="MainMenuDishPanel.cs" />
     <Compile Include="MainMenuGarnish.cs" />
     <Compile Include="Lib\AniScrollViewer.cs" />
     <Compile Include="Cart.xaml.cs">
@@ -205,6 +206,18 @@
     <None Include="history.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Content Include="AppImages\no image available.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="AppImages\no-image.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="AppImages\noimage.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="AppImages\noimage1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="PrinterBill\Footer-en.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -229,8 +242,12 @@
     </EmbeddedResource>
     <Resource Include="AppImages\icon.ico" />
     <None Include="AppImages\bg 2ver 1080x1280.png" />
-    <None Include="AppImages\bg 3hor 1920x1080 gauss.png" />
-    <None Include="AppImages\bg 3hor 1920x1080.png" />
+    <Content Include="AppImages\bg 3hor 1920x1080 gauss.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="AppImages\bg 3hor 1920x1080.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="AppImages\logo1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

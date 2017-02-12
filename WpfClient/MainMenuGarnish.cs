@@ -16,13 +16,14 @@ namespace WpfClient
     public class MainMenuGarnish: Grid
     {
         private bool _isSelected;
-        //private Brush _selectBrush;
-        //private Brush _notSelectBrush;
+        private Brush _selectBrush;
+        private Brush _notSelectBrush;
         private Brush _selectTextBrush;
         double _fontSize, _fontSizeUp;
 
         private double _height, _width;
         private DishItem _dishItem;
+        private int _garnIndex;
         private DishAdding _garnItem;
         private Path _pathSelected;
         private TextBlock _tbGarnishName;
@@ -36,13 +37,16 @@ namespace WpfClient
             set
             {
                 _isSelected = value;
-                switchSelectMode();
+                setSelectionMode();
             }
         }
+
+        public event EventHandler<SelectGarnishEventArgs> SelectGarnish;
 
         public MainMenuGarnish(DishItem dishItem, int garnIndex, double garnHeight, double garnWidth, Grid dishContentPanel)
         {
             _dishItem = dishItem;
+            _garnIndex = garnIndex;
             _garnItem = _dishItem.Garnishes[garnIndex];
             _height = garnHeight;
             _width = garnWidth;
@@ -51,7 +55,8 @@ namespace WpfClient
             _fontSize = (double)AppLib.GetAppGlobalValue("appFontSize5");
             _fontSizeUp = (double)AppLib.GetAppGlobalValue("appFontSize4");
 
-            //_notSelectBrush = (Brush)AppLib.GetAppGlobalValue("selectGarnishBackgroundColor");
+            _selectBrush = (Brush)AppLib.GetAppGlobalValue("appSelectedItemColor");
+            _notSelectBrush = (Brush)AppLib.GetAppGlobalValue("garnishBackgroundColor");
             _selectTextBrush = (Brush)AppLib.GetAppGlobalValue("addButtonBackgroundPriceColor");
             //_shadow = new DropShadowEffect() { BlurRadius = 5, Opacity = 0.5, ShadowDepth = 1 };
 
@@ -69,37 +74,16 @@ namespace WpfClient
 
         private void MainMenuGarnish_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            switchSelectModeByClicked();
-        }
-
-        private void switchSelectModeByClicked()
-        {
-            // если текущий не выбран, то очистить имеющиеся
-            if (_isSelected == false)
-            {
-                //if (Selecting != null) Selecting(_canvas);
-                clearSelectedGarnish();
-            }
-
             _isSelected = !_isSelected;
-            switchSelectMode();
-        }
-
-        private void clearSelectedGarnish()
-        {
-            Canvas currentCanvas = ((Grid)_contentPanel.Parent).Parent as Canvas;
-            List<MainMenuGarnish> v = AppLib.FindLogicalChildren<MainMenuGarnish>(currentCanvas).ToList();
-            if (v != null)
+            setSelectionMode();
+            // передать уведомление в панель блюда
+            if (SelectGarnish != null)
             {
-                foreach (MainMenuGarnish item in v)
-                {
-                    if (item.IsSelected == true) item.IsSelected = false;
-                }
+                SelectGarnish(this, new SelectGarnishEventArgs(_isSelected, _garnIndex));
             }
-
         }
 
-        private void switchSelectMode()
+        private void setSelectionMode()
         {
             _pathSelected.Visibility = (_isSelected) ? Visibility.Visible : Visibility.Collapsed;
 
@@ -109,26 +93,6 @@ namespace WpfClient
             _tbGarnishPrice.FontSize = (_isSelected) ? 1.1 * _fontSize : _fontSize;
             _tbGarnishPrice.Foreground = (_isSelected) ? _selectTextBrush : Brushes.Black;
             //_tbGarnishPrice.Effect = (_isSelected) ? _shadow: null;
-
-            // кнопка добавления
-            List<MainMenuGarnish> mmGarn = AppLib.FindLogicalChildren<MainMenuGarnish>(_contentPanel).ToList();
-            bool isAdd = mmGarn.Any(g => g.IsSelected == true);
-            List<Border> btnList = AppLib.FindLogicalChildren<Border>(_contentPanel).ToList();
-            Border btnAddDish = btnList.FirstOrDefault<Border>(b => b.Name == "btnAddDish");
-            Border btnInvitation = btnList.FirstOrDefault<Border>(b => b.Name == "btnInvitation");
-            if ((btnAddDish != null) && (btnInvitation != null))
-            {
-                if (isAdd == true)
-                {
-                    btnAddDish.Visibility = Visibility.Visible;
-                    btnInvitation.Visibility = Visibility.Hidden;
-                }
-                else
-                {
-                    btnAddDish.Visibility = Visibility.Hidden;
-                    btnInvitation.Visibility = Visibility.Visible;
-                }
-            }
 
             // логический уровень
             if (_isSelected == true)
@@ -145,14 +109,19 @@ namespace WpfClient
         {
             base.Height = _height; base.Width = _width;
 
-            Path _path = getGarnPath(_width, _height);
-            //_notSelectBrush = new ImageBrush() { ImageSource = ImageHelper.ByteArrayToBitmapImage(_garnItem.Image) };
-            //_path.Fill = _notSelectBrush;
-            //_path.Fill = new DrawingBrush( new ImageDrawing()
-            //    { ImageSource = ImageHelper.ByteArrayToBitmapImage(_garnItem.Image), Rect = new Rect(0,0,_width,_height) });
-            _path.Fill = new ImageBrush() { ImageSource = ImageHelper.ByteArrayToBitmapImage(_garnItem.Image) };
-            base.Children.Add(_path);
+            // подложка кнопки
+            Path _pathBase = getGarnPath(_width, _height);
+            if (_garnItem.Image == null)
+            {
+                _pathBase.Fill = _notSelectBrush;
+            }
+            else
+            {
+                _pathBase.Fill = new ImageBrush() { ImageSource = ImageHelper.ByteArrayToBitmapImage(_garnItem.Image) };
+            }
+            base.Children.Add(_pathBase);
 
+            // выделение кнопки
             _pathSelected = getGarnPath(_width, _height);
             Color c = ((SolidColorBrush)AppLib.GetAppGlobalValue("appSelectedItemColor")).Color;
             Color c1 = new Color(); c1.A = 0xAA; c1.R = c.R; c1.G = c.G; c1.B = c.B;
@@ -207,5 +176,17 @@ namespace WpfClient
         }
 
     }  // end class
+
+    public class SelectGarnishEventArgs : EventArgs
+    {
+        public bool Selected { get; set; }
+        public int GarnishIndex { get; set; }
+
+        public SelectGarnishEventArgs(bool selected, int garnIndex)
+        {
+            this.Selected = selected;
+            this.GarnishIndex = garnIndex;
+        }
+    }
 
 }

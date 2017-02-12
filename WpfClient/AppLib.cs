@@ -446,6 +446,7 @@ namespace WpfClient
         private static void checkAppColor(string setName)
         {
             SolidColorBrush bRes = (SolidColorBrush)Application.Current.Resources[setName];
+            if (bRes == null) throw new Exception(string.Format("Name [{0}] not found in application resources.",setName));
             SolidColorBrush bProp = (SolidColorBrush)AppLib.GetAppGlobalValue(setName);
 
             if (bRes.Color.Equals(bProp.Color) == false)  // если не равны
@@ -491,14 +492,8 @@ namespace WpfClient
             if (isCloseChildWindow == true) CloseChildWindows();
 
             WpfClient.MainWindow mainWin = (WpfClient.MainWindow)Application.Current.MainWindow;
-            List<Canvas> dishesPanels = mainWin.DishesPanels;
-            foreach (Panel item in dishesPanels)
-            {
-                // очистить выбор гарниров
-                ClearSelectedGarnish(item);
-                // убрать все описания блюд
-                ClearDescriptionsOnDishPanel(item);
-            }
+            mainWin.ClearSelectedGarnish();
+            mainWin.HideDishesDescriptions();
 
             mainWin.lstMenuFolders.SelectedIndex = 0;
             mainWin.scrollDishes.ScrollToTop();
@@ -530,55 +525,6 @@ namespace WpfClient
             }
             
         }
-
-        // очистить выбор гарнира на панели
-        public static void ClearSelectedGarnish(Panel dishesPanel)
-        {
-            foreach (UIElement dishPanel in dishesPanel.Children)
-            {
-                if ((dishPanel is Panel) && ((dishPanel as Panel).Children.Count > 0))
-                {
-                    UIElement dishContent = (dishPanel as Panel).Children[0];
-                    if ((dishContent is Panel) && ((dishContent as Panel).Children[5] is Grid))
-                    {
-                        Grid garnGrid = ((dishContent as Panel).Children[5] as Grid);
-                        foreach (MainMenuGarnish garn in garnGrid.Children)
-                        {
-                            if (garn.IsSelected == true) garn.IsSelected = false;
-                        }
-                    }
-                }
-            }  // foreach
-        }  //  end func
-
-        public static void ClearDescriptionsOnDishPanel(Panel dishesPanel)
-        {
-            foreach (UIElement dishPanel in dishesPanel.Children)
-            {
-                if ((dishPanel is Panel) && ((dishPanel as Panel).Children.Count > 0))
-                {
-                    Panel dishContent = ((dishPanel as Panel).Children[0]) as Panel;
-
-                    Border btnDescr = (Border)AppLib.GetUIElementFromPanel(dishContent, "btnDescr");
-                    Border descrTextBorder = (Border)AppLib.GetUIElementFromPanel(dishContent, "descrTextBorder");
-                    TextBlock descrText = (TextBlock)AppLib.GetUIElementFromPanel(dishContent, "descrText");
-
-                    int tagVal = System.Convert.ToInt32(btnDescr.Tag ?? 0);
-
-                    btnDescr.Background = Brushes.White;
-                    descrTextBorder.Visibility = Visibility.Hidden;
-                    descrTextBorder.Opacity = 0;
-                    descrText.Visibility = Visibility.Hidden;
-                    descrText.Opacity = 0;
-                    if ((descrText.Effect != null) && (descrText.Effect is BlurEffect))
-                    {
-                        BlurEffect be = (descrText.Effect as BlurEffect);
-                        if (be.Radius != 0) be.Radius = 20;
-                    }
-
-                }
-            }  // foreach
-        }  // end func
 
         #endregion
 

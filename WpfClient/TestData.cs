@@ -122,7 +122,7 @@ namespace WpfClient
                 db.Setting.Add(appSet);
                 appSet = new Setting() { UniqName = "cartButtonBackgroundColor", RowGUID = Guid.NewGuid(), Value = "214,244,36" };
                 db.Setting.Add(appSet);
-                appSet = new Setting() { UniqName = "selectGarnishBackgroundColor", RowGUID = Guid.NewGuid(), Value = "137,137,137" };
+                appSet = new Setting() { UniqName = "garnishBackgroundColor", RowGUID = Guid.NewGuid(), Value = "137,137,137" };
                 db.Setting.Add(appSet);
 
                 db.SaveChanges();

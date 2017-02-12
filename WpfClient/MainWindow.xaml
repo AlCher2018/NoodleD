@@ -165,8 +165,6 @@
             </Path>
         </Canvas>
 
-        <Image Grid.Column="1" Source="AppImages\bg 3hor 1920x1080 gauss.png" Stretch="UniformToFill" Opacity="0.3"/>
-
         <!--боковая панель - меню категорий блюд-->
         <Grid x:Name="gridMenuSide" Grid.Column="0" UseLayoutRounding="True" Background="{StaticResource appBackgroundColor}">
             <Grid.RowDefinitions>
@@ -263,8 +261,10 @@
             </Border>
 
         </Grid>
+        <!--фон -->
+        <Image Grid.Column="1" Source="AppImages\bg 3hor 1920x1080.png" Stretch="UniformToFill" Opacity="0.2"/>
 
-        <local:AniScrollViewer x:Name="scrollDishes" Grid.Column="1" CanContentScroll="False" HorizontalAlignment="Center" VerticalAlignment="Top" UseLayoutRounding="True" VerticalScrollBarVisibility="Hidden"
+        <local:AniScrollViewer x:Name="scrollDishes" Grid.Column="1" CanContentScroll="False" HorizontalAlignment="Center" VerticalAlignment="Top" UseLayoutRounding="True" VerticalScrollBarVisibility="Hidden" 
                   ScrollChanged="scrollDishes_ScrollChanged"
                   PreviewMouseLeftButtonDown="scrollDishes_PreviewMouseLeftButtonDown"
                   PreviewMouseLeftButtonUp="scrollDishes_MouseLeftButtonUp" 
