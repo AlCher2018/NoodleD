@@ -171,7 +171,6 @@
        
     </Window.Resources>
     
-    
     <!-- события: PreviewMouseDown - MouseDown - PreviewMouseUp -->
     <Grid UseLayoutRounding="True">
         <Grid.ColumnDefinitions>
@@ -270,9 +269,6 @@
                 <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="2">
                     <Rectangle x:Name="dishImage" DockPanel.Dock="Left" StrokeThickness="0" RadiusX="10" RadiusY="10" Margin="0"
                                    Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}, Converter={StaticResource multiplyParamConv}, ConverterParameter=1.33}">
-                        <Rectangle.Fill>
-                            <ImageBrush ImageSource="{Binding Image}" Stretch="Fill"/>
-                        </Rectangle.Fill>
                     </Rectangle>
                     <Grid Margin="20,-8,0,0" Width="{Binding ActualWidth, ElementName=gridMain, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.5}">
                         <StackPanel Grid.Column="0">

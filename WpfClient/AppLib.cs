@@ -268,11 +268,29 @@ namespace WpfClient
             return null;
         }
 
-        public static void ShowMessage(string message, int closeInterval = 0)
+        public static void ShowMessage(string title, string message, int closeInterval = 0)
         {
-            MsgBoxOk mb = new MsgBoxOk(message);
-            if (closeInterval != 0) mb.CloseInterval = closeInterval;
-            mb.ShowDialog();
+            WpfClient.Lib.MsgBoxExt mBox = new WpfClient.Lib.MsgBoxExt()
+            {
+                Title = title,
+                TitleFontSize = (double)AppLib.GetAppGlobalValue("appFontSize6"),
+
+                MsgBoxButton = MessageBoxButton.OK,
+                ButtonsText = "Ok",
+                ButtonFontSize = (double)AppLib.GetAppGlobalValue("appFontSize4"),
+                ButtonForeground = Brushes.White,
+                ButtonBackground = (Brush)AppLib.GetAppGlobalValue("appBackgroundColor"),
+                ButtonBackgroundOver = (Brush)AppLib.GetAppGlobalValue("appBackgroundColor"),
+
+                MessageText = message,
+                MessageFontSize = (double)AppLib.GetAppGlobalValue("appFontSize2")
+
+            };
+            if (closeInterval != 0) mBox.AutoCloseInterval = closeInterval;
+            
+            mBox.ShowDialog();
+
+            mBox = null;
         }
 
         #endregion
@@ -311,7 +329,7 @@ namespace WpfClient
             saveAppSettingToProps("UserIdleTime", typeof(int));        // время бездействия из config-файла, в сек
             // печать чека
             saveAppSettingToProps("BillPageWidht", typeof(int));   // ширина в пикселях, для перевода в см надо / на 96 и * на 2,45
-            saveAppSettingToProps("WindowDelayAfterPrint", typeof(int));   // время показа информац.окна после печати
+            saveAppSettingToProps("AutoCloseMsgBoxAfterPrintOrder", typeof(int));   // время показа информац.окна после печати
             // большие кнопки прокрутки панели блюд
             saveAppSettingToProps("dishesPanelScrollButtonSize", typeof(double));
             saveAppSettingToProps("dishesPanelScrollButtonHorizontalAlignment");
@@ -333,7 +351,9 @@ namespace WpfClient
             parseAndSetAllLangString("cartDelIngrTitle");
             parseAndSetAllLangString("cartDelIngrQuestion");
             parseAndSetAllLangString("cartDelDishTitle");
-            parseAndSetAllLangString("cartDelDishQuestion");
+            parseAndSetAllLangString("cartDelDishQuestion"); 
+            parseAndSetAllLangString("printOrderTitle"); 
+            parseAndSetAllLangString("printOrderErrorMessage"); 
             parseAndSetAllLangString("wordOr");
             parseAndSetAllLangString("takeOrderOut");
             parseAndSetAllLangString("takeOrderIn");
@@ -524,29 +544,6 @@ namespace WpfClient
                 }
             }
             
-        }
-
-        #endregion
-
-        #region работа с таймером бездействия
-
-        public static void ActionLog_IdleElapseEvent(ElapsedEventArgs e)
-        {
-            //Debug.Print("idle " + e.SignalTime.ToString());
-            AppLib.ShowIdleWindow();
-        }
-
-        public static void ShowIdleWindow()
-        {
-            MsgBoxYesNo mb = new MsgBoxYesNo();
-            mb.MessageText = AppLib.GetLangTextFromAppProp("areYouHereQuestion");
-            mb.ShowDialog();
-        }
-
-        public static void SetIdleWindow(Window idleWin)
-        {
-
-            //actionIdle.AnyActionWindow = Window;
         }
 
         #endregion

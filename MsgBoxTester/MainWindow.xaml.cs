@@ -24,12 +24,14 @@ namespace MsgBoxTester
         {
             InitializeComponent();
 
+            txtButtonsText.Text = "Ок;Отмена;Да;Нет";
             rbtOk.IsChecked = true;
             txtTitle.Text = "My any-any-any Title";
             txtTitleFontSize.Text = "20";
             txtMessage.Text = "Вы еще здесь? sdfsdhfkhewr wkerhwrhje wekrhwerjh wekrjhewr kjhwer werkhj  werwekrhjwe  kwjerhewr khwejrhwer  wkerhwe rkh ewrkhewrkj kjwehr werkjhwer";
             txtMsgFontSize.Text = "30";
             txtBtnFontSize.Text = "20";
+            chkCloseByButtonPress.IsChecked = true;
         }
 
         private void btnShowMsgBox_Click(object sender, RoutedEventArgs e)
@@ -45,6 +47,7 @@ namespace MsgBoxTester
                 TitleFontSize = int.Parse(txtTitleFontSize.Text),
                 MessageText = txtMessage.Text,
                 MessageFontSize = int.Parse(txtMsgFontSize.Text),
+                ButtonsText = txtButtonsText.Text,
                 ButtonFontSize = int.Parse(txtBtnFontSize.Text),
 
                 MsgBoxButton = getButtons(),
@@ -52,13 +55,22 @@ namespace MsgBoxTester
                 ButtonBackground = lb,
                 ButtonForeground = Brushes.Black,
                 ButtonBackgroundOver = lb,
-                ButtonForegroundOver = Brushes.Red
+                ButtonForegroundOver = Brushes.Red,
+
+                CloseByButtonPress = (chkCloseByButtonPress.IsChecked??false)
             };
+            if (string.IsNullOrEmpty(txtAutoCloseMlSec.Text) == false)
+            {
+                double msec = 0;
+                double.TryParse(txtAutoCloseMlSec.Text, out msec);
+                mbe.AutoCloseInterval = msec;
+            }
 
             MessageBoxResult result = mbe.Show();
             mbe = null;
 
-            //MessageBox.Show("Result - " + result.ToString());
+            if (result != MessageBoxResult.None)
+                MessageBox.Show("Result - " + result.ToString());
         }
 
         private MessageBoxButton getButtons()
@@ -94,5 +106,14 @@ namespace MsgBoxTester
             myCheckBox.IsChecked = true;
         }
 
+        private void chkAgrot_Checked(object sender, RoutedEventArgs e)
+        {
+            txtButtonsText.Text = "Зашибись;На фиг;Ништяк;Облом";
+        }
+
+        private void chkAgrot_Unchecked(object sender, RoutedEventArgs e)
+        {
+            txtButtonsText.Text = "Ок;Отмена;Да;Нет";
+        }
     }  // class
 }

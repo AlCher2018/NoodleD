@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
@@ -10,7 +6,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
 
-namespace MsgBoxTester
+namespace WpfClient.Lib
 {
     /// <summary>
     /// Interaction logic for MsgBoxExt.xaml
@@ -166,12 +162,13 @@ namespace MsgBoxTester
             //   title
             mbTitleText.Text = base.Title;
             mbTitleText.FontSize = TitleFontSize;
-            mbTitleText.Margin = new Thickness(TitleFontSize, TitleFontSize / 2, TitleFontSize, TitleFontSize / 2);
+            mbTitleText.FontStyle = FontStyles.Italic;
+            mbTitleText.Margin = new Thickness(TitleFontSize, 0.3 * TitleFontSize, TitleFontSize, 0.3 * TitleFontSize);
             //   message
             mbMessageText.FontSize = MessageFontSize;
-            mbMessageText.Margin = new Thickness(2 * MessageFontSize);
+            mbMessageText.Margin = new Thickness(2 * MessageFontSize, MessageFontSize, 2 * MessageFontSize, 0);
             //   button text
-            btnPanel.Margin = new Thickness(0, 0, 3 * ButtonFontSize, 2 * ButtonFontSize);
+            btnPanel.Margin = new Thickness(2 * ButtonFontSize);
             btn1Text.FontSize = ButtonFontSize; btn2Text.FontSize = ButtonFontSize; btn3Text.FontSize = ButtonFontSize;
 
             Thickness borderMargin = new Thickness(ButtonFontSize, 0, ButtonFontSize, 0);
@@ -245,7 +242,7 @@ namespace MsgBoxTester
 
             MessageBoxResult res;
             if (Enum.TryParse<MessageBoxResult>((sender as FrameworkElement).Tag.ToString(), out res) == true) _retValue = res;
-            closeWin(e);
+            //closeWin(e);
         }
 
         private void btn_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
@@ -257,7 +254,8 @@ namespace MsgBoxTester
         private void btn_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             doUnpress((FrameworkElement)sender);
-            if (_isClosing == false) _retValue = MessageBoxResult.None;
+//            if (_isClosing == false) _retValue = MessageBoxResult.None;
+            closeWin(e);
         }
 
         private void doPress(FrameworkElement fe)

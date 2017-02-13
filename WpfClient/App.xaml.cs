@@ -104,19 +104,6 @@ namespace WpfClient
             }
         }
 
-        private static void IdleHandler_IdleElapseEvent(System.Timers.ElapsedEventArgs obj)
-        {
-            App.Current.Dispatcher.Invoke(
-                () => {
-                    //Debug.Print("_IdleElapseEvent: " + obj.SignalTime.ToString());
-                    MsgBoxYesNo msgBox = new MsgBoxYesNo();
-                    msgBox.MessageText = AppLib.GetLangTextFromAppProp("areYouHereQuestion");
-                    if (msgBox.ShowDialog() == false)
-                    {
-                        // истекло время ожидания
-                    }
-                });
-        }
 
         #region ISingleInstanceApp Members
 

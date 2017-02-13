@@ -13,6 +13,7 @@ using System.Windows.Input;
 using System.Windows.Media.Effects;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using System.Diagnostics;
 
 namespace WpfClient
 {
@@ -33,6 +34,7 @@ namespace WpfClient
         private Grid dGrid;
         private Grid _grdGarnishes;
         private Path _pathImage = null;
+        private ImageBrush _dishImageBrush;
         private bool _showDescription = false;
         private Border _btnDescr;
         private Border _descrTextBorder;
@@ -80,7 +82,7 @@ namespace WpfClient
                 // показать подсказку
                 _sbDescrShow = getDescrStoryboard(true, cfgDuration);
                 // скрыть подсказку
-                _sbDescrHide = getDescrStoryboard(false, 1.5 * cfgDuration);
+                _sbDescrHide = getDescrStoryboard(false, 0.7 * cfgDuration);
                 _sbDescrHide.Completed += _sbDescrHide_Completed;
             }
 
@@ -165,7 +167,7 @@ namespace WpfClient
                         //markImage.Effect = new DropShadowEffect() { Opacity = 0.7 };
                         markImage.Width = 1.5 * dishPanelHeaderFontSize;
                         //markImage.Height = 2*dishPanelHeaderFontSize;
-                        markImage.Source = ImageHelper.ByteArrayToBitmapImage(markItem.Image);
+                        markImage.Source = markItem.Image;
                         markImage.Stretch = Stretch.Uniform;
                         InlineUIContainer iuc = new InlineUIContainer(markImage);
                         markImage.Margin = new Thickness(0, 0, 5, 5);
@@ -221,30 +223,13 @@ namespace WpfClient
             Rect rect = new Rect(0, 0, dGrid.Width, dishImageHeight);
 
             // изображение
-            BitmapImage bi = null;
-            if (_dishItem.Image == null)
-            {
-                string filePath = ImageHelper.GetFileNameBy(@"AppImages\noimage.png");
-                if (System.IO.File.Exists(filePath) == true)
-                {
-                    bi = new BitmapImage(new Uri(filePath, UriKind.Absolute));
-                }
-            }
-            else
-            {
-                bi = ImageHelper.ByteArrayToBitmapImage(_dishItem.Image);
-            }
-            if (bi != null)
-            {
-                _pathImage = new Path();
-                _pathImage.Data = new RectangleGeometry(rect, dishImageCornerRadius, dishImageCornerRadius);
-                _pathImage.Fill = new DrawingBrush(
-                    new ImageDrawing() { ImageSource = bi, Rect = rect }
-                    );
-                //pathImage.Effect = new DropShadowEffect();
-                // добавить в контейнер
-                Grid.SetRow(_pathImage, 2); dGrid.Children.Add(_pathImage);
-            }
+            _pathImage = new Path();
+            _pathImage.Data = new RectangleGeometry(rect, dishImageCornerRadius, dishImageCornerRadius);
+            _dishImageBrush = new ImageBrush() { ImageSource = _dishItem.Image };
+            _pathImage.Fill = _dishImageBrush;
+            //pathImage.Effect = new DropShadowEffect();
+            // добавить в контейнер
+            Grid.SetRow(_pathImage, 2); dGrid.Children.Add(_pathImage);
 
             // кнопка отображения описания
             _btnDescr = new Border()
@@ -354,9 +339,10 @@ namespace WpfClient
         }  // method
 
 
+        // ******* Выбор гарнира *********
         // здесь возможно три состояния:
         // - установить выделение гарнира в этом же или другом блюде
-        // - снять выделение в этом же блюде
+        // - снять выделение в этом же блюде этого же (текущего) гарнира
         private void GrdGarn_SelectGarnish(object sender, SelectGarnishEventArgs e)
         {
             // выбран гарнир
@@ -364,29 +350,31 @@ namespace WpfClient
             {
                 // снять выделение ранее выбранного гарнира
                 // в том же блюде
-                if (this._selectedGarnIndex > -1)
+                if ((this._selectedGarnIndex > -1) && (this._selectedGarnIndex != e.GarnishIndex))
                 {
                     getSelectedGarnish().IsSelected = false;
+                    this._selectedGarnIndex = -1;
                 }
                 //  в другом блюде
                 else
                 {
                     (this.Parent as MainMenuDishesCanvas).ClearSelectedGarnish();
                 }
+
                 // установить выделение
                 MainMenuGarnish currentGarnItem = (MainMenuGarnish)sender;
                 currentGarnItem.IsSelected = true;
-                if (this._selectedGarnIndex == -1)
-                {
-                    setAddButtonState(true);
-                }
+                setAddButtonState(true);
                 this._selectedGarnIndex = e.GarnishIndex;
+                if (_pathImage != null) _pathImage.Fill = currentGarnItem.DishWithGarnishImageBrush;
             }
 
-            //
+            // снять выделение с текущего гарнира
             else
             {
                 setAddButtonState(false);
+                this._selectedGarnIndex = -1;
+                if (_pathImage != null) _pathImage.Fill = _dishImageBrush;
             }
         }  // method
 
@@ -411,6 +399,8 @@ namespace WpfClient
             if (this._selectedGarnIndex > -1)
             {
                 getSelectedGarnish().IsSelected = false;
+                this._selectedGarnIndex = -1;
+                if (_pathImage != null) _pathImage.Fill = _dishImageBrush;
             }
             setAddButtonState(false);
         }
@@ -559,12 +549,17 @@ namespace WpfClient
         private void BtnAddDish_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             OrderItem _currentOrder = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
+            // изображение взять из элемента
+            ImageBrush imgBrush = (ImageBrush)_pathImage.Fill;
+            BitmapImage bmpImage = (imgBrush.ImageSource as BitmapImage);
 
             // если нет ИНГРЕДИЕНТОВ, то сразу в корзину
             // т.к. блюда без гарниров тоже могут быть с ингредиентами (и рекомендациями)
             if ((_dishItem.Ingredients == null) || (_dishItem.Ingredients.Count == 0))
             {
                 DishItem orderDish = _dishItem.GetCopyForOrder();
+                orderDish.Image = bmpImage;
+
                 _currentOrder.Dishes.Add(orderDish);
                 // анимировать перемещение блюда в корзину
                 animateDishToCart();
@@ -573,20 +568,12 @@ namespace WpfClient
             // иначе через "всплывашку"
             else
             {
-                DishPopup popupWin = new DishPopup(_dishItem);    // текущее блюдо передать в конструкторе
-                // размеры
-                FrameworkElement pnlClient = (App.Current.MainWindow as WpfClient.MainWindow).scrollDishes;
-                popupWin.Height = pnlClient.ActualHeight;
-                popupWin.Width = pnlClient.ActualWidth;
-                // и положение
-                Point p = this.PointToScreen(new Point(0, 0));
-                popupWin.Left = p.X;
-                popupWin.Top = p.Y;
-
+                // текущее блюдо и его изображение передать в конструкторе
+                DishPopup popupWin = new DishPopup(_dishItem, bmpImage);
                 popupWin.ShowDialog();
 
                 // очистить выбранный гарнир
-                getSelectedGarnish().IsSelected = false;
+                ClearSelectedGarnish();
             } // if else
 
         }
@@ -609,22 +596,24 @@ namespace WpfClient
 
         private double getDuration()
         {
-            double retVal = 0;
-            string s = AppLib.GetAppSetting("ShowDishDescrAnimationSpeed");
-            if (s == null) return retVal;
-            if (double.TryParse(s, out retVal) == false) return 0;
+            double retVal = 500;
+            //string s = AppLib.GetAppSetting("ShowDishDescrAnimationSpeed");
+            //if (s == null) return retVal;
+            //if (double.TryParse(s, out retVal) == false) return 0;
             return retVal;
         }
 
         private Storyboard getDescrStoryboard(bool isShow, double duration)
         {
             PropertyPath propPathOpacity = new PropertyPath(UIElement.OpacityProperty);
+            TimeSpan ts = TimeSpan.FromMilliseconds(duration);
 
-            Storyboard sb = new Storyboard() { Duration = TimeSpan.FromMilliseconds(duration) };
+            Storyboard sb = new Storyboard();
 
             // прозрачность рамки текста
             DoubleAnimation daBorderOpacity = new DoubleAnimation()
             {
+                Duration = ts, FillBehavior= FillBehavior.HoldEnd,
                 From = (isShow)?0:0.6, To = (isShow)?0.6:0,
                 EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseOut }
             };
@@ -634,14 +623,20 @@ namespace WpfClient
 
             // прозрачность текста
             DoubleAnimation daTextOpacity = new DoubleAnimation()
-            { From = (isShow)?0:1, To = (isShow)?1:0 };
+            {
+                Duration = ts, FillBehavior = FillBehavior.HoldEnd,
+                From = (isShow) ? 0 : 1, To = (isShow) ? 1 : 0
+            };
             Storyboard.SetTarget(daTextOpacity, _descrText);
             Storyboard.SetTargetProperty(daTextOpacity, propPathOpacity);
             sb.Children.Add(daTextOpacity);
 
-            // прозрачность и расплывчатость текста
+            // расплывчатость текста
             DoubleAnimation daTextBlur = new DoubleAnimation()
-            { From = (isShow)?20:0, To = (isShow)?0:20 };
+            {
+                Duration = ts, FillBehavior = FillBehavior.HoldEnd,
+                From = (isShow)?20:0, To = (isShow)?0:20
+            };
             Storyboard.SetTarget(daTextBlur, _descrText);
             Storyboard.SetTargetProperty(daTextBlur, new PropertyPath("(TextBlock.Effect).(BlurEffect.Radius)"));
             sb.Children.Add(daTextBlur);
@@ -654,18 +649,21 @@ namespace WpfClient
             // цвет фона кнопки описания блюда
             _btnDescr.Background = (_showDescription == true) ? _brushSelectedItem : Brushes.White;
 
-            // видимость описания
-            if (_showDescription == true) 
+            lock (this)
             {
-                // сделать видимым ДО анимации
-                _descrTextBorder.Visibility = Visibility.Visible;
-                _descrText.Visibility = Visibility.Visible;
+                // видимость описания
+                if (_showDescription == true)
+                {
+                    // сделать видимым ДО анимации
+                    _descrTextBorder.Visibility = Visibility.Visible;
+                    _descrText.Visibility = Visibility.Visible;
 
-                _sbDescrShow.Begin();
-            }
-            else
-            {
-                _sbDescrHide.Begin();
+                    _sbDescrShow.Begin(this);
+                }
+                else
+                {
+                    _sbDescrHide.Begin(this);
+                }
             }
 
         }  // method

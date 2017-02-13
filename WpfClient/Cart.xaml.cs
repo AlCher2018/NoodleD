@@ -1,18 +1,14 @@
-﻿using AppModel;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
+using AppModel;
+using WpfClient.Lib;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace WpfClient
 {
@@ -197,15 +193,14 @@ namespace WpfClient
             DishAdding ingrItem = (DishAdding)ingrList.SelectedItem;
             if (ingrItem == null) return;
 
-            MsgBoxYesNo msg = new MsgBoxYesNo();
-            Dictionary<string, string> v = (Dictionary<string, string>)AppLib.GetAppGlobalValue("cartDelIngrTitle");
-            msg.Title = AppLib.GetLangText(v);
-            v = (Dictionary<string, string>)AppLib.GetAppGlobalValue("cartDelIngrQuestion");
-            msg.MessageText = string.Format("{0}\n{1} ?", AppLib.GetLangText(v), AppLib.GetLangText(ingrItem.langNames));
-            bool result = msg.ShowDialog();
-            msg = null;
 
-            if (result == true)
+            MsgBoxExt mBox = getDelMsgBox();
+            mBox.Title = AppLib.GetLangTextFromAppProp("cartDelIngrTitle");
+            mBox.MessageText = string.Format("{0} \"{1}\" ?", AppLib.GetLangTextFromAppProp("cartDelIngrQuestion"), AppLib.GetLangText(ingrItem.langNames));
+            MessageBoxResult result = mBox.ShowDialog();
+            mBox = null;
+
+            if (result == MessageBoxResult.Yes)
             {
                 dishItem.SelectedIngredients.Remove(ingrItem);
                 ingrList.Items.Refresh();
@@ -220,15 +215,13 @@ namespace WpfClient
             if (dishItem == null) return;
             OrderItem order = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
 
-            MsgBoxYesNo msg = new MsgBoxYesNo();
-            Dictionary<string, string> v = (Dictionary<string, string>)AppLib.GetAppGlobalValue("cartDelDishTitle");
-            msg.Title = AppLib.GetLangText(v);
-            v = (Dictionary<string, string>)AppLib.GetAppGlobalValue("cartDelDishQuestion");
-            msg.MessageText = string.Format("{0}\n{1} ?", AppLib.GetLangText(v), AppLib.GetLangText(dishItem.langNames));
-            bool result = msg.ShowDialog();
-            msg = null;
+            MsgBoxExt mBox = getDelMsgBox();
+            mBox.Title = AppLib.GetLangTextFromAppProp("cartDelDishTitle");
+            mBox.MessageText = string.Format("{0} \"{1}\" ?", AppLib.GetLangTextFromAppProp("cartDelDishQuestion"), AppLib.GetLangText(dishItem.langNames));
+            MessageBoxResult result = mBox.ShowDialog();
+            mBox = null;
 
-            if (result == true)
+            if (result == MessageBoxResult.Yes)
             {
                 order.Dishes.Remove(dishItem);
                 lstDishes.Items.Refresh();
@@ -236,6 +229,24 @@ namespace WpfClient
 
                 updatePriceOrder();
             }
+        }
+        private MsgBoxExt getDelMsgBox()
+        {
+            string sYes = AppLib.GetLangTextFromAppProp("dialogBoxYesText");
+            string sNo = AppLib.GetLangTextFromAppProp("dialogBoxNoText");
+            MsgBoxExt mBox = new MsgBoxExt()
+            {
+                TitleFontSize = (double)AppLib.GetAppGlobalValue("appFontSize6"),
+                MessageFontSize = (double)AppLib.GetAppGlobalValue("appFontSize2"),
+                MsgBoxButton = MessageBoxButton.YesNo,
+                ButtonsText = string.Format(";;{0};{1}", sYes, sNo),
+                ButtonBackground = (System.Windows.Media.Brush)AppLib.GetAppGlobalValue("appBackgroundColor"),
+                ButtonBackgroundOver = (System.Windows.Media.Brush)AppLib.GetAppGlobalValue("appBackgroundColor"),
+                ButtonForeground = Brushes.White,
+                ButtonFontSize = (double)AppLib.GetAppGlobalValue("appFontSize4")
+            };
+
+            return mBox;
         }
 
         private void portionCountDel()
@@ -296,21 +307,23 @@ namespace WpfClient
             if (takeMode != TakeOrderEnum.None)
             {
                 // сохранить в заказе флажок "с собой"
-                if (takeMode == TakeOrderEnum.TakeAway) _currentOrder.takeAway = true;
+                _currentOrder.takeAway = (takeMode == TakeOrderEnum.TakeAway);
 
                 PrintBill prn = new PrintBill(_currentOrder, takeMode);
                 string userErrMsg = null;
                 bool result = prn.CreateBill(out userErrMsg);
 
+                string title = (string)AppLib.GetLangTextFromAppProp("printOrderTitle");
+                string msgText;
                 // формирование чека и печать завершилась успешно - сохраняем заказ в БД
                 if (result == true)
                 {
                     bool saveRes = _currentOrder.SaveToDB(out userErrMsg);
                     if (saveRes == true)
                     {
-                        string goText = (string)AppLib.GetLangTextFromAppProp("lblGoText");
-                        int delayInfoWin = (int)AppLib.GetAppGlobalValue("WindowDelayAfterPrint", 0);
-                        AppLib.ShowMessage(goText, delayInfoWin);
+                        msgText = (string)AppLib.GetLangTextFromAppProp("lblGoText");
+                        int delayInfoWin = (int)AppLib.GetAppGlobalValue("AutoCloseMsgBoxAfterPrintOrder", 0);
+                        AppLib.ShowMessage(title, msgText, delayInfoWin);
 
                         // вернуть интерфейс в исходное состояние и очистить заказ
                         AppLib.ReDrawApp(false, true);
@@ -320,16 +333,19 @@ namespace WpfClient
                     else
                     {
                         AppLib.WriteLogErrorMessage(userErrMsg);
-                        AppLib.ShowMessage("Ошибка сохранения заказа!\nЗаказ не был сохранен. Обратитесь к администратору приложения.");
+                        msgText = (string)AppLib.GetLangTextFromAppProp("printOrderErrorMessage");
+                        AppLib.ShowMessage(title, msgText);
                     }
                 }
+
                 // ошибка формирования чека и/или печати - сообщение пользователю на экран и запись в лог
                 else
                 {
-                    AppLib.ShowMessage(userErrMsg);
+                    AppLib.ShowMessage(title, userErrMsg);
                 }
             }  // if
-        }
+
+        }  // method
 
         private void updatePriceOrder()
         {

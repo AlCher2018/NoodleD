@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Collections.Specialized;
+using System.Windows.Media.Imaging;
 
 namespace AppModel
 {
@@ -102,7 +103,7 @@ namespace AppModel
 
             List<DishItem> retVal = new List<DishItem>();
 
-            List<Dish> listDish = _db.Dish.ToList();
+            //List<Dish> listDish = _db.Dish.ToList();
             List<DishGarnish> listGarn = _db.DishGarnish.ToList();
             List<DishMarks> listMarks = _db.DishMarks.ToList();
             List<DishMark> listMark = _db.DishMark.ToList();
@@ -110,8 +111,9 @@ namespace AppModel
             List<DishRecommends> listRecom = _db.DishRecommends.ToList();
             List<DishUnit> listUnit = _db.DishUnit.ToList();
 
-            foreach (Dish dishDb in
-                    from d in listDish where d.MenuFolderGUID == menuGuid orderby d.Id select d)
+            //List<Dish> sorted = (from d in _db.Dish where d.MenuFolderGUID == menuGuid orderby d.RowPosition select d).ToList();
+
+            foreach (Dish dishDb in (from d in _db.Dish where d.MenuFolderGUID == menuGuid orderby d.RowPosition select d))
             {
                 DishItem dishApp = getNewDishItem(dishDb, listUnit);
                 dishApp.MenuId = menuId;
@@ -126,7 +128,8 @@ namespace AppModel
                     {
                         DishAdding da = new DishAdding() {
                             Id = item.Id, RowGUID = item.RowGUID, Price = item.Price,
-                            Image = item.Image, ImageDish = item.ImageDishWithGarnish,
+                            Image = ImageHelper.ByteArrayToBitmapImage(item.Image),
+                            ImageDish = ImageHelper.ByteArrayToBitmapImage(item.ImageDishWithGarnish),
                             langNames = getLangTextDict(item.RowGUID, FieldTypeIDEnum.Name), 
                             langDishDescr = getLangTextDict(item.RowGUID, FieldTypeIDEnum.Description)
                         };
@@ -141,7 +144,11 @@ namespace AppModel
                     dishApp.Ingredients = new List<DishAdding>();
                     foreach (DishIngredient item in lIngr)
                     {
-                        DishAdding da = new DishAdding() { Id = item.Id, RowGUID = item.RowGUID, Price = item.Price, Image = item.Image };
+                        DishAdding da = new DishAdding()
+                        {
+                            Id = item.Id, RowGUID = item.RowGUID, Price = item.Price,
+                            Image = ImageHelper.ByteArrayToBitmapImage(item.Image)
+                        };
                         da.langNames = getLangTextDict(item.RowGUID, FieldTypeIDEnum.Name);
                         dishApp.Ingredients.Add(da);
                     }
@@ -155,7 +162,11 @@ namespace AppModel
                     foreach (DishMarks item in lMark)
                     {
                         DishMark dm = listMark.FirstOrDefault(m => m.RowGUID == item.MarkGUID);
-                        DishAdding da = new DishAdding() { Id = item.Id, Image = dm.Image };
+                        DishAdding da = new DishAdding()
+                        {
+                            Id = item.Id,
+                            Image = ImageHelper.ByteArrayToBitmapImage(dm.Image)
+                        };
                         da.langNames = getLangTextDict(dm.RowGUID, FieldTypeIDEnum.Name);
                         dishApp.Marks.Add(da);
                     }
@@ -168,7 +179,7 @@ namespace AppModel
                     dishApp.Recommends = new List<DishItem>();
                     foreach (DishRecommends item in lRecom)
                     {
-                        Dish recomDb = listDish.FirstOrDefault(d => d.RowGUID == item.RecommendGUID);
+                        Dish recomDb = _db.Dish.FirstOrDefault(d => d.RowGUID == item.RecommendGUID);
                         if (recomDb != null)
                         {
                             DishItem itemRecom = getNewDishItem(recomDb, listUnit);
@@ -190,7 +201,9 @@ namespace AppModel
             dishApp.RowGUID = dishDb.RowGUID;
             dishApp.langNames = getLangTextDict(dishDb.RowGUID, FieldTypeIDEnum.Name);
             dishApp.langDescriptions = getLangTextDict(dishDb.RowGUID, FieldTypeIDEnum.Description);
-            dishApp.Image = dishDb.Image;
+
+            dishApp.Image = ImageHelper.ByteArrayToBitmapImage(dishDb.Image);
+
             dishApp.UnitCount = dishDb.UnitCount ?? 0;
             // единица измерения
             if (dishDb.UnitGUID != null)
@@ -285,7 +298,7 @@ namespace AppModel
         private Dictionary<string, string> _langNames;
         private Dictionary<string, string> _langDescription;
         private Dictionary<string, string> _langUnitNames;
-        private byte[] _image;
+        private BitmapImage _image;
         private List<DishAdding> _garnishes;
         private List<DishAdding> _ingredients;
         private List<DishAdding> _selectedGarnishes;
@@ -360,7 +373,7 @@ namespace AppModel
             }
         }
 
-        public byte[] Image
+        public BitmapImage Image
         {
             get { return _image; }
             set
@@ -526,7 +539,7 @@ namespace AppModel
     {
         private Dictionary<string, string> _langNames;
         private decimal _price;
-        private byte[] _image;
+        private BitmapImage _image;
         private int _count;
 
         public int Id { get; set; }
@@ -555,7 +568,7 @@ namespace AppModel
                 NotifyPropertyChanged();
             }
         }
-        public byte[] Image
+        public BitmapImage Image
         {
             get { return _image; }
             set
@@ -565,7 +578,7 @@ namespace AppModel
                 NotifyPropertyChanged();
             }
         }                   // ONLY adding image
-        public byte[] ImageDish { get; set; }   // dish WITH adding image
+        public BitmapImage ImageDish { get; set; }   // dish WITH adding image
         public string Uid { get; set; }
         public int Count
         {

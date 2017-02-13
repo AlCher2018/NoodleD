@@ -60,13 +60,11 @@ namespace AppModel
         public void Clear()
         {
             _orderNumberForPrint = -1;
-            OrderDate = DateTime.MinValue;
             BarCodeValue = null;
+            takeAway = false;
+            OrderDate = DateTime.MinValue;
 
-            if (_dishItems != null)
-            {
-                _dishItems.RemoveAll(d => true);
-            }
+            if (_dishItems != null) _dishItems.RemoveAll(d => true);
         }
 
         public int CreateOrderNumberForPrint(string deviceName, int rndFrom, int rndTo)

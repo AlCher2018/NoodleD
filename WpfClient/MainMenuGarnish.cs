@@ -41,7 +41,10 @@ namespace WpfClient
             }
         }
 
+        public ImageBrush DishWithGarnishImageBrush;
+
         public event EventHandler<SelectGarnishEventArgs> SelectGarnish;
+
 
         public MainMenuGarnish(DishItem dishItem, int garnIndex, double garnHeight, double garnWidth, Grid dishContentPanel)
         {
@@ -62,6 +65,7 @@ namespace WpfClient
 
             _isSelected = false;
 
+            this.DishWithGarnishImageBrush = new ImageBrush() { ImageSource = _garnItem.ImageDish };
             createGarnishButton();
 
             base.MouseDown += MainMenuGarnish_PreviewMouseDown;
@@ -111,14 +115,15 @@ namespace WpfClient
 
             // подложка кнопки
             Path _pathBase = getGarnPath(_width, _height);
-            if (_garnItem.Image == null)
-            {
-                _pathBase.Fill = _notSelectBrush;
-            }
-            else
-            {
-                _pathBase.Fill = new ImageBrush() { ImageSource = ImageHelper.ByteArrayToBitmapImage(_garnItem.Image) };
-            }
+            //if (_garnItem.Image == null)
+            //{
+            //    _pathBase.Fill = _notSelectBrush;
+            //}
+            //else
+            //{
+            _pathBase.Fill = new ImageBrush() { ImageSource = _garnItem.Image };
+            _pathBase.Stretch = Stretch.UniformToFill;
+            //}
             base.Children.Add(_pathBase);
 
             // выделение кнопки

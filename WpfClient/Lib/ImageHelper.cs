@@ -4,12 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 
 namespace WpfClient
 {
     public static class ImageHelper
     {
-        private static Dictionary<string, System.Windows.Media.Imaging.BitmapImage> _images = new Dictionary<string, System.Windows.Media.Imaging.BitmapImage>();
+        private static Dictionary<string, BitmapImage> _images = new Dictionary<string, BitmapImage>();
 
         internal static void CheckDirectory(bool isDeleteFiles)
         {
@@ -74,20 +75,31 @@ namespace WpfClient
 
         public static System.Windows.Media.Imaging.BitmapImage ByteArrayToBitmapImage(byte[] imageData)
         {
-            if (imageData == null || imageData.Length == 0) return null;
-
-            var image = new System.Windows.Media.Imaging.BitmapImage();
-
-            using (var stream = new MemoryStream(imageData))
+            System.Windows.Media.Imaging.BitmapImage image = null;
+            
+            // если нет изображения, то вернуть из файла
+            if (imageData == null || imageData.Length == 0)
             {
-                stream.Seek(0, SeekOrigin.Begin);
+                string filePath = ImageHelper.GetFileNameBy(@"AppImages\no_image.png");
+                if (System.IO.File.Exists(filePath) == true)
+                {
+                    image = new System.Windows.Media.Imaging.BitmapImage(new Uri(filePath, UriKind.Absolute));
+                }
+            }
+            else
+            {
+                image = new System.Windows.Media.Imaging.BitmapImage();
+                using (var stream = new MemoryStream(imageData))
+                {
+                    stream.Seek(0, SeekOrigin.Begin);
 
-                image.BeginInit();
-                image.CreateOptions = System.Windows.Media.Imaging.BitmapCreateOptions.PreservePixelFormat;
-                image.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
-                image.UriSource = null;
-                image.StreamSource = stream;
-                image.EndInit();
+                    image.BeginInit();
+                    image.CreateOptions = System.Windows.Media.Imaging.BitmapCreateOptions.PreservePixelFormat;
+                    image.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                    image.UriSource = null;
+                    image.StreamSource = stream;
+                    image.EndInit();
+                }
             }
 
             image.Freeze();

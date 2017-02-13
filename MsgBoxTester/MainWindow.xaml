@@ -5,9 +5,16 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MsgBoxTester"
         mc:Ignorable="d"
-        Title="MainWindow" Height="472" Width="364">
+        Title="MainWindow" Height="502" Width="364">
     <Grid >
         <StackPanel>
+
+            <StackPanel Orientation="Horizontal" Margin="10,20,0,0">
+                <TextBlock>Надписи на кнопках: </TextBlock>
+                <TextBox x:Name="txtButtonsText" Width="150" Margin="10,0,0,0"/>
+                <CheckBox x:Name="chkAgrot" Margin="10,0,0,0" VerticalAlignment="Center" Checked="chkAgrot_Checked" IsThreeState="False" Unchecked="chkAgrot_Unchecked">феня</CheckBox>
+            </StackPanel>
+
             <WrapPanel x:Name="groupBox" Orientation="Horizontal" Margin="10">
                 <RadioButton x:Name="rbtOk" Content="Ok" HorizontalAlignment="Left" Margin="10,3" VerticalAlignment="Top" GroupName="b1"/>
                 <RadioButton x:Name="rbtOkCancel" Content="OkCancel" HorizontalAlignment="Left" Margin="10,3"  VerticalAlignment="Top" GroupName="b1"/>
@@ -41,8 +48,9 @@
             </WrapPanel>
 
             <StackPanel Orientation="Horizontal" Margin="10,10,0,0">
-                <TextBlock>auto close (sec):</TextBlock>
-                <TextBox x:Name="txtAutoCloseSec" Width="40" Margin="10,0,0,0" TextWrapping="Wrap"></TextBox>
+                <TextBlock>auto close (msec):</TextBlock>
+                <TextBox x:Name="txtAutoCloseMlSec" Width="40" Margin="10,0,0,0" TextWrapping="Wrap"></TextBox>
+                <CheckBox x:Name="chkCloseByButtonPress" Margin="10,0,0,0" VerticalAlignment="Center" IsThreeState="False">- закрывать окно по кнопке</CheckBox>
             </StackPanel>
 
             <Button x:Name="btnShowMsgBox" Margin="10" Click="btnShowMsgBox_Click" HorizontalAlignment="Left">Show MsgBoxExt</Button>

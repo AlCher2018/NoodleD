@@ -33,12 +33,25 @@ namespace WpfClient
         Storyboard _animDishSelection;
 
 
-        public DishPopup(DishItem dishItem)
+        public DishPopup(DishItem dishItem, BitmapImage img)
         {
             InitializeComponent();
 
+            // размеры
+            this.Width = (double)AppLib.GetAppGlobalValue("screenWidth");
+            this.Height = (double)AppLib.GetAppGlobalValue("screenHeight");
+            this.Top = 0; this.Left = 0;
+            //            FrameworkElement pnlClient = (App.Current.MainWindow as WpfClient.MainWindow).scrollDishes;
+            //            this.Height = pnlClient.ActualHeight; this.Width = pnlClient.ActualWidth;
+            // и положение
+            //            Point p = pnlClient.PointToScreen(new Point(0, 0));
+            //            this.Left = p.X; this.Top = p.Y;
+
             _currentDish = dishItem;
             this.DataContext = _currentDish;
+
+            dishImage.Fill = new ImageBrush(img);
+
             updatePriceControl();
 
             _notSelTextColor = new SolidColorBrush(Colors.Black);
@@ -184,6 +197,12 @@ namespace WpfClient
             // добавить блюдо в заказ
             OrderItem curOrder = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
             DishItem orderDish = _currentDish.GetCopyForOrder();   // сделать копию блюда со всеми добавками
+
+            // изображение взять из элемента
+            ImageBrush imgBrush = (ImageBrush)dishImage.Fill;
+            BitmapImage bmpImage = (imgBrush.ImageSource as BitmapImage);
+            orderDish.Image = bmpImage;
+
             curOrder.Dishes.Add(orderDish);
 
             //Debug.Print("order.Dishes.Count = " + curOrder.Dishes.Count.ToString());
