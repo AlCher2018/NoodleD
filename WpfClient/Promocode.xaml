@@ -1,0 +1,227 @@
+﻿<Window x:Class="WpfClient.Promocode"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:local="clr-namespace:WpfClient"
+        mc:Ignorable="d"
+        Title="Promocode" Height="1080" Width="1920"
+        Top="0" Left="0"
+        WindowStyle="None" ResizeMode="NoResize"
+        AllowsTransparency="True" Background="Transparent" ShowInTaskbar="False"
+        PreviewKeyDown="Window_PreviewKeyDown">
+    
+    <Grid>
+        <Grid.Resources>
+            <sys:Double x:Key="dblCornerRadius">7</sys:Double>
+
+            <CornerRadius x:Key="digBtnCornerRadius" TopLeft="{StaticResource dblCornerRadius}" TopRight="{StaticResource dblCornerRadius}" BottomLeft="{StaticResource dblCornerRadius}" BottomRight="{StaticResource dblCornerRadius}"/>
+            
+            <SolidColorBrush x:Key="btnBackBrush" Color="#FF7C0E67"/>
+
+            <Style x:Key="digButtonStyle" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource btnBackBrush}"/>
+                <Setter Property="Margin" Value="7"/>
+                <Setter Property="CornerRadius" Value="{StaticResource digBtnCornerRadius}"/>
+                <EventSetter Event="PreviewMouseLeftButtonDown" Handler="digBtn_MouseDown"/>
+                <EventSetter Event="PreviewMouseLeftButtonUp" Handler="digBtn_MouseUp"/>
+                <EventSetter Event="MouseEnter" Handler="digBtn_MouseEnter"/>
+                <EventSetter Event="MouseLeave" Handler="digBtn_MouseLeave"/>
+            </Style>
+            <Style x:Key="digButtonText" TargetType="TextBlock">
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="HorizontalAlignment" Value="Center"/>
+                <Setter Property="Foreground" Value="{StaticResource appSelectedItemColor}"/>
+                <Setter Property="FontSize" Value="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter='appFontSize1', Mode=OneWay}"/>
+            </Style>
+            
+        </Grid.Resources>
+        <Border Background="{StaticResource winShadowColor}"/>
+
+        <Border x:Name="panelMain" Background="White" VerticalAlignment="Center" HorizontalAlignment="Center" BorderThickness="6" BorderBrush="#FFCB7E4E">
+            <Grid x:Name="gridMain">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="5*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- title -->
+                <Border x:Name="brdTitle" Grid.Row="0" BorderThickness="0,0,0,6" BorderBrush="#FFCB7E4E"
+                        Background="{StaticResource appBackgroundColor}">
+                    <TextBlock x:Name="txtTitle" Foreground="{StaticResource appSelectedItemColor}" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter='appFontSize2', Mode=OneWay}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+
+                <!-- text box -->
+                <Border Grid.Row="1" BorderThickness="2" CornerRadius="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=cornerRadiusButton}" Margin="10" Background="Aquamarine">
+                    <Border.BorderBrush>
+                        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                            <GradientStop Color="#FFF6C03E"/>
+                            <GradientStop Color="#FF8F5D05" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.BorderBrush>
+                    <TextBlock x:Name="txtInput" TextWrapping="Wrap" Foreground="Black" FontWeight="Bold" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize0}" VerticalAlignment="Center" TextAlignment="Left" FontFamily="Agency FB"/>
+                </Border>
+
+                <!-- digital buttons panel -->
+                <Grid Grid.Row="2" Margin="0,10,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <!-- digital buttons grid  -->
+                    <Grid Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="0.7*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- стрелка влево -->
+                        <Border x:Name="brdBackspace" Grid.Row="0" Grid.ColumnSpan="3" Style="{StaticResource digButtonStyle}" Margin="7,0,7,7" >
+                            <Border.RenderTransform><TranslateTransform/></Border.RenderTransform>
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="10" ShadowDepth="6"/>
+                            </Border.Effect>
+                            <Viewbox Height="{Binding ElementName=brdBackspace, Path=ActualHeight, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.5, Mode=OneWay}" Width="{Binding ElementName=brdBackspace, Path=ActualWidth, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.4, Mode=OneWay}" Stretch="Fill">
+                                <Canvas Width="40" Height="20">
+                                    <Path x:Name="pathArrBS" Stroke="Black" StrokeThickness="0" Fill="{StaticResource appSelectedItemColor}" Data="M 0,10 L10,0 L10,5 L40,5 L40,15 L10,15 L10,20 Z"/>
+                                </Canvas>
+                            </Viewbox>
+                        </Border>
+                        
+                        <!-- dig 7 8 9 -->
+                        <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource digButtonStyle}"  >
+                            <Border.RenderTransform>
+                                <TranslateTransform/>
+                            </Border.RenderTransform>
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="10" ShadowDepth="6"/>
+                            </Border.Effect>
+                            <TextBlock Text="7" Style="{StaticResource digButtonText}"/>
+                        </Border>
+                        <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource digButtonStyle}">
+                            <Border.RenderTransform>
+                                <TranslateTransform/>
+                            </Border.RenderTransform>
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="10" ShadowDepth="6"/>
+                            </Border.Effect>
+                            <TextBlock Text="8" Style="{StaticResource digButtonText}"/>
+                        </Border>
+                        <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource digButtonStyle}"  >
+                            <Border.RenderTransform>
+                                <TranslateTransform/>
+                            </Border.RenderTransform>
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="10" ShadowDepth="6"/>
+                            </Border.Effect>
+                            <TextBlock Text="9" Style="{StaticResource digButtonText}"/>
+                        </Border>
+
+                        <!-- dig 4 5 6 -->
+                        <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource digButtonStyle}"  >
+                            <Border.RenderTransform>
+                                <TranslateTransform/>
+                            </Border.RenderTransform>
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="10" ShadowDepth="6"/>
+                            </Border.Effect>
+                            <TextBlock Text="4" Style="{StaticResource digButtonText}"/>
+                        </Border>
+                        <Border Grid.Row="2" Grid.Column="1" Style="{StaticResource digButtonStyle}"  >
+                            <Border.RenderTransform>
+                                <TranslateTransform/>
+                            </Border.RenderTransform>
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="10" ShadowDepth="6"/>
+                            </Border.Effect>
+                            <TextBlock Text="5" Style="{StaticResource digButtonText}"/>
+                        </Border>
+                        <Border Grid.Row="2" Grid.Column="2" Style="{StaticResource digButtonStyle}"  >
+                            <Border.RenderTransform>
+                                <TranslateTransform/>
+                            </Border.RenderTransform>
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="10" ShadowDepth="6"/>
+                            </Border.Effect>
+                            <TextBlock Text="6" Style="{StaticResource digButtonText}"/>
+                        </Border>
+
+                        <!-- dig 1 2 3 -->
+                        <Border Grid.Row="3" Grid.Column="0" Style="{StaticResource digButtonStyle}"  >
+                            <Border.RenderTransform>
+                                <TranslateTransform/>
+                            </Border.RenderTransform>
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="10" ShadowDepth="6"/>
+                            </Border.Effect>
+                            <TextBlock Text="1" Style="{StaticResource digButtonText}"/>
+                        </Border>
+                        <Border Grid.Row="3" Grid.Column="1" Style="{StaticResource digButtonStyle}"  >
+                            <Border.RenderTransform>
+                                <TranslateTransform/>
+                            </Border.RenderTransform>
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="10" ShadowDepth="6"/>
+                            </Border.Effect>
+                            <TextBlock Text="2" Style="{StaticResource digButtonText}"/>
+                        </Border>
+                        <Border Grid.Row="3" Grid.Column="2" Style="{StaticResource digButtonStyle}"  >
+                            <Border.RenderTransform>
+                                <TranslateTransform/>
+                            </Border.RenderTransform>
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="10" ShadowDepth="6"/>
+                            </Border.Effect>
+                            <TextBlock Text="3" Style="{StaticResource digButtonText}"/>
+                        </Border>
+                        
+                        <!-- dig 0 -->
+                        <Border Grid.Row="4" Grid.Column="1" Style="{StaticResource digButtonStyle}"  >
+                            <Border.RenderTransform>
+                                <TranslateTransform/>
+                            </Border.RenderTransform>
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="10" ShadowDepth="6"/>
+                            </Border.Effect>
+                            <TextBlock Text="0" Style="{StaticResource digButtonText}"/>
+                        </Border>
+                    </Grid>
+                    
+                </Grid>
+                
+                
+                <!-- footer -->
+                <Border x:Name="brdFooter" Grid.Row="3" BorderThickness="0,6,0,0" BorderBrush="#FFCB7E4E">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border x:Name="brdFooterCancel" Grid.Column="0" Background="#FFF6E4B7" PreviewMouseDown="brdFooterCancel_PreviewMouseDown">
+                            <TextBlock Text="Cancel" Foreground="{StaticResource btnBackBrush}" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize3}"/>
+                        </Border>
+
+                        <Border x:Name="brdFooterOk" Grid.Column="2" Background="{StaticResource btnBackBrush}" PreviewMouseDown="brdFooterOk_PreviewMouseDown">
+                            <TextBlock Text="Ok" Foreground="{StaticResource appSelectedItemColor}" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize3}" FontWeight="Bold"/>
+                        </Border>
+                    </Grid>
+                </Border>
+
+            </Grid> <!-- panel's grid-->
+
+        </Border> <!-- panel's border -->
+    </Grid>  <!-- maun grid -->
+</Window>

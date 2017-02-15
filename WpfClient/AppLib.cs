@@ -354,7 +354,10 @@ namespace WpfClient
             parseAndSetAllLangString("cartDelDishQuestion"); 
             parseAndSetAllLangString("printOrderTitle"); 
             parseAndSetAllLangString("printOrderErrorMessage"); 
+
             parseAndSetAllLangString("wordOr");
+            parseAndSetAllLangString("wordIngredients");
+            
             parseAndSetAllLangString("takeOrderOut");
             parseAndSetAllLangString("takeOrderIn");
             parseAndSetAllLangString("CurrencyName");
@@ -399,6 +402,8 @@ namespace WpfClient
 
                     foreach (Setting item in setList)
                     {
+                        AppLib.WriteLogTraceMessage("- параметр "+ item.UniqName + "...");
+
                         AppLib.SetAppGlobalValue(item.UniqName, item.Value);
                         if (item.UniqName.EndsWith("Color") == true)  // преобразовать и переопределить цвета
                         {
@@ -410,11 +415,13 @@ namespace WpfClient
                             Dictionary<string, string> d = getLangTextDict(stringTable, item.RowGUID, 1);
                             AppLib.SetAppGlobalValue(item.UniqName, d);
                         }
+
+                        AppLib.WriteLogTraceMessage("- параметр " + item.UniqName + "... Ready");
                     }
                 }
                 catch (Exception e)
                 {
-                    AppLib.WriteLogErrorMessage("Fatal error: {0}\nSource: {1}\nStackTrace: {2}", e.Message, e.Source, e.StackTrace);
+                    AppLib.WriteLogErrorMessage(string.Format("Fatal error: {0}\nSource: {1}\nStackTrace: {2}", e.Message, e.Source, e.StackTrace));
                     MessageBox.Show("Ошибка доступа к данным: " + e.Message + "\nПрограмма будет закрыта.");
                     throw;
                 }
@@ -466,7 +473,8 @@ namespace WpfClient
         private static void checkAppColor(string setName)
         {
             SolidColorBrush bRes = (SolidColorBrush)Application.Current.Resources[setName];
-            if (bRes == null) throw new Exception(string.Format("Name [{0}] not found in application resources.",setName));
+            if (bRes == null) return;
+
             SolidColorBrush bProp = (SolidColorBrush)AppLib.GetAppGlobalValue(setName);
 
             if (bRes.Color.Equals(bProp.Color) == false)  // если не равны

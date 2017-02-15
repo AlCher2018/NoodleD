@@ -83,7 +83,7 @@ namespace WpfClient
             // передать уведомление в панель блюда
             if (SelectGarnish != null)
             {
-                SelectGarnish(this, new SelectGarnishEventArgs(_isSelected, _garnIndex));
+                SelectGarnish(this, new SelectGarnishEventArgs(_isSelected, _garnIndex, AppLib.GetLangText(_garnItem.langDishDescr)));
             }
         }
 
@@ -99,13 +99,16 @@ namespace WpfClient
             //_tbGarnishPrice.Effect = (_isSelected) ? _shadow: null;
 
             // логический уровень
-            if (_isSelected == true)
+            if (((_dishItem.SelectedGarnishes.Count == 1) && (_dishItem.SelectedGarnishes[0].Equals(_garnItem))))
             {
-                _dishItem.SelectedGarnishes.Add(_garnItem);
+                // если текущий гарнир уже есть, то ничего не делаем
             }
             else
             {
-                _dishItem.SelectedGarnishes.Remove(_garnItem);
+                // иначе очищаем
+                if (_dishItem.SelectedGarnishes.Count > 0) _dishItem.SelectedGarnishes.Clear();
+                // и добавляем текущий
+                if (_isSelected == true) _dishItem.SelectedGarnishes.Add(_garnItem);
             }
         }
 
@@ -186,11 +189,13 @@ namespace WpfClient
     {
         public bool Selected { get; set; }
         public int GarnishIndex { get; set; }
+        public string DishWithGarnishDescription;
 
-        public SelectGarnishEventArgs(bool selected, int garnIndex)
+        public SelectGarnishEventArgs(bool selected, int garnIndex, string dishWithGarnDescr)
         {
             this.Selected = selected;
             this.GarnishIndex = garnIndex;
+            this.DishWithGarnishDescription = dishWithGarnDescr;
         }
     }
 

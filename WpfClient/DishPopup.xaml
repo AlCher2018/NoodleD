@@ -8,7 +8,7 @@
         Title="DishPopup" Height="300" Width="300"
         PreviewKeyDown="Window_PreviewKeyDown" Loaded="Window_Loaded"
         WindowStyle="None" ResizeMode="NoResize"
-        AllowsTransparency="True" Background="Transparent" 
+        AllowsTransparency="True" Background="Transparent" ShowInTaskbar="False"
         >
 
     <Window.Resources>

@@ -163,11 +163,12 @@ namespace AppModel
                         }
 
                         // гарниры
-                        if (dItem.SelectedGarnishes != null)
+                        if ((dItem.SelectedGarnishes != null) && (dItem.SelectedGarnishes.Count > 0))
                         {
-                            foreach (DishAdding garn in dItem.SelectedGarnishes)
-                            {
-                                OrderDishGarnish dGarn = new OrderDishGarnish()
+                            DishAdding garn = dItem.SelectedGarnishes[0];
+                            //foreach (DishAdding garn in dItem.SelectedGarnishes)
+                            //{
+                            OrderDishGarnish dGarn = new OrderDishGarnish()
                                 {
                                     OrderGUID = newOrder.RowGUID,
                                     DishGUID = dItem.RowGUID,
@@ -177,7 +178,7 @@ namespace AppModel
                                     OrderDishId = oDish.Id
                                 };
                                 db.OrderDishGarnish.Add(dGarn);
-                            }
+                            //}
                         }
                         // ингредиенты
                         if (dItem.SelectedIngredients != null)

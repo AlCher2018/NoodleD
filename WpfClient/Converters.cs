@@ -159,11 +159,18 @@ namespace WpfClient
         }
     }
 
-    [ValueConversion(typeof(string), typeof(object))]
+    [ValueConversion(typeof(object), typeof(object))]
     public class GetAppSetValue : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
+            string appPropName = null;
+
+            if (value != null) appPropName = value.ToString();
+            else if (parameter != null) appPropName = parameter.ToString();
+
+            if (appPropName == null) return null;
+
             object retVal = AppLib.GetAppGlobalValue(parameter.ToString());
             return retVal;
         }

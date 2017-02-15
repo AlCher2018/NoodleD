@@ -67,18 +67,6 @@ namespace WpfClient
                 AppLib.GetSettingsFromConfigFile();     // определенные в config-файле
                 //TestData.mainProc();
 
-                // определенные в ms sql
-                try
-                {
-                    AppLib.ReadSettingFromDB();
-                    AppLib.ReadAppDataFromDB();
-                }
-                catch (Exception)
-                {
-                    // сообщения об ошибках находятся в соотв.модулях, здесь только выход из приложения
-                    Application.Current.Shutdown(1);
-                }
-
                 // проверка соединения с бд
                 try
                 {
@@ -88,6 +76,19 @@ namespace WpfClient
                 {
                     AppLib.WriteLogErrorMessage(eConnDB.Message);
                     throw;
+                }
+
+                // определенные в ms sql
+                try
+                {
+                    AppLib.ReadSettingFromDB();
+                    //  DEBUG
+                    //AppLib.ReadAppDataFromDB();
+                }
+                catch (Exception)
+                {
+                    // сообщения об ошибках находятся в соотв.модулях, здесь только выход из приложения
+                    Application.Current.Shutdown(1);
                 }
 
                 //UserActionHandler = new UserActionsLog();

@@ -70,27 +70,6 @@ namespace AppModel
                 retVal.Add(newMenuItem);
             }
 
-            // DEBUG
-            // удалить категории
-            //retVal.RemoveAt(4);
-            //retVal.RemoveAt(4);
-            // добавить еще несколько категорий
-            //MenuFolder mi = lsort[0];
-            //retVal.Add(new MenuItem()
-            //{
-            //    MenuFolder = mi,
-            //    langNames = getLangTextDict(mi.RowGUID, fieldTypeId),
-            //    Dishes = getDishes(mi)
-            //});
-            //mi = lsort[1];
-            //retVal.Add(new MenuItem()
-            //{
-            //    MenuFolder = mi,
-            //    langNames = getLangTextDict(mi.RowGUID, fieldTypeId),
-            //    Dishes = getDishes(mi)
-            //});
-            // ~DEBUG
-
             if (retVal.Count == 0) retVal = null;
 
             return retVal;
@@ -103,7 +82,8 @@ namespace AppModel
 
             List<DishItem> retVal = new List<DishItem>();
 
-            //List<Dish> listDish = _db.Dish.ToList();
+            List<Dish> listDish = _db.Dish.ToList();
+            List<Dish> sortedDish = (from d in listDish where d.MenuFolderGUID == menuGuid orderby d.RowPosition select d).ToList();
             List<DishGarnish> listGarn = _db.DishGarnish.ToList();
             List<DishMarks> listMarks = _db.DishMarks.ToList();
             List<DishMark> listMark = _db.DishMark.ToList();
@@ -111,9 +91,7 @@ namespace AppModel
             List<DishRecommends> listRecom = _db.DishRecommends.ToList();
             List<DishUnit> listUnit = _db.DishUnit.ToList();
 
-            //List<Dish> sorted = (from d in _db.Dish where d.MenuFolderGUID == menuGuid orderby d.RowPosition select d).ToList();
-
-            foreach (Dish dishDb in (from d in _db.Dish where d.MenuFolderGUID == menuGuid orderby d.RowPosition select d))
+            foreach (Dish dishDb in sortedDish)
             {
                 DishItem dishApp = getNewDishItem(dishDb, listUnit);
                 dishApp.MenuId = menuId;
@@ -191,6 +169,17 @@ namespace AppModel
                 retVal.Add(dishApp);
             }  // foreach
 
+            GC.Collect();
+            listGarn.Clear(); listGarn = null;
+            listMarks.Clear(); listMarks = null;
+            listMark.Clear(); listMark = null;
+            listIngr.Clear(); listIngr = null;
+            listRecom.Clear(); listRecom = null;
+            listUnit.Clear(); listUnit = null;
+            sortedDish.Clear(); sortedDish = null;
+            listDish.Clear(); listDish = null;
+            GC.Collect();
+
             return retVal;
         }  // GetDishes(Guid menuGuid)
 
@@ -202,7 +191,10 @@ namespace AppModel
             dishApp.langNames = getLangTextDict(dishDb.RowGUID, FieldTypeIDEnum.Name);
             dishApp.langDescriptions = getLangTextDict(dishDb.RowGUID, FieldTypeIDEnum.Description);
 
+            GC.Collect();
+            var v1 = GC.GetTotalMemory(true);
             dishApp.Image = ImageHelper.ByteArrayToBitmapImage(dishDb.Image);
+            var v2 = GC.GetTotalMemory(true);
 
             dishApp.UnitCount = dishDb.UnitCount ?? 0;
             // единица измерения
@@ -238,7 +230,7 @@ namespace AppModel
         }
     }
 
-    public class MenuItem : INotifyPropertyChanged
+    public class MenuItem
     {
         private MenuFolder _menuFolder;
         private Dictionary<string, string> _langNames;
@@ -251,7 +243,6 @@ namespace AppModel
             {
                 if (value == _menuFolder) return;
                 _menuFolder = value;
-                NotifyPropertyChanged();
             }
         }
 
@@ -262,7 +253,6 @@ namespace AppModel
             {
                 if (value == _langNames) return;
                 _langNames = value;
-                NotifyPropertyChanged();
             }
         }
 
@@ -273,28 +263,12 @@ namespace AppModel
             {
                 if (value == _dishes) return;
                 _dishes = value;
-                NotifyPropertyChanged();
             }
         }
-
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        private void NotifyPropertyChanged([CallerMemberName] String propertyName = "")
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-
-
     }  // class MenuItem
 
-    public class DishItem : INotifyPropertyChanged
+    public class DishItem
     {
-        private int _unitCount;
-        private decimal _price;
-        private int _count;
         private Dictionary<string, string> _langNames;
         private Dictionary<string, string> _langDescription;
         private Dictionary<string, string> _langUnitNames;
@@ -311,36 +285,9 @@ namespace AppModel
         public int MenuId { get; set; }
         public int Id { get; set; }
         public Guid RowGUID { get; set; }
-        public int UnitCount
-        {
-            get { return _unitCount; }
-            set
-            {
-                if (value == _unitCount) return;
-                _unitCount = value;
-                NotifyPropertyChanged();
-            }
-        }
-        public decimal Price
-        {
-            get { return _price; }
-            set
-            {
-                if (value == _price) return;
-                _price = value;
-                NotifyPropertyChanged();
-            }
-        }
-        public int Count
-        {
-            get { return _count; }
-            set
-            {
-                if (value == _count) return;
-                _count = value;
-                NotifyPropertyChanged();
-            }
-        }
+        public int UnitCount { get; set; }
+        public decimal Price { get; set; }
+        public int Count { get; set; }
 
         public Dictionary<string, string> langNames
         {
@@ -349,7 +296,6 @@ namespace AppModel
             {
                 if (value == _langNames) return;
                 _langNames = value;
-                NotifyPropertyChanged();
             }
         }
         public Dictionary<string, string> langDescriptions
@@ -359,7 +305,6 @@ namespace AppModel
             {
                 if (value == _langDescription) return;
                 _langDescription = value;
-                NotifyPropertyChanged();
             }
         }
         public Dictionary<string, string> langUnitNames
@@ -369,7 +314,6 @@ namespace AppModel
             {
                 if (value == _langUnitNames) return;
                 _langUnitNames = value;
-                NotifyPropertyChanged();
             }
         }
 
@@ -380,7 +324,6 @@ namespace AppModel
             {
                 if (value == _image) return;
                 _image = value;
-                NotifyPropertyChanged();
             }
         }
 
@@ -391,7 +334,6 @@ namespace AppModel
             {
                 if (value == _garnishes) return;
                 _garnishes = value;
-                NotifyPropertyChanged();
             }
         }
         public List<DishAdding> Ingredients
@@ -401,7 +343,6 @@ namespace AppModel
             {
                 if (value == _ingredients) return;
                 _ingredients = value;
-                NotifyPropertyChanged();
             }
         }
         public List<DishAdding> Marks
@@ -411,7 +352,6 @@ namespace AppModel
             {
                 if (value == _marks) return;
                 _marks = value;
-                NotifyPropertyChanged();
             }
         }
         public List<DishItem> Recommends
@@ -421,7 +361,6 @@ namespace AppModel
             {
                 if (value == _recommends) return;
                 _recommends = value;
-                NotifyPropertyChanged();
             }
         }
 
@@ -432,7 +371,6 @@ namespace AppModel
             {
                 if (value == _selectedGarnishes) return;
                 _selectedGarnishes = value;
-                NotifyPropertyChanged();
             }
         }
         public List<DishAdding> SelectedIngredients
@@ -442,7 +380,6 @@ namespace AppModel
             {
                 if (value == _selectedIngredients) return;
                 _selectedIngredients = value;
-                NotifyPropertyChanged();
             }
         }
         public List<DishItem> SelectedRecommends
@@ -452,7 +389,6 @@ namespace AppModel
             {
                 if (value == _selectedRecommends) return;
                 _selectedRecommends = value;
-                NotifyPropertyChanged();
             }
         }
 
@@ -473,14 +409,6 @@ namespace AppModel
             this.Count = 1;
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        private void NotifyPropertyChanged([CallerMemberName] String propertyName = "")
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
 
         public DishItem GetCopyForOrder()
         {

@@ -115,6 +115,7 @@ namespace WpfClient
             btnScrollUp.HorizontalAlignment = (HorizontalAlignment)v;
 
             List<AppModel.MenuItem> mFolders = (List<AppModel.MenuItem>)AppLib.GetAppGlobalValue("mainMenu");
+            if (mFolders == null) return;
 
             // создать список категорий блюд
             AppLib.WriteLogTraceMessage(" - создаю список категорий блюд...");
@@ -150,13 +151,16 @@ namespace WpfClient
 
         private void createCategoriesList()
         {
+            var v = AppLib.GetAppGlobalValue("mainMenu");
+            if (v == null) return;
+
             // стиль содержания пункта меню
             bool isScrollingList = AppLib.GetAppSetting("IsAllowScrollingDishCategories").IsTrueString();
             // без скроллинга, поэтому настраиваем поля и отступы
             // если категорий меньше 6, то оставляем по умолчанию, из разметки
             if (isScrollingList == false)
             {
-                List<AppModel.MenuItem> mFolders = (List<AppModel.MenuItem>)AppLib.GetAppGlobalValue("mainMenu");
+                List<AppModel.MenuItem> mFolders = (List<AppModel.MenuItem>)v;
                 int iCatCount = mFolders.Count;
                 if (iCatCount > 6)
                 {
@@ -209,6 +213,8 @@ namespace WpfClient
         //*********************************
         private void createDishesCanvas(List<AppModel.MenuItem> mFolders)
         {
+            if (mFolders == null) return;
+
             foreach (AppModel.MenuItem mItem in mFolders)
             {
                 MainMenuDishesCanvas canvas = new MainMenuDishesCanvas(mItem);
@@ -327,6 +333,17 @@ namespace WpfClient
         #endregion
 
         #region работа с промокодом
+        private void brdPromoCode_PreviewMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            Promocode promoWin = new Promocode();
+            promoWin.ShowDialog();
+
+            string retVal = promoWin.InputValue;
+            promoWin = null;
+            GC.Collect();
+
+            //MessageBox.Show(retVal??"Null");
+        }
 
         #endregion
 
@@ -440,7 +457,7 @@ namespace WpfClient
         public void animateOrderPrice()
         {
             // анимация фона
-            if (_currentOrder.GetOrderValue() == 0)
+            if ((_currentOrder.GetOrderValue() == 0) && (_animOrderPriceBackgroundColor != null))
             {
                 brdMakeOrder.Background.BeginAnimation(SolidColorBrush.ColorProperty, _animOrderPriceBackgroundColor);
             }
@@ -717,6 +734,7 @@ namespace WpfClient
 
             AppLib.WriteLogTraceMessage(string.Format("{0} - mainGrid_PreviewMouseUp, _langButtonPress = {1}", ((FrameworkElement)sender).Name, _langButtonPress.ToString()));
         }
+
 
         private void btnShowCart_MouseUp(object sender, MouseButtonEventArgs e)
         {

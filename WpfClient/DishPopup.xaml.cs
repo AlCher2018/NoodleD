@@ -41,11 +41,6 @@ namespace WpfClient
             this.Width = (double)AppLib.GetAppGlobalValue("screenWidth");
             this.Height = (double)AppLib.GetAppGlobalValue("screenHeight");
             this.Top = 0; this.Left = 0;
-            //            FrameworkElement pnlClient = (App.Current.MainWindow as WpfClient.MainWindow).scrollDishes;
-            //            this.Height = pnlClient.ActualHeight; this.Width = pnlClient.ActualWidth;
-            // и положение
-            //            Point p = pnlClient.PointToScreen(new Point(0, 0));
-            //            this.Left = p.X; this.Top = p.Y;
 
             _currentDish = dishItem;
             this.DataContext = _currentDish;

@@ -364,18 +364,24 @@ namespace WpfClient
                 // установить выделение
                 MainMenuGarnish currentGarnItem = (MainMenuGarnish)sender;
                 currentGarnItem.IsSelected = true;
+
                 setAddButtonState(true);
                 this._selectedGarnIndex = e.GarnishIndex;
+                // изменить изображение блюда с гарниром
                 if (_pathImage != null) _pathImage.Fill = currentGarnItem.DishWithGarnishImageBrush;
+                // изменить описание блюда
+                if (string.IsNullOrEmpty(e.DishWithGarnishDescription) == false) _descrText.Text = e.DishWithGarnishDescription;
             }
 
             // снять выделение с текущего гарнира
             else
             {
-                setAddButtonState(false);
-                this._selectedGarnIndex = -1;
-                if (_pathImage != null) _pathImage.Fill = _dishImageBrush;
+                unselectGarnish();
             }
+
+            // если показано описание блюда, то убрать его
+//            HideDescription();
+
         }  // method
 
         // кнопка добавления для блюд с гарнирами
@@ -399,10 +405,16 @@ namespace WpfClient
             if (this._selectedGarnIndex > -1)
             {
                 getSelectedGarnish().IsSelected = false;
-                this._selectedGarnIndex = -1;
-                if (_pathImage != null) _pathImage.Fill = _dishImageBrush;
+                unselectGarnish();
             }
+        }
+
+        private void unselectGarnish()
+        {
             setAddButtonState(false);
+            this._selectedGarnIndex = -1;
+            if (_pathImage != null) _pathImage.Fill = _dishImageBrush;
+            _descrText.Text = AppLib.GetLangText(_dishItem.langDescriptions);
         }
 
         public void HideDescription()
@@ -718,9 +730,14 @@ namespace WpfClient
             }
 
             // tbList[1] - буковка i на кнопке отображения описания
-            
+
             // описание блюда
-            tbList[2].Text = AppLib.GetLangText(_dishItem.langDescriptions);
+            if ((_hasGarnishes == true) && (this._selectedGarnIndex != -1))
+            {
+                _descrText.Text = AppLib.GetLangText(_dishItem.Garnishes[this._selectedGarnIndex].langDishDescr);
+            }
+            else
+                _descrText.Text = AppLib.GetLangText(_dishItem.langDescriptions);
 
             // кнопка Добавить с тенью
             TextBlock tbAdd = tbList.First(t => t.Name == "tbAdd");

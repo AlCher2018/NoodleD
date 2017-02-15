@@ -7,7 +7,7 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         WindowStyle="None" WindowState="Maximized" WindowStartupLocation="CenterScreen" 
-        Title="Cart" Height="254" Width="379"
+        Title="Cart" Height="254" Width="379" ShowInTaskbar="False"
         KeyDown="Window_KeyDown">
 
     <Window.Resources>
@@ -22,10 +22,8 @@
         <Style x:Key="textBackToMenuStyle" TargetType="TextBlock" BasedOn="{StaticResource centeredElement}">
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="Text" Value="{Binding {x:Null}, Converter={StaticResource langTextToUpper}, ConverterParameter=appSet.btnBackToMenuText, Mode=OneWay, 
-                           StringFormat={}&lt;  {0}}"/>
+                           StringFormat={}&lt;--  {0}}"/>
             <Setter Property="FontSize" Value="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize3, Mode=OneWay}"/>
-            <EventSetter Event="MouseUp" Handler="txtbackToMenu_MouseUp"/>
-            <EventSetter Event="TouchUp" Handler="txtbackToMenu_TouchUp"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Foreground" Value="{StaticResource appSelectedItemColor}"/>
@@ -177,10 +175,10 @@
                                 <TextBlock Margin="6,0,0,0" Text="{Binding langUnitNames, Converter={StaticResource langDictToText}}" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize5, Mode=OneWay}"/>
                             </StackPanel>
                         </StackPanel>
-                            
-                        <!--добавки (снизу) -->
+
+                        <!--добавки (снизу) wordIngredients -->
                         <StackPanel Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="1" VerticalAlignment="Bottom"  HorizontalAlignment="Left" TextElement.FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize5, Mode=OneWay}">
-                            <TextBlock Text="Добавки:" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding Converter={StaticResource langDictToText}, ConverterParameter=appSet.wordIngredients, Mode=OneWay}" FontWeight="Bold"/>
                             <ListBox ItemsSource="{Binding SelectedIngredients}" Background="Transparent" IsHitTestVisible="True" VirtualizingPanel.ScrollUnit="Pixel" BorderThickness="0">
                                 <ListBox.ItemsPanel>
                                     <ItemsPanelTemplate>
@@ -307,7 +305,9 @@
             <Image Grid.Row="0" Source="AppImages\logo1.png" Stretch="Uniform" Style="{StaticResource centeredElement}" Margin="20,0"/>
             
             <!-- 1. кнопка Назад к меню -->
-            <TextBlock Grid.Row="1" Style="{StaticResource textBackToMenuStyle}"/>
+            <Border Grid.Row="1" PreviewMouseUp="txtbackToMenu_MouseUp" Background="{StaticResource appBackgroundColor}" BorderThickness="0,1,0,1" BorderBrush="DarkMagenta">
+                <TextBlock  Style="{StaticResource textBackToMenuStyle}"/>
+            </Border>
 
             <!-- 2. кнопка С собой --><!--
             <Grid Grid.Row="2">

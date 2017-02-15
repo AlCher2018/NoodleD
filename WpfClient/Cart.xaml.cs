@@ -39,12 +39,6 @@ namespace WpfClient
 
         private void txtbackToMenu_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (e.StylusDevice != null) return;
-
-            closeWin();
-        }
-        private void txtbackToMenu_TouchUp(object sender, TouchEventArgs e)
-        {
             closeWin();
         }
 
