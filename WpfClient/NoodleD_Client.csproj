@@ -189,7 +189,10 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Resource Include="AppImages\bg 3hor 1920x1080 — копия.png" />
+    <Content Include="AppImages\bg 3hor 1920x1080 background.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Resource Include="AppImages\bg 3hor 1920x1080 splash.png" />
     <Content Include="AppImages\BlankLogoFooter.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -232,12 +235,6 @@
     </EmbeddedResource>
     <Resource Include="AppImages\icon.ico" />
     <None Include="AppImages\bg 2ver 1080x1280.png" />
-    <Content Include="AppImages\bg 3hor 1920x1080 gauss.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="AppImages\bg 3hor 1920x1080.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="AppImages\logo1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -273,11 +270,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AppImages\menuItemNoImage.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="AppImages\bg.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

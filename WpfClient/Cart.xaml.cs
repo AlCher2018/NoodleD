@@ -317,7 +317,8 @@ namespace WpfClient
                     {
                         msgText = (string)AppLib.GetLangTextFromAppProp("lblGoText");
                         int delayInfoWin = (int)AppLib.GetAppGlobalValue("AutoCloseMsgBoxAfterPrintOrder", 0);
-                        AppLib.ShowMessage(title, msgText, delayInfoWin);
+                        // 2017-02-17 убрать окно "Теперь можете подходить с чеком к кассе для оплаты"
+                        //AppLib.ShowMessage(title, msgText, delayInfoWin);
 
                         // вернуть интерфейс в исходное состояние и очистить заказ
                         AppLib.ReDrawApp(false, true);

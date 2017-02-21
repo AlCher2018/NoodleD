@@ -100,6 +100,13 @@ namespace WpfClient
             AppLib.WriteLogTraceMessage("Настраиваю визуальные элементы...");
             AppLib.AppLang = AppLib.GetAppSetting("langDefault");
 
+            // яркость фона
+            string opacity = AppLib.GetAppSetting("MenuBackgroundBrightness");
+            if (opacity != null)
+            {
+                menuBackground.Opacity = opacity.GetDoubleValue();
+            }
+
             // надписи на языковых кнопках
             lblLangUa.Text = (string)AppLib.GetAppGlobalValue("langButtonTextUa");
             lblLangRu.Text = (string)AppLib.GetAppGlobalValue("langButtonTextRu");

@@ -61,14 +61,14 @@
                         <Image x:Name="btnClose" Source="AppImages\closeWindow.png" VerticalAlignment="Top" HorizontalAlignment="Right" MouseDown="btnClose_MouseDown"/>
                     </Grid>
 
-                    <Border x:Name="btnTakeOut" Grid.Row="1" Grid.Column="1" Background="{DynamicResource appBackgroundColor}" MouseDown="btnTakeOut_MouseDown">
+                    <Border x:Name="btnTakeOut" Grid.Row="1" Grid.Column="1" Background="{DynamicResource appBackgroundColor}" PreviewMouseDown = "btnTakeOut_MouseDown">
                         <TextBlock x:Name="txtTakeOut" Grid.Row="1" Grid.Column="1" 
                                    Style="{StaticResource buttonTextStyle}"/>
                     </Border>
 
                     <TextBlock x:Name="txtWordOr" Grid.Row="1" Grid.Column="2" Foreground="Black" Style="{StaticResource centeredElement}"/>
 
-                    <Border x:Name="btnTakeIn" Grid.Row="1" Grid.Column="3" Background="{DynamicResource appBackgroundColor}" MouseDown="btnTakeIn_MouseDown">
+                    <Border x:Name="btnTakeIn" Grid.Row="1" Grid.Column="3" Background="{DynamicResource appBackgroundColor}" PreviewMouseDown = "btnTakeIn_MouseDown">
                         <TextBlock x:Name="txtTakeIn" Grid.Row="1" Grid.Column="3"
                                    Style="{StaticResource buttonTextStyle}"/>
                     </Border>

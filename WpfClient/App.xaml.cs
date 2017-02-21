@@ -48,7 +48,7 @@ namespace WpfClient
                     //                Process.GetCurrentProcess().Kill();
                 }
 
-                System.Windows.SplashScreen splashScreen = new System.Windows.SplashScreen("AppImages/bg 3hor 1920x1080 — копия.png");
+                System.Windows.SplashScreen splashScreen = new System.Windows.SplashScreen("AppImages/bg 3hor 1920x1080 splash.png");
                 splashScreen.Show(true);
 
                 App app = new App();
@@ -83,7 +83,7 @@ namespace WpfClient
                 {
                     AppLib.ReadSettingFromDB();
                     //  DEBUG
-                    //AppLib.ReadAppDataFromDB();
+                    AppLib.ReadAppDataFromDB();
                 }
                 catch (Exception)
                 {

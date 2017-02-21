@@ -50,6 +50,8 @@ namespace WpfClient
                 errMessage = "Ошибка конфигурации приложения!" + UserErrMsgSuffix;
                 return false;
             }
+            if (deviceName.Length > 2) deviceName = deviceName.Substring(0, 2);
+
             // 1. OrderNumberForPrint
             int rndFrom = int.Parse(AppLib.GetAppSetting("RandomOrderNumFrom"));       // случайный номер заказа: От
             int rndTo = int.Parse(AppLib.GetAppSetting("RandomOrderNumTo"));           // случайный номер заказа: До
