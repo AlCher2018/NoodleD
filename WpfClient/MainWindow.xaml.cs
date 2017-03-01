@@ -104,7 +104,7 @@ namespace WpfClient
             string opacity = AppLib.GetAppSetting("MenuBackgroundBrightness");
             if (opacity != null)
             {
-                menuBackground.Opacity = opacity.GetDoubleValue();
+                menuBackground.Opacity = opacity.ToDouble();
             }
 
             // надписи на языковых кнопках
@@ -134,6 +134,11 @@ namespace WpfClient
             createDishesCanvas(mFolders);
             AppLib.WriteLogTraceMessage(" - создаю списки блюд по категориям... READY");
 
+            // анимация выбора блюда
+            AppLib.WriteLogTraceMessage(" - создаю Объекты анимации выбора блюда...");
+            createObjectsForDishAnimation();
+            AppLib.WriteLogTraceMessage(" - создаю Объекты анимации выбора блюда... READY");
+
             lstMenuFolders.Focus();
             lstMenuFolders.ItemsSource = mFolders;
             lstMenuFolders.SelectedIndex = 0;
@@ -141,13 +146,8 @@ namespace WpfClient
             // установить язык UI
             selectAppLang(AppLib.AppLang);
 
-            // анимация выбора блюда
-            AppLib.WriteLogTraceMessage(" - создаю Объекты анимации выбора блюда...");
-            createObjectsForDishAnimation();
-            AppLib.WriteLogTraceMessage(" - создаю Объекты анимации выбора блюда... READY");
-
             // выключить курсор мыши
-            if (AppLib.GetAppSetting("MouseCursor").IsTrueString() == false)
+            if (AppLib.GetAppSetting("MouseCursor").ToBool() == false)
             {
                 this.Cursor = Cursors.None;
                 Mouse.OverrideCursor = Cursors.None;
@@ -162,7 +162,7 @@ namespace WpfClient
             if (v == null) return;
 
             // стиль содержания пункта меню
-            bool isScrollingList = AppLib.GetAppSetting("IsAllowScrollingDishCategories").IsTrueString();
+            bool isScrollingList = AppLib.GetAppSetting("IsAllowScrollingDishCategories").ToBool();
             // без скроллинга, поэтому настраиваем поля и отступы
             // если категорий меньше 6, то оставляем по умолчанию, из разметки
             if (isScrollingList == false)
@@ -225,7 +225,6 @@ namespace WpfClient
             foreach (AppModel.MenuItem mItem in mFolders)
             {
                 MainMenuDishesCanvas canvas = new MainMenuDishesCanvas(mItem);
-
                 _dishCanvas.Add(canvas);
             }
         }  // createDishesCanvas
@@ -414,9 +413,18 @@ namespace WpfClient
 
             // для анимации фона с ценой заказа
             _animOrderPriceBackgroundColor = new ColorAnimation(Colors.Magenta, TimeSpan.FromMilliseconds(50), FillBehavior.Stop) { AutoReverse = true, RepeatBehavior = new RepeatBehavior(5) };
+            //  сохранить анимацию в App.Properties
+            AppLib.SetAppGlobalValue("AddDishButtonBackgroundColorAnimation", _animOrderPriceBackgroundColor);
+            // анимация любого текста: размера и размытие
+            AppLib.SetAppGlobalValue("AddDishButtonTextAnimation", new TextAnimation()
+            {
+                IsAnimFontSize = true, DurationFontSize = 200, FontSizeKoef = 1.2, RepeatBehaviorFontSize = 3,
+                IsAnimTextBlur = false, DurationTextBlur = 200, TextBlurTo = 10,  RepeatBehaviorTextBlur = 3
+            });
+
             _orderPriceEffectShadow = new DropShadowEffect() { Direction = 315, Color = Colors.DarkGreen, ShadowDepth = 5, BlurRadius = 10 };
             _orderPriceEffectBlur = new BlurEffect() { Radius = 0 };
-            txtOrderPrice.Effect = _orderPriceEffectShadow;
+            //txtOrderPrice.Effect = _orderPriceEffectShadow;
             Color c = ((SolidColorBrush)Application.Current.Resources["cartButtonBackgroundColor"]).Color;
             brdMakeOrder.Background = new SolidColorBrush(c); //Do not use a frozen instance  (Colors.Orange)
         }
@@ -500,7 +508,7 @@ namespace WpfClient
         private void _daCommon2_Completed(object sender, EventArgs e)
         {
             _daCommon2.Completed -= _daCommon2_Completed;
-            txtOrderPrice.Effect = _orderPriceEffectShadow;
+            //txtOrderPrice.Effect = _orderPriceEffectShadow;
         }
 
         #endregion

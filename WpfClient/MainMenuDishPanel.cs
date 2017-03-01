@@ -42,10 +42,15 @@ namespace WpfClient
         private SolidColorBrush _brushSelectedItem;
 
         private Border _btnAddDish;
+        private TextBlock _btnAddDishTextBlock;
         private Border _btnInvitation;
+        // размер шрифтов
+        private double _dishPanelAddButtoFontSize;
 
         // раскадровки для анимации описания
         private Storyboard _sbDescrShow, _sbDescrHide;
+        // прочие анимации
+        DoubleAnimation _daAddBtnShow, _daAddBtnHide;
 
         #endregion
 
@@ -61,6 +66,7 @@ namespace WpfClient
             _hasGarnishes = (_dishItem.Garnishes != null);
             currentPanelHeight = (_hasGarnishes) ? (double)AppLib.GetAppGlobalValue("dishPanelHeightWithGarnish") : (double)AppLib.GetAppGlobalValue("dishPanelHeight");
             _brushSelectedItem = (SolidColorBrush)AppLib.GetAppGlobalValue("appSelectedItemColor");
+            _dishPanelAddButtoFontSize = Convert.ToDouble(AppLib.GetAppGlobalValue("dishPanelAddButtoFontSize"));
 
             // декоратор для панели блюда (должен быть для корректной работы ручного скроллинга)
             setDishPanel();
@@ -87,6 +93,10 @@ namespace WpfClient
             }
 
             base.Children.Add(dGrid); Grid.SetRow(dGrid, 1); Grid.SetColumn(dGrid, 1);
+
+            _daAddBtnShow = new DoubleAnimation(0d, 1d, TimeSpan.FromMilliseconds(300));
+            _daAddBtnHide = new DoubleAnimation(1d, 0d, TimeSpan.FromMilliseconds(300));
+            _daAddBtnShow.Completed += _daOpacity_Completed;
         }
 
 
@@ -227,6 +237,7 @@ namespace WpfClient
             _pathImage.Data = new RectangleGeometry(rect, dishImageCornerRadius, dishImageCornerRadius);
             _dishImageBrush = new ImageBrush() { ImageSource = _dishItem.Image };
             _pathImage.Fill = _dishImageBrush;
+            _pathImage.PreviewMouseLeftButtonUp += CanvDescr_PreviewMouseLeftButtonUp;
             //pathImage.Effect = new DropShadowEffect();
             // добавить в контейнер
             Grid.SetRow(_pathImage, 2); dGrid.Children.Add(_pathImage);
@@ -311,7 +322,12 @@ namespace WpfClient
             _grdGarnishes.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(grnColWidth, GridUnitType.Pixel) });
             _grdGarnishes.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(grnColWidth, GridUnitType.Pixel) });
 
+            Brush notSelTextBrush = AppLib.GetSolidColorBrushFromAppProps("dishPanelGarnishTextColor", Brushes.Black);
+            Brush selTextBrush = AppLib.GetSolidColorBrushFromAppProps("dishPanelGarnishSelectTextColor", Brushes.Black);
+
             MainMenuGarnish grdGarn = new MainMenuGarnish(_dishItem, 0, grnH, grnW, dGrid);
+            grdGarn.NotSelectedTextBrush = notSelTextBrush;
+            grdGarn.SelectedTextBrush = selTextBrush;
             grdGarn.HorizontalAlignment = HorizontalAlignment.Left;
             grdGarn.SetValue(Grid.ColumnProperty, 0);
             grdGarn.SelectGarnish += GrdGarn_SelectGarnish;
@@ -320,6 +336,8 @@ namespace WpfClient
             if (_dishItem.Garnishes.Count >= 2)
             {
                 grdGarn = new MainMenuGarnish(_dishItem, 1, grnH, grnW, dGrid);
+                grdGarn.NotSelectedTextBrush = notSelTextBrush;
+                grdGarn.SelectedTextBrush = selTextBrush;
                 grdGarn.HorizontalAlignment = HorizontalAlignment.Center;
                 grdGarn.SetValue(Grid.ColumnProperty, 1);
                 grdGarn.SelectGarnish += GrdGarn_SelectGarnish;
@@ -328,6 +346,8 @@ namespace WpfClient
             if (_dishItem.Garnishes.Count >= 3)
             {
                 grdGarn = new MainMenuGarnish(_dishItem, 2, grnH, grnW, dGrid);
+                grdGarn.NotSelectedTextBrush = notSelTextBrush;
+                grdGarn.SelectedTextBrush = selTextBrush;
                 grdGarn.HorizontalAlignment = HorizontalAlignment.Right;
                 grdGarn.SetValue(Grid.ColumnProperty, 2);
                 grdGarn.SelectGarnish += GrdGarn_SelectGarnish;
@@ -337,7 +357,7 @@ namespace WpfClient
             Grid.SetRow(_grdGarnishes, 4); dGrid.Children.Add(_grdGarnishes);
 
         }  // method
-
+        
 
         // ******* Выбор гарнира *********
         // здесь возможно три состояния:
@@ -365,12 +385,13 @@ namespace WpfClient
                 MainMenuGarnish currentGarnItem = (MainMenuGarnish)sender;
                 currentGarnItem.IsSelected = true;
 
-                setAddButtonState(true);
                 this._selectedGarnIndex = e.GarnishIndex;
                 // изменить изображение блюда с гарниром
                 if (_pathImage != null) _pathImage.Fill = currentGarnItem.DishWithGarnishImageBrush;
                 // изменить описание блюда
                 if (string.IsNullOrEmpty(e.DishWithGarnishDescription) == false) _descrText.Text = e.DishWithGarnishDescription;
+
+                setAddButtonState(true);
             }
 
             // снять выделение с текущего гарнира
@@ -390,14 +411,70 @@ namespace WpfClient
             if (_hasGarnishes == false) return;
             if (isActive == true)
             {
-                _btnAddDish.Visibility = Visibility.Visible;
-                _btnInvitation.Visibility = Visibility.Hidden;
+                // _btnAddDish.Visibility = Visibility.Visible;
+                // _btnInvitation.Visibility = Visibility.Hidden;
+                if (_btnAddDish.Opacity == 0)
+                {
+                    _btnAddDish.BeginAnimation(UIElement.OpacityProperty, _daAddBtnShow);
+                    _btnInvitation.BeginAnimation(UIElement.OpacityProperty, _daAddBtnHide);
+                }
+                else
+                {
+                    animateAddButtonAfterSelectGarnish();
+                }
             }
-            else
+            else if ((isActive == false) && (_btnAddDish.Opacity == 1))
             {
-                _btnAddDish.Visibility = Visibility.Hidden;
-                _btnInvitation.Visibility = Visibility.Visible;
+                // _btnAddDish.Visibility = Visibility.Hidden;
+                // _btnInvitation.Visibility = Visibility.Visible;
+                _btnAddDish.BeginAnimation(UIElement.OpacityProperty, _daAddBtnHide);
+                _btnInvitation.BeginAnimation(UIElement.OpacityProperty, _daAddBtnShow);
             }
+        }  // method
+
+        private void _daOpacity_Completed(object sender, EventArgs e)
+        {
+            animateAddButtonAfterSelectGarnish();
+        }
+
+        private void animateAddButtonAfterSelectGarnish()
+        {
+            if (this._selectedGarnIndex == 0)
+            {
+                // анимация кнопки Добавить
+                ColorAnimation animBCol = (ColorAnimation)AppLib.GetAppGlobalValue("AddDishButtonBackgroundColorAnimation");
+                if (animBCol != null)
+                {
+                    _btnAddDish.Background.BeginAnimation(SolidColorBrush.ColorProperty, animBCol);
+                }
+            }
+            else if (this._selectedGarnIndex == 1)
+            {
+                TextAnimation tAnim = new TextAnimation()
+                {
+                    IsAnimFontSize = true, DurationFontSize = 200, FontSizeKoef = 1.2, RepeatBehaviorFontSize = 3,
+                    IsAnimTextBlur = false
+                };
+
+                tAnim.BeginAnimation(_btnAddDishTextBlock, _dishPanelAddButtoFontSize);
+            }
+            else if (this._selectedGarnIndex == 2)
+            {
+                // анимация кнопки Добавить
+                ColorAnimation animBCol = (ColorAnimation)AppLib.GetAppGlobalValue("AddDishButtonBackgroundColorAnimation");
+                if (animBCol != null)
+                {
+                    _btnAddDish.Background.BeginAnimation(SolidColorBrush.ColorProperty, animBCol);
+                }
+                TextAnimation tAnim = new TextAnimation()
+                {
+                    IsAnimFontSize = true, DurationFontSize = 200, FontSizeKoef = 1.2, RepeatBehaviorFontSize = 3,
+                    IsAnimTextBlur = false
+                };
+
+                tAnim.BeginAnimation(_btnAddDishTextBlock, _dishPanelAddButtoFontSize);
+            }
+
         }  // method
 
         public void ClearSelectedGarnish()
@@ -447,8 +524,6 @@ namespace WpfClient
             // высота строки кнопки добавления
             double dishPanelAddButtonRowHeight = (double)AppLib.GetAppGlobalValue("dishPanelAddButtonRowHeight");
             double cornerRadiusButton = (double)AppLib.GetAppGlobalValue("cornerRadiusButton");
-            // размер шрифтов
-            double dishPanelAddButtoFontSize = Convert.ToDouble(AppLib.GetAppGlobalValue("dishPanelAddButtoFontSize"));
 
             // размеры тени под кнопками (от высоты самой кнопки, dishPanelAddButtonHeight)
             double addButtonShadowDepth = 0.1d * dishPanelAddButtonRowHeight;
@@ -477,13 +552,13 @@ namespace WpfClient
             };
             _btnAddDish.PreviewMouseLeftButtonUp += BtnAddDish_PreviewMouseLeftButtonUp;
 
-            TextBlock tbText = new TextBlock()
+            _btnAddDishTextBlock = new TextBlock()
             {
                 Name = "tbAdd",
                 Text = (string)AppLib.GetLangText((Dictionary<string, string>)AppLib.GetAppGlobalValue("btnSelectDishText")),
                 VerticalAlignment = VerticalAlignment.Center,
                 HorizontalAlignment = HorizontalAlignment.Center,
-                FontSize = dishPanelAddButtoFontSize,
+                FontSize = _dishPanelAddButtoFontSize,
                 Foreground = Brushes.White
             };
 
@@ -507,16 +582,17 @@ namespace WpfClient
                     Text = string.Format((string)AppLib.GetAppResource("priceFormatString"), _dishItem.Price),
                     VerticalAlignment = VerticalAlignment.Center,
                     HorizontalAlignment = HorizontalAlignment.Center,
-                    FontSize = dishPanelAddButtoFontSize,
+                    FontSize = _dishPanelAddButtoFontSize,
                     Foreground = Brushes.White
                 };
                 brdPrice.Child = tbPrice;
                 Grid.SetColumn(brdPrice, 0); grdPrice.Children.Add(brdPrice);
 
-                Grid.SetColumn(tbText, 1); grdPrice.Children.Add(tbText);
+                Grid.SetColumn(_btnAddDishTextBlock, 1); grdPrice.Children.Add(_btnAddDishTextBlock);
                 _btnAddDish.Child = grdPrice;
 
-                Grid.SetRow(_btnAddDish, 4); dGrid.Children.Add(_btnAddDish);
+                Grid.SetRow(_btnAddDish, 4);
+                dGrid.Children.Add(_btnAddDish);
             }
 
             else   // Воки
@@ -540,18 +616,19 @@ namespace WpfClient
                     Text = (string)AppLib.GetLangText((Dictionary<string, string>)AppLib.GetAppGlobalValue("btnSelectGarnishText")),
                     VerticalAlignment = VerticalAlignment.Center,
                     HorizontalAlignment = HorizontalAlignment.Center,
-                    FontSize = dishPanelAddButtoFontSize,
+                    FontSize = _dishPanelAddButtoFontSize,
                     Foreground = Brushes.Gray
                 };
                 _btnInvitation.Child = tbInvitation;
 
-                _btnAddDish.Child = tbText; _btnAddDish.SetValue(Grid.RowProperty, 6);
-                _btnAddDish.Visibility = Visibility.Hidden;
-                dGrid.Children.Add(_btnAddDish);
-
                 // добавить в контейнер
                 _btnInvitation.Child = tbInvitation; _btnInvitation.SetValue(Grid.RowProperty, 6);
                 dGrid.Children.Add(_btnInvitation);
+
+                _btnAddDish.Child = _btnAddDishTextBlock; _btnAddDish.SetValue(Grid.RowProperty, 6);
+                //_btnAddDish.Visibility = Visibility.Hidden;
+                _btnAddDish.Opacity = 0;
+                dGrid.Children.Add(_btnAddDish);
             }
 
         }  // method

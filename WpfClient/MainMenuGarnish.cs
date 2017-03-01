@@ -16,9 +16,15 @@ namespace WpfClient
     public class MainMenuGarnish: Grid
     {
         private bool _isSelected;
-        private Brush _selectBrush;
-        private Brush _notSelectBrush;
+        
+        // кисти фона
+        private Brush _selectBackgroundBrush;
+        private Brush _notSelectBackgroundBrush;
+        // кисти текста
         private Brush _selectTextBrush;
+        private Brush _notSelectTextBrush;
+
+
         double _fontSize, _fontSizeUp;
 
         private double _height, _width;
@@ -42,6 +48,10 @@ namespace WpfClient
         }
 
         public ImageBrush DishWithGarnishImageBrush;
+        public Brush SelectedBackgroundBrush { get { return _selectBackgroundBrush; } set { _selectBackgroundBrush = value; } }
+        public Brush NotSelectedBackgroundBrush { get { return _notSelectBackgroundBrush; } set { _notSelectBackgroundBrush = value; } }
+        public Brush SelectedTextBrush { get { return _selectTextBrush; } set { _selectTextBrush = value; } }
+        public Brush NotSelectedTextBrush { get { return _notSelectTextBrush; } set { _notSelectTextBrush = value; } }
 
         public event EventHandler<SelectGarnishEventArgs> SelectGarnish;
 
@@ -58,9 +68,10 @@ namespace WpfClient
             _fontSize = (double)AppLib.GetAppGlobalValue("appFontSize5");
             _fontSizeUp = (double)AppLib.GetAppGlobalValue("appFontSize4");
 
-            _selectBrush = (Brush)AppLib.GetAppGlobalValue("appSelectedItemColor");
-            _notSelectBrush = (Brush)AppLib.GetAppGlobalValue("garnishBackgroundColor");
+            _selectBackgroundBrush = (Brush)AppLib.GetAppGlobalValue("appSelectedItemColor");
+            _notSelectBackgroundBrush = (Brush)AppLib.GetAppGlobalValue("garnishBackgroundColor");
             _selectTextBrush = (Brush)AppLib.GetAppGlobalValue("addButtonBackgroundPriceColor");
+            _notSelectTextBrush = Brushes.Black;
             //_shadow = new DropShadowEffect() { BlurRadius = 5, Opacity = 0.5, ShadowDepth = 1 };
 
             _isSelected = false;
@@ -91,7 +102,7 @@ namespace WpfClient
         {
             _pathSelected.Visibility = (_isSelected) ? Visibility.Visible : Visibility.Collapsed;
 
-            _tbGarnishName.Foreground = (_isSelected) ? Brushes.Black : Brushes.White;
+            _tbGarnishName.Foreground = (_isSelected) ? _selectTextBrush : _notSelectTextBrush;
             _tbGarnishName.FontWeight = (_isSelected) ? FontWeights.Bold : FontWeights.Normal;
 
             _tbGarnishPrice.FontSize = (_isSelected) ? 1.1 * _fontSize : _fontSize;
@@ -126,6 +137,8 @@ namespace WpfClient
             //{
             _pathBase.Fill = new ImageBrush() { ImageSource = _garnItem.Image };
             _pathBase.Stretch = Stretch.UniformToFill;
+            string sVal = (string)AppLib.GetAppGlobalValue("dishPanelGarnishBrightness");
+            _pathBase.Opacity = (sVal == null) ? 1.0 : sVal.ToDouble();
             //}
             base.Children.Add(_pathBase);
 
@@ -148,7 +161,7 @@ namespace WpfClient
                 TextAlignment = TextAlignment.Center,
                 FontSize = _fontSize,
                 Margin = new Thickness(dMarg),
-                Foreground = Brushes.White
+                Foreground = _notSelectTextBrush
             };
             base.Children.Add(_tbGarnishName);
 

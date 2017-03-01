@@ -82,7 +82,6 @@ namespace WpfClient
                 try
                 {
                     AppLib.ReadSettingFromDB();
-                    //  DEBUG
                     AppLib.ReadAppDataFromDB();
                 }
                 catch (Exception)

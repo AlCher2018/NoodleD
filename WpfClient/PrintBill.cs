@@ -159,7 +159,7 @@ namespace WpfClient
                     // если DishFullNameInGargnish = true, то полное имя берем из гарнира, 
                     // иначе к имени блюда добавляем имя гарнира
                     string s = AppLib.GetAppSetting("DishFullNameInGarnish");
-                    if (s != null && s.IsTrueString())
+                    if (s != null && s.ToBool())
                         itemName = garnName;
                     else
                         itemName += " " + AppLib.GetLangTextFromAppProp("withGarnish") + " " + garnName;

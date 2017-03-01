@@ -52,7 +52,7 @@ namespace WpfClient
             double dBuf = 0f, retVal = 0f;
             string sParam = parameter.ToString();
 
-            dBuf = sParam.GetDoubleValue();
+            dBuf = sParam.ToDouble();
 
             retVal = dBuf * System.Convert.ToDouble(value);
             if ((retVal == 0) && (DefaultValue != 0)) retVal = DefaultValue;
@@ -191,10 +191,10 @@ namespace WpfClient
             string[] param = ((string)parameter).Split(',');
             double left = 0.0, top = 0.0, right = 0.0, bottom = 0.0, val = (double)value;
 
-            left = param[0].GetDoubleValue() * val;
-            top = param[1].GetDoubleValue() * val;
-            right = param[2].GetDoubleValue() * val;
-            bottom = param[3].GetDoubleValue() * val;
+            left = param[0].ToDouble() * val;
+            top = param[1].ToDouble() * val;
+            right = param[2].ToDouble() * val;
+            bottom = param[3].ToDouble() * val;
 
             return new Thickness(left,top,right,bottom);
         }

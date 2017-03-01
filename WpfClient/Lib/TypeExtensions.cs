@@ -7,9 +7,29 @@ using System.Windows.Media.Imaging;
 
 namespace WpfClient
 {
+
     public static class StringExtensions
     {
-        public static double GetDoubleValue(this string sParam)
+        // convert string to bool
+        public static bool ToBool(this string source)
+        {
+            bool retValue = false;
+            if (string.IsNullOrEmpty(source)) return retValue;
+
+            string sLower = source.ToLower();
+
+            if (sLower.Equals("true") || sLower.Equals("да"))
+                retValue = true;
+            else
+            {
+                int iBuf = 0;
+                if (int.TryParse(source, out iBuf) == true) retValue = (iBuf != 0);
+            }
+
+            return retValue;
+        }  // method
+
+        public static double ToDouble(this string sParam)
         {
             double retVal = 0;
             double.TryParse(sParam, out retVal);
@@ -22,15 +42,21 @@ namespace WpfClient
             return retVal;
         }
 
-        public static bool IsTrueString(this string src)
+        public static int ToInt(this string source)
         {
-            if (string.IsNullOrEmpty(src) == true) return false;
+            if (source == null) return 0;
 
-            string s = src.ToUpper();
-            return (s.Equals("ИСТИНА") || s.Equals("TRUE") || s.Equals("1"));
+            List<char> chList = new List<char>();
+            foreach (char c in source)
+            {
+                if (System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) == System.Globalization.UnicodeCategory.DecimalDigitNumber) chList.Add(c);
+            }
+            return (chList.Count > 0) ? int.Parse(string.Join("", chList.ToArray())) : 0;
         }
 
-    }
+    } // class
+
+
 
     // расширения класса System.Windows.Media.ImageSource / System.Windows.Controls.Image
     public static class BitmapImageExtensions

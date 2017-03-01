@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
 using System.Windows.Shapes;
 
@@ -17,6 +18,7 @@ namespace WpfClient
     public class MainMenuDishesCanvas: Canvas
     {
         AppModel.MenuItem mItem;
+
 
         public MainMenuDishesCanvas(AppModel.MenuItem menuItem)
         {
@@ -56,7 +58,7 @@ namespace WpfClient
                 topPos = iRow * currentPanelHeight;
 
                 MainMenuDishPanel dishPanel = new MainMenuDishPanel(dish, leftPos, topPos);
-                
+
                 base.Children.Add(dishPanel);
 
             }  // for dishes

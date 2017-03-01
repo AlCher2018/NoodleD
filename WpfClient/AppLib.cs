@@ -340,6 +340,8 @@ namespace WpfClient
             saveAppSettingToProps("dishPanelDescriptionFontSize", typeof(int));
             saveAppSettingToProps("dishPanelAddButtoFontSize", typeof(int));
             saveAppSettingToProps("dishPanelFontSize", typeof(int));
+            saveAppSettingToProps("dishPanelGarnishBrightness");
+            
             saveAppSettingToPropTypeBool("IsPrintBarCode");
             saveAppSettingToPropTypeBool("IsIncludeBarCodeLabel");
             saveAppSettingToPropTypeBool("isAnimatedSelectVoki");
@@ -372,7 +374,7 @@ namespace WpfClient
             if (settingValue == null) return;
 
             // если значение истина, true или 1, то сохранить в свойствах приложения True, иначе False
-            if (settingValue.IsTrueString() == true)
+            if (settingValue.ToBool() == true)
                 AppLib.SetAppGlobalValue(settingName, true);
             else
                 AppLib.SetAppGlobalValue(settingName, false);
@@ -482,6 +484,23 @@ namespace WpfClient
                 Application.Current.Resources[setName] = bProp;   // то переопределить ресурсную кисть
             }
         }
+
+        public static Brush GetSolidColorBrushFromAppProps(string propName, Brush defaultBrush)
+        {
+            string sProp = (string)GetAppSetting(propName);
+            if (sProp == null)
+            {
+                return defaultBrush;
+            }
+            else
+            {
+                var color = ColorConverter.ConvertFromString(sProp);
+                if (color == null) return defaultBrush;
+                else return new SolidColorBrush((Color)color);
+            }
+
+        }
+
         private static Dictionary<string, string> getLangTextDict(List<StringValue> stringTable, Guid rowGuid, int fieldTypeId)
         {
             Dictionary<string, string> retVal = new Dictionary<string, string>();
