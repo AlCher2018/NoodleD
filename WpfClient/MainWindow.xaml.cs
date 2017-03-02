@@ -127,11 +127,6 @@ namespace WpfClient
             List<AppModel.MenuItem> mFolders = (List<AppModel.MenuItem>)AppLib.GetAppGlobalValue("mainMenu");
             if (mFolders == null) return;
 
-            // создать список категорий блюд
-            AppLib.WriteLogTraceMessage(" - создаю список категорий блюд...");
-            createCategoriesList();
-            AppLib.WriteLogTraceMessage(" - создаю список категорий блюд... READY");
-
             AppLib.WriteLogTraceMessage(" - создаю списки блюд по категориям...");
             // создать канву со списком блюд
             createDishesCanvas(mFolders);
@@ -163,8 +158,9 @@ namespace WpfClient
         {
             AppLib.WriteLogTraceMessage("Настраиваю дизайн приложения...");
 
-            double pnlHeight = (double)AppLib.GetAppGlobalValue("categoriesPanelHeight");
             double pnlWidth = (double)AppLib.GetAppGlobalValue("categoriesPanelWidth");
+            double pnlHeight = (double)AppLib.GetAppGlobalValue("categoriesPanelHeight");
+            double lstFldWidth, lstFldHeight;
 
             //clearMenuSideLayout();
 
@@ -188,6 +184,9 @@ namespace WpfClient
                 imageLogo.Margin = new Thickness(0.25 * d1);
                 gridLang.Margin = new Thickness(0, 0.2 * d1, 0, 0.4 * d1);
 
+                lstFldWidth = pnlWidth;
+                lstFldHeight = 0.33 * pnlHeight;
+
                 //// панель меню на всю ширину экрана
                 ////    logo+gridLang+promo
                 //gridMenuSide.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(25d / 90d * pnlHeight, GridUnitType.Pixel) });
@@ -204,6 +203,7 @@ namespace WpfClient
                 ////gridMenuSideSub1.Children.Add(imageLogo); Grid.SetColumn(imageLogo, 0);
                 ////gridMenuSideSub1.Children.Add(gridLang); Grid.SetColumn(gridLang, 1);
                 ////gridMenuSideSub1.Children.Add(gridPromoCode); Grid.SetColumn(gridPromoCode, 2);
+
 
                 //Grid.SetRow(lstMenuFolders, 1);
                 //Grid.SetRow(brdMakeOrder, 2);
@@ -251,7 +251,10 @@ namespace WpfClient
                 setLngInnerBtnSizes(btnLangRuInner, dLangSize);
                 setLngInnerBtnSizes(btnLangEnInner, dLangSize);
 
-//                lstMenuFolders.Height = 8 * dH;
+                lstFldWidth = pnlWidth;
+                lstFldHeight = 8d * dH;
+                lstMenuFolders.Margin = new Thickness(0, 0.01 * lstFldHeight, 0, 0.01 * lstFldHeight);
+                lstFldHeight *= 0.98;
 
                 gridPromoCode.Height = 0.6 * dH;
                 gridPromoCode.Margin = new Thickness(0, 0, 0, 0.4 * dH);
@@ -261,6 +264,11 @@ namespace WpfClient
                 //pnlHeight = (double)AppLib.GetAppGlobalValue("dishesPanelHeight");
                 //gridDishesSide.Height = pnlHeight; gridDishesSide.Width = pnlWidth;
             }
+
+            // создать список категорий блюд
+            AppLib.WriteLogTraceMessage(" - создаю список категорий блюд...");
+            createCategoriesList(lstFldWidth, lstFldHeight);
+            AppLib.WriteLogTraceMessage(" - создаю список категорий блюд... READY");
 
             AppLib.WriteLogTraceMessage("Настраиваю дизайн приложения... READY");
         }  // method
@@ -291,49 +299,59 @@ namespace WpfClient
             //gridMenuSideSub1.Children.Clear();
         }
 
-        private void createCategoriesList()
+        private void createCategoriesList(double pnlWidth, double pnlHeight)
         {
-            var v = AppLib.GetAppGlobalValue("mainMenu");
-            if (v == null) return;
+            List<AppModel.MenuItem> mFolders = (List<AppModel.MenuItem>)AppLib.GetAppGlobalValue("mainMenu");
+            if (mFolders == null) return;
+
+            bool isScrollingList = AppLib.GetAppSetting("IsAllowScrollingDishCategories").ToBool();
+            // кол-во пунктов для расчета из размера
+            int iCount = (isScrollingList == true)? 6: mFolders.Count;
+            if (iCount < 6) iCount = 6;
 
             // стиль содержания пункта меню
-            bool isScrollingList = AppLib.GetAppSetting("IsAllowScrollingDishCategories").ToBool();
-            // без скроллинга, поэтому настраиваем поля и отступы
-            // если категорий меньше 6, то оставляем по умолчанию, из разметки
-            if (isScrollingList == false)
-            {
-                List<AppModel.MenuItem> mFolders = (List<AppModel.MenuItem>)v;
-                int iCatCount = mFolders.Count;
-                if (iCatCount > 6)
-                {
-                    Style brdStyle = (Style)this.Resources["menuItemStyle"];
-                    Style imgStyle = (Style)this.Resources["menuItemImageStyle"];
-                    Style txtStyle = (Style)this.Resources["menuItemTextStyle"];
+            Style brdStyle = (Style)this.Resources["menuItemStyle"];
+            Style imgStyle = (Style)this.Resources["menuItemImageStyle"];
+            Style txtStyle = (Style)this.Resources["menuItemTextStyle"];
 
-                    double listWidth = (double)AppLib.GetAppGlobalValue("categoriesPanelWidth");
-                    double listHeight = getHeightCatList();
-                    listHeight *= (double)AppLib.GetAppGlobalValue("screenHeight");
-                    double itemHeight = listHeight / iCatCount;
-                    double marginBase = 0.09 * itemHeight;
-                    double imageSize = 0.6 * itemHeight;
-                    double txtFontSize = 0.3 * itemHeight;
+            double itemHeight = pnlHeight / iCount;
+            double marginBase = 0.1 * itemHeight;
+            double imageSize = 0.4 * itemHeight;
+            double txtFontSize = 0.25 * itemHeight;
+            Setter st; Thickness th;
 
-                    // поле вокруг рамки
-                    SetterBase sb = brdStyle.Setters.FirstOrDefault(s => (s as Setter).Property.Name == "Margin");
-                    if (sb != null) (sb as Setter).Value = new Thickness(marginBase, 0, marginBase, 1.5 * marginBase);
-                    // отступ внутри рамки
-                    sb = brdStyle.Setters.FirstOrDefault(s => (s as Setter).Property.Name == "Padding");
-                    if (sb != null) (sb as Setter).Value = new Thickness(marginBase, marginBase, marginBase, marginBase);
-                    // размер изображения категории
-                    sb = imgStyle.Setters.FirstOrDefault(s => (s as Setter).Property.Name == "Width");
-                    if (sb != null) (sb as Setter).Value = imageSize;
-                    sb = imgStyle.Setters.FirstOrDefault(s => (s as Setter).Property.Name == "Height");
-                    if (sb != null) (sb as Setter).Value = imageSize;
-                    // размер текста
-                    sb = txtStyle.Setters.FirstOrDefault(s => (s as Setter).Property.Name == "FontSize");
-                    if (sb != null) (sb as Setter).Value = txtFontSize;
-                }  // if
-            }  // else
+            // поле вокруг рамки
+            th = new Thickness(marginBase, 0, marginBase, 1.4 * marginBase);
+            st = (Setter)brdStyle.Setters.FirstOrDefault(s => (s as Setter).Property.Name == "Margin");
+            if (st == null)
+                brdStyle.Setters.Add(new Setter(ListBoxItem.MarginProperty, th));
+            else
+                st.Value = th;
+            // отступ внутри рамки
+            th = new Thickness(0, 2.0 * marginBase, 0, 2.0 * marginBase);
+            st = (Setter)brdStyle.Setters.FirstOrDefault(s => (s as Setter).Property.Name == "Padding");
+            if (st == null)
+                brdStyle.Setters.Add(new Setter(ListBoxItem.PaddingProperty, th));
+            else
+                (st as Setter).Value = th;
+            // размер изображения категории
+            st = (Setter)imgStyle.Setters.FirstOrDefault(s => (s as Setter).Property.Name == "Width");
+            if (st == null)
+                imgStyle.Setters.Add(new Setter(Image.WidthProperty, imageSize));
+            else
+                st.Value = imageSize;
+            st = (Setter)imgStyle.Setters.FirstOrDefault(s => (s as Setter).Property.Name == "Height");
+            if (st == null)
+                imgStyle.Setters.Add(new Setter(Image.HeightProperty, imageSize));
+            else
+                st.Value = imageSize;
+            // размер текста
+            st = (Setter)txtStyle.Setters.FirstOrDefault(s => (s as Setter).Property.Name == "FontSize");
+            if (st == null)
+                txtStyle.Setters.Add(new Setter(TextBlock.FontSizeProperty, txtFontSize));
+            else
+                st.Value = txtFontSize;
+
         }  // method
 
         private double getHeightCatList()
