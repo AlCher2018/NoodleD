@@ -97,6 +97,9 @@ namespace WpfClient
 
         private void initUI()
         {
+
+            setAppLayout();
+
             AppLib.WriteLogTraceMessage("Настраиваю визуальные элементы...");
             AppLib.AppLang = AppLib.GetAppSetting("langDefault");
 
@@ -154,6 +157,138 @@ namespace WpfClient
             }
 
             AppLib.WriteLogTraceMessage("Настраиваю визуальные элементы - READY");
+        }
+
+        private void setAppLayout()
+        {
+            AppLib.WriteLogTraceMessage("Настраиваю дизайн приложения...");
+
+            double pnlHeight = (double)AppLib.GetAppGlobalValue("categoriesPanelHeight");
+            double pnlWidth = (double)AppLib.GetAppGlobalValue("categoriesPanelWidth");
+
+            //clearMenuSideLayout();
+
+            if (AppLib.IsAppVerticalLayout == true)
+            {
+                // если ширина экрана меньше его высоты, то дизайн вертикальный: меню категорий сверху
+                AppLib.WriteLogTraceMessage("\t- дизайн вертикальный");
+
+                // грид меню
+                DockPanel.SetDock(gridMenuSide, Dock.Top);
+                menuSidePanelLogo.Background = new SolidColorBrush(Color.FromRgb(0x62, 0x1C, 0x55));
+
+                gridMenuSide.Height = pnlHeight;
+                //gridMenuSide.Width = pnlWidth;
+
+                // панель меню на всю высоту экрана
+                double d1 = pnlHeight / 13d;
+
+                // stackPanel для Logo
+                menuSidePanelLogo.Orientation = Orientation.Horizontal;
+                imageLogo.Margin = new Thickness(0.25 * d1);
+                gridLang.Margin = new Thickness(0, 0.2 * d1, 0, 0.4 * d1);
+
+                //// панель меню на всю ширину экрана
+                ////    logo+gridLang+promo
+                //gridMenuSide.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(25d / 90d * pnlHeight, GridUnitType.Pixel) });
+                ////    menu  
+                //gridMenuSide.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(37d / 90d * pnlHeight, GridUnitType.Pixel) });
+                ////    order
+                //gridMenuSide.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(28d / 90d * pnlHeight, GridUnitType.Pixel) });
+
+                ////gridMenuSideSub1.Visibility = Visibility.Visible;
+                ////gridMenuSideSub1.Height = gridMenuSide.RowDefinitions[0].Height.Value;
+                ////if (gridMenuSide.Children.Contains(imageLogo) == true) gridMenuSide.Children.Remove(imageLogo);
+                ////if (gridMenuSide.Children.Contains(gridLang) == true) gridMenuSide.Children.Remove(gridLang);
+                ////if (gridMenuSide.Children.Contains(gridPromoCode) == true) gridMenuSide.Children.Remove(gridPromoCode);
+                ////gridMenuSideSub1.Children.Add(imageLogo); Grid.SetColumn(imageLogo, 0);
+                ////gridMenuSideSub1.Children.Add(gridLang); Grid.SetColumn(gridLang, 1);
+                ////gridMenuSideSub1.Children.Add(gridPromoCode); Grid.SetColumn(gridPromoCode, 2);
+
+                //Grid.SetRow(lstMenuFolders, 1);
+                //Grid.SetRow(brdMakeOrder, 2);
+
+                //// грид блюд
+                //Grid.SetRowSpan(gridDishesSide, 1);
+                //Grid.SetColumn(gridDishesSide, 0); Grid.SetRow(gridDishesSide, 1);
+                //Grid.SetColumnSpan(gridDishesSide, 2);
+                //pnlWidth = (double)AppLib.GetAppGlobalValue("dishesPanelWidth");
+                //pnlHeight = (double)AppLib.GetAppGlobalValue("dishesPanelHeight");
+                //gridDishesSide.Height = pnlHeight; gridDishesSide.Width = pnlWidth;
+            }
+
+            // иначе дизайн горизонтальный: меню категорий справа
+            else
+            {
+                AppLib.WriteLogTraceMessage("\t- дизайн горизонтальный");
+                DockPanel.SetDock(gridMenuSide, Dock.Left);
+                menuSidePanelLogo.Background = (Brush)AppLib.GetAppGlobalValue("appBackgroundColor");
+
+                // грид меню
+                //gridMenuSide.Height = pnlHeight;
+                gridMenuSide.Width = pnlWidth;
+
+                // панель меню на всю высоту экрана
+                double dH = pnlHeight / 13d;
+                gridMenuSide.RowDefinitions[0].Height = new GridLength(2.2 * dH);
+                gridMenuSide.RowDefinitions[1].Height = new GridLength(8.0 * dH);
+                gridMenuSide.RowDefinitions[2].Height = new GridLength(1.0 * dH);
+                gridMenuSide.RowDefinitions[3].Height = new GridLength(1.8 * dH);
+
+                // stackPanel для Logo
+                menuSidePanelLogo.Orientation = Orientation.Vertical;
+                imageLogo.Height = dH;
+                imageLogo.Margin = new Thickness(0.07 * pnlWidth, 0, 0.07 * pnlWidth, 0);
+                gridLang.Height = 1.2 * dH;
+
+                // фон для внешних Border, чтобы они были кликабельные
+                btnLangUa.Background = menuSidePanelLogo.Background;
+                btnLangRu.Background = menuSidePanelLogo.Background;
+                btnLangEn.Background = menuSidePanelLogo.Background;
+                double dMin = Math.Min(gridLang.Height, pnlWidth / (0.2 + 1.0 + 0.2 + 1.0 + 0.2 + 1.0 + 0.2));
+                double dLangSize = 0.6 * dMin;
+                setLngInnerBtnSizes(btnLangUaInner, dLangSize);
+                setLngInnerBtnSizes(btnLangRuInner, dLangSize);
+                setLngInnerBtnSizes(btnLangEnInner, dLangSize);
+
+//                lstMenuFolders.Height = 8 * dH;
+
+                gridPromoCode.Height = 0.6 * dH;
+                gridPromoCode.Margin = new Thickness(0, 0, 0, 0.4 * dH);
+
+                //// грид блюд
+                //pnlWidth = (double)AppLib.GetAppGlobalValue("dishesPanelWidth");
+                //pnlHeight = (double)AppLib.GetAppGlobalValue("dishesPanelHeight");
+                //gridDishesSide.Height = pnlHeight; gridDishesSide.Width = pnlWidth;
+            }
+
+            AppLib.WriteLogTraceMessage("Настраиваю дизайн приложения... READY");
+        }  // method
+
+        private void setLngInnerBtnSizes(Border btnLangInner, double dLangSize)
+        {
+            double dMargin = (1.0 - dLangSize) / 2.0;
+            btnLangInner.Height = dLangSize; btnLangInner.Width = dLangSize;
+            btnLangInner.CornerRadius = new CornerRadius(dLangSize / 2.0);
+            btnLangInner.Margin = new Thickness(dMargin);
+        }
+
+        private void clearMenuSideLayout()
+        {
+            Thickness tn = new Thickness(0);
+            imageLogo.Margin = tn; gridLang.Margin = tn; lstMenuFolders.Margin = tn; gridPromoCode.Margin = tn; brdMakeOrder.Margin = tn;
+
+            Grid.SetColumn(imageLogo, 0); Grid.SetRow(imageLogo, 0);
+            Grid.SetColumn(gridLang, 0); Grid.SetRow(gridLang, 0);
+            Grid.SetColumn(lstMenuFolders, 0); Grid.SetRow(lstMenuFolders, 0);
+            Grid.SetColumn(gridPromoCode, 0); Grid.SetRow(gridPromoCode, 0);
+            Grid.SetColumn(brdMakeOrder, 0); Grid.SetRow(brdMakeOrder, 0);
+
+            gridMenuSide.ColumnDefinitions.Clear();
+            gridMenuSide.RowDefinitions.Clear();
+            //gridMenuSideSub1.ColumnDefinitions.Clear();
+            //gridMenuSideSub1.RowDefinitions.Clear();
+            //gridMenuSideSub1.Children.Clear();
         }
 
         private void createCategoriesList()

@@ -20,8 +20,6 @@
         <Style x:Key="langButtonBorderStyle" TargetType="Border">
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Control.Foreground" Value="Black"/>
-            <Setter Property="Width" Value="{Binding ActualHeight, RelativeSource={RelativeSource Self}, Mode=OneWay}"/>
-            <Setter Property="CornerRadius" Value="{Binding ActualHeight, RelativeSource={RelativeSource Self}, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.5, Mode=OneWay}"/>
         </Style>
         <Style x:Key="langButtonBorderUncheckedStyle" TargetType="Border" BasedOn="{StaticResource langButtonBorderStyle}">
             <Setter Property="BorderBrush" Value="{StaticResource appSelectedItemColor}"/>
@@ -125,14 +123,10 @@
 
     </Window.Resources>
 
-    <Grid UseLayoutRounding="True" PreviewTouchUp="Grid_TouchUp">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="5*"/>
-        </Grid.ColumnDefinitions>
+    <Grid x:Name="gridMain" UseLayoutRounding="True" PreviewTouchUp="Grid_TouchUp">
 
         <!-- канва с анимацией -->
-        <Canvas x:Name="canvasAnim" Grid.ColumnSpan="2" Background="Transparent" Panel.ZIndex="5" Visibility="Hidden">
+        <Canvas x:Name="canvasAnim" Background="Transparent" Panel.ZIndex="5" Visibility="Hidden">
             <!-- канва перемещения -->
             <Canvas x:Name="canvasDish">
                 <Canvas.RenderTransform>
@@ -165,108 +159,112 @@
             </Path>
         </Canvas>
 
-        <!--боковая панель - меню категорий блюд-->
-        <Grid x:Name="gridMenuSide" Grid.Column="0" UseLayoutRounding="True" Background="{StaticResource appBackgroundColor}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>    <!-- 0. логотип -->
-                <RowDefinition Height="0.2*"/>
-                <RowDefinition Height="0.6*"/>    <!-- 2. языковые кнопки -->
-                <RowDefinition Height="0.2*"/> 
-                <RowDefinition x:Name="rowCatList" Height="8*"/>   <!-- 4. ListBox категорий блюд -->
-                <RowDefinition Height="0.6*"/> <!-- 5. промокод -->
-                <RowDefinition Height="0.6*"/> <!-- 6. промеж.между промокодом и кн.Оформить -->
-                <RowDefinition Height="1.8*"/>   <!-- 7. цена и кнопка Оформить -->
-            </Grid.RowDefinitions>
+        <DockPanel x:Name="dockPanelMain">
             
-            <!-- логотип -->
-            <Image Grid.Row="0" Source="AppImages\logo1.png" Stretch="Uniform" Margin="20"
-                   PreviewMouseUp="Image_MouseUp"/>
+            <!--боковая панель - меню категорий блюд-->
+            <Grid x:Name="gridMenuSide" DockPanel.Dock="Left" UseLayoutRounding="True" Background="{StaticResource appBackgroundColor}" Width="100">
+                <Grid.RowDefinitions>
+                    <RowDefinition />  <!-- logo и языковые кнопки -->
+                    <RowDefinition />  <!-- ListBox категорий блюд -->
+                    <RowDefinition />  <!-- промокод -->
+                    <RowDefinition />  <!-- цена и кнопка Оформить -->
+                </Grid.RowDefinitions>
 
-            <!--горизонтальный грид языковых кнопок
-             TouchUp="lblButtonLang_TouchDown"
-            -->
-            <Grid x:Name="gridLang" Grid.Row="2">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="0.3*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="0.3*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="0.3*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="0.3*"/>
-                </Grid.ColumnDefinitions>
-                <Border x:Name="btnLangUa" Grid.Column="1" Background="{StaticResource appBackgroundColor}" 
-                        MouseDown="lblButtonLang_MouseDown" MouseUp="lblButtonLang_MouseUp"
-                        TouchDown="btnLang_TouchDown" TouchUp="btnLang_TouchUp"
-                        >
-                    <Border x:Name="btnLangUaInner" Style="{StaticResource langButtonBorderUncheckedStyle}">
-                        <TextBlock x:Name="lblLangUa" Text="Укр" Style="{StaticResource langTextStyle}"/>
-                    </Border>
-                </Border>
-                <Border x:Name="btnLangRu" Grid.Column="3" Background="{StaticResource appBackgroundColor}" 
-                        MouseDown="lblButtonLang_MouseDown" MouseUp="lblButtonLang_MouseUp"
-                        TouchDown="btnLang_TouchDown" TouchUp="btnLang_TouchUp"
-                        >
-                    <Border x:Name="btnLangRuInner" Style="{StaticResource langButtonBorderUncheckedStyle}">
-                        <TextBlock x:Name="lblLangRu" Text="Рус" Style="{StaticResource langTextStyle}"/>
-                    </Border>
-                </Border>
-                <Border x:Name="btnLangEn" Grid.Column="5" Background="{StaticResource appBackgroundColor}" 
-                        MouseDown="lblButtonLang_MouseDown" MouseUp="lblButtonLang_MouseUp"
-                        TouchDown="btnLang_TouchDown" TouchUp="btnLang_TouchUp"
-                        >
-                    <Border x:Name="btnLangEnInner" Style="{StaticResource langButtonBorderUncheckedStyle}">
-                        <TextBlock x:Name="lblLangEng" Text="Eng" Style="{StaticResource langTextStyle}"/>
-                    </Border>
-                </Border>
-            </Grid>
+                <!-- грид для logo, языковых кнопок (и промокода для гориз.дизайна) -->
+                <StackPanel x:Name="menuSidePanelLogo" Grid.Row="0" Orientation="Vertical" Background="Green">
+                    <!-- логотип -->
+                    <Image x:Name="imageLogo" Source="AppImages\logo1.png" Stretch="Uniform" PreviewMouseUp="Image_MouseUp"/>
 
-            <ListBox x:Name="lstMenuFolders" Grid.Row="4" Margin="0,10" SelectionMode="Single" BorderThickness="0" HorizontalContentAlignment="Stretch" Background="{StaticResource appBackgroundColor}" ScrollViewer.VerticalScrollBarVisibility="Auto"
-                     ItemContainerStyle="{StaticResource menuItemStyle}"
-                     ItemTemplate="{StaticResource menuDataTemplate}" 
-                     SelectionChanged="lstMenuFolders_SelectionChanged"/>
+                    <!--горизонтальный грид языковых кнопок
+            TouchUp="lblButtonLang_TouchDown"
+        -->
+                    <Grid x:Name="gridLang" Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="0.2*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="0.2*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="0.2*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="0.2*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border x:Name="btnLangUa" Grid.Column="1"
+                    MouseDown="lblButtonLang_MouseDown" MouseUp="lblButtonLang_MouseUp"
+                    TouchDown="btnLang_TouchDown" TouchUp="btnLang_TouchUp">
+                            <Border x:Name="btnLangUaInner" Style="{StaticResource langButtonBorderUncheckedStyle}">
+                                <TextBlock x:Name="lblLangUa" Text="Укр" Style="{StaticResource langTextStyle}"/>
+                            </Border>
+                        </Border>
+                        <Border x:Name="btnLangRu" Grid.Column="3"
+                    MouseDown="lblButtonLang_MouseDown" MouseUp="lblButtonLang_MouseUp"
+                    TouchDown="btnLang_TouchDown" TouchUp="btnLang_TouchUp"
+                    >
+                            <Border x:Name="btnLangRuInner" Style="{StaticResource langButtonBorderUncheckedStyle}">
+                                <TextBlock x:Name="lblLangRu" Text="Рус" Style="{StaticResource langTextStyle}"/>
+                            </Border>
+                        </Border>
+                        <Border x:Name="btnLangEn" Grid.Column="5"
+                    MouseDown="lblButtonLang_MouseDown" MouseUp="lblButtonLang_MouseUp"
+                    TouchDown="btnLang_TouchDown" TouchUp="btnLang_TouchUp"
+                    >
+                            <Border x:Name="btnLangEnInner" Style="{StaticResource langButtonBorderUncheckedStyle}">
+                                <TextBlock x:Name="lblLangEng" Text="Eng" Style="{StaticResource langTextStyle}"/>
+                            </Border>
+                        </Border>
+                    </Grid>
 
-            <!--промо панель-->
-            <Grid Grid.Row="5">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="0.5*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="0.5*"/>
-                </Grid.ColumnDefinitions>
-                <Border Grid.Column="1" x:Name="brdPromoCode" Background="{StaticResource appNotSelectedItemColor}"
-                        CornerRadius="{Binding Converter={StaticResource cornerRadiusLeft}, Mode=OneWay}"
-                        PreviewMouseUp="brdPromoCode_PreviewMouseUp">
-                    <TextBox x:Name="txtPromoCode" Grid.Column="1" Style="{StaticResource centeredElement}" Background="Transparent" BorderThickness="0" TextWrapping="Wrap" Foreground="Black" Opacity="0.6" Margin="5,0"
-                         Text="{Binding {x:Null}, Converter={StaticResource langDictToText}, ConverterParameter=appSet.invitePromoText, Mode=OneWay}"
-                         FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize5, Mode= OneWay}"/>
-                </Border>
-
-                <Border Grid.Column="2" Background="Black"
-                        CornerRadius="{Binding Converter={StaticResource cornerRadiusRight}, Mode=OneWay}"/>
-                <TextBlock x:Name="lblPromoCode" Grid.Column="2" Style="{StaticResource centeredElement}" Text="OK" Foreground="White"
-                        FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize5, Mode=OneWay}"/>
-            </Grid>
-
-            <!--кнопка ОФОРМИТЬ-->
-            <Border x:Name="brdMakeOrder" Grid.Row="7" Background="{StaticResource cartButtonBackgroundColor}" 
-                    PreviewMouseUp="btnShowCart_MouseUp">
-                <StackPanel VerticalAlignment="Center">
-                    <TextBlock x:Name="txtOrderPrice" TextAlignment="Center" Foreground="{StaticResource addButtonBackgroundTextColor}" FontWeight="Bold" 
-                         FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize1}">
-                    </TextBlock>
-                    <TextBlock x:Name="lblMakeOrderText" Foreground="Black" TextAlignment="Center"
-                               Text="{Binding {x:Null}, Converter={StaticResource langDictToText}, ConverterParameter=appSet.btnCreateOrderText, Mode=OneWay}"
-                               FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize2}" FontWeight="Bold"/>
                 </StackPanel>
-            </Border>
+
+
+                <ListBox x:Name="lstMenuFolders" Grid.Row="1" Margin="0,10" SelectionMode="Single" BorderThickness="0" HorizontalContentAlignment="Stretch" Background="{StaticResource appBackgroundColor}" ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         ItemContainerStyle="{StaticResource menuItemStyle}"
+                         ItemTemplate="{StaticResource menuDataTemplate}" 
+                         SelectionChanged="lstMenuFolders_SelectionChanged"/>
+
+                <!--промо панель-->
+                <Grid x:Name="gridPromoCode" Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="0.5*"/>
+                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="0.5*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="1" x:Name="brdPromoCode" Background="{StaticResource appNotSelectedItemColor}"
+                            CornerRadius="{Binding Converter={StaticResource cornerRadiusLeft}, Mode=OneWay}"
+                            PreviewMouseUp="brdPromoCode_PreviewMouseUp">
+                        <TextBox x:Name="txtPromoCode" Grid.Column="1" Style="{StaticResource centeredElement}" Background="Transparent" BorderThickness="0" TextWrapping="Wrap" Foreground="Black" Opacity="0.6" Margin="5,0"
+                             Text="{Binding {x:Null}, Converter={StaticResource langDictToText}, ConverterParameter=appSet.invitePromoText, Mode=OneWay}"
+                             FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize5, Mode= OneWay}"/>
+                    </Border>
+
+                    <Border Grid.Column="2" Background="Black"
+                            CornerRadius="{Binding Converter={StaticResource cornerRadiusRight}, Mode=OneWay}"/>
+                    <TextBlock x:Name="lblPromoCode" Grid.Column="2" Style="{StaticResource centeredElement}" Text="OK" Foreground="White"
+                            FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize5, Mode=OneWay}"/>
+                </Grid>
+
+                <!--кнопка ОФОРМИТЬ-->
+                <Border x:Name="brdMakeOrder" Grid.Row="3" Background="{StaticResource cartButtonBackgroundColor}" 
+                        PreviewMouseUp="btnShowCart_MouseUp">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock x:Name="txtOrderPrice" TextAlignment="Center" Foreground="{StaticResource addButtonBackgroundTextColor}" FontWeight="Bold" 
+                             FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize1}">
+                        </TextBlock>
+                        <TextBlock x:Name="lblMakeOrderText" Foreground="Black" TextAlignment="Center"
+                                   Text="{Binding {x:Null}, Converter={StaticResource langDictToText}, ConverterParameter=appSet.btnCreateOrderText, Mode=OneWay}"
+                                   FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize2}" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
 
         </Grid>
-        
-        <!--фон -->
-        <Image x:Name="menuBackground" Grid.Column="1" Source="AppImages\bg 3hor 1920x1080 background.png" Stretch="UniformToFill"/>
 
-        <local:AniScrollViewer x:Name="scrollDishes" Grid.Column="1" CanContentScroll="False" HorizontalAlignment="Center" VerticalAlignment="Top" UseLayoutRounding="True" VerticalScrollBarVisibility="Hidden" 
+        <!-- грид панели блюд -->
+        <Grid x:Name="gridDishesSide">
+
+        <!--фон -->
+        <Image x:Name="menuBackground" Source="AppImages\bg 3hor 1920x1080 background.png" Stretch="UniformToFill"/>
+
+        <local:AniScrollViewer x:Name="scrollDishes" CanContentScroll="False" HorizontalAlignment="Center" VerticalAlignment="Top" UseLayoutRounding="True" VerticalScrollBarVisibility="Hidden" 
                   ScrollChanged="scrollDishes_ScrollChanged"
                   PreviewMouseLeftButtonDown="scrollDishes_PreviewMouseLeftButtonDown"
                   PreviewMouseLeftButtonUp="scrollDishes_MouseLeftButtonUp" 
@@ -274,7 +272,7 @@
                       >
         </local:AniScrollViewer>
 
-        <Viewbox x:Name="btnScrollDown" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Visibility="Hidden">
+        <Viewbox x:Name="btnScrollDown" HorizontalAlignment="Right" VerticalAlignment="Bottom" Visibility="Hidden">
             <Canvas Width="100" Height="100" MouseDown="btnScrollDown_MouseDown">
                 <Path>
                     <Path.Fill>
@@ -296,7 +294,7 @@
             </Canvas>
         </Viewbox>
 
-        <Viewbox x:Name="btnScrollUp" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Visibility="Hidden">
+        <Viewbox x:Name="btnScrollUp" HorizontalAlignment="Right" VerticalAlignment="Top" Visibility="Hidden">
             <Canvas Width="100" Height="100" MouseDown="btnScrollUp_MouseDown">
                 <Path>
                     <Path.Fill>
@@ -317,7 +315,12 @@
             </Canvas>
         </Viewbox>
 
-    </Grid>
-</Window>
+                <!-- gridDishesSide-->
+            </Grid>
 
+        </DockPanel>
+
+    </Grid>
+    
+</Window>
 

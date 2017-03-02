@@ -222,13 +222,37 @@ namespace WpfClient
             screenHeight = SystemParameters.PrimaryScreenHeight;
             //            screenHeight = SystemParameters.VirtualScreenHeight;
 
+            // DEBUG TODO reverse width/height
+            dVar = screenWidth;
+            //screenWidth = screenHeight; screenHeight = dVar;
+
             AppLib.SetAppGlobalValue("screenWidth", screenWidth);
             AppLib.SetAppGlobalValue("screenHeight", screenHeight);
 
-            AppLib.SetAppGlobalValue("categoriesPanelWidth", (screenWidth / 6d * 1d));
-            // панель блюд
-            double dishesPanelWidth = (screenWidth / 6d * 5d);
+            double dishesPanelWidth;
+            // вертикальная разметка
+            if (AppLib.IsAppVerticalLayout)
+            {
+                // панель меню
+                AppLib.SetAppGlobalValue("categoriesPanelWidth", screenWidth);
+                AppLib.SetAppGlobalValue("categoriesPanelHeight", (screenWidth / 6d * 1d));
+                // панель блюд
+                dishesPanelWidth = screenWidth;
+                AppLib.SetAppGlobalValue("dishesPanelHeight", (screenWidth / 6d * 5d));
+            }
+            // горизонтальная разметка
+            else
+            {
+                // панель меню
+                AppLib.SetAppGlobalValue("categoriesPanelWidth", (screenWidth / 6d * 1d));
+                AppLib.SetAppGlobalValue("categoriesPanelHeight", screenHeight);
+                // панель блюд
+                dishesPanelWidth = (screenWidth / 6d * 5d);
+                AppLib.SetAppGlobalValue("dishesPanelHeight", screenWidth);
+            }
             AppLib.SetAppGlobalValue("dishesPanelWidth", dishesPanelWidth);
+
+
             // ***************
             // панель блюда
             double dishPanelWidth = 0.95d * dishesPanelWidth / 3d;

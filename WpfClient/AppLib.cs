@@ -186,6 +186,16 @@ namespace WpfClient
 
         #region WPF UI interface
 
+        public static bool IsAppVerticalLayout
+        {
+            get
+            {
+                double appWidth = (double)AppLib.GetAppGlobalValue("screenWidth");
+                double appHeight = (double)AppLib.GetAppGlobalValue("screenHeight");
+                return (appWidth < appHeight);
+            }
+        }
+
         public static IEnumerable<T> FindLogicalChildren<T>(DependencyObject depObj) where T : DependencyObject
         {
             if (depObj != null)
