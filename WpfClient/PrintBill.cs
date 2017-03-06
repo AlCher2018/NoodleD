@@ -263,7 +263,7 @@ namespace WpfClient
             ImageModel imgModel = sectionModel.ImageModel;
             BlockUIContainer imageBlockHeader = new BlockUIContainer();
             Image imageHeader = new Image();
-            imageHeader.Source = ImageHelper.GetBitmapImage(ImageHelper.GetFileNameBy(imgModel.Source));
+            imageHeader.Source = ImageHelper.GetBitmapImage(imgModel.Source);
             imageBlockHeader.Child = imageHeader;
             imageHeader.Width = imgModel.Width;
             imageHeader.Height = imgModel.Height;

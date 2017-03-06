@@ -78,14 +78,32 @@ namespace WpfClient
 
         private void btnTakeOut_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (e.StylusDevice != null) return;
+
+            _takeOrder = TakeOrderEnum.TakeAway;
+            this.Close();
+        }
+        private void btnTakeOut_PreviewTouchDown(object sender, TouchEventArgs e)
+        {
             _takeOrder = TakeOrderEnum.TakeAway;
             this.Close();
         }
 
+
         private void btnTakeIn_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.StylusDevice != null) return;
+
+            _takeOrder = TakeOrderEnum.TakeInRestaurant;
+            this.Close();
+        }
+
+        private void btnTakeIn_PreviewTouchDown(object sender, TouchEventArgs e)
         {
             _takeOrder = TakeOrderEnum.TakeInRestaurant;
             this.Close();
         }
-    }
+
+    }  // class
+
 }

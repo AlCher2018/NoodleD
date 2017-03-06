@@ -145,21 +145,6 @@ namespace WpfClient
             return string.Format(@"{0}{1}", AppDomain.CurrentDomain.BaseDirectory, fileName);
         }
 
-        //public static string GetFileNameBy(ExchangeModelLibrary.DataTools.PromotionalOffer offer)
-        //{
-        //    return string.Format(@"{0}Images\{1}_{2}.png", AppDomain.CurrentDomain.BaseDirectory , offer.Id, offer.Uid);
-        //}
-
-        //public static string GetFileNameBy(ExchangeModelLibrary.DataTools.MainSetting mainSetting)
-        //{
-        //    return string.Format(@"{0}Images\{1}_{2}.png", AppDomain.CurrentDomain.BaseDirectory, mainSetting.Id, "banner");
-        //}
-
-        //public static string GetFileNameBy(ExchangeModelLibrary.DataTools.OrderItem orderItem)
-        //{
-        //    return string.Format(@"{0}Images\{1}_{2}.png", AppDomain.CurrentDomain.BaseDirectory,orderItem.Dish.GroupTypeId,orderItem.Dish.Id);
-        //}
-
         public static string NoImagePath { 
             get 
             {
@@ -175,8 +160,17 @@ namespace WpfClient
             }
             else
             {
-                _images.Add(imagePath,
-                    new System.Windows.Media.Imaging.BitmapImage(new Uri(imagePath, UriKind.Absolute)));
+                if (imagePath == null) return null;
+                if (!File.Exists(imagePath)) return null;
+
+                BitmapImage bi = null;
+                // full path (absolutely)
+                if (imagePath[1].Equals(':'))
+                    bi = new System.Windows.Media.Imaging.BitmapImage(new Uri(imagePath, UriKind.Absolute));
+                else
+                    bi = new System.Windows.Media.Imaging.BitmapImage(new Uri(imagePath, UriKind.Relative));
+
+                _images.Add(imagePath,bi);
                 return _images[imagePath];
             }
                    

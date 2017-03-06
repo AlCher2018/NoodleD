@@ -48,7 +48,11 @@ namespace WpfClient
                     //                Process.GetCurrentProcess().Kill();
                 }
 
-                System.Windows.SplashScreen splashScreen = new System.Windows.SplashScreen("AppImages/bg 3hor 1920x1080 splash.png");
+                System.Windows.SplashScreen splashScreen;
+                if (SystemParameters.PrimaryScreenWidth < SystemParameters.PrimaryScreenHeight)
+                    splashScreen = new System.Windows.SplashScreen("AppImages/bg 3ver 1080x1920 splash.png");
+                else
+                    splashScreen = new System.Windows.SplashScreen("AppImages/bg 3hor 1920x1080 splash.png");
                 splashScreen.Show(true);
 
                 App app = new App();
@@ -230,17 +234,17 @@ namespace WpfClient
             AppLib.SetAppGlobalValue("screenHeight", screenHeight);
 
             double dishesPanelWidth;
-            // вертикальная разметка
+            // вертикальная разметка: панель меню сверху
             if (AppLib.IsAppVerticalLayout)
             {
                 // панель меню
                 AppLib.SetAppGlobalValue("categoriesPanelWidth", screenWidth);
-                AppLib.SetAppGlobalValue("categoriesPanelHeight", (screenWidth / 6d * 1d));
+                AppLib.SetAppGlobalValue("categoriesPanelHeight", (screenHeight / 6d * 1d));
                 // панель блюд
                 dishesPanelWidth = screenWidth;
-                AppLib.SetAppGlobalValue("dishesPanelHeight", (screenWidth / 6d * 5d));
+                AppLib.SetAppGlobalValue("dishesPanelHeight", (screenHeight / 6d * 5d));
             }
-            // горизонтальная разметка
+            // горизонтальная разметка: панель меню справа
             else
             {
                 // панель меню
@@ -248,7 +252,7 @@ namespace WpfClient
                 AppLib.SetAppGlobalValue("categoriesPanelHeight", screenHeight);
                 // панель блюд
                 dishesPanelWidth = (screenWidth / 6d * 5d);
-                AppLib.SetAppGlobalValue("dishesPanelHeight", screenWidth);
+                AppLib.SetAppGlobalValue("dishesPanelHeight", screenHeight);
             }
             AppLib.SetAppGlobalValue("dishesPanelWidth", dishesPanelWidth);
 
@@ -263,22 +267,22 @@ namespace WpfClient
             double dishPanelLeftMargin = (dishesPanelWidth - 3 * dishPanelWidth) / 2;
             AppLib.SetAppGlobalValue("dishPanelLeftMargin", dishPanelLeftMargin);
             // высота строки заголовка
-            double dishPanelHeaderRowHeight = 0.17d * dishPanelWidth;
+            double dishPanelHeaderRowHeight = (AppLib.IsAppVerticalLayout ? 0.33d : 0.17d) * dishPanelWidth;
             AppLib.SetAppGlobalValue("dishPanelHeaderRowHeight", dishPanelHeaderRowHeight);
             // высота строки изображения
             double dishPanelImageRowHeight = 0.7d * dishPanelWidth;
             AppLib.SetAppGlobalValue("dishPanelImageRowHeight", dishPanelImageRowHeight);
             AppLib.SetAppGlobalValue("dishImageHeight", dishPanelImageRowHeight);
             // высота строки гарниров
-            double dishPanelGarnishesRowHeight = 0.2d * dishPanelWidth;
+            double dishPanelGarnishesRowHeight = ((AppLib.IsAppVerticalLayout)?0.3d:0.2d) * dishPanelWidth;
             AppLib.SetAppGlobalValue("dishPanelGarnishesRowHeight", dishPanelGarnishesRowHeight);
             // высота строки кнопки добавления
-            double dishPanelAddButtonRowHeight = 0.15d * dishPanelWidth;
+            double dishPanelAddButtonRowHeight = (AppLib.IsAppVerticalLayout?0.25d:0.15d) * dishPanelWidth;
             AppLib.SetAppGlobalValue("dishPanelAddButtonRowHeight", dishPanelAddButtonRowHeight);
             AppLib.SetAppGlobalValue("dishPanelAddButtonTextSize", 0.3d * dishPanelAddButtonRowHeight);
             // расстояния между строками панели блюда
             double dishPanelRowMargin1 = 0.01d * dishPanelWidth;
-            double dishPanelRowMargin2 = 0.02d * dishPanelWidth;
+            double dishPanelRowMargin2 = (AppLib.IsAppVerticalLayout?0.05d:0.02d) * dishPanelWidth;
             AppLib.SetAppGlobalValue("dishPanelRowMargin1", dishPanelRowMargin1);
             AppLib.SetAppGlobalValue("dishPanelRowMargin2", dishPanelRowMargin2);
             // размер кнопки описания блюда

@@ -37,20 +37,41 @@ namespace WpfClient
         {
             InitializeComponent();
 
-            // размеры
-            this.Width = (double)AppLib.GetAppGlobalValue("screenWidth");
-            this.Height = (double)AppLib.GetAppGlobalValue("screenHeight");
-            this.Top = 0; this.Left = 0;
+            // init private vars
+            _notSelTextColor = new SolidColorBrush(Colors.Black);
+            _selTextColor = (SolidColorBrush)AppLib.GetAppGlobalValue("addButtonBackgroundTextColor");
 
+            setWinLayout();
+
+            // set Win data
             _currentDish = dishItem;
             this.DataContext = _currentDish;
 
             dishImage.Fill = new ImageBrush(img);
 
             updatePriceControl();
+        }
 
-            _notSelTextColor = new SolidColorBrush(Colors.Black);
-            _selTextColor = (SolidColorBrush)AppLib.GetAppGlobalValue("addButtonBackgroundTextColor");
+        private void setWinLayout()
+        {
+            // размеры
+            this.Width = (double)AppLib.GetAppGlobalValue("screenWidth");
+            this.Height = (double)AppLib.GetAppGlobalValue("screenHeight");
+            this.Top = 0; this.Left = 0;
+            double pnlWidth = (double)AppLib.GetAppGlobalValue("categoriesPanelWidth");
+            double pnlHeight = (double)AppLib.GetAppGlobalValue("categoriesPanelHeight");
+
+            if (AppLib.IsAppVerticalLayout == true)
+            {
+                DockPanel.SetDock(brdAboveFolderMenu, Dock.Top);
+            }
+            else
+            {
+                DockPanel.SetDock(brdAboveFolderMenu, Dock.Left);
+            }
+            brdAboveFolderMenu.Height = pnlHeight;
+            brdAboveFolderMenu.Width = pnlWidth;
+
         }
 
         private void _animDishSelection_Completed(object sender, EventArgs e)

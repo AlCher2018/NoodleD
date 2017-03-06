@@ -38,18 +38,18 @@
         </Style>
 
         <Style x:Key="langTextStyle" TargetType="TextBlock" BasedOn="{StaticResource centeredElement}">
-            <Setter Property="FontSize" Value="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize5, Mode=OneWay}"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Padding" Value="0,0,0,3"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="0,0,0,2"/>
         </Style>
 
         <ControlTemplate x:Key="menuListBoxItemTemplate" TargetType="{x:Type ListBoxItem}">
             <Border x:Name="categoryBorder" Background="{TemplateBinding Background}"
-                BorderThickness="1" 
+                BorderThickness="1" Width="{TemplateBinding Width}"
                 BorderBrush="{StaticResource appSelectedItemColor}"
-                CornerRadius="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=cornerRadiusButton}">
+                CornerRadius="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=cornerRadiusButton}" SnapsToDevicePixels="True">
                 <ContentPresenter 
-                    Margin="{TemplateBinding Padding}"
+                    Margin="{TemplateBinding Padding}" SnapsToDevicePixels="True"
                     HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                     VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
             </Border>
@@ -61,7 +61,6 @@
         </Style>
         <Style x:Key="menuItemTextStyle" TargetType="TextBlock">
             <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="HorizontalAlignment" Value="Left"/>
         </Style>
         <DataTemplate x:Key="menuDataTemplate">
             <Grid>
@@ -72,7 +71,29 @@
                 
                 <Image x:Name="menuItemImage" Source="{Binding MenuFolder.Image}" Style="{StaticResource menuItemImageStyle}"/>
                 
-                <TextBlock Grid.Column="1" Style="{StaticResource menuItemTextStyle}"
+                <TextBlock Grid.Column="1" Style="{StaticResource menuItemTextStyle}" HorizontalAlignment="Left"
+                           Text="{Binding langNames, Converter={StaticResource langDictToText}}"/>
+            </Grid>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBoxItem}}}" Value="True">
+                    <Setter TargetName="menuItemImage" Property="Source" Value="{Binding MenuFolder.ImageInv}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBoxItem}}}" Value="False">
+                    <Setter TargetName="menuItemImage" Property="Source" Value="{Binding MenuFolder.Image}"/>
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+        
+        <DataTemplate x:Key="menuDataTemplateHor">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Image x:Name="menuItemImage" Source="{Binding MenuFolder.Image}" Style="{StaticResource menuItemImageStyle}"/>
+
+                <TextBlock Grid.Row="1" Style="{StaticResource menuItemTextStyle}" HorizontalAlignment="Center"
                            Text="{Binding langNames, Converter={StaticResource langDictToText}}"/>
             </Grid>
             <DataTemplate.Triggers>
@@ -118,6 +139,8 @@
     </Window.Resources>
 
     <Grid x:Name="gridMain" UseLayoutRounding="True" PreviewTouchUp="Grid_TouchUp">
+
+        <Image x:Name="dishesPanelBackground" Stretch="Fill"/>
 
         <!-- канва с анимацией -->
         <Canvas x:Name="canvasAnim" Background="Transparent" Panel.ZIndex="5" Visibility="Hidden">
@@ -174,13 +197,13 @@
         -->
                     <Grid x:Name="gridLang" Grid.Row="2">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="0.2*"/>
+                            <ColumnDefinition Width="0.3*"/>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="0.2*"/>
+                            <ColumnDefinition Width="0.3*"/>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="0.2*"/>
+                            <ColumnDefinition Width="0.3*"/>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="0.2*"/>
+                            <ColumnDefinition Width="0.3*"/>
                         </Grid.ColumnDefinitions>
                         <Border x:Name="btnLangUa" Grid.Column="1"
                     MouseDown="lblButtonLang_MouseDown" MouseUp="lblButtonLang_MouseUp"
@@ -202,17 +225,18 @@
                     TouchDown="btnLang_TouchDown" TouchUp="btnLang_TouchUp"
                     >
                             <Border x:Name="btnLangEnInner" Style="{StaticResource langButtonBorderUncheckedStyle}">
-                                <TextBlock x:Name="lblLangEng" Text="Eng" Style="{StaticResource langTextStyle}"/>
+                                <TextBlock x:Name="lblLangEn" Text="Eng" Style="{StaticResource langTextStyle}"/>
                             </Border>
                         </Border>
                     </Grid>
 
                 </StackPanel>
 
-                <ListBox x:Name="lstMenuFolders" Grid.Row="1" SelectionMode="Single" BorderThickness="0" HorizontalContentAlignment="Stretch" Background="{StaticResource appBackgroundColor}" ScrollViewer.VerticalScrollBarVisibility="Auto"
+                <ListBox x:Name="lstMenuFolders" Grid.Row="1" SelectionMode="Single" BorderThickness="0" SnapsToDevicePixels="True" HorizontalContentAlignment="Stretch" Background="{StaticResource appBackgroundColor}"
                          ItemContainerStyle="{StaticResource menuItemStyle}"
-                         ItemTemplate="{StaticResource menuDataTemplate}" 
-                         SelectionChanged="lstMenuFolders_SelectionChanged"/>
+                         ItemTemplate="{StaticResource menuDataTemplate}"
+                         SelectionChanged="lstMenuFolders_SelectionChanged">
+                </ListBox>
 
                 <!--промо панель-->
                 <Grid x:Name="gridPromoCode" Grid.Row="2">
@@ -225,9 +249,7 @@
                     <Border Grid.Column="1" x:Name="brdPromoCode" Background="{StaticResource appNotSelectedItemColor}"
                             CornerRadius="{Binding Converter={StaticResource cornerRadiusLeft}, Mode=OneWay}"
                             PreviewMouseUp="brdPromoCode_PreviewMouseUp">
-                        <TextBox x:Name="txtPromoCode" Grid.Column="1" Style="{StaticResource centeredElement}" Background="Transparent" BorderThickness="0" TextWrapping="Wrap" Foreground="Black" Opacity="0.6" Margin="5,0"
-                             Text="{Binding {x:Null}, Converter={StaticResource langDictToText}, ConverterParameter=appSet.invitePromoText, Mode=OneWay}"
-                             FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize5, Mode= OneWay}"/>
+                        <TextBox x:Name="txtPromoCode" Grid.Column="1" Style="{StaticResource centeredElement}" Background="Transparent" BorderThickness="0" TextWrapping="Wrap" Foreground="DarkGray" Opacity="0.6" Margin="5,0" Text="{Binding {x:Null}, Converter={StaticResource langDictToText}, ConverterParameter=appSet.invitePromoText, Mode=OneWay}"/>
                     </Border>
 
                     <Border Grid.Column="2" Background="Black"
@@ -239,13 +261,9 @@
                 <!--кнопка ОФОРМИТЬ-->
                 <Border x:Name="brdMakeOrder" Grid.Row="3" Background="{StaticResource cartButtonBackgroundColor}" 
                         PreviewMouseUp="btnShowCart_MouseUp">
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock x:Name="txtOrderPrice" TextAlignment="Center" Foreground="{StaticResource addButtonBackgroundTextColor}" FontWeight="Bold" 
-                             FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize1}">
-                        </TextBlock>
-                        <TextBlock x:Name="lblMakeOrderText" Foreground="Black" TextAlignment="Center"
-                                   Text="{Binding {x:Null}, Converter={StaticResource langDictToText}, ConverterParameter=appSet.btnCreateOrderText, Mode=OneWay}"
-                                   FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize2}" FontWeight="Bold"/>
+                    <StackPanel x:Name="pnlMakeOrder" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock x:Name="lblOrderPrice" TextAlignment="Center" Foreground="{StaticResource addButtonBackgroundTextColor}"/>
+                        <TextBlock x:Name="lblMakeOrderText" TextAlignment="Center" Foreground="Black" Text="{Binding {x:Null}, Converter={StaticResource langDictToText}, ConverterParameter=appSet.btnCreateOrderText, Mode=OneWay}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Border>
 
@@ -254,59 +272,56 @@
         <!-- грид панели блюд -->
         <Grid x:Name="gridDishesSide">
 
-        <!--фон -->
-        <Image x:Name="menuBackground" Source="AppImages\bg 3hor 1920x1080 background.png" Stretch="UniformToFill"/>
+            <local:AniScrollViewer x:Name="scrollDishes" CanContentScroll="False" HorizontalAlignment="Center" VerticalAlignment="Top" UseLayoutRounding="True" VerticalScrollBarVisibility="Hidden" 
+                      ScrollChanged="scrollDishes_ScrollChanged"
+                      PreviewMouseLeftButtonDown="scrollDishes_PreviewMouseLeftButtonDown"
+                      PreviewMouseLeftButtonUp="scrollDishes_MouseLeftButtonUp" 
+                      PreviewMouseMove = "scrollDishes_MouseMove"
+                          >
+            </local:AniScrollViewer>
 
-        <local:AniScrollViewer x:Name="scrollDishes" CanContentScroll="False" HorizontalAlignment="Center" VerticalAlignment="Top" UseLayoutRounding="True" VerticalScrollBarVisibility="Hidden" 
-                  ScrollChanged="scrollDishes_ScrollChanged"
-                  PreviewMouseLeftButtonDown="scrollDishes_PreviewMouseLeftButtonDown"
-                  PreviewMouseLeftButtonUp="scrollDishes_MouseLeftButtonUp" 
-                  PreviewMouseMove = "scrollDishes_MouseMove"
-                      >
-        </local:AniScrollViewer>
+            <Viewbox x:Name="btnScrollDown" HorizontalAlignment="Right" VerticalAlignment="Bottom" Visibility="Hidden">
+                <Canvas Width="100" Height="100" MouseDown="btnScrollDown_MouseDown">
+                    <Path>
+                        <Path.Fill>
+                            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0" Opacity="0.7">
+                                <GradientStop Color="DarkMagenta" Offset="1"/>
+                                <GradientStop Color="Black" Offset="0.4"/>
+                                <GradientStop Color="Black" Offset="0"/>
+                            </LinearGradientBrush>
+                        </Path.Fill>
+                        <Path.Data>
+                            <PathGeometry>
+                                <PathFigure StartPoint="0,100" IsClosed="True" IsFilled="True">
+                                    <ArcSegment Point="100,100" Size="50,50" SweepDirection="Clockwise"/>
+                                </PathFigure>
+                            </PathGeometry>
+                        </Path.Data>
+                    </Path>
+                    <Path x:Name="signDown" Stroke="White" StrokeThickness="2" Data="M40,75 L50,85 L60,75"/>
+                </Canvas>
+            </Viewbox>
 
-        <Viewbox x:Name="btnScrollDown" HorizontalAlignment="Right" VerticalAlignment="Bottom" Visibility="Hidden">
-            <Canvas Width="100" Height="100" MouseDown="btnScrollDown_MouseDown">
-                <Path>
-                    <Path.Fill>
-                        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0" Opacity="0.7">
-                            <GradientStop Color="DarkMagenta" Offset="1"/>
-                            <GradientStop Color="Black" Offset="0.4"/>
-                            <GradientStop Color="Black" Offset="0"/>
-                        </LinearGradientBrush>
-                    </Path.Fill>
-                    <Path.Data>
-                        <PathGeometry>
-                            <PathFigure StartPoint="0,100" IsClosed="True" IsFilled="True">
-                                <ArcSegment Point="100,100" Size="50,50" SweepDirection="Clockwise"/>
-                            </PathFigure>
-                        </PathGeometry>
-                    </Path.Data>
-                </Path>
-                <Path x:Name="signDown" Stroke="White" StrokeThickness="2" Data="M40,75 L50,85 L60,75"/>
-            </Canvas>
-        </Viewbox>
-
-        <Viewbox x:Name="btnScrollUp" HorizontalAlignment="Right" VerticalAlignment="Top" Visibility="Hidden">
-            <Canvas Width="100" Height="100" MouseDown="btnScrollUp_MouseDown">
-                <Path>
-                    <Path.Fill>
-                        <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1" Opacity="0.7">
-                            <GradientStop Color="DarkMagenta" Offset="0"/>
-                            <GradientStop Color="Black" Offset="1"/>
-                        </LinearGradientBrush>
-                    </Path.Fill>
-                    <Path.Data>
-                        <PathGeometry>
-                            <PathFigure StartPoint="0,0" IsClosed="True" IsFilled="True">
-                                <ArcSegment Point="100,0" Size="50,50" />
-                            </PathFigure>
-                        </PathGeometry>
-                    </Path.Data>
-                </Path>
-                <Path x:Name="signUp" Stroke="White" StrokeThickness="2" Data="M40,25 L50,15 L60,25"/>
-            </Canvas>
-        </Viewbox>
+            <Viewbox x:Name="btnScrollUp" HorizontalAlignment="Right" VerticalAlignment="Top" Visibility="Hidden">
+                <Canvas Width="100" Height="100" MouseDown="btnScrollUp_MouseDown">
+                    <Path>
+                        <Path.Fill>
+                            <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1" Opacity="0.7">
+                                <GradientStop Color="DarkMagenta" Offset="0"/>
+                                <GradientStop Color="Black" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Path.Fill>
+                        <Path.Data>
+                            <PathGeometry>
+                                <PathFigure StartPoint="0,0" IsClosed="True" IsFilled="True">
+                                    <ArcSegment Point="100,0" Size="50,50" />
+                                </PathFigure>
+                            </PathGeometry>
+                        </Path.Data>
+                    </Path>
+                    <Path x:Name="signUp" Stroke="White" StrokeThickness="2" Data="M40,25 L50,15 L60,25"/>
+                </Canvas>
+            </Viewbox>
 
                 <!-- gridDishesSide-->
             </Grid>

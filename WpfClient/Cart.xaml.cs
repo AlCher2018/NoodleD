@@ -30,6 +30,24 @@ namespace WpfClient
             this.lstDishes.ItemsSource = _currentOrder.Dishes;
 
             updatePriceOrder();
+
+
+            // фон
+            if (AppLib.IsAppVerticalLayout == true)
+            {
+                imgBackground.Source = ImageHelper.GetBitmapImage(@"AppImages\bg 3ver 1080x1920 background.png");
+            }
+            else
+            {
+                imgBackground.Source = ImageHelper.GetBitmapImage(@"AppImages\bg 3hor 1920x1080 background.png");
+            }
+            // яркость фона
+            string opacity = AppLib.GetAppSetting("MenuBackgroundBrightness");
+            if (opacity != null)
+            {
+                imgBackground.Opacity = opacity.ToDouble();
+            }
+
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
@@ -37,11 +55,15 @@ namespace WpfClient
             if (e.Key == Key.Escape) closeWin();
         }
 
-        private void txtbackToMenu_MouseUp(object sender, MouseButtonEventArgs e)
+        private void btnReturn_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (e.StylusDevice != null) return;
+            closeWin();
+        }
+        private void btnReturn_PreviewTouchDown(object sender, TouchEventArgs e)
         {
             closeWin();
         }
-
 
 
         #region dish list behaviour
@@ -290,6 +312,14 @@ namespace WpfClient
         // ПЕЧАТЬ чека
         private void btnPrintCheck_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (e.StylusDevice != null) return;
+
+            createAndPrintClientInvoice();
+
+        }  // method
+
+        private void createAndPrintClientInvoice()
+        {
             // если стоимость чека == 0, то выйти
             if (_currentOrder.GetOrderValue() == 0) return;
 
@@ -339,8 +369,17 @@ namespace WpfClient
                     AppLib.ShowMessage(title, userErrMsg);
                 }
             }  // if
+        }
 
-        }  // method
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            //Source = "AppImages\bg 3hor 1920x1080.png"       
+        }
+
+        private void btnPrintCheck_PreviewTouchDown(object sender, TouchEventArgs e)
+        {
+            createAndPrintClientInvoice();
+        }
 
         private void updatePriceOrder()
         {
@@ -349,7 +388,7 @@ namespace WpfClient
 
             // также обновить на главном меню
             MainWindow mainWin = (MainWindow)Application.Current.MainWindow;
-            mainWin.txtOrderPrice.Text = AppLib.GetCostUIText(_currentOrder.GetOrderValue());
+            mainWin.lblOrderPrice.Text = AppLib.GetCostUIText(_currentOrder.GetOrderValue());
 
             if (orderValue == 0) closeWin();
         }

@@ -51,7 +51,8 @@ namespace WpfClient
         private Storyboard _sbDescrShow, _sbDescrHide;
         // прочие анимации
         DoubleAnimation _daAddBtnShow, _daAddBtnHide;
-
+        ColorAnimation _animBCol;
+        TextAnimation _tAnim;
         #endregion
 
         public bool HasGarnishes { get { return _hasGarnishes; } }
@@ -67,6 +68,17 @@ namespace WpfClient
             currentPanelHeight = (_hasGarnishes) ? (double)AppLib.GetAppGlobalValue("dishPanelHeightWithGarnish") : (double)AppLib.GetAppGlobalValue("dishPanelHeight");
             _brushSelectedItem = (SolidColorBrush)AppLib.GetAppGlobalValue("appSelectedItemColor");
             _dishPanelAddButtoFontSize = Convert.ToDouble(AppLib.GetAppGlobalValue("dishPanelAddButtoFontSize"));
+            _animBCol = (ColorAnimation)AppLib.GetAppGlobalValue("AddDishButtonBackgroundColorAnimation");
+            // анимация текста на кнопке добавления блюда
+            _tAnim = new TextAnimation()
+            {
+                IsAnimFontSize = true,
+                DurationFontSize = 200,
+                FontSizeKoef = 1.2,
+                RepeatBehaviorFontSize = 3,
+                IsAnimTextBlur = false
+            };
+
 
             // декоратор для панели блюда (должен быть для корректной работы ручного скроллинга)
             setDishPanel();
@@ -315,7 +327,7 @@ namespace WpfClient
         private void createGarnisheButtons()
         {
             double grnColWidth = Math.Ceiling(contentPanelWidth / 3d);
-            double grnH = dGrid.RowDefinitions[4].Height.Value, grnW = 1.3 * grnH; // пропорции кнопки
+            double grnH = dGrid.RowDefinitions[4].Height.Value, grnW = ((AppLib.IsAppVerticalLayout)?1.1d:1.3) * grnH; // пропорции кнопки
 
             _grdGarnishes = new Grid();
             _grdGarnishes.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(grnColWidth, GridUnitType.Pixel) });
@@ -439,42 +451,7 @@ namespace WpfClient
 
         private void animateAddButtonAfterSelectGarnish()
         {
-            if (this._selectedGarnIndex == 0)
-            {
-                // анимация кнопки Добавить
-                ColorAnimation animBCol = (ColorAnimation)AppLib.GetAppGlobalValue("AddDishButtonBackgroundColorAnimation");
-                if (animBCol != null)
-                {
-                    _btnAddDish.Background.BeginAnimation(SolidColorBrush.ColorProperty, animBCol);
-                }
-            }
-            else if (this._selectedGarnIndex == 1)
-            {
-                TextAnimation tAnim = new TextAnimation()
-                {
-                    IsAnimFontSize = true, DurationFontSize = 200, FontSizeKoef = 1.2, RepeatBehaviorFontSize = 3,
-                    IsAnimTextBlur = false
-                };
-
-                tAnim.BeginAnimation(_btnAddDishTextBlock, _dishPanelAddButtoFontSize);
-            }
-            else if (this._selectedGarnIndex == 2)
-            {
-                // анимация кнопки Добавить
-                ColorAnimation animBCol = (ColorAnimation)AppLib.GetAppGlobalValue("AddDishButtonBackgroundColorAnimation");
-                if (animBCol != null)
-                {
-                    _btnAddDish.Background.BeginAnimation(SolidColorBrush.ColorProperty, animBCol);
-                }
-                TextAnimation tAnim = new TextAnimation()
-                {
-                    IsAnimFontSize = true, DurationFontSize = 200, FontSizeKoef = 1.2, RepeatBehaviorFontSize = 3,
-                    IsAnimTextBlur = false
-                };
-
-                tAnim.BeginAnimation(_btnAddDishTextBlock, _dishPanelAddButtoFontSize);
-            }
-
+            _tAnim.BeginAnimation(_btnAddDishTextBlock, _dishPanelAddButtoFontSize);
         }  // method
 
         public void ClearSelectedGarnish()
@@ -544,7 +521,7 @@ namespace WpfClient
                 Tag = _dishItem.RowGUID.ToString(),
                 VerticalAlignment = VerticalAlignment.Top,
                 Width = dGrid.Width,
-                Height = Math.Floor(0.7d * dishPanelAddButtonRowHeight),
+                Height = Math.Floor((AppLib.IsAppVerticalLayout?0.5d:0.7d) * dishPanelAddButtonRowHeight),
                 CornerRadius = new CornerRadius(cornerRadiusButton),
                 Background = (Brush)AppLib.GetAppGlobalValue("addButtonBackgroundTextColor"),
                 SnapsToDevicePixels = true,
@@ -603,7 +580,7 @@ namespace WpfClient
                     Name = "btnInvitation",
                     VerticalAlignment = VerticalAlignment.Top,
                     Width = Math.Floor(dGrid.Width),
-                    Height = Math.Floor(0.7d * dishPanelAddButtonRowHeight),
+                    Height = _btnAddDish.Height,
                     CornerRadius = new CornerRadius(cornerRadiusButton),
                     Background = Brushes.White,
                     BorderBrush = Brushes.Gray,
@@ -637,6 +614,9 @@ namespace WpfClient
 
         private void BtnAddDish_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
+            Border brdAddButton = (Border)sender;
+            if (brdAddButton.Opacity == 0) return;
+
             OrderItem _currentOrder = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
             // изображение взять из элемента
             ImageBrush imgBrush = (ImageBrush)_pathImage.Fill;

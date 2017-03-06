@@ -33,6 +33,7 @@ namespace WpfClient
         private byte _langButtonPress = 0;
         private Border _curDescrBorder;
         private TextBlock _curDescrTextBlock;
+        private double _orderPriceFontSize;
 
         // dish description animations
         private DoubleAnimation _daCommon1, _daCommon2;
@@ -103,17 +104,10 @@ namespace WpfClient
             AppLib.WriteLogTraceMessage("Настраиваю визуальные элементы...");
             AppLib.AppLang = AppLib.GetAppSetting("langDefault");
 
-            // яркость фона
-            string opacity = AppLib.GetAppSetting("MenuBackgroundBrightness");
-            if (opacity != null)
-            {
-                menuBackground.Opacity = opacity.ToDouble();
-            }
-
             // надписи на языковых кнопках
             lblLangUa.Text = (string)AppLib.GetAppGlobalValue("langButtonTextUa");
             lblLangRu.Text = (string)AppLib.GetAppGlobalValue("langButtonTextRu");
-            lblLangEng.Text = (string)AppLib.GetAppGlobalValue("langButtonTextEn");
+            lblLangEn.Text = (string)AppLib.GetAppGlobalValue("langButtonTextEn");
 
             // большие кнопки скроллинга
             var v = Enum.Parse(typeof(HorizontalAlignment), (string)AppLib.GetAppGlobalValue("dishesPanelScrollButtonHorizontalAlignment"));
@@ -161,9 +155,11 @@ namespace WpfClient
             double pnlWidth = (double)AppLib.GetAppGlobalValue("categoriesPanelWidth");
             double pnlHeight = (double)AppLib.GetAppGlobalValue("categoriesPanelHeight");
             double lstFldWidth, lstFldHeight;
+            lstFldWidth = pnlWidth;
+            double promoFontSize, dH;
 
             //clearMenuSideLayout();
-
+            // вертикальное размещение: панель меню справа
             if (AppLib.IsAppVerticalLayout == true)
             {
                 // если ширина экрана меньше его высоты, то дизайн вертикальный: меню категорий сверху
@@ -171,50 +167,59 @@ namespace WpfClient
 
                 // грид меню
                 DockPanel.SetDock(gridMenuSide, Dock.Top);
+
+                // грид меню
+                gridMenuSide.Height = pnlHeight;
+                gridMenuSide.Width = pnlWidth;
                 menuSidePanelLogo.Background = new SolidColorBrush(Color.FromRgb(0x62, 0x1C, 0x55));
 
-                gridMenuSide.Height = pnlHeight;
-                //gridMenuSide.Width = pnlWidth;
-
-                // панель меню на всю высоту экрана
-                double d1 = pnlHeight / 13d;
+                // панель меню на всю ширину экрана
+                dH = pnlHeight / 10d;
+                gridMenuSide.RowDefinitions[0].Height = new GridLength(3.0 * dH);
+                gridMenuSide.RowDefinitions[1].Height = new GridLength(4.0 * dH);
+                gridMenuSide.RowDefinitions[2].Height = new GridLength(0.0 * dH);
+                gridMenuSide.RowDefinitions[3].Height = new GridLength(3.0 * dH);
 
                 // stackPanel для Logo
                 menuSidePanelLogo.Orientation = Orientation.Horizontal;
-                imageLogo.Margin = new Thickness(0.25 * d1);
-                gridLang.Margin = new Thickness(0, 0.2 * d1, 0, 0.4 * d1);
+                //   logo
+                imageLogo.Height = 1.5 * dH;
+                imageLogo.Width = 0.3 * gridMenuSide.Width;
+                imageLogo.HorizontalAlignment = HorizontalAlignment.Left;
+                imageLogo.Margin = new Thickness(dH, 0, 0, 0);
+                //   языковые кнопки
+                gridLang.Height = 2.0 * dH;  // необходимо для расчета размера внутренних кнопок
+                gridLang.Width = 0.2 * gridMenuSide.Width;
+                gridLang.Margin = new Thickness(0.1 * gridMenuSide.Width, 0, 0.1 * gridMenuSide.Width, 0);
+                // перенести промокод
+                gridMenuSide.Children.Remove(gridPromoCode);
+                menuSidePanelLogo.Children.Add(gridPromoCode);
+                gridPromoCode.Width = 0.3 * gridMenuSide.Width - dH;
+                gridPromoCode.Height = 1.5 * dH;
+                promoFontSize = 0.5 * dH;
+                gridPromoCode.HorizontalAlignment = HorizontalAlignment.Right;
 
-                lstFldWidth = pnlWidth;
-                lstFldHeight = 0.33 * pnlHeight;
+                lstFldHeight = 3d * dH;
+                lstMenuFolders.ItemsPanel = GetItemsPanelTemplate(Orientation.Horizontal);
+                lstMenuFolders.Margin = new Thickness(dH, 0.5*dH, 0, 0);
+                lstFldWidth -= 1.2*dH;
+                ScrollViewer.SetHorizontalScrollBarVisibility(lstMenuFolders, ScrollBarVisibility.Auto);
+                ScrollViewer.SetVerticalScrollBarVisibility(lstMenuFolders, ScrollBarVisibility.Disabled);
 
-                //// панель меню на всю ширину экрана
-                ////    logo+gridLang+promo
-                //gridMenuSide.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(25d / 90d * pnlHeight, GridUnitType.Pixel) });
-                ////    menu  
-                //gridMenuSide.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(37d / 90d * pnlHeight, GridUnitType.Pixel) });
-                ////    order
-                //gridMenuSide.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(28d / 90d * pnlHeight, GridUnitType.Pixel) });
+                // кнопка Оформить
+                brdMakeOrder.Margin = new Thickness(dH, 0.6*dH, dH, 0.8 * dH);
+                brdMakeOrder.CornerRadius = new CornerRadius((double)AppLib.GetAppGlobalValue("cornerRadiusButton"));
+                pnlMakeOrder.Orientation = Orientation.Horizontal;
+                _orderPriceFontSize = 0.3 * gridMenuSide.RowDefinitions[3].Height.Value;
+                lblOrderPrice.FontSize = _orderPriceFontSize;
+                lblOrderPrice.FontWeight = FontWeights.Bold;
+                lblOrderPrice.Margin = new Thickness(0,0,dH,0);
+                lblMakeOrderText.FontSize = 0.8 * _orderPriceFontSize;
+                lblMakeOrderText.FontWeight = FontWeights.Normal;
 
-                ////gridMenuSideSub1.Visibility = Visibility.Visible;
-                ////gridMenuSideSub1.Height = gridMenuSide.RowDefinitions[0].Height.Value;
-                ////if (gridMenuSide.Children.Contains(imageLogo) == true) gridMenuSide.Children.Remove(imageLogo);
-                ////if (gridMenuSide.Children.Contains(gridLang) == true) gridMenuSide.Children.Remove(gridLang);
-                ////if (gridMenuSide.Children.Contains(gridPromoCode) == true) gridMenuSide.Children.Remove(gridPromoCode);
-                ////gridMenuSideSub1.Children.Add(imageLogo); Grid.SetColumn(imageLogo, 0);
-                ////gridMenuSideSub1.Children.Add(gridLang); Grid.SetColumn(gridLang, 1);
-                ////gridMenuSideSub1.Children.Add(gridPromoCode); Grid.SetColumn(gridPromoCode, 2);
-
-
-                //Grid.SetRow(lstMenuFolders, 1);
-                //Grid.SetRow(brdMakeOrder, 2);
-
-                //// грид блюд
-                //Grid.SetRowSpan(gridDishesSide, 1);
-                //Grid.SetColumn(gridDishesSide, 0); Grid.SetRow(gridDishesSide, 1);
-                //Grid.SetColumnSpan(gridDishesSide, 2);
-                //pnlWidth = (double)AppLib.GetAppGlobalValue("dishesPanelWidth");
-                //pnlHeight = (double)AppLib.GetAppGlobalValue("dishesPanelHeight");
-                //gridDishesSide.Height = pnlHeight; gridDishesSide.Width = pnlWidth;
+                // фон
+                dishesPanelBackground.Source = ImageHelper.GetBitmapImage(@"AppImages\bg 3ver 1080x1920 background.png");
+                scrollDishes.Margin = new Thickness(0,dH,0,dH);
             }
 
             // иначе дизайн горизонтальный: меню категорий справа
@@ -222,14 +227,14 @@ namespace WpfClient
             {
                 AppLib.WriteLogTraceMessage("\t- дизайн горизонтальный");
                 DockPanel.SetDock(gridMenuSide, Dock.Left);
-                menuSidePanelLogo.Background = (Brush)AppLib.GetAppGlobalValue("appBackgroundColor");
 
                 // грид меню
-                //gridMenuSide.Height = pnlHeight;
+                gridMenuSide.Height = pnlHeight;
                 gridMenuSide.Width = pnlWidth;
+                menuSidePanelLogo.Background = (Brush)AppLib.GetAppGlobalValue("appBackgroundColor");
 
                 // панель меню на всю высоту экрана
-                double dH = pnlHeight / 13d;
+                dH = pnlHeight / 13d;
                 gridMenuSide.RowDefinitions[0].Height = new GridLength(2.2 * dH);
                 gridMenuSide.RowDefinitions[1].Height = new GridLength(8.0 * dH);
                 gridMenuSide.RowDefinitions[2].Height = new GridLength(1.0 * dH);
@@ -239,46 +244,83 @@ namespace WpfClient
                 menuSidePanelLogo.Orientation = Orientation.Vertical;
                 imageLogo.Height = dH;
                 imageLogo.Margin = new Thickness(0.07 * pnlWidth, 0, 0.07 * pnlWidth, 0);
-                gridLang.Height = 1.2 * dH;
 
-                // фон для внешних Border, чтобы они были кликабельные
-                btnLangUa.Background = menuSidePanelLogo.Background;
-                btnLangRu.Background = menuSidePanelLogo.Background;
-                btnLangEn.Background = menuSidePanelLogo.Background;
-                double dMin = Math.Min(gridLang.Height, pnlWidth / (0.2 + 1.0 + 0.2 + 1.0 + 0.2 + 1.0 + 0.2));
-                double dLangSize = 0.6 * dMin;
-                setLngInnerBtnSizes(btnLangUaInner, dLangSize);
-                setLngInnerBtnSizes(btnLangRuInner, dLangSize);
-                setLngInnerBtnSizes(btnLangEnInner, dLangSize);
+                gridLang.Height = 1.2 * dH; gridLang.Width = gridMenuSide.Width;
 
-                lstFldWidth = pnlWidth;
+                // список категорий
                 lstFldHeight = 8d * dH;
+                lstMenuFolders.ItemsPanel = GetItemsPanelTemplate(Orientation.Vertical);
                 lstMenuFolders.Margin = new Thickness(0, 0.01 * lstFldHeight, 0, 0.01 * lstFldHeight);
                 lstFldHeight *= 0.98;
+                ScrollViewer.SetVerticalScrollBarVisibility(lstMenuFolders, ScrollBarVisibility.Auto);
+                ScrollViewer.SetHorizontalScrollBarVisibility(lstMenuFolders, ScrollBarVisibility.Disabled);
 
+                // промокод
                 gridPromoCode.Height = 0.6 * dH;
                 gridPromoCode.Margin = new Thickness(0, 0, 0, 0.4 * dH);
+                promoFontSize = 0.3 * gridPromoCode.Height;
 
-                //// грид блюд
-                //pnlWidth = (double)AppLib.GetAppGlobalValue("dishesPanelWidth");
-                //pnlHeight = (double)AppLib.GetAppGlobalValue("dishesPanelHeight");
-                //gridDishesSide.Height = pnlHeight; gridDishesSide.Width = pnlWidth;
+                // кнопка Оформить
+                _orderPriceFontSize = 0.3 * gridMenuSide.RowDefinitions[3].Height.Value;
+                lblOrderPrice.FontSize = _orderPriceFontSize;
+                lblOrderPrice.FontWeight = FontWeights.Bold;
+                lblMakeOrderText.FontSize = 0.2 * gridMenuSide.RowDefinitions[3].Height.Value;
+                lblMakeOrderText.FontWeight = FontWeights.Bold;
+                
+                // фон
+                dishesPanelBackground.Source = ImageHelper.GetBitmapImage(@"AppImages\bg 3hor 1920x1080 background.png");
+
+            }
+
+            // яркость фона
+            string opacity = AppLib.GetAppSetting("MenuBackgroundBrightness");
+            if (opacity != null)
+            {
+                dishesPanelBackground.Opacity = opacity.ToDouble();
             }
 
             // создать список категорий блюд
             AppLib.WriteLogTraceMessage(" - создаю список категорий блюд...");
-            createCategoriesList(lstFldWidth, lstFldHeight);
+            createCategoriesList(lstFldWidth, lstFldHeight, dH);
             AppLib.WriteLogTraceMessage(" - создаю список категорий блюд... READY");
+
+            // языковые кнопки, фон для внешних Border, чтобы они были кликабельные
+            btnLangUa.Background = menuSidePanelLogo.Background;
+            btnLangRu.Background = menuSidePanelLogo.Background;
+            btnLangEn.Background = menuSidePanelLogo.Background;
+            double dMin = Math.Min(gridLang.Height, gridMenuSide.Width / (0.3 + 1.0 + 0.3 + 1.0 + 0.3 + 1.0 + 0.3));
+            double dLangSize = 0.7 * dMin;
+            setLngInnerBtnSizes(btnLangUaInner, lblLangUa, dLangSize);
+            setLngInnerBtnSizes(btnLangRuInner, lblLangRu, dLangSize);
+            setLngInnerBtnSizes(btnLangEnInner, lblLangEn, dLangSize);
+
+            txtPromoCode.FontSize = promoFontSize;
+
+            // грид блюд
+            pnlWidth = (double)AppLib.GetAppGlobalValue("dishesPanelWidth");
+            pnlHeight = (double)AppLib.GetAppGlobalValue("dishesPanelHeight");
+            gridDishesSide.Height = pnlHeight; gridDishesSide.Width = pnlWidth;
 
             AppLib.WriteLogTraceMessage("Настраиваю дизайн приложения... READY");
         }  // method
 
-        private void setLngInnerBtnSizes(Border btnLangInner, double dLangSize)
+        private void setLngInnerBtnSizes(Border btnLangInner, TextBlock lblLang, double dLangSize)
         {
             double dMargin = (1.0 - dLangSize) / 2.0;
             btnLangInner.Height = dLangSize; btnLangInner.Width = dLangSize;
             btnLangInner.CornerRadius = new CornerRadius(dLangSize / 2.0);
             btnLangInner.Margin = new Thickness(dMargin);
+
+            // размер шрифта на язык.кнопках
+            double txtFontSize = 0.35 * dLangSize;
+            lblLang.FontSize = txtFontSize;
+
+        }
+
+        private ItemsPanelTemplate GetItemsPanelTemplate(Orientation orientation)
+        {
+            string xaml = @"<ItemsPanelTemplate xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'> <StackPanel Orientation = """ + ((orientation == Orientation.Vertical) ? "Vertical" : "Horizontal") + "\"/>                </ItemsPanelTemplate>";
+            return System.Windows.Markup.XamlReader.Parse(xaml) as ItemsPanelTemplate;
         }
 
         private void clearMenuSideLayout()
@@ -299,11 +341,12 @@ namespace WpfClient
             //gridMenuSideSub1.Children.Clear();
         }
 
-        private void createCategoriesList(double pnlWidth, double pnlHeight)
+        private void createCategoriesList(double pnlWidth, double pnlHeight, double dH)
         {
             List<AppModel.MenuItem> mFolders = (List<AppModel.MenuItem>)AppLib.GetAppGlobalValue("mainMenu");
             if (mFolders == null) return;
 
+            bool isVerticalFolderMenu = (pnlWidth < pnlHeight);
             bool isScrollingList = AppLib.GetAppSetting("IsAllowScrollingDishCategories").ToBool();
             // кол-во пунктов для расчета из размера
             int iCount = (isScrollingList == true)? 6: mFolders.Count;
@@ -313,27 +356,56 @@ namespace WpfClient
             Style brdStyle = (Style)this.Resources["menuItemStyle"];
             Style imgStyle = (Style)this.Resources["menuItemImageStyle"];
             Style txtStyle = (Style)this.Resources["menuItemTextStyle"];
+            Setter st;
 
-            double itemHeight = pnlHeight / iCount;
-            double marginBase = 0.1 * itemHeight;
-            double imageSize = 0.4 * itemHeight;
-            double txtFontSize = 0.25 * itemHeight;
-            Setter st; Thickness th;
+            double itemHeight, itemWidth, marginBase, imageSize, txtFontSize;
+            double d1, d2, d3;
+            Thickness thMargin, thPadding;
+            object o1;
+
+            // меню категорий размещено вертикально, справа
+            if (isVerticalFolderMenu)
+            {
+                itemHeight = pnlHeight / iCount; itemWidth = pnlWidth;
+                marginBase = 0.1 * itemHeight;
+                thMargin = new Thickness(marginBase, 0, marginBase, 1.4 * marginBase);
+                thPadding = new Thickness(0, 2.0 * marginBase, 0, 2.0 * marginBase);
+                o1 = this.TryFindResource("menuDataTemplate");
+                if (o1 != null) lstMenuFolders.ItemTemplate = (DataTemplate)o1;
+                imageSize = 0.4 * itemHeight;
+                txtFontSize = 0.25 * itemHeight;
+
+            }
+            // меню категорий размещено горизонтально, вверху экрана
+            else
+            {
+                d1 = Math.Floor(0.8 * dH);
+                itemHeight = pnlHeight;
+                itemWidth = pnlWidth / iCount;
+                itemWidth -= Math.Floor(d1);
+                thMargin = new Thickness(0, 0, d1, 0);
+                thPadding = new Thickness(0);
+                o1 = this.TryFindResource("menuDataTemplateHor");
+                if (o1 != null) lstMenuFolders.ItemTemplate = (DataTemplate)o1;
+
+                brdStyle.Setters.Add(new Setter(ListBoxItem.WidthProperty, itemWidth));
+
+                imageSize = 0.5 * itemHeight;
+                txtFontSize = 0.2 * itemHeight;
+            }
 
             // поле вокруг рамки
-            th = new Thickness(marginBase, 0, marginBase, 1.4 * marginBase);
             st = (Setter)brdStyle.Setters.FirstOrDefault(s => (s as Setter).Property.Name == "Margin");
             if (st == null)
-                brdStyle.Setters.Add(new Setter(ListBoxItem.MarginProperty, th));
+                brdStyle.Setters.Add(new Setter(ListBoxItem.MarginProperty, thMargin));
             else
-                st.Value = th;
+                st.Value = thMargin;
             // отступ внутри рамки
-            th = new Thickness(0, 2.0 * marginBase, 0, 2.0 * marginBase);
             st = (Setter)brdStyle.Setters.FirstOrDefault(s => (s as Setter).Property.Name == "Padding");
             if (st == null)
-                brdStyle.Setters.Add(new Setter(ListBoxItem.PaddingProperty, th));
+                brdStyle.Setters.Add(new Setter(ListBoxItem.PaddingProperty, thPadding));
             else
-                (st as Setter).Value = th;
+                (st as Setter).Value = thPadding;
             // размер изображения категории
             st = (Setter)imgStyle.Setters.FirstOrDefault(s => (s as Setter).Property.Name == "Width");
             if (st == null)
@@ -577,7 +649,7 @@ namespace WpfClient
 
             _orderPriceEffectShadow = new DropShadowEffect() { Direction = 315, Color = Colors.DarkGreen, ShadowDepth = 5, BlurRadius = 10 };
             _orderPriceEffectBlur = new BlurEffect() { Radius = 0 };
-            //txtOrderPrice.Effect = _orderPriceEffectShadow;
+            //lblOrderPrice.Effect = _orderPriceEffectShadow;
             Color c = ((SolidColorBrush)Application.Current.Resources["cartButtonBackgroundColor"]).Color;
             brdMakeOrder.Background = new SolidColorBrush(c); //Do not use a frozen instance  (Colors.Orange)
         }
@@ -634,14 +706,14 @@ namespace WpfClient
             {
                 //   размер шрифта
                 _daCommon1.Duration = TimeSpan.FromMilliseconds(400);
-                _daCommon1.To = 1.5 * txtOrderPrice.FontSize;
-                txtOrderPrice.BeginAnimation(TextBlock.FontSizeProperty, _daCommon1);
+                _daCommon1.To = 1.5 * _orderPriceFontSize;
+                lblOrderPrice.BeginAnimation(TextBlock.FontSizeProperty, _daCommon1);
                 //   расплывчатость текста
-                txtOrderPrice.Effect = _orderPriceEffectBlur;
+                lblOrderPrice.Effect = _orderPriceEffectBlur;
                 _daCommon2.Duration = TimeSpan.FromMilliseconds(400);
                 _daCommon2.To = 80;
                 _daCommon2.Completed += _daCommon1_Completed;
-                txtOrderPrice.Effect.BeginAnimation(BlurEffect.RadiusProperty, _daCommon2);
+                lblOrderPrice.Effect.BeginAnimation(BlurEffect.RadiusProperty, _daCommon2);
             }
         }
 
@@ -649,19 +721,19 @@ namespace WpfClient
         {
             updatePrice();
 
-            _daCommon1.To = (double)AppLib.GetAppGlobalValue("appFontSize1");
-            txtOrderPrice.BeginAnimation(TextBlock.FontSizeProperty, _daCommon1);
+            _daCommon1.To = _orderPriceFontSize;
+            lblOrderPrice.BeginAnimation(TextBlock.FontSizeProperty, _daCommon1);
 
             _daCommon2.To = 0;
             _daCommon2.Completed -= _daCommon1_Completed;
             _daCommon2.Completed += _daCommon2_Completed;
-            txtOrderPrice.Effect.BeginAnimation(BlurEffect.RadiusProperty, _daCommon2);
+            lblOrderPrice.Effect.BeginAnimation(BlurEffect.RadiusProperty, _daCommon2);
         }
 
         private void _daCommon2_Completed(object sender, EventArgs e)
         {
             _daCommon2.Completed -= _daCommon2_Completed;
-            //txtOrderPrice.Effect = _orderPriceEffectShadow;
+            //lblOrderPrice.Effect = _orderPriceEffectShadow;
         }
 
         #endregion
@@ -863,7 +935,7 @@ namespace WpfClient
         // обновить стоимость заказа
         public void updatePrice()
         {
-            txtOrderPrice.Text = AppLib.GetCostUIText(_currentOrder.GetOrderValue());
+            lblOrderPrice.Text = AppLib.GetCostUIText(_currentOrder.GetOrderValue());
         }
 
         private void Image_MouseUp(object sender, MouseButtonEventArgs e)

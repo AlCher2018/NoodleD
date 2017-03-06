@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         WindowStyle="None" WindowState="Maximized" WindowStartupLocation="CenterScreen" 
         Title="Cart" Height="254" Width="379" ShowInTaskbar="False"
-        KeyDown="Window_KeyDown">
+        KeyDown="Window_KeyDown" Loaded="Window_Loaded">
 
     <Window.Resources>
         <local:GetDishPrice x:Key="getDishPrice"/>
@@ -284,11 +284,7 @@
         </Grid.ColumnDefinitions>
 
         <!-- фон правой панели -->
-        <Image Grid.Column="1" Source="AppImages\bg 3hor 1920x1080.png" Stretch="UniformToFill" Opacity="0.1" OpacityMask="#FFD6F424">
-            <Image.Effect>
-                <BlurEffect/>
-            </Image.Effect>
-        </Image>
+        <Image x:Name="imgBackground" Grid.Column="0" Grid.ColumnSpan="2" Stretch="Fill"/>
 
         <!-- левая панель - панель управления -->
         <Grid x:Name="leftSideGrid" Grid.Column="0" UseLayoutRounding="True" Background="{DynamicResource appBackgroundColor}">
@@ -305,7 +301,7 @@
             <Image Grid.Row="0" Source="AppImages\logo1.png" Stretch="Uniform" Style="{StaticResource centeredElement}" Margin="20,0"/>
             
             <!-- 1. кнопка Назад к меню -->
-            <Border Grid.Row="1" PreviewMouseUp="txtbackToMenu_MouseUp" Background="{StaticResource appBackgroundColor}" BorderThickness="0,1,0,1" BorderBrush="DarkMagenta">
+            <Border x:Name="btnReturn" Grid.Row="1" PreviewMouseDown="btnReturn_MouseUp" PreviewTouchDown="btnReturn_PreviewTouchDown" Background="{StaticResource appBackgroundColor}" BorderThickness="0,1,0,1" BorderBrush="DarkMagenta">
                 <TextBlock  Style="{StaticResource textBackToMenuStyle}"/>
             </Border>
 
@@ -363,7 +359,7 @@
             </Grid>
             
             <!-- 5. кнопка Распечатать чек -->
-            <Border x:Name="btnPrintCheck" Grid.Row="5" Background="{DynamicResource cartButtonBackgroundColor}" MouseDown="btnPrintCheck_MouseDown">
+            <Border x:Name="btnPrintCheck" Grid.Row="5" Background="{DynamicResource cartButtonBackgroundColor}" PreviewMouseDown="btnPrintCheck_MouseDown" PreviewTouchDown="btnPrintCheck_PreviewTouchDown">
                 <TextBlock Grid.Row="6" Style="{StaticResource btnPrintCheckTextStyle}"/>
                 <Border.Style>
                     <Style>
