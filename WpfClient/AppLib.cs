@@ -24,7 +24,8 @@ namespace WpfClient
     {
         // общий логгер
         private static NLog.Logger AppLogger;
-        
+        private static string _appPromoCode;
+
         /// <summary>
         /// Static Ctor
         /// </summary>
@@ -585,6 +586,50 @@ namespace WpfClient
 
         #endregion
 
-    }
+        #region работа с промокодом
+
+        public static bool ShowPromoCodeWindow()
+        {
+            Promocode promoWin = new Promocode(AppLib.GetPromoCode());
+            bool isOk = (promoWin.ShowDialog() ?? false);
+
+            if (isOk) SetPromoCode(promoWin.InputValue);
+
+            promoWin = null;
+            GC.Collect();
+
+            return isOk;
+        }
+
+        public static void SetPromoCode(string value)
+        {
+            _appPromoCode = value;
+        }
+        public static string GetPromoCode()
+        {
+            return _appPromoCode;
+        }
+
+        public static void SetPromoCodeTextBlock(TextBlock textBlock)
+        {
+            if (textBlock == null) return;
+
+            if (string.IsNullOrEmpty(GetPromoCode()) == true)
+            {
+                textBlock.Text = AppLib.GetLangTextFromAppProp("invitePromoText");
+                textBlock.Style = (Style)App.Current.Resources["promoInviteTextStyle"];
+                textBlock.FontSize = (double)AppLib.GetAppGlobalValue("appFontSize5");
+            }
+            else
+            {
+                textBlock.Text = GetPromoCode();
+                textBlock.Style = (Style)App.Current.Resources["promoCodeTextStyle"];
+                textBlock.FontSize = (double)AppLib.GetAppGlobalValue("appFontSize4");
+            }
+        }
+
+        #endregion
+
+    }  // class
 
 }

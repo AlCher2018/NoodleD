@@ -58,20 +58,90 @@ namespace WpfClient
             this.Width = (double)AppLib.GetAppGlobalValue("screenWidth");
             this.Height = (double)AppLib.GetAppGlobalValue("screenHeight");
             this.Top = 0; this.Left = 0;
-            double pnlWidth = (double)AppLib.GetAppGlobalValue("categoriesPanelWidth");
-            double pnlHeight = (double)AppLib.GetAppGlobalValue("categoriesPanelHeight");
+
+            double pnlMenuWidth = (double)AppLib.GetAppGlobalValue("categoriesPanelWidth");
+            double pnlMenuHeight = (double)AppLib.GetAppGlobalValue("categoriesPanelHeight");
+            brdAboveFolderMenu.Height = pnlMenuHeight;
+            brdAboveFolderMenu.Width = pnlMenuWidth;
+
+            double dW, dH, d1;
+            double grdContentWidth = getAbsColWidth(gridWindow, 1, ((this.Width == pnlMenuWidth) ? this.Width : this.Width - pnlMenuWidth));
+            double grdContentHeight = getAbsRowHeight(gridWindow, 1, ((this.Height == pnlMenuHeight) ? this.Height : this.Height - pnlMenuHeight));
+
+            double itemWidth = 10, itemHeight=10, garnTextFontSize=10;
+
+            Setter st; Thickness thMargin;
+            object o1;
+
+            Style lbiStyle = (Style)this.Resources["addingsListBoxItemStyle"];
+            Style garnTextStyle = (Style)this.Resources["garnishTextStyle"];
+            
 
             if (AppLib.IsAppVerticalLayout == true)
             {
                 DockPanel.SetDock(brdAboveFolderMenu, Dock.Top);
+
+                gridWindow.RowDefinitions[1].Height = new GridLength(3.5d, GridUnitType.Star);
+                gridWindow.ColumnDefinitions[1].Width = new GridLength(10d, GridUnitType.Star);
+
+                // строка изображения
+                gridMain.RowDefinitions[2].Height = new GridLength(2.5, GridUnitType.Star);
+                // строки добавок
+                gridMain.RowDefinitions[5].Height = new GridLength(1.2, GridUnitType.Star);
+                gridMain.RowDefinitions[8].Height = new GridLength(1.2, GridUnitType.Star);
+                // Кнопка Добавить
+                gridAddButtonSection.RowDefinitions[1].Height = new GridLength(1.0, GridUnitType.Star);
+
+                grdContentWidth = getAbsColWidth(gridWindow, 1, ((this.Width == pnlMenuWidth) ? this.Width : this.Width - pnlMenuWidth));
+                grdContentHeight = getAbsRowHeight(gridWindow, 1, ((this.Height == pnlMenuHeight) ? this.Height : this.Height - pnlMenuHeight));
+
+                // ширина изображения
+                dW = getAbsColWidth(gridMain, 1, grdContentWidth);
+                dishImage.Width = 0.4d * dW;
+
+                dH = getAbsRowHeight(gridMain, 5, grdContentHeight);
+                garnTextFontSize = (0.4d * dH) * 0.25d;
             }
+
+            // горизонтальное размещение
             else
             {
                 DockPanel.SetDock(brdAboveFolderMenu, Dock.Left);
-            }
-            brdAboveFolderMenu.Height = pnlHeight;
-            brdAboveFolderMenu.Width = pnlWidth;
 
+                // ширина изображения
+                dW = getAbsColWidth(gridMain, 1, grdContentWidth);
+                dishImage.Width = 0.35d * dW;
+
+                dH = getAbsRowHeight(gridMain, 5, grdContentHeight);
+                garnTextFontSize = (0.4d * dH) * 0.3d;
+            }
+
+            // ширина элемента списка добавок
+            dW = getAbsColWidth(gridMain, 1, grdContentWidth); // + getAbsColWidth(gridMain, 2, grdContentWidth);
+            dW /= 5d;
+            itemWidth = 0.9d * dW;
+            thMargin = new Thickness(0, 0, 0.1 * dW, 0);
+
+            st = (Setter)lbiStyle.Setters.FirstOrDefault(s => (s as Setter).Property.Name == "Margin");
+            st.Value = thMargin;
+
+            st = (Setter)lbiStyle.Setters.FirstOrDefault(s => (s as Setter).Property.Name == "Width");
+            st.Value = itemWidth;
+
+            st = (Setter)garnTextStyle.Setters.FirstOrDefault(s => (s as Setter).Property.Name == "FontSize");
+            st.Value = garnTextFontSize;
+        }  // method
+
+        private double getAbsRowHeight(Grid grid, int iRow, double totalHeight)
+        {
+            double cntStars = grid.RowDefinitions.Sum(r => r.Height.Value);
+            return grid.RowDefinitions[iRow].Height.Value / cntStars * totalHeight;
+        }
+
+        private double getAbsColWidth(Grid grid, int iCol, double totalWidth)
+        {
+            double cntStars = grid.ColumnDefinitions.Sum(c => c.Width.Value);
+            return grid.ColumnDefinitions[iCol].Width.Value / cntStars * totalWidth;
         }
 
         private void _animDishSelection_Completed(object sender, EventArgs e)

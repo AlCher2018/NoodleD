@@ -162,7 +162,6 @@ namespace WpfClient
             // вертикальное размещение: панель меню справа
             if (AppLib.IsAppVerticalLayout == true)
             {
-                // если ширина экрана меньше его высоты, то дизайн вертикальный: меню категорий сверху
                 AppLib.WriteLogTraceMessage("\t- дизайн вертикальный");
 
                 // грид меню
@@ -289,7 +288,7 @@ namespace WpfClient
             btnLangRu.Background = menuSidePanelLogo.Background;
             btnLangEn.Background = menuSidePanelLogo.Background;
             double dMin = Math.Min(gridLang.Height, gridMenuSide.Width / (0.3 + 1.0 + 0.3 + 1.0 + 0.3 + 1.0 + 0.3));
-            double dLangSize = 0.7 * dMin;
+            double dLangSize = 0.6 * dMin;
             setLngInnerBtnSizes(btnLangUaInner, lblLangUa, dLangSize);
             setLngInnerBtnSizes(btnLangRuInner, lblLangRu, dLangSize);
             setLngInnerBtnSizes(btnLangEnInner, lblLangEn, dLangSize);
@@ -326,7 +325,9 @@ namespace WpfClient
         private void clearMenuSideLayout()
         {
             Thickness tn = new Thickness(0);
-            imageLogo.Margin = tn; gridLang.Margin = tn; lstMenuFolders.Margin = tn; gridPromoCode.Margin = tn; brdMakeOrder.Margin = tn;
+            imageLogo.Margin = tn; gridLang.Margin = tn; lstMenuFolders.Margin = tn;
+            //gridPromoCode.Margin = tn;
+            brdMakeOrder.Margin = tn;
 
             Grid.SetColumn(imageLogo, 0); Grid.SetRow(imageLogo, 0);
             Grid.SetColumn(gridLang, 0); Grid.SetRow(gridLang, 0);
@@ -405,7 +406,7 @@ namespace WpfClient
             if (st == null)
                 brdStyle.Setters.Add(new Setter(ListBoxItem.PaddingProperty, thPadding));
             else
-                (st as Setter).Value = thPadding;
+                st.Value = thPadding;
             // размер изображения категории
             st = (Setter)imgStyle.Setters.FirstOrDefault(s => (s as Setter).Property.Name == "Width");
             if (st == null)
@@ -507,11 +508,13 @@ namespace WpfClient
             AppLib.AppLang = langId;
             setLangButtonStyle(true);   // "включить" кнопку
 
+            AppLib.SetPromoCodeTextBlock(txtPromoCode);
+
+            BindingExpression be;
             // установка текстов на выбранном языке
-            BindingExpression be = txtPromoCode.GetBindingExpression(TextBox.TextProperty);
-            be.UpdateTarget();
             be = lblMakeOrderText.GetBindingExpression(TextBlock.TextProperty);
-            be.UpdateTarget();
+            if (be != null) be.UpdateTarget();
+
             lstMenuFolders.Items.Refresh();
             resetDishesLang();
 
@@ -526,7 +529,7 @@ namespace WpfClient
             Border langBorder = getInnerLangBorder();
             if (langBorder != null)
             {
-                Style newStyle = (checkedMode) ? (Style)this.Resources["langButtonBorderCheckedStyle"] : (Style)this.Resources["langButtonBorderUncheckedStyle"];
+                Style newStyle = (checkedMode) ? (Style)App.Current.Resources["langButtonBorderCheckedStyle"] : (Style)App.Current.Resources["langButtonBorderUncheckedStyle"];
                 if (langBorder.Style.Equals(newStyle) == false) langBorder.Style = newStyle;
             }
         }
@@ -564,18 +567,11 @@ namespace WpfClient
         #endregion
 
         #region работа с промокодом
+
         private void brdPromoCode_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
-            Promocode promoWin = new Promocode();
-            promoWin.ShowDialog();
-
-            string retVal = promoWin.InputValue;
-            promoWin = null;
-            GC.Collect();
-
-            //MessageBox.Show(retVal??"Null");
+            if (AppLib.ShowPromoCodeWindow() == true) AppLib.SetPromoCodeTextBlock(txtPromoCode);
         }
-
         #endregion
 
         #region анимация выбора блюда и стоимости заказа
@@ -975,9 +971,14 @@ namespace WpfClient
             AppLib.WriteLogTraceMessage(string.Format("{0} - mainGrid_PreviewMouseUp, _langButtonPress = {1}", ((FrameworkElement)sender).Name, _langButtonPress.ToString()));
         }
 
+        private void brdMakeOrder_PreviewTouchDown(object sender, TouchEventArgs e)
+        {
+            showCartWindow();
+        }
 
         private void btnShowCart_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (e.StylusDevice != null) return;
             showCartWindow();
         }
 

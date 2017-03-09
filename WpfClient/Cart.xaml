@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         WindowStyle="None" WindowState="Maximized" WindowStartupLocation="CenterScreen" 
         Title="Cart" Height="254" Width="379" ShowInTaskbar="False"
-        KeyDown="Window_KeyDown" Loaded="Window_Loaded">
+        KeyDown="Window_KeyDown">
 
     <Window.Resources>
         <local:GetDishPrice x:Key="getDishPrice"/>
@@ -27,7 +27,6 @@
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Foreground" Value="{StaticResource appSelectedItemColor}"/>
-                    <Setter Property="FontWeight" Value="Bold"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -36,7 +35,7 @@
             <Setter Property="Background" Value="{StaticResource appBackgroundColor}"/>
             <Setter Property="BorderBrush" Value="White"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Height" Value="{Binding ElementName=leftSideGrid, Path=ActualHeight, Mode=OneWay, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.06}"/>
+            <Setter Property="Height" Value="{Binding ElementName=gridMenuSide, Path=ActualHeight, Mode=OneWay, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.06}"/>
             <Setter Property="CornerRadius" Value="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=cornerRadiusButton, Mode=OneWay}"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
@@ -51,12 +50,6 @@
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Text" Value="{Binding {x:Null}, Converter={StaticResource langTextToUpper}, ConverterParameter=appSet.btnTakeAwayText, Mode=OneWay}"/>
-            <Setter Property="FontSize" Value="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize3, Mode=OneWay}"/>
-        </Style>
-
-        <Style x:Key="btnPrintCheckTextStyle" TargetType="TextBlock" BasedOn="{StaticResource centeredElement}">
-            <Setter Property="Foreground" Value="Black"/>
-            <Setter Property="Text" Value="{Binding {x:Null}, Converter={StaticResource langTextToUpper}, ConverterParameter=appSet.btnPrintBillText, Mode=OneWay}"/>
             <Setter Property="FontSize" Value="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize3, Mode=OneWay}"/>
         </Style>
 
@@ -127,8 +120,8 @@
                                             Text="{Binding SelectedGarnishes, Converter={StaticResource garnishPriceConverter}, ConverterParameter=1, StringFormat={StaticResource priceFormatString}, TargetNullValue=''}" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize3, Mode=OneWay}"/>
                                 <!--маркеры блюда-->
                                 <ListBox ItemsSource="{Binding Marks}" BorderThickness="0" Background="Transparent" SnapsToDevicePixels="True" Focusable="False" IsHitTestVisible="True" ScrollViewer.CanContentScroll="False" FocusVisualStyle="{x:Null}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                                Margin="{Binding ElementName=leftSideGrid, Path=ActualWidth, Converter={StaticResource getMargin}, ConverterParameter='0.05,0,0,0.05', Mode=OneWay}"
-                                Height="{Binding ElementName=leftSideGrid, Path=ActualWidth, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.07, Mode=OneWay}"
+                                Margin="{Binding ElementName=gridMenuSide, Path=ActualWidth, Converter={StaticResource getMargin}, ConverterParameter='0.05,0,0,0.05', Mode=OneWay}"
+                                Height="{Binding ElementName=gridMenuSide, Path=ActualWidth, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.07, Mode=OneWay}"
                                 >
                                     <ListBox.ItemContainerStyle>
                                         <Style TargetType="ListBoxItem">
@@ -154,7 +147,7 @@
                             
                             <!-- гарнир -->
                             <TextBlock Text="{Binding SelectedGarnishes, Converter={StaticResource garnishLangTextConverter}, ConverterParameter=1}" 
-                                       FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize5, Mode=OneWay}">
+                                       FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize4, Mode=OneWay}">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
                                         <Style.Triggers>
@@ -171,13 +164,13 @@
                             
                             <!-- количество и ед.изм -->
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding UnitCount}" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize5, Mode=OneWay}"/>
-                                <TextBlock Margin="6,0,0,0" Text="{Binding langUnitNames, Converter={StaticResource langDictToText}}" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize5, Mode=OneWay}"/>
+                                <TextBlock Text="{Binding UnitCount}" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize4, Mode=OneWay}"/>
+                                <TextBlock Margin="6,0,0,0" Text="{Binding langUnitNames, Converter={StaticResource langDictToText}}" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize4, Mode=OneWay}"/>
                             </StackPanel>
                         </StackPanel>
 
                         <!--добавки (снизу) wordIngredients -->
-                        <StackPanel Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="1" VerticalAlignment="Bottom"  HorizontalAlignment="Left" TextElement.FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize5, Mode=OneWay}">
+                        <StackPanel Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="1" VerticalAlignment="Bottom"  HorizontalAlignment="Left" TextElement.FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize4, Mode=OneWay}">
                             <TextBlock Text="{Binding Converter={StaticResource langDictToText}, ConverterParameter=appSet.wordIngredients, Mode=OneWay}" FontWeight="Bold"/>
                             <ListBox ItemsSource="{Binding SelectedIngredients}" Background="Transparent" IsHitTestVisible="True" VirtualizingPanel.ScrollUnit="Pixel" BorderThickness="0">
                                 <ListBox.ItemsPanel>
@@ -197,14 +190,14 @@
                                 </ListBox.ItemContainerStyle>
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <StackPanel Orientation="Horizontal" Height="{Binding ElementName=leftSideGrid, Path=ActualWidth, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.15, Mode=OneWay}">
+                                        <StackPanel Orientation="Horizontal" Height="{Binding ElementName=gridMenuSide, Path=ActualWidth, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.15, Mode=OneWay}">
                                             <!--наименование ингредиента-->
                                             <TextBlock Text="{Binding langNames, Converter={StaticResource langDictToText}, Mode=OneWay}" VerticalAlignment="Center"/>
                                             <!--стоимость ингредиента-->
                                             <TextBlock Margin="10,0" FontWeight="Bold" Text="{Binding Price, StringFormat={StaticResource priceFormatString}, Mode=OneWay}" VerticalAlignment="Center"/>
                                             <!--кнопка удаления ингредиента-->
-                                            <Border BorderBrush="Blue" BorderThickness="0" Width="{Binding ElementName=leftSideGrid, Path=ActualWidth, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.2, Mode=OneWay}" Background="Transparent" Panel.ZIndex="5" PreviewMouseUp="ingrDel_MouseUp" >
-                                                <Image Margin="8,0" Source="AppImages/removeItem.png" Height="{Binding ElementName=leftSideGrid, Path=ActualWidth, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.08, Mode=OneWay}"/>
+                                            <Border BorderBrush="Blue" BorderThickness="0" Width="{Binding ElementName=gridMenuSide, Path=ActualWidth, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.2, Mode=OneWay}" Background="Transparent" Panel.ZIndex="5" PreviewMouseUp="ingrDel_MouseUp" >
+                                                <Image Margin="8,0" Source="AppImages/removeItem.png" Height="{Binding ElementName=gridMenuSide, Path=ActualWidth, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.08, Mode=OneWay}"/>
                                             </Border>
                                         </StackPanel>
                                     </DataTemplate>
@@ -226,7 +219,7 @@
                             
                         <!--управление количеством порций-->
                         <Grid x:Name="gridPortion" Grid.Column="2" Grid.Row="0" VerticalAlignment="Top" 
-                           Margin="0" Height="{Binding ElementName=leftSideGrid, Path=ActualWidth, Mode=OneWay, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.3}">
+                           Margin="0" Height="{Binding ElementName=gridMenuSide, Path=ActualWidth, Mode=OneWay, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.3}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="1.2*"/>  <!-- 0. кнопка - -->
                                 <ColumnDefinition Width="*"/>  <!-- 1. колич.порций -->
@@ -278,104 +271,98 @@
     </Window.Resources>
     
     <Grid x:Name="winMainGrid">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="5*"/>
-        </Grid.ColumnDefinitions>
 
-        <!-- фон правой панели -->
-        <Image x:Name="imgBackground" Grid.Column="0" Grid.ColumnSpan="2" Stretch="Fill"/>
-
+        <Image x:Name="imgBackground" Stretch="Fill"/>
+        
+        <DockPanel x:Name="dockMain" >
+            
         <!-- левая панель - панель управления -->
-        <Grid x:Name="leftSideGrid" Grid.Column="0" UseLayoutRounding="True" Background="{DynamicResource appBackgroundColor}">
+        <Grid x:Name="gridMenuSide" DockPanel.Dock="Left" UseLayoutRounding="True" Background="{DynamicResource appBackgroundColor}" Width="100">
+            <!-- height = 13 -->
             <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>                <!-- 0. логотип -->
-                <RowDefinition Height="*"/>                <!-- 1. кнопка Назад к меню -->
-                <!--<RowDefinition Height="Auto"/>                --><!-- 2. кнопка С собой -->
-                <RowDefinition Height="3.5*"/>                <!-- 2. общая стоимость заказа -->
-                <RowDefinition Height="0.4*"/>                <!-- 3. промокод -->
-                <RowDefinition Height="1.4*"/>                <!-- 4. надпись Подходите с чеком... -->
-                <RowDefinition Height="1.2*"/>                <!-- 5. кнопка Распечатать чек -->
+                <RowDefinition Height="1.0*"/>                <!-- 0. логотип -->
+                <RowDefinition Height="2.0*"/>                <!-- 1. кнопка Назад к меню -->
+                <RowDefinition Height="5.6*"/>                <!-- 2. общая стоимость заказа -->
+                <RowDefinition Height="1.0*"/>                <!-- 3. промокод -->
+                <RowDefinition Height="1.6*"/>                <!-- 4. надпись Подходите с чеком... -->
+                <RowDefinition Height="1.8*"/>                <!-- 5. кнопка Распечатать чек -->
             </Grid.RowDefinitions>
             <!-- 0. логотип -->
-            <Image Grid.Row="0" Source="AppImages\logo1.png" Stretch="Uniform" Style="{StaticResource centeredElement}" Margin="20,0"/>
+                <Image x:Name="imageLogo" Grid.Row="0" Source="AppImages\logo1.png" Stretch="Uniform" Style="{StaticResource centeredElement}" Margin="20,0"/>
             
             <!-- 1. кнопка Назад к меню -->
-            <Border x:Name="btnReturn" Grid.Row="1" PreviewMouseDown="btnReturn_MouseUp" PreviewTouchDown="btnReturn_PreviewTouchDown" Background="{StaticResource appBackgroundColor}" BorderThickness="0,1,0,1" BorderBrush="DarkMagenta">
-                <TextBlock  Style="{StaticResource textBackToMenuStyle}"/>
-            </Border>
-
-            <!-- 2. кнопка С собой --><!--
-            <Grid Grid.Row="2">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="10*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Border Grid.Column="1" Style="{StaticResource btnTakeAwayStyle}">
-                    <TextBlock Style="{StaticResource textTakeAwayStyle}" />
+                <Border x:Name="btnReturn" Grid.Row="1" PreviewMouseDown="btnReturn_MouseUp" Background="{StaticResource appBackgroundColor}" PreviewTouchDown="btnReturn_PreviewTouchDown" BorderThickness="0,1,0,1" BorderBrush="DarkMagenta">
+                    <TextBlock x:Name="txtReturn" Style="{StaticResource textBackToMenuStyle}" TextAlignment="Center"/>
                 </Border>
-            </Grid>-->
-            
-            <!-- 2. общая стоимость заказа -->
-            <StackPanel Grid.Row="2" Style="{StaticResource centeredElement}">
-                <TextBlock Foreground="White" HorizontalAlignment="Center"
-                           Text="{Binding {x:Null}, Converter={StaticResource langDictToText}, ConverterParameter=appSet.lblTotalText, Mode=OneWay}" 
-                           FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize1, Mode=OneWay}"/>
-                <TextBlock x:Name="txtOrderPrice" Foreground="Yellow" HorizontalAlignment="Center"
+
+                <!-- 2. общая стоимость заказа -->
+                <StackPanel x:Name="pnlTotal" Grid.Row="2" Style="{StaticResource centeredElement}">
+                    <TextBlock x:Name="pnlTotalLabel" Foreground="White" Style="{StaticResource centeredElement}" Text="{Binding {x:Null}, Converter={StaticResource langDictToText}, ConverterParameter=appSet.lblTotalText, Mode=OneWay}" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize1, Mode=OneWay}"/>
+                    <TextBlock x:Name="txtOrderPrice" Foreground="Yellow" Style="{StaticResource centeredElement}"
                            FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize0, Mode=OneWay}"/>
-            </StackPanel>
+                </StackPanel>
 
-            <!-- 3. промокод -->
-            <Grid Grid.Row="3">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="0.5*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="0.5*"/>
-                </Grid.ColumnDefinitions>
-                <Border Grid.Column="1" x:Name="brdPromoCode" Background="{StaticResource appNotSelectedItemColor}"
-                        CornerRadius="{Binding Converter={StaticResource cornerRadiusLeft}, Mode=OneWay}"/>
-                <TextBox x:Name="txtPromoCode" Grid.Column="1" Style="{StaticResource centeredElement}" Background="Transparent" BorderThickness="0" TextWrapping="Wrap" Foreground="Black" Opacity="0.6" Margin="5,0"
-                         Text="{Binding {x:Null}, Converter={StaticResource langDictToText}, ConverterParameter=appSet.invitePromoText, Mode=OneWay}"
-                         FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize5, Mode= OneWay}"/>
+                <!--промо панель-->
+                <Grid x:Name="gridPromoCode" Grid.Row="3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="0.5*"/>
+                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="0.5*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="1" x:Name="brdPromoCode" Background="{StaticResource appNotSelectedItemColor}" CornerRadius="{Binding Converter={StaticResource cornerRadiusLeft}, Mode=OneWay}" PreviewMouseDown="brdPromoCode_PreviewMouseUp">
+                        <!-- обернуть в Border, чтобы клик срабатывал и на тексте -->
+                        <TextBlock x:Name="txtPromoCode" Grid.Column="1" Style="{StaticResource promoInviteTextStyle}" TextWrapping="NoWrap" Margin="5,0"/>
+                    </Border>
+                    <Border Grid.Column="2" Background="Black" CornerRadius="{Binding Converter={StaticResource cornerRadiusRight}, Mode=OneWay}">
+                        <TextBlock x:Name="lblPromoCode" Grid.Column="2" Style="{StaticResource centeredElement}" Text="OK" Foreground="White" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize5, Mode=OneWay}"/>
+                    </Border>
+                </Grid>
 
-                <Border Grid.Column="2" Background="Black"
-                        CornerRadius="{Binding Converter={StaticResource cornerRadiusRight}, Mode=OneWay}"/>
-                <TextBlock x:Name="lblPromoCode" Grid.Column="2" Style="{StaticResource centeredElement}" Text="OK" Foreground="White"
-                        FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize5, Mode= OneWay}"/>
+                <!-- 4. надпись Подходите с чеком... -->
+                <TextBlock x:Name="txtCashier" Grid.Row="4" Foreground="White" Style="{StaticResource centeredElement}" TextAlignment="Center" TextWrapping="Wrap" Text="{Binding {x:Null}, Converter={StaticResource langDictToText}, ConverterParameter=appSet.lblGoText, Mode=OneWay}" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize4, Mode=OneWay}">
+                </TextBlock>
+
+                <!-- 5. кнопка Распечатать чек -->
+                <Border x:Name="btnPrintCheck" Grid.Row="5" Background="{DynamicResource cartButtonBackgroundColor}" PreviewMouseDown="btnPrintCheck_MouseDown" PreviewTouchDown="btnPrintCheck_PreviewTouchDown">
+                    <StackPanel x:Name="pnlPrintCheck" Style="{StaticResource centeredElement}">
+                        <TextBlock x:Name="txtPrintCheck" Style="{StaticResource centeredElement}" Foreground="Black" Text="{Binding {x:Null}, Converter={StaticResource langTextToUpper}, ConverterParameter=appSet.btnPrintBillText, Mode=OneWay}" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize3, Mode=OneWay}"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- языковые кнопки, скрытые -->
+                <Grid x:Name="gridLang" Visibility="Hidden">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="0.3*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="0.3*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="0.3*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="0.3*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border x:Name="btnLangUa" Grid.Column="1">
+                        <Border x:Name="btnLangUaInner" Style="{StaticResource langButtonBorderUncheckedStyle}">
+                            <TextBlock x:Name="lblLangUa" Text="Укр" Style="{StaticResource langTextStyle}"/>
+                        </Border>
+                    </Border>
+                    <Border x:Name="btnLangRu" Grid.Column="3">
+                        <Border x:Name="btnLangRuInner" Style="{StaticResource langButtonBorderUncheckedStyle}">
+                            <TextBlock x:Name="lblLangRu" Text="Рус" Style="{StaticResource langTextStyle}"/>
+                        </Border>
+                    </Border>
+                    <Border x:Name="btnLangEn" Grid.Column="5">
+                        <Border x:Name="btnLangEnInner" Style="{StaticResource langButtonBorderUncheckedStyle}">
+                            <TextBlock x:Name="lblLangEn" Text="Eng" Style="{StaticResource langTextStyle}"/>
+                        </Border>
+                    </Border>
+                </Grid>
+
+
             </Grid>
-
-            <!-- 4. надпись Подходите с чеком... -->
-            <Grid Grid.Row="4">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="0.5*"/>
-                    <ColumnDefinition Width="4*"/>
-                    <ColumnDefinition Width="0.5*"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="1" Foreground="White" Style="{StaticResource centeredElement}"
-                       Text="{Binding {x:Null}, Converter={StaticResource langDictToText}, ConverterParameter=appSet.lblGoText, Mode=OneWay}" TextWrapping="Wrap" Margin="10,0" TextAlignment="Center"
-                       FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize4, Mode=OneWay}"/>
-            </Grid>
-            
-            <!-- 5. кнопка Распечатать чек -->
-            <Border x:Name="btnPrintCheck" Grid.Row="5" Background="{DynamicResource cartButtonBackgroundColor}" PreviewMouseDown="btnPrintCheck_MouseDown" PreviewTouchDown="btnPrintCheck_PreviewTouchDown">
-                <TextBlock Grid.Row="6" Style="{StaticResource btnPrintCheckTextStyle}"/>
-                <Border.Style>
-                    <Style>
-                        <Style.Triggers>
-                            <Trigger Property="Control.IsMouseOver" Value="True">
-                                <Setter Property="TextElement.FontWeight" Value="Bold" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Border.Style>
-            </Border>
-        </Grid>        <!-- left side grid -->
-
+        
         <!-- правая панель - список заказанных блюд (OrderItem) -->
-        <!--<DockPanel x:Name="dishItemsBorder" Grid.Column="1">-->
-        <ScrollViewer x:Name="scrollDishes" Grid.Column="1" CanContentScroll="False" VerticalScrollBarVisibility="Hidden"
+        <ScrollViewer x:Name="scrollDishes" CanContentScroll="False" VerticalScrollBarVisibility="Hidden"
                   PreviewMouseLeftButtonDown="scrollDishes_PreviewMouseLeftButtonDown"
                   PreviewMouseLeftButtonUp="scrollDishes_MouseLeftButtonUp" 
                   PreviewMouseMove = "scrollDishes_MouseMove"
@@ -404,6 +391,8 @@
 
             </StackPanel>
         </ScrollViewer>
+
+        </DockPanel>
 
     </Grid>    <!-- winMainGrid -->
 </Window>

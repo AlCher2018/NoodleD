@@ -210,11 +210,11 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Border x:Name="brdFooterCancel" Grid.Column="0" Background="#FFF6E4B7" PreviewMouseDown="brdFooterCancel_PreviewMouseDown">
+                        <Border x:Name="brdFooterCancel" Grid.Column="0" Background="#FFF6E4B7" PreviewMouseUp="brdFooterCancel_PreviewMouseDown">
                             <TextBlock Text="Cancel" Foreground="{StaticResource btnBackBrush}" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize3}"/>
                         </Border>
 
-                        <Border x:Name="brdFooterOk" Grid.Column="2" Background="{StaticResource btnBackBrush}" PreviewMouseDown="brdFooterOk_PreviewMouseDown">
+                        <Border x:Name="brdFooterOk" Grid.Column="2" Background="{StaticResource btnBackBrush}" PreviewMouseUp="brdFooterOk_PreviewMouseDown">
                             <TextBlock Text="Ok" Foreground="{StaticResource appSelectedItemColor}" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize3}" FontWeight="Bold"/>
                         </Border>
                     </Grid>

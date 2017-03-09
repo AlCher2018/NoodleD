@@ -22,15 +22,41 @@ namespace WpfClient
     {
         public string InputValue;
 
-        public Promocode()
+        public string WinTitle {
+            set { txtTitle.Text = value; } }
+
+        private string _preValue;
+
+        public Promocode(string editCode = null)
         {
             InitializeComponent();
 
+            setLayout();
+
+            if (string.IsNullOrEmpty(editCode) == false) txtInput.Text = editCode;
+            _preValue = editCode;
+        }
+
+        private void setLayout()
+        {
             // размеры
             double scrWidth = (double)AppLib.GetAppGlobalValue("screenWidth");
             double scrHeight = (double)AppLib.GetAppGlobalValue("screenHeight");
-            panelMain.Height = 0.7 * scrHeight;
-            panelMain.Width = 0.72 * panelMain.Height;
+
+            // vertical
+            if (AppLib.IsAppVerticalLayout)
+            {
+                this.Width = scrWidth; this.Height = scrHeight;
+                panelMain.Height = 0.55 * scrHeight;
+                panelMain.Width = 0.7 * panelMain.Height;
+            }
+            // horizontal
+            else
+            {
+                panelMain.Height = 0.7 * scrHeight;
+                panelMain.Width = 0.7 * panelMain.Height;
+            }
+
             // радиусы закругления
             if (panelMain is Border)
             {
@@ -41,12 +67,10 @@ namespace WpfClient
                 (brdFooterCancel as Border).CornerRadius = new CornerRadius(0, 0, 0, radius1);
                 (brdFooterOk as Border).CornerRadius = new CornerRadius(0, 0, radius1, 0);
             }
-            txtTitle.Text = "Set discount";
 
             double d1 = 0.5 * (double)AppLib.GetAppGlobalValue("appFontSize1");
             txtInput.Margin = new Thickness(d1, 0, d1, 0);
         }
-
 
         private void digBtn_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
         {
@@ -114,9 +138,17 @@ namespace WpfClient
         }
         private void closeWin(bool isSetRetValue)
         {
-            this.InputValue = (isSetRetValue)?txtInput.Text:null;
-
-            this.Close();
+            if (isSetRetValue)
+            {
+                this.InputValue = txtInput.Text;
+                this.DialogResult = true;
+            }
+            else
+            {
+                this.InputValue = _preValue;
+                this.DialogResult = false;
+            }
+            //this.Close();
         }
 
     }  // class

@@ -29,44 +29,157 @@ namespace WpfClient
             _currentOrder = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
             this.lstDishes.ItemsSource = _currentOrder.Dishes;
 
+            initUI();
+
             updatePriceOrder();
+        }
 
+        private void initUI()
+        {
+            double pnlWidth = (double)AppLib.GetAppGlobalValue("categoriesPanelWidth");
+            double pnlHeight = (double)AppLib.GetAppGlobalValue("categoriesPanelHeight");
+            double promoFontSize, dH;
+            double pnlW;
 
-            // фон
-            if (AppLib.IsAppVerticalLayout == true)
+            // дизайн вертикальный: панель меню СВЕРХУ
+            if (AppLib.IsAppVerticalLayout)
             {
+                DockPanel.SetDock(gridMenuSide, Dock.Top);
+                //                menuSidePanelLogo.Background = (Brush)AppLib.GetAppGlobalValue("appBackgroundColor");
+                // грид меню
+                gridMenuSide.Height = pnlHeight;
+                gridMenuSide.Width = pnlWidth;
+
+                // панель меню на всю ширину экрана
+                dH = pnlHeight / 10d;
+                gridMenuSide.RowDefinitions[0].Height = new GridLength(3.0 * dH);
+                gridMenuSide.RowDefinitions[1].Height = new GridLength(0.0 * dH);
+                gridMenuSide.RowDefinitions[2].Height = new GridLength(3.5 * dH);
+                gridMenuSide.RowDefinitions[3].Height = new GridLength(0.0 * dH);
+                gridMenuSide.RowDefinitions[4].Height = new GridLength(0.0 * dH);
+                gridMenuSide.RowDefinitions[5].Height = new GridLength(3.5 * dH);
+
+                // stackPanel для Logo
+                gridMenuSide.Children.Remove(imageLogo);
+                StackPanel pnlLogo = new StackPanel();
+                pnlLogo.Orientation = Orientation.Horizontal;
+                pnlLogo.Background = new SolidColorBrush(Color.FromRgb(0x62, 0x1C, 0x55));
+
+                pnlW = gridMenuSide.Width - 2.0 * dH;
+                // перенести кнопку Назад
+                gridMenuSide.Children.Remove(btnReturn);
+                pnlLogo.Children.Add(btnReturn);
+                btnReturn.Width = 0.3 * pnlW;  // общая ширина = ширина элемента + отступы справа/слева
+                txtReturn.HorizontalAlignment = HorizontalAlignment.Left;
+                btnReturn.Margin = new Thickness(dH,0,0,0);
+                btnReturn.Background = pnlLogo.Background;
+                //   языковые кнопки
+                gridMenuSide.Children.Remove(gridLang);
+                gridLang.Height = 2.0 * dH;  // необходимо для расчета размера внутренних кнопок
+                gridLang.Width = 0.2 * pnlW;
+                gridLang.Margin = new Thickness(0.1 * pnlW, 0, 0.1 * pnlW, 0);
+                pnlLogo.Children.Add(gridLang);
+                gridLang.Visibility = Visibility.Visible;
+                // языковые кнопки, фон для внешних Border, чтобы они были кликабельные
+                btnLangUa.Background = pnlLogo.Background;
+                btnLangRu.Background = pnlLogo.Background;
+                btnLangEn.Background = pnlLogo.Background;
+                double dMin = Math.Min(gridLang.Height, gridMenuSide.Width / (0.3 + 1.0 + 0.3 + 1.0 + 0.3 + 1.0 + 0.3));
+                double dLangSize = 0.6 * dMin;
+                setLngInnerBtnSizes(btnLangUaInner, lblLangUa, dLangSize);
+                setLngInnerBtnSizes(btnLangRuInner, lblLangRu, dLangSize);
+                setLngInnerBtnSizes(btnLangEnInner, lblLangEn, dLangSize);
+
+                // перенести промокод
+                gridMenuSide.Children.Remove(gridPromoCode);
+                gridPromoCode.ColumnDefinitions[3].Width = new GridLength(0.0 * dH);
+                gridPromoCode.Width = 0.3 * pnlW;
+                gridPromoCode.HorizontalAlignment = HorizontalAlignment.Right;
+                gridPromoCode.Height = 1.5 * dH;
+                promoFontSize = 0.5 * dH;
+                pnlLogo.Children.Add(gridPromoCode);
+
+                Grid.SetRow(pnlLogo, 0);
+                gridMenuSide.Children.Add(pnlLogo);
+
+                // строка с общей стоимостью
+                pnlTotal.Orientation = Orientation.Horizontal;
+                txtOrderPrice.Margin = new Thickness(20,0,0,0);
+                pnlTotalLabel.FontSize = (double)AppLib.GetAppGlobalValue("appFontSize2");
+                txtOrderPrice.FontSize = (double)AppLib.GetAppGlobalValue("appFontSize1");
+
+                // кнопка Оформить
+                btnPrintCheck.Margin = new Thickness(dH, 0.0 * dH, dH, 0.8 * dH);
+                btnPrintCheck.CornerRadius = new CornerRadius((double)AppLib.GetAppGlobalValue("cornerRadiusButton"));
+                txtPrintCheck.FontSize = (double)AppLib.GetAppGlobalValue("appFontSize4");
+                txtPrintCheck.FontWeight = FontWeights.Bold;
+                gridMenuSide.Children.Remove(txtCashier);
+                pnlPrintCheck.Children.Add(txtCashier);
+                txtCashier.Foreground = Brushes.Black;
+                txtCashier.Text = "(" + AppLib.GetLangTextFromAppProp("lblGoText") + ")";
+                txtCashier.FontSize = (double)AppLib.GetAppGlobalValue("appFontSize5");
+
+                // фон
                 imgBackground.Source = ImageHelper.GetBitmapImage(@"AppImages\bg 3ver 1080x1920 background.png");
             }
+
+            // дизайн горизонтальный: панель меню слева
             else
             {
+                DockPanel.SetDock(dockMain, Dock.Left);
+
+                // грид меню
+                gridMenuSide.Height = pnlHeight;
+                gridMenuSide.Width = pnlWidth;
+                dH = pnlHeight / 13d;
+
+                // промокод
+                gridPromoCode.Height = 0.6 * dH;
+                gridPromoCode.Margin = new Thickness(0, 0, 0, 0.4 * dH);
+                promoFontSize = 0.3 * gridPromoCode.Height;
+
+                txtCashier.Margin = new Thickness(0.5*dH,0,0.5*dH,0);
+
+                // фон
                 imgBackground.Source = ImageHelper.GetBitmapImage(@"AppImages\bg 3hor 1920x1080 background.png");
             }
+
             // яркость фона
             string opacity = AppLib.GetAppSetting("MenuBackgroundBrightness");
-            if (opacity != null)
-            {
-                imgBackground.Opacity = opacity.ToDouble();
-            }
+            if (opacity != null) imgBackground.Opacity = opacity.ToDouble();
+
+            txtPromoCode.FontSize = promoFontSize;
+            AppLib.SetPromoCodeTextBlock(txtPromoCode);
+
+            // грид блюд
+            pnlWidth = (double)AppLib.GetAppGlobalValue("dishesPanelWidth");
+            pnlHeight = (double)AppLib.GetAppGlobalValue("dishesPanelHeight");
+            scrollDishes.Height = pnlHeight; scrollDishes.Width = pnlWidth;
+        }
+
+        private void setLngInnerBtnSizes(Border btnLangInner, TextBlock lblLang, double dLangSize)
+        {
+            double dMargin = (1.0 - dLangSize) / 2.0;
+            btnLangInner.Height = dLangSize; btnLangInner.Width = dLangSize;
+            btnLangInner.CornerRadius = new CornerRadius(dLangSize / 2.0);
+            btnLangInner.Margin = new Thickness(dMargin);
+
+            // размер шрифта на язык.кнопках
+            double txtFontSize = 0.35 * dLangSize;
+            lblLang.FontSize = txtFontSize;
 
         }
 
-        private void Window_KeyDown(object sender, KeyEventArgs e)
+        #region работа с промокодом
+        private void brdPromoCode_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (e.Key == Key.Escape) closeWin();
+            if (AppLib.ShowPromoCodeWindow() == true) AppLib.SetPromoCodeTextBlock(txtPromoCode);
         }
-
-        private void btnReturn_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            if (e.StylusDevice != null) return;
-            closeWin();
-        }
-        private void btnReturn_PreviewTouchDown(object sender, TouchEventArgs e)
-        {
-            closeWin();
-        }
+        #endregion
 
 
         #region dish list behaviour
+        // dish list dragging
         private void lstDishes_RequestBringIntoView(object sender, RequestBringIntoViewEventArgs e)
         {
             e.Handled = true;
@@ -144,17 +257,30 @@ namespace WpfClient
 
         #endregion
 
-        private void closeWin()
+        #region close win
+        private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            this.Close();
-            // DEBUG Cart
-            //foreach (Window item in Application.Current.Windows)
-            //{
-            //    item.Close();
-            //}
-            //Application.Current.Shutdown();
+            if (e.Key == Key.Escape) closeWin();
         }
 
+        private void btnReturn_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (e.StylusDevice != null) return;
+            closeWin();
+        }
+        private void btnReturn_PreviewTouchDown(object sender, TouchEventArgs e)
+        {
+            closeWin();
+        }
+
+        private void closeWin()
+        {
+            // если здесь менялся промокод, то изменить его и на главном окне
+            AppLib.SetPromoCodeTextBlock((App.Current.MainWindow as MainWindow).txtPromoCode);
+
+            this.Close();
+        }
+        #endregion
 
         #region portion Count
 
@@ -287,36 +413,18 @@ namespace WpfClient
 
         #endregion
 
-        private void updatePriceControls()
-        {
-            var container = lstDishes.ItemContainerGenerator.ContainerFromIndex(lstDishes.SelectedIndex) as FrameworkElement;
-            if (container != null)
-            {
-                ContentPresenter queueListBoxItemCP = AppLib.FindVisualChildren<ContentPresenter>(container).First();
-                if (queueListBoxItemCP != null)
-                {
-                    DataTemplate dataTemplate = queueListBoxItemCP.ContentTemplate;
-                    TextBlock txtDishCount = (TextBlock)dataTemplate.FindName("txtDishCount", queueListBoxItemCP);
-                    TextBlock txtDishPrice = (TextBlock)dataTemplate.FindName("txtDishPrice", queueListBoxItemCP);
-
-                    BindingExpression be = txtDishCount.GetBindingExpression(TextBlock.TextProperty);
-                    be.UpdateTarget();
-                    be = txtDishPrice.GetBindingExpression(TextBlock.TextProperty);
-                    be.UpdateTarget();
-
-                    updatePriceOrder();
-                }
-            }
-        }  // updatePriceControl()
-
         // ПЕЧАТЬ чека
+        #region print invoice
         private void btnPrintCheck_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.StylusDevice != null) return;
 
             createAndPrintClientInvoice();
-
         }  // method
+        private void btnPrintCheck_PreviewTouchDown(object sender, TouchEventArgs e)
+        {
+            createAndPrintClientInvoice();
+        }
 
         private void createAndPrintClientInvoice()
         {
@@ -371,15 +479,29 @@ namespace WpfClient
             }  // if
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            //Source = "AppImages\bg 3hor 1920x1080.png"       
-        }
+        #endregion
 
-        private void btnPrintCheck_PreviewTouchDown(object sender, TouchEventArgs e)
+        private void updatePriceControls()
         {
-            createAndPrintClientInvoice();
-        }
+            var container = lstDishes.ItemContainerGenerator.ContainerFromIndex(lstDishes.SelectedIndex) as FrameworkElement;
+            if (container != null)
+            {
+                ContentPresenter queueListBoxItemCP = AppLib.FindVisualChildren<ContentPresenter>(container).First();
+                if (queueListBoxItemCP != null)
+                {
+                    DataTemplate dataTemplate = queueListBoxItemCP.ContentTemplate;
+                    TextBlock txtDishCount = (TextBlock)dataTemplate.FindName("txtDishCount", queueListBoxItemCP);
+                    TextBlock txtDishPrice = (TextBlock)dataTemplate.FindName("txtDishPrice", queueListBoxItemCP);
+
+                    BindingExpression be = txtDishCount.GetBindingExpression(TextBlock.TextProperty);
+                    be.UpdateTarget();
+                    be = txtDishPrice.GetBindingExpression(TextBlock.TextProperty);
+                    be.UpdateTarget();
+
+                    updatePriceOrder();
+                }
+            }
+        }  // updatePriceControl()
 
         private void updatePriceOrder()
         {

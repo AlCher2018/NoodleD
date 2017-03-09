@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfClient"
+        xmlns:lib="clr-namespace:WpfClient.Lib"
         mc:Ignorable="d"
         Title="MainWindow" 
         WindowStyle="None" WindowState="Maximized" WindowStartupLocation="CenterScreen" 
@@ -16,32 +17,6 @@
         <local:GarnishBrushConverter x:Key="garnishForegroundConverter" Mode="Foreground"/>
         <local:GarnishVisibilityConverter x:Key="garnishVisibilityConverter"/>
         <local:GetDishPanelRect x:Key="getDishPanelRect"/>
-
-        <Style x:Key="langButtonBorderStyle" TargetType="Border">
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Control.Foreground" Value="Black"/>
-        </Style>
-        <Style x:Key="langButtonBorderUncheckedStyle" TargetType="Border" BasedOn="{StaticResource langButtonBorderStyle}">
-            <Setter Property="BorderBrush" Value="{StaticResource appSelectedItemColor}"/>
-            <Setter Property="Background" Value="{StaticResource appNotSelectedItemColor}"/>
-            <Style.Triggers>
-                <Trigger Property="Control.IsMouseOver" Value="True">
-                    <Setter Property="Control.Background" Value="DarkViolet" />
-                    <Setter Property="Control.Foreground" Value="LightYellow" />
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-        <Style x:Key="langButtonBorderCheckedStyle" TargetType="Border" BasedOn="{StaticResource langButtonBorderStyle}">
-            <Setter Property="BorderBrush" Value="{StaticResource appSelectedItemColor}"/>
-            <Setter Property="Background" Value="{StaticResource appSelectedItemColor}"/>
-            <Setter Property="Control.FontWeight" Value="Bold" />
-        </Style>
-
-        <Style x:Key="langTextStyle" TargetType="TextBlock" BasedOn="{StaticResource centeredElement}">
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="HorizontalAlignment" Value="Center"/>
-            <Setter Property="Padding" Value="0,0,0,2"/>
-        </Style>
 
         <ControlTemplate x:Key="menuListBoxItemTemplate" TargetType="{x:Type ListBoxItem}">
             <Border x:Name="categoryBorder" Background="{TemplateBinding Background}"
@@ -246,21 +221,18 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="0.5*"/>
                     </Grid.ColumnDefinitions>
-                    <Border Grid.Column="1" x:Name="brdPromoCode" Background="{StaticResource appNotSelectedItemColor}"
-                            CornerRadius="{Binding Converter={StaticResource cornerRadiusLeft}, Mode=OneWay}"
-                            PreviewMouseUp="brdPromoCode_PreviewMouseUp">
-                        <TextBox x:Name="txtPromoCode" Grid.Column="1" Style="{StaticResource centeredElement}" Background="Transparent" BorderThickness="0" TextWrapping="Wrap" Foreground="DarkGray" Opacity="0.6" Margin="5,0" Text="{Binding {x:Null}, Converter={StaticResource langDictToText}, ConverterParameter=appSet.invitePromoText, Mode=OneWay}"/>
+                    <Border Grid.Column="1" x:Name="brdPromoCode" Background="{StaticResource appNotSelectedItemColor}" CornerRadius="{Binding Converter={StaticResource cornerRadiusLeft}, Mode=OneWay}" PreviewMouseDown="brdPromoCode_PreviewMouseUp">
+                        <!-- обернуть в Border, чтобы клик срабатывал и на тексте -->
+                        <TextBlock x:Name="txtPromoCode" x:FieldModifier="public" Grid.Column="1" Style="{StaticResource promoInviteTextStyle}" TextWrapping="NoWrap" Margin="5,0"/>
                     </Border>
-
-                    <Border Grid.Column="2" Background="Black"
-                            CornerRadius="{Binding Converter={StaticResource cornerRadiusRight}, Mode=OneWay}"/>
-                    <TextBlock x:Name="lblPromoCode" Grid.Column="2" Style="{StaticResource centeredElement}" Text="OK" Foreground="White"
-                            FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize5, Mode=OneWay}"/>
+                    <Border Grid.Column="2" Background="Black" CornerRadius="{Binding Converter={StaticResource cornerRadiusRight}, Mode=OneWay}">
+                        <TextBlock x:Name="lblPromoCode" Grid.Column="2" Style="{StaticResource centeredElement}" Text="OK" Foreground="White" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize5, Mode=OneWay}"/>
+                    </Border>
                 </Grid>
 
                 <!--кнопка ОФОРМИТЬ-->
                 <Border x:Name="brdMakeOrder" Grid.Row="3" Background="{StaticResource cartButtonBackgroundColor}" 
-                        PreviewMouseUp="btnShowCart_MouseUp">
+                        PreviewMouseDown="btnShowCart_MouseUp" PreviewTouchDown="brdMakeOrder_PreviewTouchDown">
                     <StackPanel x:Name="pnlMakeOrder" VerticalAlignment="Center" HorizontalAlignment="Center">
                         <TextBlock x:Name="lblOrderPrice" TextAlignment="Center" Foreground="{StaticResource addButtonBackgroundTextColor}"/>
                         <TextBlock x:Name="lblMakeOrderText" TextAlignment="Center" Foreground="Black" Text="{Binding {x:Null}, Converter={StaticResource langDictToText}, ConverterParameter=appSet.btnCreateOrderText, Mode=OneWay}" VerticalAlignment="Center"/>
