@@ -46,12 +46,14 @@
 
         <!-- стиль наименования добавки -->
         <Style x:Key="garnishTextStyle" TargetType="TextBlock">
-            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
             <Setter Property="TextAlignment" Value="Center"/>
-            <Setter Property="FontSize" Value="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize5, Mode=OneWay}"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="Foreground" Value="Black"/>
             <Setter Property="TextWrapping" Value="Wrap"/>
             <Setter Property="Margin" Value="0"/>
+            <Setter Property="Panel.ZIndex" Value="5"/>
         </Style>
         <!-- стиль цены добавки -->
         <Style x:Key="garnishPriceStyle" TargetType="TextBlock">
@@ -78,16 +80,14 @@
                 <Grid.RowDefinitions>
                     <!-- наименование добавки -->
                     <RowDefinition Height="4*"/>
-                    <!-- список изображений добавок -->
-                    <RowDefinition Height="10*"/>
+                    <!-- изображение -->
+                    <RowDefinition Height="8*"/>
                 </Grid.RowDefinitions>
 
                 <!-- наименование добавки -->
-                <TextBlock x:Name="txtName" Grid.Row="0" Style="{StaticResource garnishTextStyle}"
-                               Text="{Binding langNames, Converter={StaticResource langDictToText}}"/>
+                <TextBlock x:Name="txtName" Grid.Row="0" Grid.RowSpan="2"  Style="{StaticResource garnishTextStyle}" Text="{Binding langNames, Converter={StaticResource langDictToText}}"/>
                 <!-- цена добавки -->
-                <TextBlock x:Name="txtPrice" Grid.Row="1" Style="{StaticResource garnishPriceStyle}"
-                               Text="{Binding Price, StringFormat={StaticResource priceFormatString}}"/>
+                <TextBlock x:Name="txtPrice" Grid.Row="1" Style="{StaticResource garnishPriceStyle}" Text="{Binding Price, StringFormat={StaticResource priceFormatString}}"/>
                 <!-- фон добавки -->
                 <Viewbox x:Name="garnBaseImage" Grid.Row="1" Stretch="Fill">
                     <Path Data="{StaticResource garnBaseGeometry}">
@@ -332,12 +332,12 @@
                         </Grid.Effect>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
-                            <RowDefinition Height="3*"/>
+                            <RowDefinition Height="4*"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="1.2*"/>
+                            <ColumnDefinition Width="3*"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Grid x:Name="gridAddButton" Grid.Row="1" Grid.Column="1" PreviewMouseUp="btnAddDish_MouseUp">

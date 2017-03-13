@@ -248,8 +248,7 @@
                       ScrollChanged="scrollDishes_ScrollChanged"
                       PreviewMouseLeftButtonDown="scrollDishes_PreviewMouseLeftButtonDown"
                       PreviewMouseLeftButtonUp="scrollDishes_MouseLeftButtonUp" 
-                      PreviewMouseMove = "scrollDishes_MouseMove"
-                          >
+                      PreviewMouseMove = "scrollDishes_MouseMove">
             </local:AniScrollViewer>
 
             <Viewbox x:Name="btnScrollDown" HorizontalAlignment="Right" VerticalAlignment="Bottom" Visibility="Hidden">

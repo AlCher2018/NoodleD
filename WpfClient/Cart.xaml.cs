@@ -9,6 +9,7 @@ using System.Windows.Input;
 using AppModel;
 using WpfClient.Lib;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 
 namespace WpfClient
 {
@@ -20,7 +21,9 @@ namespace WpfClient
         // dragging
         Point? lastDragPoint, initDragPoint;
         protected DateTime _dateTime;
-        OrderItem _currentOrder;
+        private OrderItem _currentOrder;
+
+        private double dishBorderHeight;
 
         public Cart()
         {
@@ -38,8 +41,14 @@ namespace WpfClient
         {
             double pnlWidth = (double)AppLib.GetAppGlobalValue("categoriesPanelWidth");
             double pnlHeight = (double)AppLib.GetAppGlobalValue("categoriesPanelHeight");
-            double promoFontSize, dH;
-            double pnlW;
+            double promoFontSize, dH, d1, dKoefPortionCount;
+            double pnlW, titleFontSize;
+            // грид блюд
+            double dishesPanelWidth = (double)AppLib.GetAppGlobalValue("dishesPanelWidth");
+            double dishesPanelHeight = (double)AppLib.GetAppGlobalValue("dishesPanelHeight");
+            scrollDishes.Height = dishesPanelHeight; scrollDishes.Width = dishesPanelWidth;
+            double dishNameFontSize, dishUnitFontSize;
+            Style stl; Setter str;
 
             // дизайн вертикальный: панель меню СВЕРХУ
             if (AppLib.IsAppVerticalLayout)
@@ -47,6 +56,7 @@ namespace WpfClient
                 DockPanel.SetDock(gridMenuSide, Dock.Top);
                 //                menuSidePanelLogo.Background = (Brush)AppLib.GetAppGlobalValue("appBackgroundColor");
                 // грид меню
+                //pnlHeight *= 0.8;
                 gridMenuSide.Height = pnlHeight;
                 gridMenuSide.Width = pnlWidth;
 
@@ -85,7 +95,7 @@ namespace WpfClient
                 btnLangRu.Background = pnlLogo.Background;
                 btnLangEn.Background = pnlLogo.Background;
                 double dMin = Math.Min(gridLang.Height, gridMenuSide.Width / (0.3 + 1.0 + 0.3 + 1.0 + 0.3 + 1.0 + 0.3));
-                double dLangSize = 0.6 * dMin;
+                double dLangSize = 0.7 * dMin;
                 setLngInnerBtnSizes(btnLangUaInner, lblLangUa, dLangSize);
                 setLngInnerBtnSizes(btnLangRuInner, lblLangRu, dLangSize);
                 setLngInnerBtnSizes(btnLangEnInner, lblLangEn, dLangSize);
@@ -115,12 +125,21 @@ namespace WpfClient
                 txtPrintCheck.FontWeight = FontWeights.Bold;
                 gridMenuSide.Children.Remove(txtCashier);
                 pnlPrintCheck.Children.Add(txtCashier);
-                txtCashier.Foreground = Brushes.Black;
-                txtCashier.Text = "(" + AppLib.GetLangTextFromAppProp("lblGoText") + ")";
-                txtCashier.FontSize = (double)AppLib.GetAppGlobalValue("appFontSize5");
+                txtCashier.Style = (Style)this.Resources["goToCashierVer"];
 
                 // фон
                 imgBackground.Source = ImageHelper.GetBitmapImage(@"AppImages\bg 3ver 1080x1920 background.png");
+                setLangButtonStyle(true);   // "включить" текущую языковую кнопку
+
+                // панели блюд
+                dishBorderHeight = (dishesPanelHeight - dishesListTitle.ActualHeight) / 6.0;
+                titleFontSize = 0.015 * dishesPanelHeight;
+                dishNameFontSize = 0.09 * dishBorderHeight;
+                dishUnitFontSize = 0.08 * dishBorderHeight;
+                dKoefPortionCount = 1.5d;
+                // отступы кнопок изменения кол-ва блюда
+                setStylePropertyValue("dishPortionImageStyle", "Margin", new Thickness(0.03 * dishBorderHeight));  
+                setStylePropertyValue("dishDelImageStyle", "Margin", new Thickness(0.1 * dishBorderHeight));
             }
 
             // дизайн горизонтальный: панель меню слева
@@ -142,7 +161,32 @@ namespace WpfClient
 
                 // фон
                 imgBackground.Source = ImageHelper.GetBitmapImage(@"AppImages\bg 3hor 1920x1080 background.png");
+
+                dishBorderHeight = (dishesPanelHeight - dishesListTitle.ActualHeight) / 4.0;
+                titleFontSize = 0.02 * dishesPanelHeight;
+                dishNameFontSize = 0.1 * dishBorderHeight;
+                dishUnitFontSize = 0.08 * dishBorderHeight;
+                dKoefPortionCount = 1.75;
+                // отступы кнопок изменения кол-ва блюда
+                setStylePropertyValue("dishPortionImageStyle", "Margin", new Thickness(0.06 * dishBorderHeight));
+                setStylePropertyValue("dishDelImageStyle", "Margin", new Thickness(0.15 * dishBorderHeight));
             }
+
+            // высота рамки блюда в заказе, из стиля
+            setStylePropertyValue("dishBorderStyle", "Height", dishBorderHeight);
+            // элементы в строке блюда, относительно ее высоты dishBorderHeight
+            // внутренние поля в рамке блюда
+            setStylePropertyValue("dishListBoxItemStyle", "Padding",  new Thickness(0.1 * dishBorderHeight, 0.06 * dishBorderHeight, 0, 0.06 * dishBorderHeight));
+            //  наименование блюда
+            setStylePropertyValue("dishNameStyle", "FontSize", dishNameFontSize);
+            // ед.изм. блюда
+            setStylePropertyValue("dishUnitStyle", "FontSize", dishUnitFontSize);
+            // заголовок ингредиентов
+            setStylePropertyValue("dishIngrTitleStyle", "FontSize", dishUnitFontSize);
+            // наименование и цена ингредиента
+            setStylePropertyValue("dishIngrStyle", "FontSize", dishUnitFontSize);
+            // количество и цена порции
+            setStylePropertyValue("dishPortionTextStyle", "FontSize", dKoefPortionCount * dishNameFontSize);
 
             // яркость фона
             string opacity = AppLib.GetAppSetting("MenuBackgroundBrightness");
@@ -150,11 +194,28 @@ namespace WpfClient
 
             txtPromoCode.FontSize = promoFontSize;
             AppLib.SetPromoCodeTextBlock(txtPromoCode);
+            // заголовок списка
+            
+            dishesListTitle.Margin = new Thickness(0,titleFontSize,0, titleFontSize);
+            dishesListTitle.FontSize = 1.5* titleFontSize;
 
-            // грид блюд
-            pnlWidth = (double)AppLib.GetAppGlobalValue("dishesPanelWidth");
-            pnlHeight = (double)AppLib.GetAppGlobalValue("dishesPanelHeight");
-            scrollDishes.Height = pnlHeight; scrollDishes.Width = pnlWidth;
+            // большие кнопки скроллинга
+            var v = Enum.Parse(typeof(HorizontalAlignment), (string)AppLib.GetAppGlobalValue("dishesPanelScrollButtonHorizontalAlignment"));
+            btnScrollDown.Width = (double)AppLib.GetAppGlobalValue("dishesPanelScrollButtonSize");
+            btnScrollDown.Height = (double)AppLib.GetAppGlobalValue("dishesPanelScrollButtonSize");
+            btnScrollDown.HorizontalAlignment = (HorizontalAlignment)v;
+            btnScrollUp.Width = (double)AppLib.GetAppGlobalValue("dishesPanelScrollButtonSize");
+            btnScrollUp.Height = (double)AppLib.GetAppGlobalValue("dishesPanelScrollButtonSize");
+            btnScrollUp.HorizontalAlignment = (HorizontalAlignment)v;
+
+        }  // method
+
+        private void setStylePropertyValue(string styleName, string propName, object value)
+        {
+            Style stl = (Style)this.Resources[styleName];
+            Setter str = (Setter)stl.Setters.FirstOrDefault(s => (s is Setter) ? (s as Setter).Property.Name == propName : false);
+
+            if (str != null) str.Value = value;
         }
 
         private void setLngInnerBtnSizes(Border btnLangInner, TextBlock lblLang, double dLangSize)
@@ -173,49 +234,19 @@ namespace WpfClient
         #region работа с промокодом
         private void brdPromoCode_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (AppLib.ShowPromoCodeWindow() == true) AppLib.SetPromoCodeTextBlock(txtPromoCode);
+            //if (AppLib.ShowPromoCodeWindow() == true) AppLib.SetPromoCodeTextBlock(txtPromoCode);
         }
         #endregion
 
-
         #region dish list behaviour
-        // dish list dragging
         private void lstDishes_RequestBringIntoView(object sender, RequestBringIntoViewEventArgs e)
         {
             e.Handled = true;
         }
 
-        private void initDrag(Point mousePos)
-        {
-            //_dateTime = DateTime.Now;
-            //make sure we still can use the scrollbars
-            if (mousePos.X <= scrollDishes.ViewportWidth && mousePos.Y < scrollDishes.ViewportHeight)
-            {
-                //scrollViewer.Cursor = Cursors.SizeAll;
-                initDragPoint = mousePos;
-                lastDragPoint = initDragPoint;
-                //Mouse.Capture(scrollViewer);
-            }
-        }
-        private void endDrag()
-        {
-            //scrollViewer.Cursor = Cursors.Arrow;
-            //scrollViewer.ReleaseMouseCapture();
-            //lastDragPoint = null;
-        }
-        private void doMove(Point posNow)
-        {
-            double dX = posNow.X - lastDragPoint.Value.X;
-            double dY = posNow.Y - lastDragPoint.Value.Y;
-
-            lastDragPoint = posNow;
-
-            scrollDishes.ScrollToHorizontalOffset(scrollDishes.HorizontalOffset - dX);
-            scrollDishes.ScrollToVerticalOffset(scrollDishes.VerticalOffset - dY);
-        }
         private void scrollDishes_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.StylusDevice != null) return;
+            //if (e.StylusDevice != null) return;
 
             initDrag(e.GetPosition(scrollDishes));
         }
@@ -227,10 +258,11 @@ namespace WpfClient
 
         private void scrollDishes_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if (e.StylusDevice != null) return;
+            //if (e.StylusDevice != null) return;
 
             endDrag();
         }
+
 
         private void scrollDishes_PreviewTouchUp(object sender, TouchEventArgs e)
         {
@@ -239,7 +271,7 @@ namespace WpfClient
 
         private void scrollDishes_MouseMove(object sender, MouseEventArgs e)
         {
-            if (e.StylusDevice != null) return;
+            //if (e.StylusDevice != null) return;
 
             if (lastDragPoint.HasValue && e.LeftButton == MouseButtonState.Pressed)
             {
@@ -255,7 +287,132 @@ namespace WpfClient
             }
         }
 
+        private void initDrag(Point mousePos)
+        {
+            //_dateTime = DateTime.Now;
+            //make sure we still can use the scrollbars
+            if (mousePos.X <= scrollDishes.ViewportWidth && mousePos.Y < scrollDishes.ViewportHeight)
+            {
+                //scrollDishes.Cursor = Cursors.SizeAll;
+                initDragPoint = mousePos;
+                lastDragPoint = initDragPoint;
+                //Mouse.Capture(scrollViewer);
+            }
+        }
+
+        private void scrollDishes_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            // debug
+            //return;
+
+            Visibility visButtonTop, visButtonBottom;
+
+            if (e.VerticalOffset == 0)
+            {
+                visButtonTop = Visibility.Hidden;
+                visButtonBottom = (pnlDishes.ActualHeight == scrollDishes.ActualHeight) ? Visibility.Hidden : Visibility.Visible;
+            }
+            else if (e.VerticalOffset == (pnlDishes.ActualHeight - scrollDishes.ActualHeight))
+            {
+                visButtonTop = Visibility.Visible;
+                visButtonBottom = Visibility.Hidden;
+            }
+            else
+            {
+                visButtonTop = Visibility.Visible;
+                visButtonBottom = Visibility.Visible;
+            }
+
+            if (btnScrollDown.Visibility != visButtonBottom) btnScrollDown.Visibility = visButtonBottom;
+            if (btnScrollUp.Visibility != visButtonTop) btnScrollUp.Visibility = visButtonTop;
+        }
+
+        private void endDrag()
+        {
+            //scrollDishes.Cursor = Cursors.Arrow;
+            //scrollViewer.ReleaseMouseCapture();
+            //lastDragPoint = null;
+        }
+        private void doMove(Point posNow)
+        {
+            double dX = posNow.X - lastDragPoint.Value.X;
+            double dY = posNow.Y - lastDragPoint.Value.Y;
+
+            lastDragPoint = posNow;
+            //Debug.Print(posNow.ToString());
+            scrollDishes.ScrollToHorizontalOffset(scrollDishes.HorizontalOffset - dX);
+            scrollDishes.ScrollToVerticalOffset(scrollDishes.VerticalOffset - dY);
+        }
         #endregion
+
+        #region animated scrolling
+        private void btnScrollUp_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (lstDishes.Items.Count == 0) return;
+
+            int iRows = lstDishes.Items.Count;
+            // высота панели блюда
+            double h1 = (lstDishes.ItemContainerGenerator.ContainerFromIndex(0) as ListBoxItem).ActualHeight;
+            double dH = dishesListTitle.ActualHeight;
+            // текущая строка
+            Matrix matrix = (Matrix)pnlDishes.TransformToVisual(scrollDishes).GetValue(MatrixTransform.MatrixProperty);
+            double dFrom = Math.Abs(matrix.OffsetY);
+            int curRow = Convert.ToInt32(Math.Floor((dFrom - dH) / h1));
+
+            if ((Convert.ToInt32(((dFrom- dH) % h1)) == 0) && (curRow > 0)) curRow--;
+
+            double dTo = curRow * h1 + ((curRow == 0) ? 0d : dH);
+            animateDishesScroll(dFrom, dTo, Math.Abs(dTo - dFrom) >= h1);
+        }
+
+        private void btnScrollDown_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (lstDishes.Items.Count == 0) return;
+
+            int iRows = lstDishes.Items.Count;
+            // высота панели блюда
+            double h1 = (lstDishes.ItemContainerGenerator.ContainerFromIndex(0) as ListBoxItem).ActualHeight;
+            double dH = dishesListTitle.ActualHeight;
+            // текущая строка
+            Matrix matrix = (Matrix)pnlDishes.TransformToVisual(scrollDishes).GetValue(MatrixTransform.MatrixProperty);
+            double dFrom = Math.Abs(matrix.OffsetY);
+            int curRow = Convert.ToInt32(Math.Floor(dFrom / h1)) + 1;
+
+            // переход к следующей строке
+            double dTo;
+            if (curRow < (iRows - 1))
+            {
+                dTo = (curRow) * h1 + dH;
+                animateDishesScroll(dFrom, dTo, Math.Abs(dTo - dFrom) >= h1);
+            }
+            // или в конец списка
+            else if (curRow == (iRows - 1))
+            {
+                dTo = pnlDishes.ActualHeight - dH;
+                animateDishesScroll(dFrom, dTo, Math.Abs(dTo - dFrom) >= h1);
+            }
+        }
+
+        private void animateDishesScroll(double dFrom, double dTo, bool isEasing)
+        {
+            double mSec = (isEasing) ? 1000 : 200;
+
+            DoubleAnimation vertAnim = new DoubleAnimation();
+            vertAnim.From = dFrom;
+            vertAnim.To = dTo;
+            vertAnim.DecelerationRatio = .2;
+            vertAnim.Duration = new Duration(TimeSpan.FromMilliseconds(mSec));
+            if (isEasing) vertAnim.EasingFunction = new ExponentialEase() { EasingMode = EasingMode.EaseInOut };
+
+            Storyboard sb = new Storyboard();
+            sb.Children.Add(vertAnim);
+            Storyboard.SetTarget(vertAnim, scrollDishes);
+            Storyboard.SetTargetProperty(vertAnim, new PropertyPath(AniScrollViewer.CurrentVerticalOffsetProperty));
+            sb.Begin();
+        }
+
+        #endregion
+
 
         #region close win
         private void Window_KeyDown(object sender, KeyEventArgs e)
@@ -481,6 +638,7 @@ namespace WpfClient
 
         #endregion
 
+        #region price funcs
         private void updatePriceControls()
         {
             var container = lstDishes.ItemContainerGenerator.ContainerFromIndex(lstDishes.SelectedIndex) as FrameworkElement;
@@ -514,6 +672,66 @@ namespace WpfClient
 
             if (orderValue == 0) closeWin();
         }
+        #endregion
 
-    }
+        #region lang buttons
+        private void btnLang_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            string langId = getLangIdByButtonName(((FrameworkElement)sender).Name);
+            selectAppLang(langId);
+        }
+        private string getLangIdByButtonName(string langButtonName)
+        {
+            return langButtonName.Substring(langButtonName.Length - 2).ToLower();
+        }
+        public void selectAppLang(string langId)
+        {
+            setLangButtonStyle(false);  // "выключить" кнопку
+            (App.Current.MainWindow as WpfClient.MainWindow).selectAppLang(langId);
+            setLangButtonStyle(true);   // "включить" кнопку
+
+            AppLib.SetPromoCodeTextBlock(txtPromoCode);
+
+           
+            // установка текстов на выбранном языке
+            updateBindingText(txtReturn);
+            updateBindingText(pnlTotalLabel);
+            updateBindingText(txtCashier);
+            updateBindingText(txtPrintCheck);
+            updateBindingText(dishesListTitle);
+
+            lstDishes.Items.Refresh();
+        }
+        private void updateBindingText(TextBlock textBlock)
+        {
+            BindingExpression be = textBlock.GetBindingExpression(TextBlock.TextProperty);
+            if (be != null) be.UpdateTarget();
+        }
+
+        private void setLangButtonStyle(bool checkedMode)
+        {
+            Border langBorder = getInnerLangBorder();
+            if (langBorder != null)
+            {
+                Style newStyle = (checkedMode) ? (Style)App.Current.Resources["langButtonBorderCheckedStyle"] : (Style)App.Current.Resources["langButtonBorderUncheckedStyle"];
+                if (langBorder.Style.Equals(newStyle) == false) langBorder.Style = newStyle;
+            }
+        }
+
+        private Border getInnerLangBorder()
+        {
+            Border retVal = null;
+            switch (AppLib.AppLang)
+            {
+                case "ua": retVal = btnLangUaInner; break;
+                case "ru": retVal = btnLangRuInner; break;
+                case "en": retVal = btnLangEnInner; break;
+                default:
+                    break;
+            }
+            return retVal;
+        }
+        #endregion
+
+    }  // class
 }

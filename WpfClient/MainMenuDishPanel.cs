@@ -219,16 +219,20 @@ namespace WpfClient
                 });
             }
 
+            double dishPanelLeftMargin = (double)AppLib.GetAppGlobalValue("dishPanelLeftMargin");
             TextBlock tb = new TextBlock()
             {
                 Foreground = new SolidColorBrush(Colors.Black),
                 TextWrapping = TextWrapping.Wrap,
                 VerticalAlignment = VerticalAlignment.Center,
-                TextAlignment = TextAlignment.Center
+                TextAlignment = TextAlignment.Center,
+                LineStackingStrategy = LineStackingStrategy.BlockLineHeight , LineHeight = 1.2 * dishPanelHeaderFontSize
             };
             tb.Inlines.AddRange(inlines);
 
-            Grid.SetRow(tb, 0); dGrid.Children.Add(tb);
+            Grid.SetRow(tb, 0); Grid.SetRowSpan(tb, 2);
+            Grid.SetZIndex(tb, 5);
+            dGrid.Children.Add(tb);
         }  // method
 
         private void setDishDescription()
@@ -249,6 +253,7 @@ namespace WpfClient
             _pathImage.Data = new RectangleGeometry(rect, dishImageCornerRadius, dishImageCornerRadius);
             _dishImageBrush = new ImageBrush() { ImageSource = _dishItem.Image };
             _pathImage.Fill = _dishImageBrush;
+            
             _pathImage.PreviewMouseLeftButtonUp += CanvDescr_PreviewMouseLeftButtonUp;
             //pathImage.Effect = new DropShadowEffect();
             // добавить в контейнер
@@ -279,7 +284,7 @@ namespace WpfClient
             _btnDescr.Child = btnDescrText;
             // добавить в контейнер
             Grid.SetRow(_btnDescr, 2); dGrid.Children.Add(_btnDescr);
-            Grid.SetZIndex(_btnDescr, 10);
+            Grid.SetZIndex(_btnDescr, 2);
 
             // описание блюда
             LinearGradientBrush lgBrush = new LinearGradientBrush()

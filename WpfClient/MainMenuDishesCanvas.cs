@@ -33,9 +33,10 @@ namespace WpfClient
             double dishesPanelWidth = (double)AppLib.GetAppGlobalValue("dishesPanelWidth");
             double dishPanelLeftMargin = (double)AppLib.GetAppGlobalValue("dishPanelLeftMargin");
             double dishPanelWidth = (double)AppLib.GetAppGlobalValue("dishPanelWidth");
-            
+            int dColCount = AppLib.GetAppGlobalValue("dishesColumnsCount").ToString().ToInt();
+
             int iRowsCount = 0;
-            if (mItem.Dishes.Count > 0) iRowsCount = ((mItem.Dishes.Count - 1) / 3) + 1;
+            if (mItem.Dishes.Count > 0) iRowsCount = ((mItem.Dishes.Count - 1) / dColCount) + 1;
 
             DishItem dish;
             int iRow, iCol; double leftPos, topPos;
@@ -53,7 +54,7 @@ namespace WpfClient
                 }
 
                 // положение панели блюда
-                iRow = i / 3; iCol = i % 3;
+                iRow = i / dColCount; iCol = i % dColCount;
                 leftPos = (dishPanelLeftMargin + iCol * dishPanelWidth);
                 topPos = iRow * currentPanelHeight;
 

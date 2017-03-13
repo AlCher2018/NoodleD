@@ -89,12 +89,30 @@ namespace WpfClient
 
             // имя принтера для печати чека
             string printerName = AppLib.GetAppSetting("PrinterName");
+            bool isOk = true;
             if (printerName == null)
             {
                 AppLib.WriteLogErrorMessage("В config-файле не указан элемент PrinterName - имя принтера в ОС для печати чеков.\n\t\tМодуль PrintBill.cs, CreateBill()");
                 errMessage = "Ошибка в конфигурации печати чека." + UserErrMsgSuffix;
-                return false;
+                isOk = false;
             }
+            string result = PrintHelper.GetPrinterStatus(printerName);
+            if (result.ToUpper() != "OK")
+            {
+                errMessage = string.Format("Принтер \"{0}\" находится в состоянии {1}", printerName, result);
+                isOk = false;
+            }
+            // если принтер из настроек не Ок, то берем первый в системе
+            if (isOk == false)
+            {
+                List<PrintQueue> prnList = PrintHelper.getPrintersList();
+                if (prnList.Count != 0)
+                {
+                    printerName = prnList[0].Name;
+                    isOk = true; errMessage = "";
+                }
+            }
+            if (isOk == false) return false;
 
             // создание документа
             FlowDocument doc = createDocument(width);
@@ -126,7 +144,6 @@ namespace WpfClient
 
             var doc = new FlowDocument();
             doc.PageWidth = width;
-            
             // значения по умолчанию
             doc.FontFamily = new FontFamily("Panton-Bold");
             doc.FontSize = 12;

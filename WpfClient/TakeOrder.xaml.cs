@@ -25,43 +25,69 @@ namespace WpfClient
         public TakeOrder()
         {
             InitializeComponent();
+
+            setWinLayout();
         }
 
-        protected override void OnRender(DrawingContext drawingContext)
+        private void setWinLayout()
         {
-            base.OnRender(drawingContext);
+            // размеры
+            this.Width = (double)AppLib.GetAppGlobalValue("screenWidth");
+            this.Height = (double)AppLib.GetAppGlobalValue("screenHeight");
+            this.Top = 0; this.Left = 0;
 
-            // уголки
-            //CornerRadius = "{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=cornerRadiusButton, Mode=OneWay}"
-            double rad = (double)AppLib.GetAppGlobalValue("cornerRadiusButton");
-            CornerRadius cr = new CornerRadius(rad);
-            brdDialog.CornerRadius = cr;
-            btnTakeOut.CornerRadius = cr;
-            btnTakeIn.CornerRadius = cr;
+            double pnlMenuWidth = (double)AppLib.GetAppGlobalValue("categoriesPanelWidth");
+            double pnlMenuHeight = (double)AppLib.GetAppGlobalValue("categoriesPanelHeight");
+            brdAboveFolderMenu.Height = pnlMenuHeight;
+            brdAboveFolderMenu.Width = pnlMenuWidth;
+            // грид блюд
+            double pnlDishesWidth = (double)AppLib.GetAppGlobalValue("dishesPanelWidth");
+            double pnlDishesHeight = (double)AppLib.GetAppGlobalValue("dishesPanelHeight");
+            double pnlContentWidth, pnlContentHeight, pnlContentTop, pnlContentLeft;
 
-            // размеры и положение кнопки закрытия окна
-            double dW = gridCloseButton.ActualWidth;
-            double dH = gridCloseButton.ActualHeight;
+            double dH;
+            double btnTextFontSize;
 
-            if (dW != double.NaN && dH != double.NaN)
+            // вертикальное размещение
+            if (AppLib.IsAppVerticalLayout == true)
             {
-                double dMin = Math.Min(dW, dH) / 2.0;
-                if (btnClose.Width != dMin)
-                {
-                    btnClose.Width = dMin;
-                    btnClose.Height = dMin;
-                    btnClose.Margin = new Thickness(0, dMin/2f, dMin/2f, 0);
-                }
+                DockPanel.SetDock(brdAboveFolderMenu, Dock.Top);
+                pnlContentWidth = 0.8 * pnlDishesWidth;
+                pnlContentHeight = 0.1 * pnlDishesHeight;
+                pnlContentTop = (pnlDishesHeight - pnlContentHeight) / 2d;
+                pnlContentTop *= 0.5;
+                pnlContentLeft = (pnlDishesWidth - pnlContentWidth) / 2d;
+            }
+            // горизонтальное размещение
+            else
+            {
+                DockPanel.SetDock(brdAboveFolderMenu, Dock.Left);
+                pnlContentWidth = 0.7 * pnlDishesWidth;
+                pnlContentHeight = 0.2 * pnlDishesHeight;
+                pnlContentTop = (pnlDishesHeight - pnlContentHeight) / 2d;
+                pnlContentLeft = (pnlDishesWidth - pnlContentWidth) / 2d;
             }
 
-            // тексты
-            //Text = "{Binding Converter={StaticResource langDictToUpperText}, ConverterParameter=appSet.takeDishOut, Mode=OneWay}"
-            // <Setter Property="FontSize" Value="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize3}"/>
-            double fSize = System.Convert.ToDouble(AppLib.GetAppGlobalValue("appFontSize3"));
-            this.FontSize = fSize;
-            txtTakeOut.Text = AppLib.GetLangText((Dictionary<string, string>)AppLib.GetAppGlobalValue("takeOrderOut")).ToUpper();
-            txtWordOr.Text = AppLib.GetLangText((Dictionary<string, string>)AppLib.GetAppGlobalValue("wordOr")).ToUpper();
-            txtTakeIn.Text = AppLib.GetLangText((Dictionary<string, string>)AppLib.GetAppGlobalValue("takeOrderIn")).ToUpper();
+            // панель содержания
+            brdDialog.Width = pnlContentWidth; brdDialog.Height = pnlContentHeight;
+            brdDialog.Margin = new Thickness(pnlContentLeft, pnlContentTop, 
+                pnlDishesWidth - pnlContentWidth - pnlContentLeft, 
+                pnlDishesHeight - pnlContentHeight - pnlContentTop);
+            dH = pnlContentHeight / gridDialog.RowDefinitions.Sum(r => r.Height.Value);
+
+            btnTextFontSize = 0.5 * dH;
+            txtTakeOut.FontSize = btnTextFontSize;
+            txtWordOr.FontSize = btnTextFontSize;
+            txtTakeIn.FontSize = btnTextFontSize;
+
+        }  // method
+
+        private void setStylePropertyValue(string styleName, string propName, object value)
+        {
+            Style stl = (Style)this.Resources[styleName];
+            Setter str = (Setter)stl.Setters.FirstOrDefault(s => (s is Setter) ? (s as Setter).Property.Name == propName : false);
+
+            if (str != null) str.Value = value;
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -72,9 +98,16 @@ namespace WpfClient
 
         private void btnClose_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (e.StylusDevice != null) return;
+
             e.Handled = true;
             this.Close();
         }
+        private void btnClose_PreviewTouchDown(object sender, TouchEventArgs e)
+        {
+            this.Close();
+        }
+
 
         private void btnTakeOut_MouseDown(object sender, MouseButtonEventArgs e)
         {

@@ -10,33 +10,41 @@
         Top="0" Left="0"
         WindowStyle="None" ResizeMode="NoResize"
         AllowsTransparency="True" Background="Transparent" ShowInTaskbar="False"
-        PreviewKeyDown="Window_PreviewKeyDown">
-    
+        PreviewKeyDown="Window_PreviewKeyDown"
+        PreviewKeyUp="Window_PreviewKeyUp"
+        KeyDown="Window_KeyDown" KeyUp="Window_KeyUp"
+        PreviewTouchDown="Window_PreviewTouchDown" PreviewTouchUp="Window_PreviewTouchUp"
+        TouchDown="Window_TouchDown" TouchUp="Window_TouchUp"
+        Loaded="Window_Loaded" Activated="Window_Activated" Closing="Window_Closing" Closed="Window_Closed"
+        
+        >
+
+    <Window.Resources>
+        <sys:Double x:Key="dblCornerRadius">7</sys:Double>
+
+        <CornerRadius x:Key="digBtnCornerRadius" TopLeft="{StaticResource dblCornerRadius}" TopRight="{StaticResource dblCornerRadius}" BottomLeft="{StaticResource dblCornerRadius}" BottomRight="{StaticResource dblCornerRadius}"/>
+
+        <SolidColorBrush x:Key="btnBackBrush" Color="#FF7C0E67"/>
+
+        <Style x:Key="digButtonStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource btnBackBrush}"/>
+            <Setter Property="Margin" Value="7"/>
+            <Setter Property="CornerRadius" Value="{StaticResource digBtnCornerRadius}"/>
+            <EventSetter Event="PreviewMouseLeftButtonDown" Handler="digBtn_MouseDown"/>
+            <EventSetter Event="PreviewMouseLeftButtonUp" Handler="digBtn_MouseUp"/>
+            <EventSetter Event="MouseEnter" Handler="digBtn_MouseEnter"/>
+            <EventSetter Event="MouseLeave" Handler="digBtn_MouseLeave"/>
+        </Style>
+        <Style x:Key="digButtonText" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="{StaticResource appSelectedItemColor}"/>
+            <Setter Property="FontSize" Value="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter='appFontSize1', Mode=OneWay}"/>
+        </Style>
+
+    </Window.Resources>
+
     <Grid>
-        <Grid.Resources>
-            <sys:Double x:Key="dblCornerRadius">7</sys:Double>
-
-            <CornerRadius x:Key="digBtnCornerRadius" TopLeft="{StaticResource dblCornerRadius}" TopRight="{StaticResource dblCornerRadius}" BottomLeft="{StaticResource dblCornerRadius}" BottomRight="{StaticResource dblCornerRadius}"/>
-            
-            <SolidColorBrush x:Key="btnBackBrush" Color="#FF7C0E67"/>
-
-            <Style x:Key="digButtonStyle" TargetType="Border">
-                <Setter Property="Background" Value="{StaticResource btnBackBrush}"/>
-                <Setter Property="Margin" Value="7"/>
-                <Setter Property="CornerRadius" Value="{StaticResource digBtnCornerRadius}"/>
-                <EventSetter Event="PreviewMouseLeftButtonDown" Handler="digBtn_MouseDown"/>
-                <EventSetter Event="PreviewMouseLeftButtonUp" Handler="digBtn_MouseUp"/>
-                <EventSetter Event="MouseEnter" Handler="digBtn_MouseEnter"/>
-                <EventSetter Event="MouseLeave" Handler="digBtn_MouseLeave"/>
-            </Style>
-            <Style x:Key="digButtonText" TargetType="TextBlock">
-                <Setter Property="VerticalAlignment" Value="Center"/>
-                <Setter Property="HorizontalAlignment" Value="Center"/>
-                <Setter Property="Foreground" Value="{StaticResource appSelectedItemColor}"/>
-                <Setter Property="FontSize" Value="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter='appFontSize1', Mode=OneWay}"/>
-            </Style>
-            
-        </Grid.Resources>
         <Border Background="{StaticResource winShadowColor}"/>
 
         <Border x:Name="panelMain" Background="White" VerticalAlignment="Center" HorizontalAlignment="Center" BorderThickness="6" BorderBrush="#FFCB7E4E">
@@ -48,10 +56,10 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <!-- title -->
+                <!-- title (InputNumberWinTitle)-->
                 <Border x:Name="brdTitle" Grid.Row="0" BorderThickness="0,0,0,6" BorderBrush="#FFCB7E4E"
                         Background="{StaticResource appBackgroundColor}">
-                    <TextBlock x:Name="txtTitle" Foreground="{StaticResource appSelectedItemColor}" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter='appFontSize2', Mode=OneWay}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="txtTitle" Style="{StaticResource centeredElement}" Foreground="{StaticResource appSelectedItemColor}" Text="{Binding {x:Null}, Converter={StaticResource langDictToText}, ConverterParameter=appSet.InputNumberWinTitle, Mode=OneWay}" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter='appFontSize2', Mode=OneWay}"/>
                 </Border>
 
                 <!-- text box -->
@@ -210,11 +218,11 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Border x:Name="brdFooterCancel" Grid.Column="0" Background="#FFF6E4B7" PreviewMouseUp="brdFooterCancel_PreviewMouseDown">
+                        <Border x:Name="brdFooterCancel" Grid.Column="0" Background="#FFF6E4B7" MouseDown="brdFooterCancel_PreviewMouseDown" TouchDown="brdFooterCancel_PreviewTouchDown">
                             <TextBlock Text="Cancel" Foreground="{StaticResource btnBackBrush}" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize3}"/>
                         </Border>
 
-                        <Border x:Name="brdFooterOk" Grid.Column="2" Background="{StaticResource btnBackBrush}" PreviewMouseUp="brdFooterOk_PreviewMouseDown">
+                        <Border x:Name="brdFooterOk" Grid.Column="2" Background="{StaticResource btnBackBrush}" MouseDown="brdFooterOk_PreviewMouseDown" TouchDown="brdFooterOk_PreviewTouchDown">
                             <TextBlock Text="Ok" Foreground="{StaticResource appSelectedItemColor}" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize3}" FontWeight="Bold"/>
                         </Border>
                     </Grid>

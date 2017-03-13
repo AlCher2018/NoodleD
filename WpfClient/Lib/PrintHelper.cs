@@ -86,7 +86,7 @@ namespace WpfClient.Lib
             return false;
         }
 
-        private static List<PrintQueue> getPrintersList()
+        public static List<PrintQueue> getPrintersList()
         {
             LocalPrintServer _printServer = new LocalPrintServer();
 

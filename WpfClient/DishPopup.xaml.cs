@@ -66,7 +66,7 @@ namespace WpfClient
 
             double dW, dH, d1;
             double grdContentWidth = getAbsColWidth(gridWindow, 1, ((this.Width == pnlMenuWidth) ? this.Width : this.Width - pnlMenuWidth));
-            double grdContentHeight = getAbsRowHeight(gridWindow, 1, ((this.Height == pnlMenuHeight) ? this.Height : this.Height - pnlMenuHeight));
+            double grdContentHeight = AppLib.GetRowHeightAbsValue(gridWindow, 1, ((this.Height == pnlMenuHeight) ? this.Height : this.Height - pnlMenuHeight));
 
             double itemWidth = 10, itemHeight=10, garnTextFontSize=10;
 
@@ -76,12 +76,12 @@ namespace WpfClient
             Style lbiStyle = (Style)this.Resources["addingsListBoxItemStyle"];
             Style garnTextStyle = (Style)this.Resources["garnishTextStyle"];
             
-
+            // вертикальное размещение
             if (AppLib.IsAppVerticalLayout == true)
             {
                 DockPanel.SetDock(brdAboveFolderMenu, Dock.Top);
 
-                gridWindow.RowDefinitions[1].Height = new GridLength(3.5d, GridUnitType.Star);
+                gridWindow.RowDefinitions[1].Height = new GridLength(5d, GridUnitType.Star);
                 gridWindow.ColumnDefinitions[1].Width = new GridLength(10d, GridUnitType.Star);
 
                 // строка изображения
@@ -90,17 +90,17 @@ namespace WpfClient
                 gridMain.RowDefinitions[5].Height = new GridLength(1.2, GridUnitType.Star);
                 gridMain.RowDefinitions[8].Height = new GridLength(1.2, GridUnitType.Star);
                 // Кнопка Добавить
-                gridAddButtonSection.RowDefinitions[1].Height = new GridLength(1.0, GridUnitType.Star);
+                gridAddButtonSection.RowDefinitions[1].Height = new GridLength(2.0, GridUnitType.Star);
 
                 grdContentWidth = getAbsColWidth(gridWindow, 1, ((this.Width == pnlMenuWidth) ? this.Width : this.Width - pnlMenuWidth));
-                grdContentHeight = getAbsRowHeight(gridWindow, 1, ((this.Height == pnlMenuHeight) ? this.Height : this.Height - pnlMenuHeight));
+                grdContentHeight = AppLib.GetRowHeightAbsValue(gridWindow, 1, ((this.Height == pnlMenuHeight) ? this.Height : this.Height - pnlMenuHeight));
 
                 // ширина изображения
                 dW = getAbsColWidth(gridMain, 1, grdContentWidth);
                 dishImage.Width = 0.4d * dW;
-
-                dH = getAbsRowHeight(gridMain, 5, grdContentHeight);
-                garnTextFontSize = (0.4d * dH) * 0.25d;
+                // текст добавки
+                dH = AppLib.GetRowHeightAbsValue(gridMain, 5, grdContentHeight);
+                garnTextFontSize = (0.4d * dH) * 0.3d;
             }
 
             // горизонтальное размещение
@@ -112,7 +112,7 @@ namespace WpfClient
                 dW = getAbsColWidth(gridMain, 1, grdContentWidth);
                 dishImage.Width = 0.35d * dW;
 
-                dH = getAbsRowHeight(gridMain, 5, grdContentHeight);
+                dH = AppLib.GetRowHeightAbsValue(gridMain, 5, grdContentHeight);
                 garnTextFontSize = (0.4d * dH) * 0.3d;
             }
 
@@ -130,13 +130,13 @@ namespace WpfClient
 
             st = (Setter)garnTextStyle.Setters.FirstOrDefault(s => (s as Setter).Property.Name == "FontSize");
             st.Value = garnTextFontSize;
+            if (AppLib.IsAppVerticalLayout)
+            {
+                st = (Setter)garnTextStyle.Setters.FirstOrDefault(s => (s as Setter).Property.Name == "Margin");
+                thMargin = new Thickness(- 0.4* 0.1 * dW, 0, -0.4 * 0.1 * dW, 0);
+                st.Value = thMargin;
+            }
         }  // method
-
-        private double getAbsRowHeight(Grid grid, int iRow, double totalHeight)
-        {
-            double cntStars = grid.RowDefinitions.Sum(r => r.Height.Value);
-            return grid.RowDefinitions[iRow].Height.Value / cntStars * totalHeight;
-        }
 
         private double getAbsColWidth(Grid grid, int iCol, double totalWidth)
         {
@@ -345,10 +345,31 @@ namespace WpfClient
             Point toPoint = bezierSeg.Point3;
             pf.StartPoint = fromPoint;
             // и опорные точки кривой Безье
-            double dX = fromPoint.X - toPoint.X;
-            double dY = toPoint.Y - fromPoint.Y;
-            Point p1 = new Point(fromPoint.X - 0.3 * dX, 0.3 * fromPoint.Y);
-            Point p2 = new Point(toPoint.X + 0.05 * dX, toPoint.Y - 0.8 * dY);
+            double dX, dY; Point p1, p2;
+            if (AppLib.IsAppVerticalLayout)
+            {
+                dX = fromPoint.X - toPoint.X;
+                dY = fromPoint.Y - toPoint.Y;
+                // блюдо справа
+                if (dX > 0)
+                {
+                    p1 = new Point(0.5 * toPoint.X, 1.3 * fromPoint.Y);
+                    p2 = new Point(0.8 * toPoint.X, 0.5 * fromPoint.Y);
+                }
+                // блюдо слева
+                else
+                {
+                    p1 = new Point(1.2 * toPoint.X, 1.3 * fromPoint.Y);
+                    p2 = new Point(1.2 * toPoint.X, 0.5 * fromPoint.Y);
+                }
+            }
+            else
+            {
+                dX = fromPoint.X - toPoint.X;
+                dY = toPoint.Y - fromPoint.Y;
+                p1 = new Point(fromPoint.X - 0.3 * dX, 0.3 * fromPoint.Y);
+                p2 = new Point(toPoint.X + 0.05 * dX, toPoint.Y - 0.8 * dY);
+            }
             bezierSeg.Point1 = p1;
             bezierSeg.Point2 = p2;
 

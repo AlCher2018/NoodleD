@@ -27,6 +27,7 @@ namespace WpfClient
     {
         // подложка списка блюд
         private List<MainMenuDishesCanvas> _dishCanvas;
+        private int _dishColCount;  // кол-во колонок блюд
         // текущий заказ
         private OrderItem _currentOrder;
         // visual elements
@@ -58,6 +59,7 @@ namespace WpfClient
 
             // инициализация локальных переменных
             _dishCanvas = new List<MainMenuDishesCanvas>();
+            _dishColCount = AppLib.GetAppGlobalValue("dishesColumnsCount").ToString().ToInt();
             _daCommon1 = new DoubleAnimation();
             _daCommon2 = new DoubleAnimation();
 
@@ -218,7 +220,7 @@ namespace WpfClient
 
                 // фон
                 dishesPanelBackground.Source = ImageHelper.GetBitmapImage(@"AppImages\bg 3ver 1080x1920 background.png");
-                scrollDishes.Margin = new Thickness(0,dH,0,dH);
+                scrollDishes.Margin = new Thickness(0,0.5*dH,0,0.5*dH);
             }
 
             // иначе дизайн горизонтальный: меню категорий справа
@@ -570,7 +572,7 @@ namespace WpfClient
 
         private void brdPromoCode_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (AppLib.ShowPromoCodeWindow() == true) AppLib.SetPromoCodeTextBlock(txtPromoCode);
+            //if (AppLib.ShowPromoCodeWindow() == true) AppLib.SetPromoCodeTextBlock(txtPromoCode);
         }
         #endregion
 
@@ -669,10 +671,31 @@ namespace WpfClient
             Point toPoint = bezierSeg.Point3;
             pf.StartPoint = fromPoint;
             // и опорные точки кривой Безье
-            double dX = fromPoint.X - toPoint.X;
-            double dY = toPoint.Y - fromPoint.Y;
-            Point p1 = new Point(fromPoint.X - 0.3 * dX, 0.3 * fromPoint.Y);
-            Point p2 = new Point(toPoint.X + 0.05 * dX, toPoint.Y - 0.8 * dY);
+            double dX, dY; Point p1, p2;
+            if (AppLib.IsAppVerticalLayout)
+            {
+                dX = fromPoint.X - toPoint.X;
+                dY = fromPoint.Y - toPoint.Y;
+                // блюдо справа
+                if (dX > 0)
+                {
+                    p1 = new Point(0.5 * toPoint.X, 1.3 * fromPoint.Y);
+                    p2 = new Point(0.8 * toPoint.X, 0.5 * fromPoint.Y);
+                }
+                // блюдо слева
+                else
+                {
+                    p1 = new Point(1.5 * toPoint.X, 1.3 * fromPoint.Y);
+                    p2 = new Point(1.2 * toPoint.X, 0.5 * fromPoint.Y);
+                }
+            }
+            else
+            {
+                dX = fromPoint.X - toPoint.X;
+                dY = toPoint.Y - fromPoint.Y;
+                p1 = new Point(fromPoint.X - 0.3 * dX, 0.3 * fromPoint.Y);
+                p2 = new Point(toPoint.X + 0.05 * dX, toPoint.Y - 0.8 * dY);
+            }
             bezierSeg.Point1 = p1;
             bezierSeg.Point2 = p2;
 
@@ -847,7 +870,7 @@ namespace WpfClient
             
             if (curCanvas.Children.Count == 0) return;
 
-            int iRows = Convert.ToInt32(Math.Ceiling(curCanvas.Children.Count / 3.0));
+            int iRows = Convert.ToInt32(Math.Ceiling(1d * curCanvas.Children.Count / _dishColCount));
             // высота панели блюда
             double h1 = ((FrameworkElement)curCanvas.Children[0]).ActualHeight;
             // текущая строка
@@ -865,7 +888,7 @@ namespace WpfClient
             Canvas curCanvas = _dishCanvas[lstMenuFolders.SelectedIndex];
             if (curCanvas.Children.Count == 0) return;
 
-            int iRows = Convert.ToInt32(Math.Ceiling(curCanvas.Children.Count / 3.0));
+            int iRows = Convert.ToInt32(Math.Ceiling(1d * curCanvas.Children.Count / _dishColCount));
             // высота панели блюда
             double h1 = ((FrameworkElement)curCanvas.Children[0]).ActualHeight;
             // текущая строка
@@ -941,11 +964,11 @@ namespace WpfClient
 
         private void btnLang_TouchUp(object sender, TouchEventArgs e)
         {
-            AppLib.WriteLogTraceMessage(string.Format("{0} - TouchUp, _langButtonPress = {1}", ((FrameworkElement)sender).Name, _langButtonPress.ToString()));
+            //AppLib.WriteLogTraceMessage(string.Format("{0} - TouchUp, _langButtonPress = {1}", ((FrameworkElement)sender).Name, _langButtonPress.ToString()));
 
             _langButtonPress = 0;
 
-            AppLib.WriteLogTraceMessage(string.Format("{0} - TouchUp, _langButtonPress = {1}", ((FrameworkElement)sender).Name, _langButtonPress.ToString()));
+           // AppLib.WriteLogTraceMessage(string.Format("{0} - TouchUp, _langButtonPress = {1}", ((FrameworkElement)sender).Name, _langButtonPress.ToString()));
         }
 
         private void btnLang_TouchDown(object sender, TouchEventArgs e)
@@ -958,17 +981,17 @@ namespace WpfClient
                 case "en": _langButtonPress |= 4; break;
                 default: break;
             }
-            AppLib.WriteLogTraceMessage(string.Format("{0} - TouchDown, _langButtonPress = {1}", ((FrameworkElement)sender).Name, _langButtonPress.ToString()));
+            //AppLib.WriteLogTraceMessage(string.Format("{0} - TouchDown, _langButtonPress = {1}", ((FrameworkElement)sender).Name, _langButtonPress.ToString()));
             if (_langButtonPress == 7) App.Current.Shutdown(3);
         }
 
         private void Grid_TouchUp(object sender, TouchEventArgs e)
         {
-            AppLib.WriteLogTraceMessage(string.Format("{0} - mainGrid_PreviewMouseUp, _langButtonPress = {1}", ((FrameworkElement)sender).Name, _langButtonPress.ToString()));
+//            AppLib.WriteLogTraceMessage(string.Format("{0} - mainGrid_PreviewMouseUp, _langButtonPress = {1}", ((FrameworkElement)sender).Name, _langButtonPress.ToString()));
 
             _langButtonPress = 0;
 
-            AppLib.WriteLogTraceMessage(string.Format("{0} - mainGrid_PreviewMouseUp, _langButtonPress = {1}", ((FrameworkElement)sender).Name, _langButtonPress.ToString()));
+//            AppLib.WriteLogTraceMessage(string.Format("{0} - mainGrid_PreviewMouseUp, _langButtonPress = {1}", ((FrameworkElement)sender).Name, _langButtonPress.ToString()));
         }
 
         private void brdMakeOrder_PreviewTouchDown(object sender, TouchEventArgs e)

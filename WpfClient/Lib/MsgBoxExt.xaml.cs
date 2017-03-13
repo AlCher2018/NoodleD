@@ -146,7 +146,8 @@ namespace WpfClient.Lib
             double w = this.ActualWidth;
             double h = this.ActualHeight;
             
-            mainGrid.Width = 0.4 * w;
+            mainGrid.Width = ((w > h)?0.4:0.7) * w;
+
             CornerRadius cr = new CornerRadius(0.008 * Math.Min(w, h));
             btn1.CornerRadius = cr; btn2.CornerRadius = cr; btn3.CornerRadius = cr;
             //mainGrid.Height = 0.3 * h;

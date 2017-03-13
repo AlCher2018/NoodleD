@@ -22,9 +22,6 @@ namespace WpfClient
     {
         public string InputValue;
 
-        public string WinTitle {
-            set { txtTitle.Text = value; } }
-
         private string _preValue;
 
         public Promocode(string editCode = null)
@@ -124,32 +121,109 @@ namespace WpfClient
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            anyAction("Window_PreviewKeyDown");
+
             if (e.Key == Key.Escape) closeWin(false);
         }
 
         private void brdFooterCancel_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (e.StylusDevice != null) return;
+            e.Handled = true;
+            closeWin(false);
+        }
+        private void brdFooterCancel_PreviewTouchDown(object sender, TouchEventArgs e)
+        {
+            e.Handled = true;
             closeWin(false);
         }
 
+
         private void brdFooterOk_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (e.StylusDevice != null) return;
+            e.Handled = true;
             closeWin(true);
         }
+        private void brdFooterOk_PreviewTouchDown(object sender, TouchEventArgs e)
+        {
+            e.Handled = true;
+            closeWin(true);
+        }
+
+
+
         private void closeWin(bool isSetRetValue)
         {
             if (isSetRetValue)
             {
                 this.InputValue = txtInput.Text;
-                this.DialogResult = true;
             }
             else
             {
-                this.InputValue = _preValue;
-                this.DialogResult = false;
+                this.InputValue = null;
             }
-            //this.Close();
+            this.Close();
         }
 
+        private void Window_PreviewKeyUp(object sender, KeyEventArgs e)
+        {
+            anyAction("Window_PreviewKeyUp");
+        }
+
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            anyAction("Window_KeyDown");
+        }
+
+        private void Window_KeyUp(object sender, KeyEventArgs e)
+        {
+            anyAction("Window_KeyUp");
+        }
+
+        private void Window_PreviewTouchDown(object sender, TouchEventArgs e)
+        {
+            anyAction("Window_PreviewTouchDown");
+        }
+
+        private void Window_PreviewTouchUp(object sender, TouchEventArgs e)
+        {
+            anyAction("Window_PreviewTouchUp");
+        }
+
+        private void Window_TouchDown(object sender, TouchEventArgs e)
+        {
+            anyAction("Window_TouchDown");
+        }
+
+        private void Window_TouchUp(object sender, TouchEventArgs e)
+        {
+            anyAction("Window_TouchUp");
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            anyAction("Window_Loaded");
+        }
+
+        private void Window_Activated(object sender, EventArgs e)
+        {
+            anyAction("Window_Activated");
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            anyAction("Window_Closing");
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            anyAction("Window_Closed");
+        }
+
+        private void anyAction(string msg)
+        {
+            AppLib.WriteLogTraceMessage(msg + "\n\t"+ Environment.StackTrace);
+        }
     }  // class
 }

@@ -5,44 +5,35 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfClient"
         mc:Ignorable="d"
-        Title="TakeOrder" Height="300" Width="300"
+        Title="TakeOrder" Height="1080" Width="1920"
         WindowStyle="None" ResizeMode="NoResize" WindowState="Maximized"
         AllowsTransparency="True" Background="Transparent"
         PreviewKeyDown="Window_PreviewKeyDown"
         >
 
     <Window.Resources>
-        <Style x:Key="buttonTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource centeredElement}">
+        <Style x:Key="btnTextStyle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource centeredElement}">
             <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="10"/>
             <Style.Triggers>
                 <Trigger Property="Control.IsMouseOver" Value="True">
-                    <Setter Property="Control.Foreground" Value="{DynamicResource appSelectedItemColor}"/>
-                    <Setter Property="TextBlock.FontWeight" Value="Bold"/>
-                    <Setter Property="FontSize" Value="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize2, Mode=OneWay}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource appSelectedItemColor}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
+
+        <Style x:Key="btnBorderStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource appBackgroundColor}"/>
+            <Setter Property="CornerRadius" Value="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=cornerRadiusButton, Mode=OneWay}"/>
+        </Style>
     </Window.Resources>
 
-    <Grid x:Name="gridWindow" UseLayoutRounding="True">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="5*"/>
-        </Grid.ColumnDefinitions>
-        <Border Grid.Column="0" Background="#33000000"/>
-        <Grid Grid.Column="1" x:Name="gridShadowed" Background="{StaticResource winShadowColor}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="2*"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="2*"/>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="5*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+    <Grid x:Name="gridWindow" UseLayoutRounding="True" Background="{StaticResource winShadowColor}">
+        <DockPanel>
+            <!-- Background="#33000000" -->
+            <Border x:Name="brdAboveFolderMenu" DockPanel.Dock="Left" Width="300"/>
 
-            <Border x:Name="brdDialog" Grid.Row="1" Grid.Column="1" Background="White">
+            <Border x:Name="brdDialog" Background="White" CornerRadius="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=cornerRadiusButton, Mode=OneWay}">
                 <Grid x:Name="gridDialog">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
@@ -57,25 +48,25 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <!--кнопка закрытия окна  -->
-                    <Grid x:Name="gridCloseButton" Grid.Column="4">
-                        <Image x:Name="btnClose" Source="AppImages\closeWindow.png" VerticalAlignment="Top" HorizontalAlignment="Right" MouseDown="btnClose_MouseDown"/>
-                    </Grid>
-
-                    <Border x:Name="btnTakeOut" Grid.Row="1" Grid.Column="1" Background="{DynamicResource appBackgroundColor}" PreviewMouseDown = "btnTakeOut_MouseDown" PreviewTouchDown="btnTakeOut_PreviewTouchDown">
-                        <TextBlock x:Name="txtTakeOut" Grid.Row="1" Grid.Column="1" 
-                                   Style="{StaticResource buttonTextStyle}"/>
+                    <!-- border for click -->
+                    <Border Grid.Column="4" PreviewMouseDown="btnClose_MouseDown" CornerRadius="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=cornerRadiusButton, Mode=OneWay}" PreviewTouchDown="btnClose_PreviewTouchDown" Background="{Binding ElementName=brdDialog, Path=Background}">
+                        <Image x:Name="btnClose"  Grid.Column="4" Source="AppImages\closeWindow.png" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="{Binding ElementName=brdDialog, Path=ActualHeight, Converter={StaticResource getMargin}, ConverterParameter='0,0.1,0.1,0', Mode=OneWay}"/>
                     </Border>
 
-                    <TextBlock x:Name="txtWordOr" Grid.Row="1" Grid.Column="2" Foreground="Black" Style="{StaticResource centeredElement}"/>
+                    <Border x:Name="btnTakeOut" Grid.Row="1" Grid.Column="1" Style="{StaticResource btnBorderStyle}" PreviewMouseDown = "btnTakeOut_MouseDown" PreviewTouchDown="btnTakeOut_PreviewTouchDown">
+                        <TextBlock x:Name="txtTakeOut" Grid.Row="1" Grid.Column="1" Style="{StaticResource btnTextStyle}" Text="{Binding Converter={StaticResource langDictToText}, ConverterParameter=appSet.takeOrderOut}"/>
+                    </Border>
 
-                    <Border x:Name="btnTakeIn" Grid.Row="1" Grid.Column="3" Background="{DynamicResource appBackgroundColor}" PreviewMouseDown = "btnTakeIn_MouseDown" PreviewTouchDown="btnTakeIn_PreviewTouchDown">
-                        <TextBlock x:Name="txtTakeIn" Grid.Row="1" Grid.Column="3"
-                                   Style="{StaticResource buttonTextStyle}"/>
+                    <TextBlock x:Name="txtWordOr" Grid.Row="1" Grid.Column="2" Foreground="Black" Style="{StaticResource centeredElement}" Text="{Binding Converter={StaticResource langDictToText}, ConverterParameter=appSet.wordOr}"/>
+
+                    <Border x:Name="btnTakeIn" Grid.Row="1" Grid.Column="3" Style="{StaticResource btnBorderStyle}" PreviewMouseDown = "btnTakeIn_MouseDown" PreviewTouchDown="btnTakeIn_PreviewTouchDown">
+                        <TextBlock x:Name="txtTakeIn" Grid.Row="1" Grid.Column="3" Style="{StaticResource btnTextStyle}" Text="{Binding Converter={StaticResource langDictToText}, ConverterParameter=appSet.takeOrderIn}"/>
                     </Border>
 
                 </Grid>
             </Border>
 
-        </Grid>
+        </DockPanel>
     </Grid>
+
 </Window>

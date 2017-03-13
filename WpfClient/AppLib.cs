@@ -49,7 +49,7 @@ namespace WpfClient
 
         public static void WriteLogTraceMessage(string msg)
         {
-            if ((bool)AppLib.GetAppGlobalValue("IsWriteTraceMessages")) AppLogger.Trace(msg);
+            if ((bool)AppLib.GetAppGlobalValue("IsWriteTraceMessages")) AppLogger.Trace(string.Format("{0}: {1}", DateTime.Now.ToString(), msg) );
         }
         public static void WriteLogTraceMessage(string format, params string[] values)
         {
@@ -187,6 +187,12 @@ namespace WpfClient
 
         #region WPF UI interface
 
+        public static double GetRowHeightAbsValue(Grid grid, int iRow, double totalHeight)
+        {
+            double cntStars = grid.RowDefinitions.Sum(r => r.Height.Value);
+            return grid.RowDefinitions[iRow].Height.Value / cntStars * totalHeight;
+        }
+
         public static bool IsAppVerticalLayout
         {
             get
@@ -309,7 +315,7 @@ namespace WpfClient
         #region AppBL
 
         // сохранить настройки приложения из config-файла в свойствах приложения
-        private static bool saveAppSettingToProps(string settingName, Type settingType = null)
+        public static bool saveAppSettingToProps(string settingName, Type settingType = null)
         {
             string settingValue = AppLib.GetAppSetting(settingName);
             if (settingValue == null) return false;
@@ -361,6 +367,7 @@ namespace WpfClient
             // добавить некоторые постоянные тексты (заголовки, надписи на кнопках)
             parseAndSetAllLangString("dialogBoxYesText");
             parseAndSetAllLangString("dialogBoxNoText");
+            parseAndSetAllLangString("InputNumberWinTitle");
             parseAndSetAllLangString("cartDelIngrTitle");
             parseAndSetAllLangString("cartDelIngrQuestion");
             parseAndSetAllLangString("cartDelDishTitle");
@@ -415,7 +422,7 @@ namespace WpfClient
 
                     foreach (Setting item in setList)
                     {
-                        AppLib.WriteLogTraceMessage("- параметр "+ item.UniqName + "...");
+//                        AppLib.WriteLogTraceMessage("- параметр "+ item.UniqName + "...");
 
                         AppLib.SetAppGlobalValue(item.UniqName, item.Value);
                         if (item.UniqName.EndsWith("Color") == true)  // преобразовать и переопределить цвета
@@ -429,7 +436,7 @@ namespace WpfClient
                             AppLib.SetAppGlobalValue(item.UniqName, d);
                         }
 
-                        AppLib.WriteLogTraceMessage("- параметр " + item.UniqName + "... Ready");
+//                        AppLib.WriteLogTraceMessage("- параметр " + item.UniqName + "... Ready");
                     }
                 }
                 catch (Exception e)
@@ -590,15 +597,18 @@ namespace WpfClient
 
         public static bool ShowPromoCodeWindow()
         {
-            Promocode promoWin = new Promocode(AppLib.GetPromoCode());
-            bool isOk = (promoWin.ShowDialog() ?? false);
+            string _preCode = GetPromoCode();
 
-            if (isOk) SetPromoCode(promoWin.InputValue);
-
+            Promocode promoWin = new Promocode(_preCode);
+            promoWin.ShowDialog();
+            string _newCode = promoWin.InputValue;
             promoWin = null;
             GC.Collect();
 
-            return isOk;
+            bool isNewValue = (_newCode != null) && ((_preCode == null) || (_preCode != _newCode));
+            if (isNewValue) SetPromoCode(_newCode);
+
+            return isNewValue;
         }
 
         public static void SetPromoCode(string value)
