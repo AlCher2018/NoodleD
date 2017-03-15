@@ -70,6 +70,7 @@ namespace WpfClient
             }
         }
 
+        public event EventHandler Completed;
 
         public TextAnimation()
         {
@@ -79,10 +80,22 @@ namespace WpfClient
             _daSize = new DoubleAnimation() { AutoReverse = true };
             _daSize.FillBehavior = FillBehavior.Stop;
             _daSize.Duration = TimeSpan.FromMilliseconds(_durationFontSize);
+            _daSize.Completed += _daSize_Completed;
 
             _daBlur = new DoubleAnimation() { AutoReverse = true };
             _daBlur.FillBehavior = FillBehavior.Stop;
             _daBlur.Duration = TimeSpan.FromMilliseconds(_durationTextBlur);
+            _daBlur.Completed += _daBlur_Completed;
+        }
+
+        private void _daBlur_Completed(object sender, EventArgs e)
+        {
+            if (Completed != null) Completed("AnimTextBlur", null);
+        }
+
+        private void _daSize_Completed(object sender, EventArgs e)
+        {
+            if (Completed != null) Completed("AnimFontSize", null);
         }
 
         public void BeginAnimation(TextBlock textBlock, double initFontSize = 0)

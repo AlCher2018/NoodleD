@@ -89,6 +89,8 @@ namespace WpfClient
 
         private void MainMenuGarnish_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
+            if (AppLib.IsDrag) return;
+
             _isSelected = !_isSelected;
             setSelectionMode();
             // передать уведомление в панель блюда

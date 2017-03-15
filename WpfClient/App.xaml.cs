@@ -228,6 +228,7 @@ namespace WpfClient
             screenHeight = SystemParameters.PrimaryScreenHeight;
             //            screenHeight = SystemParameters.VirtualScreenHeight;
 
+
             AppLib.SetAppGlobalValue("screenWidth", screenWidth);
             AppLib.SetAppGlobalValue("screenHeight", screenHeight);
 
@@ -294,13 +295,13 @@ namespace WpfClient
             // размер кнопки описания блюда
             AppLib.SetAppGlobalValue("dishPanelDescrButtonSize", 0.085d * dishPanelWidth);
             // высота панелей
-            double dishPanelHeight = Math.Ceiling(dishPanelHeaderRowHeight + dishPanelRowMargin1 + dishPanelImageRowHeight + dishPanelRowMargin2 + dishPanelAddButtonRowHeight);
-            double dishPanelHeightWithGarnish = Math.Ceiling(dishPanelHeight + dishPanelGarnishesRowHeight + dishPanelRowMargin2);
+            double dishPanelHeight = Math.Floor(dishPanelHeaderRowHeight + dishPanelRowMargin1 + dishPanelImageRowHeight + dishPanelRowMargin2 + dishPanelAddButtonRowHeight);
+            double dishPanelHeightWithGarnish = Math.Floor(dishPanelHeight + dishPanelGarnishesRowHeight + dishPanelRowMargin2);
             AppLib.SetAppGlobalValue("dishPanelHeight", dishPanelHeight);
             AppLib.SetAppGlobalValue("dishPanelHeightWithGarnish", dishPanelHeightWithGarnish);
             dVar = 1d;
-            double contentPanelHeight = Math.Ceiling(dVar * dishPanelHeight);
-            double contentPanelHeightWithGarnish = Math.Ceiling(dVar * dishPanelHeightWithGarnish);
+            double contentPanelHeight = Math.Floor(dVar * dishPanelHeight);
+            double contentPanelHeightWithGarnish = Math.Floor(dVar * dishPanelHeightWithGarnish);
             AppLib.SetAppGlobalValue("contentPanelHeight", contentPanelHeight);
             AppLib.SetAppGlobalValue("contentPanelHeightWithGarnish", contentPanelHeightWithGarnish);
             // ***********

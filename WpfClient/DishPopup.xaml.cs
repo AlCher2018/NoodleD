@@ -201,6 +201,7 @@ namespace WpfClient
             Point toBasePoint = brdMakeOrder.PointToScreen(new Point(0, 0));
             Size toSize = brdMakeOrder.RenderSize;
             Point endPoint = new Point(toBasePoint.X + toSize.Width / 2.0, toBasePoint.Y + toSize.Height / 2.0);
+            if (AppLib.ScreenScale != 1d) endPoint = PointFromScreen(endPoint);
             // установить для сегмента анимации конечную точку
             PathFigure pf = (animPath.Data as PathGeometry).Figures[0];
             BezierSegment bs = (pf.Segments[0] as BezierSegment);
@@ -342,6 +343,7 @@ namespace WpfClient
             BezierSegment bezierSeg = (pf.Segments[0] as BezierSegment);
             // получить точку начала анимации: центр панели блюда
             Point fromPoint = dishImage.PointToScreen(new Point(dishImage.ActualWidth / 2d, dishImage.ActualHeight / 2d));
+            if (AppLib.ScreenScale != 1d) fromPoint = PointFromScreen(fromPoint);
             Point toPoint = bezierSeg.Point3;
             pf.StartPoint = fromPoint;
             // и опорные точки кривой Безье

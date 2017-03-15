@@ -84,6 +84,7 @@
         <Style x:Key="menuItemStyle" TargetType="{x:Type ListBoxItem}">
             <Setter Property="Foreground" Value="{StaticResource appNotSelectedItemColor}"/>
             <Setter Property="Template" Value="{StaticResource menuListBoxItemTemplate}"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Style.Triggers>
                 <!--<Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Foreground" Value="Yellow"/>
@@ -207,10 +208,11 @@
 
                 </StackPanel>
 
-                <ListBox x:Name="lstMenuFolders" Grid.Row="1" SelectionMode="Single" BorderThickness="0" SnapsToDevicePixels="True" HorizontalContentAlignment="Stretch" Background="{StaticResource appBackgroundColor}"
+                <ListBox x:Name="lstMenuFolders" Grid.Row="1" SelectionMode="Single" BorderThickness="0" SnapsToDevicePixels="True" HorizontalContentAlignment="Stretch" Background="{StaticResource appBackgroundColor}" Focusable="False" FocusVisualStyle="{x:Null}"
                          ItemContainerStyle="{StaticResource menuItemStyle}"
                          ItemTemplate="{StaticResource menuDataTemplate}"
-                         SelectionChanged="lstMenuFolders_SelectionChanged">
+                         SelectionChanged="lstMenuFolders_SelectionChanged"
+                         >
                 </ListBox>
 
                 <!--промо панель-->
@@ -244,12 +246,15 @@
         <!-- грид панели блюд -->
         <Grid x:Name="gridDishesSide">
 
-            <local:AniScrollViewer x:Name="scrollDishes" CanContentScroll="False" HorizontalAlignment="Center" VerticalAlignment="Top" UseLayoutRounding="True" VerticalScrollBarVisibility="Hidden" 
+                <local:AniScrollViewer x:Name="scrollDishes" IsHitTestVisible="True" CanContentScroll="False" VirtualizingPanel.ScrollUnit="Pixel" Focusable="False" FocusVisualStyle="{x:Null}" HorizontalAlignment="Center" VerticalAlignment="Top" UseLayoutRounding="True" VerticalScrollBarVisibility="Hidden" 
                       ScrollChanged="scrollDishes_ScrollChanged"
-                      PreviewMouseLeftButtonDown="scrollDishes_PreviewMouseLeftButtonDown"
-                      PreviewMouseLeftButtonUp="scrollDishes_MouseLeftButtonUp" 
-                      PreviewMouseMove = "scrollDishes_MouseMove">
-            </local:AniScrollViewer>
+                      PreviewMouseDown="scrollDishes_PreviewMouseDown"
+                      PreviewMouseUp="scrollDishes_PreviewMouseUp" 
+                      PreviewMouseMove = "scrollDishes_MouseMove"
+                      PreviewTouchDown="scrollDishes_PreviewTouchDown"
+                      PreviewTouchUp="scrollDishes_PreviewTouchUp"
+                      PreviewTouchMove = "scrollDishes_PreviewTouchMove">
+                </local:AniScrollViewer>
 
             <Viewbox x:Name="btnScrollDown" HorizontalAlignment="Right" VerticalAlignment="Bottom" Visibility="Hidden">
                 <Canvas Width="100" Height="100" MouseDown="btnScrollDown_MouseDown">

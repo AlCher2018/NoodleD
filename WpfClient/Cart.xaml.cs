@@ -22,6 +22,7 @@ namespace WpfClient
         Point? lastDragPoint, initDragPoint;
         protected DateTime _dateTime;
         private OrderItem _currentOrder;
+        private bool _isDrag;
 
         private double dishBorderHeight;
 
@@ -164,27 +165,37 @@ namespace WpfClient
 
                 dishBorderHeight = (dishesPanelHeight - dishesListTitle.ActualHeight) / 4.0;
                 titleFontSize = 0.02 * dishesPanelHeight;
-                dishNameFontSize = 0.1 * dishBorderHeight;
+                dishNameFontSize = 0.09 * dishBorderHeight;
                 dishUnitFontSize = 0.08 * dishBorderHeight;
-                dKoefPortionCount = 1.75;
+                dKoefPortionCount = 1.5;
                 // отступы кнопок изменения кол-ва блюда
-                setStylePropertyValue("dishPortionImageStyle", "Margin", new Thickness(0.06 * dishBorderHeight));
+                setStylePropertyValue("dishPortionImageStyle", "Margin", new Thickness(0.03 * dishBorderHeight));
                 setStylePropertyValue("dishDelImageStyle", "Margin", new Thickness(0.15 * dishBorderHeight));
             }
 
             // высота рамки блюда в заказе, из стиля
-            setStylePropertyValue("dishBorderStyle", "Height", dishBorderHeight);
+            setStylePropertyValue("dishBorderStyle", "MinHeight", dishBorderHeight);
             // элементы в строке блюда, относительно ее высоты dishBorderHeight
             // внутренние поля в рамке блюда
-            setStylePropertyValue("dishListBoxItemStyle", "Padding",  new Thickness(0.1 * dishBorderHeight, 0.06 * dishBorderHeight, 0, 0.06 * dishBorderHeight));
+            setStylePropertyValue("dishListBoxItemStyle", "Padding",  new Thickness(0.06 * dishBorderHeight, 0.05 * dishBorderHeight, 0, 0.05 * dishBorderHeight));
+            
+            // изображение блюда (1:1.33)
+            setStylePropertyValue("dishImageBorderStyle", "Height", 1.0 * dishBorderHeight);
+            setStylePropertyValue("dishImageBorderStyle", "Width", 1.33 * dishBorderHeight);
+            
             //  наименование блюда
             setStylePropertyValue("dishNameStyle", "FontSize", dishNameFontSize);
             // ед.изм. блюда
             setStylePropertyValue("dishUnitStyle", "FontSize", dishUnitFontSize);
+            // маркеры блюда
+            setStylePropertyValue("dishMarksItemStyle", "Height", 1.2*dishUnitFontSize);
+            
             // заголовок ингредиентов
             setStylePropertyValue("dishIngrTitleStyle", "FontSize", dishUnitFontSize);
             // наименование и цена ингредиента
             setStylePropertyValue("dishIngrStyle", "FontSize", dishUnitFontSize);
+            setStylePropertyValue("dishIngrDelImageStyle", "Width", 2.5 * dishUnitFontSize);
+            setStylePropertyValue("dishIngrDelImageStyle", "Padding", new Thickness(0.5 * dishUnitFontSize, 0.2 * dishUnitFontSize, 0.5 * dishUnitFontSize, 0.2 * dishUnitFontSize));
             // количество и цена порции
             setStylePropertyValue("dishPortionTextStyle", "FontSize", dKoefPortionCount * dishNameFontSize);
 
@@ -244,9 +255,9 @@ namespace WpfClient
             e.Handled = true;
         }
 
-        private void scrollDishes_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void scrollDishes_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            //if (e.StylusDevice != null) return;
+            if (e.StylusDevice != null) return;
 
             initDrag(e.GetPosition(scrollDishes));
         }
@@ -256,9 +267,9 @@ namespace WpfClient
             initDrag(e.GetTouchPoint(scrollDishes).Position);
         }
 
-        private void scrollDishes_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private void scrollDishes_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
-            //if (e.StylusDevice != null) return;
+            if (e.StylusDevice != null) return;
 
             endDrag();
         }
@@ -269,9 +280,9 @@ namespace WpfClient
             endDrag();
         }
 
-        private void scrollDishes_MouseMove(object sender, MouseEventArgs e)
+        private void scrollDishes_PreviewMouseMove(object sender, MouseEventArgs e)
         {
-            //if (e.StylusDevice != null) return;
+            if (e.StylusDevice != null) return;
 
             if (lastDragPoint.HasValue && e.LeftButton == MouseButtonState.Pressed)
             {
@@ -329,9 +340,14 @@ namespace WpfClient
 
         private void endDrag()
         {
-            //scrollDishes.Cursor = Cursors.Arrow;
-            //scrollViewer.ReleaseMouseCapture();
-            //lastDragPoint = null;
+            if ((lastDragPoint == null) || (initDragPoint == null))
+            {
+                _isDrag = false;
+            }
+            else
+            {
+                _isDrag = (Math.Abs(lastDragPoint.Value.X - initDragPoint.Value.X) > 3) || (Math.Abs(lastDragPoint.Value.Y - initDragPoint.Value.Y) > 3);
+            }
         }
         private void doMove(Point posNow)
         {
@@ -443,7 +459,9 @@ namespace WpfClient
 
         private void portionCountAdd_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint) == false) { lastDragPoint = null; return; }
+            //            if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint) == false) { lastDragPoint = null; return; }
+            if (_isDrag) return;
+
             lock (this)
             {
                 portionCountAdd();
@@ -453,7 +471,9 @@ namespace WpfClient
 
         private void portionCountDel_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint) == false) { lastDragPoint = null; return; }
+            //            if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint) == false) { lastDragPoint = null; return; }
+            if (_isDrag) return;
+
             lock (this)
             {
                 portionCountDel();
@@ -588,17 +608,14 @@ namespace WpfClient
             // если стоимость чека == 0, то выйти
             if (_currentOrder.GetOrderValue() == 0) return;
 
-            TakeOrder takeOrderWin = new TakeOrder();
+            TakeOrder takeOrderWin = AppLib.TakeOrderWindow;
             takeOrderWin.ShowDialog();
-            TakeOrderEnum takeMode = takeOrderWin.TakeOrderMode;
-            takeOrderWin = null;
+            // сохранить в заказе флажок "с собой"
+            _currentOrder.takeAway = (takeOrderWin.TakeOrderMode == TakeOrderEnum.TakeAway);
 
-            if (takeMode != TakeOrderEnum.None)
+            if (takeOrderWin.TakeOrderMode != TakeOrderEnum.None)
             {
-                // сохранить в заказе флажок "с собой"
-                _currentOrder.takeAway = (takeMode == TakeOrderEnum.TakeAway);
-
-                PrintBill prn = new PrintBill(_currentOrder, takeMode);
+                PrintBill prn = new PrintBill(_currentOrder);
                 string userErrMsg = null;
                 bool result = prn.CreateBill(out userErrMsg);
 

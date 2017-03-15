@@ -61,7 +61,23 @@ namespace WpfClient
 
     } // class
 
+    public static class IntExtensions
+    {
+        public static int SetBit(this int bitMask, int bit)
+        {
+            return (bitMask |= (1 << bit));
+        }
+        public static int ClearBit(this int bitMask, int bit)
+        {
+            return (bitMask &= ~(1 << bit));
+        }
+        public static bool IsSetBit(this int bitMask, int bit)
+        {
+            int val = (1 << bit);
+            return (bitMask & val) == val;
+        }
 
+    }
 
     // расширения класса System.Windows.Media.ImageSource / System.Windows.Controls.Image
     public static class BitmapImageExtensions

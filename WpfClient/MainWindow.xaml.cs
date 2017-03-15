@@ -17,6 +17,7 @@ using System.Diagnostics;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
 using System.Timers;
+using System.ComponentModel;
 
 namespace WpfClient
 {
@@ -43,19 +44,26 @@ namespace WpfClient
         private Effect _orderPriceEffectShadow;
         private Effect _orderPriceEffectBlur;
 
+#if (enableTimer)
+        // логгер нажатий
+        NLog.Logger _touchLogger = NLog.LogManager.GetLogger("touchTrace");
+        TextBlock tbTimer;
+        Timer _tmr;
+#endif
+
         // dragging
         private Point? lastDragPoint, initDragPoint;
         private DateTime _dateTime;
 
         public List<MainMenuDishesCanvas> DishesPanels { get { return _dishCanvas; } }
 
-
         public MainWindow()
         {
             InitializeComponent();
 
             // для настройки элементов после отрисовки окна
-            Loaded += MainWindow_Loaded;
+            this.Loaded += MainWindow_Loaded;
+            this.Closing += MainWindow_Closing;
 
             // инициализация локальных переменных
             _dishCanvas = new List<MainMenuDishesCanvas>();
@@ -74,6 +82,11 @@ namespace WpfClient
             initUI();
         }
 
+        private void MainWindow_Closing(object sender, CancelEventArgs e)
+        {
+            AppLib.CloseChildWindows(true);
+        }
+
         protected override void OnClosed(EventArgs e)
         {
             base.OnClosed(e);
@@ -82,10 +95,14 @@ namespace WpfClient
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            Point pt = PointFromScreen(new Point(1920, 1080));
+            AppLib.ScreenScale = 1920.0 / pt.X;
+
             //   конечный элемент анимации выбора блюда, это Point3 в BezierSegment
             Point toBasePoint = brdMakeOrder.PointToScreen(new Point(0, 0));
             Size toSize = brdMakeOrder.RenderSize;
             Point endPoint = new Point(toBasePoint.X + toSize.Width / 2.0, toBasePoint.Y + toSize.Height / 2.0);
+            if (AppLib.ScreenScale != 1d) endPoint = PointFromScreen(endPoint);
             // установить для сегмента анимации конечную точку
             PathFigure pf = (this.animPath.Data as PathGeometry).Figures[0];
             BezierSegment bs = (pf.Segments[0] as BezierSegment);
@@ -96,7 +113,72 @@ namespace WpfClient
             {
                 int idleSec = int.Parse(sBuf);
             }
+
+#if (enableTimer)
+            menuSidePanelLogo.Children.Remove(imageLogo);
+            tbTimer = new TextBlock()
+            {
+                FontSize=24, FontWeight=FontWeights.Bold, Foreground = Brushes.Yellow, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0,10,0,0)
+            };
+            menuSidePanelLogo.Children.Insert(0, tbTimer);
+
+            //enableEvents(lstMenuFolders);
+
+            _tmr = new Timer();
+            _tmr.Elapsed += _tmr_Elapsed;
+            _tmr.Interval = 100;
+            _tmr.Start();
+#endif
+        }  // method
+
+#if (enableTimer)
+        private void _tmr_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            this.Dispatcher.Invoke(() => tbTimer.Text = e.SignalTime.ToString("yyyy.MM.dd HH:mm:ss.f00"));
         }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            base.OnClosing(e);
+            _tmr.Stop();
+            _tmr.Dispose();
+        }
+        private void enableEvents(FrameworkElement ctl)
+        {
+            ctl.PreviewTouchDown += lstEvent; 
+//            ctl.PreviewTouchMove += lstEvent;
+            ctl.PreviewTouchUp += lstEvent;
+
+            ctl.TouchEnter += lstEvent;
+            ctl.TouchDown += lstEvent; 
+            ctl.TouchMove += lstEvent;
+            ctl.TouchUp += lstEvent;
+            ctl.TouchLeave += lstEvent;
+
+            ctl.PreviewMouseDown += lstEvent;
+//            ctl.PreviewMouseMove += lstEvent;
+            ctl.PreviewMouseUp += lstEvent;
+
+            ctl.MouseEnter += lstEvent;
+            ctl.MouseDown += lstEvent;
+            ctl.MouseMove += lstEvent;
+            ctl.MouseUp += lstEvent;
+            ctl.MouseLeave += lstEvent;
+        }
+        private void lstEvent(object sender, RoutedEventArgs e)
+        {
+            if (e.RoutedEvent.Name.Equals("PreviewTouchEnter")) outTouchTrace("\n");
+            else if (e.RoutedEvent.Name.Equals("TouchEnter")) outTouchTrace("\n");
+            else if (e.RoutedEvent.Name.Equals("PreviewMouseEnter")) outTouchTrace("\n");
+            else if (e.RoutedEvent.Name.Equals("MouseEnter")) outTouchTrace("\n");
+
+            outTouchTrace(e.RoutedEvent.Name);
+        }
+        private void outTouchTrace(string msg)
+        {
+            _touchLogger.Trace(msg);
+        }
+#endif
 
         private void initUI()
         {
@@ -148,6 +230,9 @@ namespace WpfClient
             }
 
             AppLib.WriteLogTraceMessage("Настраиваю визуальные элементы - READY");
+
+            // вспомогательные окна
+            AppLib.TakeOrderWindow = new TakeOrder();
         }
 
         private void setAppLayout()
@@ -185,18 +270,23 @@ namespace WpfClient
                 menuSidePanelLogo.Orientation = Orientation.Horizontal;
                 //   logo
                 imageLogo.Height = 1.5 * dH;
-                imageLogo.Width = 0.3 * gridMenuSide.Width;
+                imageLogo.Width = 0.333 * gridMenuSide.Width;
                 imageLogo.HorizontalAlignment = HorizontalAlignment.Left;
                 imageLogo.Margin = new Thickness(dH, 0, 0, 0);
+
                 //   языковые кнопки
                 gridLang.Height = 2.0 * dH;  // необходимо для расчета размера внутренних кнопок
-                gridLang.Width = 0.2 * gridMenuSide.Width;
-                gridLang.Margin = new Thickness(0.1 * gridMenuSide.Width, 0, 0.1 * gridMenuSide.Width, 0);
+                gridLang.Width = 0.3 * gridMenuSide.Width;
+                //gridLang.Background = Brushes.Yellow;
+                //gridLang.Margin = new Thickness(0.1 * gridMenuSide.Width, 0, 0.1 * gridMenuSide.Width, 0);
+                
                 // перенести промокод
                 gridMenuSide.Children.Remove(gridPromoCode);
+                //gridPromoCode.ColumnDefinitions[3].Width = new GridLength(0.0 * dH);
                 menuSidePanelLogo.Children.Add(gridPromoCode);
-                gridPromoCode.Width = 0.3 * gridMenuSide.Width - dH;
+                gridPromoCode.Width = 0.333 * gridMenuSide.Width;
                 gridPromoCode.Height = 1.5 * dH;
+//                gridPromoCode.Background = Brushes.Green;
                 promoFontSize = 0.5 * dH;
                 gridPromoCode.HorizontalAlignment = HorizontalAlignment.Right;
 
@@ -290,7 +380,7 @@ namespace WpfClient
             btnLangRu.Background = menuSidePanelLogo.Background;
             btnLangEn.Background = menuSidePanelLogo.Background;
             double dMin = Math.Min(gridLang.Height, gridMenuSide.Width / (0.3 + 1.0 + 0.3 + 1.0 + 0.3 + 1.0 + 0.3));
-            double dLangSize = 0.6 * dMin;
+            double dLangSize = Math.Floor(0.7 * dMin);
             setLngInnerBtnSizes(btnLangUaInner, lblLangUa, dLangSize);
             setLngInnerBtnSizes(btnLangRuInner, lblLangRu, dLangSize);
             setLngInnerBtnSizes(btnLangEnInner, lblLangEn, dLangSize);
@@ -307,7 +397,7 @@ namespace WpfClient
 
         private void setLngInnerBtnSizes(Border btnLangInner, TextBlock lblLang, double dLangSize)
         {
-            double dMargin = (1.0 - dLangSize) / 2.0;
+            double dMargin = Math.Floor((1.0 - dLangSize) / 2.0) + 1d;
             btnLangInner.Height = dLangSize; btnLangInner.Width = dLangSize;
             btnLangInner.CornerRadius = new CornerRadius(dLangSize / 2.0);
             btnLangInner.Margin = new Thickness(dMargin);
@@ -426,6 +516,8 @@ namespace WpfClient
                 txtStyle.Setters.Add(new Setter(TextBlock.FontSizeProperty, txtFontSize));
             else
                 st.Value = txtFontSize;
+
+            //SetterBase bs = brdStyle.Setters.FirstOrDefault(s => (s as Setter).Property.Name == "MouseDown");
 
         }  // method
 
@@ -668,6 +760,7 @@ namespace WpfClient
             BezierSegment bezierSeg = (pf.Segments[0] as BezierSegment);
             // получить точку начала анимации: центр панели блюда
             Point fromPoint = pathImage.PointToScreen(new Point(pathImage.ActualWidth / 2d, pathImage.ActualHeight / 2d));
+            if (AppLib.ScreenScale != 1d) fromPoint = PointFromScreen(fromPoint);
             Point toPoint = bezierSeg.Point3;
             pf.StartPoint = fromPoint;
             // и опорные точки кривой Безье
@@ -762,10 +855,9 @@ namespace WpfClient
         {
             e.Handled = true;
         }
-
-        private void scrollDishes_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void scrollDishes_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            //if (e.StylusDevice != null) return;
+            if (e.StylusDevice != null) return;
 
             initDrag(e.GetPosition(scrollDishes));
         }
@@ -775,13 +867,12 @@ namespace WpfClient
             initDrag(e.GetTouchPoint(scrollDishes).Position);
         }
 
-        private void scrollDishes_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private void scrollDishes_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
-            //if (e.StylusDevice != null) return;
+            if (e.StylusDevice != null) return;
 
             endDrag();
         }
-
 
         private void scrollDishes_PreviewTouchUp(object sender, TouchEventArgs e)
         {
@@ -790,7 +881,7 @@ namespace WpfClient
 
         private void scrollDishes_MouseMove(object sender, MouseEventArgs e)
         {
-            //if (e.StylusDevice != null) return;
+            if (e.StylusDevice != null) return;
 
             if (lastDragPoint.HasValue && e.LeftButton == MouseButtonState.Pressed)   
             {
@@ -847,9 +938,14 @@ namespace WpfClient
 
         private void endDrag()
         {
-            //scrollDishes.Cursor = Cursors.Arrow;
-            //scrollViewer.ReleaseMouseCapture();
-            //lastDragPoint = null;
+            if ((lastDragPoint == null) || (initDragPoint == null))
+            {
+                AppLib.IsDrag = false;
+            }
+            else
+            {
+                AppLib.IsDrag = (Math.Abs(lastDragPoint.Value.X - initDragPoint.Value.X) > 3) || (Math.Abs(lastDragPoint.Value.Y - initDragPoint.Value.Y) > 3);
+            }
         }
         private void doMove(Point posNow)
         {
@@ -935,6 +1031,10 @@ namespace WpfClient
         // боковое меню выбора категории блюд
         private void lstMenuFolders_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+#if (enableTimer)
+            AppModel.MenuItem mi = e.AddedItems[0] as AppModel.MenuItem;
+            outTouchTrace(string.Format("выбрана кнопка: {0}", mi.langNames["ru"]));
+#endif
             e.Handled = true;
 
             if ((_dishCanvas.Count > 0) && (lstMenuFolders.SelectedIndex <= (_dishCanvas.Count-1)))
@@ -997,6 +1097,21 @@ namespace WpfClient
         private void brdMakeOrder_PreviewTouchDown(object sender, TouchEventArgs e)
         {
             showCartWindow();
+        }
+
+        private void scrollDishes_PreviewTouchDown_1(object sender, TouchEventArgs e)
+        {
+
+        }
+
+        private void scrollDishes_PreviewTouchUp_1(object sender, TouchEventArgs e)
+        {
+
+        }
+
+        private void scrollDishes_PreviewTouchMove_1(object sender, TouchEventArgs e)
+        {
+
         }
 
         private void btnShowCart_MouseUp(object sender, MouseButtonEventArgs e)

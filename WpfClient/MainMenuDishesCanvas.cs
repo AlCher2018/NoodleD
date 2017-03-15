@@ -72,7 +72,9 @@ namespace WpfClient
         {
             foreach (MainMenuDishPanel dishPanel in this.Children)
             {
-                if ((dishPanel.HasGarnishes) && (dishPanel.SelectedGarnishIndex > -1))
+                if ((dishPanel.HasGarnishes) && 
+                    ((dishPanel.SelectedGarnishIndex > -1) || dishPanel.IsAnimating.IsSetBit(2) || dishPanel.IsAnimating.IsSetBit(3))
+                    )
                 {
                     dishPanel.ClearSelectedGarnish();
                 }

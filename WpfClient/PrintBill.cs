@@ -22,13 +22,11 @@ namespace WpfClient
 
         private OrderItem _order;
         string _langId;
-        TakeOrderEnum _takeMode;
 
-        public PrintBill(OrderItem order, TakeOrderEnum takeMode)
+        public PrintBill(OrderItem order)
         {
             _order = order;
             _langId = AppLib.AppLang;
-            _takeMode = takeMode;
         }
 
         public bool CreateBill(out string errMessage)
@@ -151,7 +149,7 @@ namespace WpfClient
             // вставить изображение в заголовок
             addImageToDoc(textHeader, doc);
             // метка, если заказ С СОБОЙ
-            if (_takeMode == TakeOrderEnum.TakeAway)
+            if (_order.takeAway == true)
             {
                 string langText = AppLib.GetLangTextFromAppProp("takeOrderOut");
                 langText = string.Concat(" **** ", langText.ToUpper(), " ****");

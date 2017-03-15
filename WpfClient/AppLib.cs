@@ -26,6 +26,12 @@ namespace WpfClient
         private static NLog.Logger AppLogger;
         private static string _appPromoCode;
 
+        public static bool IsDrag;
+        public static double ScreenScale = 1d;
+
+        // вспомогательные окна
+        public static TakeOrder TakeOrderWindow = null;
+        
         /// <summary>
         /// Static Ctor
         /// </summary>
@@ -44,6 +50,22 @@ namespace WpfClient
             }
 
         }
+
+        #region bitwise
+        public static void SetBit(ref int bitMask, int bit)
+        {
+            bitMask |= (1 << bit);
+        }
+        public static void ClearBit(ref int bitMask, int bit)
+        {
+            bitMask &= ~(1 << bit);
+        }
+        public static bool IsSetBit(int bitMask, int bit)
+        {
+            int val = (1 << bit);
+            return (bitMask & val) == val;
+        }
+        #endregion
 
         #region App logger
 
@@ -577,19 +599,26 @@ namespace WpfClient
         }
 
         // закрыть все открытые окна, кроме главного окна
-        public static void CloseChildWindows()
+        public static void CloseChildWindows(bool isCloseAuxWindows = false)
         {
+            Window currWin;
             foreach (Window win in Application.Current.Windows)
             {
-                if ((win is WpfClient.MainWindow) == false)
+                currWin = win;
+
+                if (currWin is WpfClient.MainWindow) continue;
+                if ((isCloseAuxWindows == false) && ((currWin is TakeOrder))) continue;
+
+                Type t = currWin.GetType();
+                PropertyInfo pInfo = t.GetProperty("Host");
+                if (pInfo == null)
                 {
-                    Type t = win.GetType();
-                    PropertyInfo pInfo = t.GetProperty("Host");
-                    if (pInfo == null) win.Close();
+                    currWin.Close();
+                    currWin = null;
                 }
-            }
+            }  // for each
             
-        }
+        }  // method
 
         #endregion
 

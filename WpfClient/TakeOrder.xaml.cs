@@ -25,8 +25,14 @@ namespace WpfClient
         public TakeOrder()
         {
             InitializeComponent();
+            this.Activated += TakeOrder_Activated;
 
             setWinLayout();
+        }
+
+        private void TakeOrder_Activated(object sender, EventArgs e)
+        {
+            _takeOrder = TakeOrderEnum.None;
         }
 
         private void setWinLayout()
@@ -92,20 +98,18 @@ namespace WpfClient
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Escape) this.Close();
-            e.Handled = true;
+            if (e.Key == Key.Escape) closeWin(e);
         }
 
         private void btnClose_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.StylusDevice != null) return;
 
-            e.Handled = true;
-            this.Close();
+            closeWin(e);
         }
         private void btnClose_PreviewTouchDown(object sender, TouchEventArgs e)
         {
-            this.Close();
+            closeWin(e);
         }
 
 
@@ -114,12 +118,12 @@ namespace WpfClient
             if (e.StylusDevice != null) return;
 
             _takeOrder = TakeOrderEnum.TakeAway;
-            this.Close();
+            closeWin(e);
         }
         private void btnTakeOut_PreviewTouchDown(object sender, TouchEventArgs e)
         {
             _takeOrder = TakeOrderEnum.TakeAway;
-            this.Close();
+            closeWin(e);
         }
 
 
@@ -128,13 +132,19 @@ namespace WpfClient
             if (e.StylusDevice != null) return;
 
             _takeOrder = TakeOrderEnum.TakeInRestaurant;
-            this.Close();
+            closeWin(e);
         }
 
         private void btnTakeIn_PreviewTouchDown(object sender, TouchEventArgs e)
         {
             _takeOrder = TakeOrderEnum.TakeInRestaurant;
-            this.Close();
+            closeWin(e);
+        }
+
+        private void closeWin(RoutedEventArgs e)
+        {
+            e.Handled = true;
+            this.Hide();
         }
 
     }  // class

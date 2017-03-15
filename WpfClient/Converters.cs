@@ -225,7 +225,10 @@ namespace WpfClient
             //}
             //d1 *= d2;  // радиус
 
-            d1 = (double)AppLib.GetAppGlobalValue("cornerRadiusButton");
+            var v = AppLib.GetAppGlobalValue("cornerRadiusButton");
+            if (v == null) return null;
+
+            d1 = v.ToString().ToDouble();
 
             CornerRadius retVal;
             string side = (Side == null) ? "all" : Side.ToLower();
