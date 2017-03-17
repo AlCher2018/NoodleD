@@ -31,7 +31,9 @@ namespace WpfClient
 
         // вспомогательные окна
         public static TakeOrder TakeOrderWindow = null;
-        
+        public static Lib.MsgBoxExt MessageWindow = null;
+        public static Lib.MsgBoxExt ChoiceWindow = null;
+
         /// <summary>
         /// Static Ctor
         /// </summary>
@@ -209,6 +211,17 @@ namespace WpfClient
 
         #region WPF UI interface
 
+        public static void SelectListBoxItemByHisInnerConttrol(FrameworkElement sourceControl, ListBox targetListBox)
+        {
+            FrameworkElement lbItemContainer = AppLib.FindVisualParentByType((FrameworkElement)sourceControl, typeof(ListBoxItem));
+            if (lbItemContainer == null) return;
+            int idxContainer = targetListBox.ItemContainerGenerator.IndexFromContainer(lbItemContainer);
+            if (idxContainer != targetListBox.SelectedIndex)
+            {
+                targetListBox.SelectedIndex = idxContainer;
+            }
+        }
+
         public static double GetRowHeightAbsValue(Grid grid, int iRow, double totalHeight)
         {
             double cntStars = grid.RowDefinitions.Sum(r => r.Height.Value);
@@ -291,6 +304,23 @@ namespace WpfClient
             return (parent.GetValue(FrameworkElement.NameProperty).ToString() == parentName) ? (FrameworkElement)parent : null;
         }
 
+        // synonym of GetAncestorByType
+        public static FrameworkElement FindVisualParentByType(FrameworkElement objectFrom, Type findType)
+        {
+            if (objectFrom == null) return null;
+
+            DependencyObject parent = objectFrom;
+
+            while (!(parent.GetType().Equals(findType)))
+            {
+                parent = VisualTreeHelper.GetParent(parent);
+                if (parent == null) break;
+                if ((parent is Window) || (parent is Page)) { parent = null; break; }
+            }
+
+            return (parent == null)? null: parent as FrameworkElement;
+        }
+
         public static FrameworkElement FindLogicalChildrenByName(FrameworkElement objectFrom, string childName)
         {
             if (objectFrom == null) return null;
@@ -307,29 +337,74 @@ namespace WpfClient
             return null;
         }
 
-        public static void ShowMessage(string title, string message, int closeInterval = 0)
+        #endregion
+
+        #region диалоговые окна
+        public static void CreateMsgBox()
         {
             WpfClient.Lib.MsgBoxExt mBox = new WpfClient.Lib.MsgBoxExt()
             {
-                Title = title,
                 TitleFontSize = (double)AppLib.GetAppGlobalValue("appFontSize6"),
+                MessageFontSize = (double)AppLib.GetAppGlobalValue("appFontSize2"),
+                ButtonFontSize = (double)AppLib.GetAppGlobalValue("appFontSize4"),
 
                 MsgBoxButton = MessageBoxButton.OK,
                 ButtonsText = "Ok",
-                ButtonFontSize = (double)AppLib.GetAppGlobalValue("appFontSize4"),
                 ButtonForeground = Brushes.White,
                 ButtonBackground = (Brush)AppLib.GetAppGlobalValue("appBackgroundColor"),
                 ButtonBackgroundOver = (Brush)AppLib.GetAppGlobalValue("appBackgroundColor"),
 
-                MessageText = message,
-                MessageFontSize = (double)AppLib.GetAppGlobalValue("appFontSize2")
-
+                CloseByButtonPress = false,
+                AutoCloseInterval = 0
             };
-            if (closeInterval != 0) mBox.AutoCloseInterval = closeInterval;
-            
-            mBox.ShowDialog();
+            AppLib.MessageWindow = mBox;
+        }
+        public static void CreateChoiceBox()
+        {
+            WpfClient.Lib.MsgBoxExt chBox = new WpfClient.Lib.MsgBoxExt()
+            {
+                TitleFontSize = (double)AppLib.GetAppGlobalValue("appFontSize6"),
+                MessageFontSize = (double)AppLib.GetAppGlobalValue("appFontSize2"),
+                ButtonFontSize = (double)AppLib.GetAppGlobalValue("appFontSize4"),
 
-            mBox = null;
+                MsgBoxButton = MessageBoxButton.YesNo,
+
+                ButtonForeground = Brushes.White,
+                ButtonBackground = (Brush)AppLib.GetAppGlobalValue("appBackgroundColor"),
+                ButtonBackgroundOver = (Brush)AppLib.GetAppGlobalValue("appBackgroundColor"),
+
+                CloseByButtonPress = false,
+                AutoCloseInterval = 0
+            };
+            AppLib.ChoiceWindow = chBox;
+        }
+
+
+        public static void ShowMessageBox(string title, string message)
+        {
+            if (AppLib.MessageWindow == null) AppLib.CreateMsgBox();
+
+            AppLib.MessageWindow.Title = title;
+            AppLib.MessageWindow.MessageText = message;
+
+            AppLib.MessageWindow.ShowDialog();
+        }
+
+        public static MessageBoxResult ShowChoiceBox(string title, string message)
+        {
+            if (AppLib.ChoiceWindow == null) AppLib.CreateChoiceBox();
+
+            AppLib.ChoiceWindow.Title = title;
+            AppLib.ChoiceWindow.MessageText = message;
+
+            // надписи на кнопках Да/Нет согласно выбранному языку
+            string sYes = AppLib.GetLangTextFromAppProp("dialogBoxYesText");
+            string sNo = AppLib.GetLangTextFromAppProp("dialogBoxNoText");
+            AppLib.ChoiceWindow.ButtonsText = string.Format(";;{0};{1}", sYes, sNo);
+
+            MessageBoxResult retVal = AppLib.ChoiceWindow.ShowDialog();
+
+            return retVal;
         }
 
         #endregion
@@ -573,7 +648,8 @@ namespace WpfClient
             return null;
         }
 
-        // очистка заказа, закрытие всех окон и возврат в начальный экран
+        // закрытие всех окон и возврат в начальный экран
+        // создание нового заказа
         public static void ReDrawApp(bool isResetLang, bool isCloseChildWindow)
         {
             if (isCloseChildWindow == true) CloseChildWindows();
@@ -592,11 +668,31 @@ namespace WpfClient
                 mainWin.selectAppLang(langDefault);
             }
 
-            // очистить заказ
-            OrderItem curOrder = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
-            if (curOrder != null) curOrder.Clear();
+            // заказ
+            CreateNewOrder();
+
             mainWin.updatePrice();
         }
+
+        #region работа с заказом
+        public static OrderItem CreateNewOrder()
+        {
+            string deviceName = (string)AppLib.GetAppGlobalValue("ssdID", string.Empty);
+            int rndFrom = int.Parse(AppLib.GetAppSetting("RandomOrderNumFrom"));       // случайный номер заказа: От
+            int rndTo = int.Parse(AppLib.GetAppSetting("RandomOrderNumTo"));           // случайный номер заказа: До
+
+            OrderItem order = new OrderItem() { DeviceID = deviceName, RangeOrderNumberFrom = rndFrom, RangeOrderNumberTo = rndTo };
+
+            // создать случайный номер заказа
+            order.CreateOrderNumberForPrint();  // 
+
+            // сохранить ссылку на новый заказ в глоб.перем.
+            AppLib.SetAppGlobalValue("currentOrder", order);
+
+            return order;
+        }
+
+        #endregion
 
         // закрыть все открытые окна, кроме главного окна
         public static void CloseChildWindows(bool isCloseAuxWindows = false)

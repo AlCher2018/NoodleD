@@ -35,12 +35,10 @@ namespace WpfClient
             errMessage = null;
 
             // свойства заказа, созадаваемые перед печатью чека:
-            //      1. OrderNumberForPrint - номер чека для печати
-            //      2. BarCodeValue - значение штрих-кода, 12 цифр (6 - yymmdd, 2 - код источника, 4 - номер чека для печати)
-            //      3. LanguageTypeId - язык, который был выбран при создании чека (ua/en/ru)
+            //      1. BarCodeValue - значение штрих-кода, 12 цифр (6 - yymmdd, 2 - код источника, 4 - номер чека для печати)
+            //      2. LanguageTypeId - язык, который был выбран при создании чека (ua/en/ru)
             //--------------------------------------------------
 
-            // создать номер счета для ПЕЧАТНОГО чека
             string deviceName = (string)AppLib.GetAppGlobalValue("ssdID", string.Empty);
             if (deviceName == string.Empty)
             {
@@ -50,10 +48,7 @@ namespace WpfClient
             }
             if (deviceName.Length > 2) deviceName = deviceName.Substring(0, 2);
 
-            // 1. OrderNumberForPrint
-            int rndFrom = int.Parse(AppLib.GetAppSetting("RandomOrderNumFrom"));       // случайный номер заказа: От
-            int rndTo = int.Parse(AppLib.GetAppSetting("RandomOrderNumTo"));           // случайный номер заказа: До
-            _order.CreateOrderNumberForPrint(deviceName, rndFrom, rndTo);  // в свойстве OrderNumberForPrint
+            // 1. OrderNumberForPrint and order date
             _order.OrderDate = DateTime.Now;
             if (_order.OrderNumberForPrint == -1)
             {
@@ -275,15 +270,19 @@ namespace WpfClient
         {
             if (sectionModel.ImageModel == null) return;
 
-            ImageModel imgModel = sectionModel.ImageModel;
-            BlockUIContainer imageBlockHeader = new BlockUIContainer();
-            Image imageHeader = new Image();
-            imageHeader.Source = ImageHelper.GetBitmapImage(imgModel.Source);
-            imageBlockHeader.Child = imageHeader;
-            imageHeader.Width = imgModel.Width;
-            imageHeader.Height = imgModel.Height;
-            imageHeader.Margin = new Thickness(imgModel.LeftMargin, imgModel.TopMargin, imgModel.RightMargin, imgModel.ButtomMargin);
-            doc.Blocks.Add(imageBlockHeader);
+            //ImageModel imgModel = sectionModel.ImageModel;
+            //BlockUIContainer imageBlockHeader = new BlockUIContainer();
+            //Image imageHeader = new Image();
+            //imageHeader.Source = ImageHelper.GetBitmapImage(imgModel.Source);
+
+            //imageBlockHeader.Child = imageHeader;
+            //imageHeader.Width = imgModel.Width;
+            //imageHeader.Height = imgModel.Height;
+            //imageHeader.Margin = new Thickness(imgModel.LeftMargin, imgModel.TopMargin, imgModel.RightMargin, imgModel.ButtomMargin);
+
+            BlockUIContainer imageBlock = ImageHelper.getImageBlock(sectionModel.ImageModel, doc);
+
+            if (imageBlock != null) doc.Blocks.Add(imageBlock);
         }
 
         private void addSectionToDoc(TextModel sectionModel, FlowDocument doc)
@@ -302,23 +301,41 @@ namespace WpfClient
                 }
                 else if (item.Text.Contains("{OrderNumber}") == true)
                 {
-                    sBuf = _order.OrderNumberForPrint.ToString();
-                    Run runOrderNumber = getRunFromModel(item, sBuf);
-                    // переопределить формат текста из шаблона
-                    runOrderNumber.FontFamily = new FontFamily("Panton-Bold");
-                    runOrderNumber.FontSize = item.FontSize + 3;
-                    runOrderNumber.FontWeight = FontWeights.Bold;
                     // форматированный текст до и после номера счета
-                    string[] separate = Regex.Split(item.Text, "{OrderNumber}");
-                    Run textPart0 = getRunFromModel(item, separate[0]);
-                    textPart0.FontWeight = FontWeights.Bold;
-                    Run textPart1 = getRunFromModel(item, separate[1]);
-                    textPart1.FontWeight = FontWeights.Bold;
+                    List<Run> runBlocks = new List<Run>();
+                    Run r;
+
+                    string[] aStr = item.Text.Split(new string[] { "{OrderNumber}" }, StringSplitOptions.RemoveEmptyEntries);
+                    // текст перед номером
+                    if (aStr.Length > 0)
+                    {
+                        sBuf = aStr[0];
+                        r = getRunFromModel(item, sBuf); r.FontWeight = FontWeights.Bold;
+                        runBlocks.Add(r);
+                    }
+                    // номер заказа
+                    r = getRunFromModel(item, _order.OrderNumberForPrint.ToString());
+                    r.FontSize = item.FontSize + 3; r.FontWeight = FontWeights.Bold;
+                    runBlocks.Add(r);
+
+                    // идентификатор устройства
+                    if ((aStr.Length > 1) && (aStr[1].Contains("{ssdId}")))
+                    {
+                        sBuf = (string)AppLib.GetAppGlobalValue("ssdID");
+                        if (sBuf != null)
+                        {
+                            aStr = aStr[1].Split(new string[] { "{ssdId}" }, StringSplitOptions.RemoveEmptyEntries);
+                            // текст до идентификатора
+                            if (aStr.Length > 0) runBlocks.Add(getRunFromModel(item, aStr[0]));
+                            // идентификатор
+                            r = getRunFromModel(item, sBuf); runBlocks.Add(r);
+                            // текст после идент.
+                            if (aStr.Length > 1) runBlocks.Add(getRunFromModel(item, aStr[1]));
+                        }
+                    }
 
                     par = new Paragraph();  // собрать тексты в абзац
-                    par.Inlines.Add(textPart0);
-                    par.Inlines.Add(runOrderNumber);
-                    par.Inlines.Add(textPart1);
+                    par.Inlines.AddRange(runBlocks);
                 }
                 else
                 {
@@ -331,6 +348,7 @@ namespace WpfClient
                 {
                     par.Margin = new Thickness(item.LeftMargin, item.TopMargin, item.RightMargin, item.ButtomMargin);
                     doc.Blocks.Add(par);
+                    par = null;
                 }
             }
         }

@@ -3,8 +3,8 @@
   <ImageModel LeftMargin="0" TopMargin="0" RightMargin="0" ButtomMargin="0" Source="AppImages\BlankLogoHeader.png" Width="200" Height="95"/>
   <Paragraphs>
     <ParagraphModel LeftMargin="0" TopMargin="0" RightMargin="0" ButtomMargin="0" FontFamily="Panton-Bold" FontSize="12">СЧЁТ ГОСТЯ</ParagraphModel>
-    <ParagraphModel LeftMargin="0" TopMargin="0" RightMargin="0" ButtomMargin="0" FontFamily="Panton-Bold" FontSize="12">Заказ № {OrderNumber}</ParagraphModel>
+    <ParagraphModel LeftMargin="0" TopMargin="0" RightMargin="0" ButtomMargin="0" FontFamily="Panton-Bold" FontSize="12">Заказ № {OrderNumber} (устр-во {ssdId})</ParagraphModel>
 	<ParagraphModel LeftMargin="0" TopMargin="0" RightMargin="0" ButtomMargin="0" FontFamily="Panton-Bold" FontSize="12">от {OrderDate}</ParagraphModel>
-    <ParagraphModel LeftMargin="0" TopMargin="0" RightMargin="0" ButtomMargin="0" FontFamily="Panton-Bold" FontSize="12">______________________</ParagraphModel>
+    <ParagraphModel LeftMargin="0" TopMargin="0" RightMargin="0" ButtomMargin="0" FontFamily="Panton-Bold" FontSize="20">______________________</ParagraphModel>
   </Paragraphs>
 </TextModel>

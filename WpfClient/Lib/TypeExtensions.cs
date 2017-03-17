@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 
 namespace WpfClient
 {
@@ -77,6 +79,16 @@ namespace WpfClient
             return (bitMask & val) == val;
         }
 
+    }
+
+    public static class UIElementExtensions
+    {
+        private static Action EmptyDelegate = delegate () { };
+
+        public static void Refresh(this UIElement uiElement)
+        {
+            uiElement.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
+        }
     }
 
     // расширения класса System.Windows.Media.ImageSource / System.Windows.Controls.Image

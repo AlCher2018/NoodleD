@@ -5,6 +5,6 @@
     <ParagraphModel LeftMargin="0" TopMargin="0" RightMargin="0" ButtomMargin="0" FontFamily="Panton-Bold" FontSize="12">РАХУНОК ГОСТЯ</ParagraphModel>
     <ParagraphModel LeftMargin="0" TopMargin="0" RightMargin="0" ButtomMargin="0" FontFamily="Panton-Bold" FontSize="12">Замовлення № {OrderNumber}</ParagraphModel>
 	<ParagraphModel LeftMargin="0" TopMargin="0" RightMargin="0" ButtomMargin="0" FontFamily="Panton-Bold" FontSize="12">вiд {OrderDate}</ParagraphModel>
-    <ParagraphModel LeftMargin="0" TopMargin="0" RightMargin="0" ButtomMargin="0" FontFamily="Panton-Bold" FontSize="32">______________________</ParagraphModel>
+    <ParagraphModel LeftMargin="0" TopMargin="0" RightMargin="0" ButtomMargin="0" FontFamily="Panton-Bold" FontSize="20">______________________</ParagraphModel>
   </Paragraphs>
 </TextModel>

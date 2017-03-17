@@ -297,6 +297,10 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AppActionLog\AppActionLog.csproj">
+      <Project>{609fb074-3b84-4865-b6fb-e54dc82d5eb7}</Project>
+      <Name>AppActionLog</Name>
+    </ProjectReference>
     <ProjectReference Include="..\AppModel\AppModel.csproj">
       <Project>{69c032f2-4f5d-469d-adf0-59ed5650ab52}</Project>
       <Name>AppModel</Name>

@@ -255,6 +255,10 @@ namespace WpfClient
             e.Handled = true;
         }
 
+        private void scrollDishes_PreviewTouchDown(object sender, TouchEventArgs e)
+        {
+            initDrag(e.GetTouchPoint(scrollDishes).Position);
+        }
         private void scrollDishes_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.StylusDevice != null) return;
@@ -262,11 +266,10 @@ namespace WpfClient
             initDrag(e.GetPosition(scrollDishes));
         }
 
-        private void scrollDishes_PreviewTouchDown(object sender, TouchEventArgs e)
+        private void scrollDishes_PreviewTouchUp(object sender, TouchEventArgs e)
         {
-            initDrag(e.GetTouchPoint(scrollDishes).Position);
+            endDrag();
         }
-
         private void scrollDishes_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
             if (e.StylusDevice != null) return;
@@ -274,12 +277,13 @@ namespace WpfClient
             endDrag();
         }
 
-
-        private void scrollDishes_PreviewTouchUp(object sender, TouchEventArgs e)
+        private void scrollDishes_PreviewTouchMove(object sender, TouchEventArgs e)
         {
-            endDrag();
+            if (lastDragPoint.HasValue)
+            {
+                doMove(e.GetTouchPoint((sender as IInputElement)).Position);
+            }
         }
-
         private void scrollDishes_PreviewMouseMove(object sender, MouseEventArgs e)
         {
             if (e.StylusDevice != null) return;
@@ -290,13 +294,6 @@ namespace WpfClient
             }
         }
 
-        private void scrollDishes_PreviewTouchMove(object sender, TouchEventArgs e)
-        {
-            if (lastDragPoint.HasValue)
-            {
-                doMove(e.GetTouchPoint((sender as IInputElement)).Position);
-            }
-        }
 
         private void initDrag(Point mousePos)
         {
@@ -346,7 +343,7 @@ namespace WpfClient
             }
             else
             {
-                _isDrag = (Math.Abs(lastDragPoint.Value.X - initDragPoint.Value.X) > 3) || (Math.Abs(lastDragPoint.Value.Y - initDragPoint.Value.Y) > 3);
+                _isDrag = (Math.Abs(lastDragPoint.Value.X - initDragPoint.Value.X) > 10) || (Math.Abs(lastDragPoint.Value.Y - initDragPoint.Value.Y) > 10);
             }
         }
         private void doMove(Point posNow)
@@ -457,72 +454,139 @@ namespace WpfClient
 
         #region portion Count
 
-        private void portionCountAdd_MouseUp(object sender, MouseButtonEventArgs e)
+        private void portionCountDel_TouchUp(object sender, TouchEventArgs e)
         {
-            //            if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint) == false) { lastDragPoint = null; return; }
             if (_isDrag) return;
+
+            // touch-события контролов не вызывают событие SelectionChanged списка !!!!
+            AppLib.SelectListBoxItemByHisInnerConttrol((FrameworkElement)sender, lstDishes); // делаем это принудетельно
 
             lock (this)
             {
-                portionCountAdd();
+                portionCountDel();
             }
-            e.Handled = true;
         }
-
         private void portionCountDel_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            //            if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint) == false) { lastDragPoint = null; return; }
+            if (e.StylusDevice != null) return;
             if (_isDrag) return;
 
             lock (this)
             {
                 portionCountDel();
             }
-            e.Handled = true;
         }
 
-        private void dishDel_MouseUp(object sender, MouseButtonEventArgs e)
+        private void portionCountAdd_TouchUp(object sender, TouchEventArgs e)
         {
-            if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint) == false) { lastDragPoint = null; return; }
+            if (_isDrag) return;
+
+            // touch-события контролов не вызывают событие SelectionChanged списка !!!!
+            AppLib.SelectListBoxItemByHisInnerConttrol((FrameworkElement)sender, lstDishes); // делаем это принудетельно
+
+            lock (this)
+            {
+                portionCountAdd();
+            }
+        }
+        private void portionCountAdd_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (e.StylusDevice != null) return;
+
+            if (_isDrag) return;
+
+            lock (this)
+            {
+                portionCountAdd();
+            }
+        }
+
+        private void dishDel_PreviewTouchUp(object sender, TouchEventArgs e)
+        {
+            if (_isDrag) return;
+
+            // touch-события контролов не вызывают событие SelectionChanged списка !!!!
+            AppLib.SelectListBoxItemByHisInnerConttrol((FrameworkElement)sender, lstDishes); // делаем это принудетельно
+
             lock (this)
             {
                 dishDel();
             }
-            e.Handled = true;
         }
-
-        private void ingrDel_MouseUp(object sender, MouseButtonEventArgs e)
+        private void dishDel_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if ((lastDragPoint != null) && lastDragPoint.Equals(initDragPoint) == false) { lastDragPoint = null; return; }
+            if (e.StylusDevice != null) return;
+
+            if (_isDrag) return;
+
             lock (this)
             {
-                ingrDel(sender);
+                dishDel();
             }
-            e.Handled = true;
-
         }
 
-        private void ingrDel(object sender)
+        //private void ingrDel_TouchUp(object sender, TouchEventArgs e)
+        //{
+        //    AppLib.WriteLogTraceMessage("ingrDel_TouchUp, _isDrag = " + ((_isDrag) ? "true" : "false"));
+
+        //    if (_isDrag) return;
+
+        //    lock (this)
+        //    {
+        //        ingrDel(sender, e.GetTouchPoint(this).Position);
+        //    }
+        //}
+        private void ingrDel_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            ListBox ingrList = (ListBox)AppLib.GetAncestorByType(sender as DependencyObject, typeof(ListBox));
-            ListBoxItem lbItem = (ListBoxItem)AppLib.GetAncestorByType(ingrList as DependencyObject, typeof(ListBoxItem));
-            DishItem dishItem = (DishItem)lstDishes.ItemContainerGenerator.ItemFromContainer(lbItem);
+            AppLib.WriteLogTraceMessage("ingrDel_MouseUp, _isDrag = " + ((_isDrag) ? "true" : "false"));
+//            if (e.StylusDevice != null) return;
 
-            lstDishes.SelectedItem = dishItem;
-            DishAdding ingrItem = (DishAdding)ingrList.SelectedItem;
-            if (ingrItem == null) return;
+            if (_isDrag) return;
 
+            lock (this)
+            {
+                ingrDel(sender, e.GetPosition(this));
+            }
+        }
 
-            MsgBoxExt mBox = getDelMsgBox();
-            mBox.Title = AppLib.GetLangTextFromAppProp("cartDelIngrTitle");
-            mBox.MessageText = string.Format("{0} \"{1}\" ?", AppLib.GetLangTextFromAppProp("cartDelIngrQuestion"), AppLib.GetLangText(ingrItem.langNames));
-            MessageBoxResult result = mBox.ShowDialog();
-            mBox = null;
+        private void ingrDel(object sender, Point point)
+        {
+            // получить контролы из нажатого элемента
+            //    listbox ингредиентов
+            AppLib.WriteLogTraceMessage("");
+            AppLib.WriteLogTraceMessage(string.Format("нажата кнопка с координатами ({0}, {1}), type - {2}",point.X, point.Y, sender.GetType().Name));
+            ListBoxItem lbiIngr = (ListBoxItem)AppLib.FindVisualParentByType((FrameworkElement)sender, typeof(ListBoxItem));
 
+            ListBox lbIngr = (ListBox)AppLib.FindVisualParentByType((FrameworkElement)lbiIngr, typeof(ListBox));
+            AppLib.WriteLogTraceMessage(string.Format("найден список ингредиентов - {0}",lbIngr));
+            DishAdding tmpIngr = (DishAdding)lbIngr.ItemContainerGenerator.ItemFromContainer(lbiIngr);
+            AppLib.WriteLogTraceMessage(string.Format("найден элемент в списке - {0}, {1}", lbiIngr.ToString(), tmpIngr.langNames["ru"]));
+
+            int iCnt = lbIngr.ItemContainerGenerator.IndexFromContainer(lbiIngr);
+            AppLib.WriteLogTraceMessage(string.Format("индекс контейнера в списке - {0}",iCnt));
+
+            if (lbIngr.SelectedIndex != iCnt) lbIngr.SelectedIndex = iCnt;
+            AppLib.WriteLogTraceMessage(string.Format("индекс элемента в списке - {0}", lbIngr.SelectedIndex));
+            
+            //    listbox блюд
+            AppLib.SelectListBoxItemByHisInnerConttrol((FrameworkElement)lbIngr, lstDishes); // делаем это принудетельно
+            AppLib.WriteLogTraceMessage(string.Format("индекс блюда в списке - {0}", lstDishes.SelectedIndex));
+
+            DishItem dishItem = (DishItem)lstDishes.SelectedItem;
+            DishAdding ingrItem = (DishAdding)lbIngr.SelectedItem;
+
+            //MsgBoxExt mBox = getDelMsgBox();
+            //mBox.Title = AppLib.GetLangTextFromAppProp("cartDelIngrTitle");
+            //mBox.MessageText = string.Format("{0} \"{1}\" ?", AppLib.GetLangTextFromAppProp("cartDelIngrQuestion"), AppLib.GetLangText(ingrItem.langNames));
+            //MessageBoxResult result = mBox.ShowDialog();
+            //mBox = null;
+            string title = AppLib.GetLangTextFromAppProp("cartDelIngrTitle");
+            string msg = string.Format("{0} \"{1}\" ?", AppLib.GetLangTextFromAppProp("cartDelIngrQuestion"), AppLib.GetLangText(ingrItem.langNames));
+            MessageBoxResult result = AppLib.ShowChoiceBox(title, msg);
             if (result == MessageBoxResult.Yes)
             {
                 dishItem.SelectedIngredients.Remove(ingrItem);
-                ingrList.Items.Refresh();
+                lbIngr.Items.Refresh();
 
                 updatePriceControls();
             }
@@ -534,12 +598,14 @@ namespace WpfClient
             if (dishItem == null) return;
             OrderItem order = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
 
-            MsgBoxExt mBox = getDelMsgBox();
-            mBox.Title = AppLib.GetLangTextFromAppProp("cartDelDishTitle");
-            mBox.MessageText = string.Format("{0} \"{1}\" ?", AppLib.GetLangTextFromAppProp("cartDelDishQuestion"), AppLib.GetLangText(dishItem.langNames));
-            MessageBoxResult result = mBox.ShowDialog();
-            mBox = null;
-
+            //MsgBoxExt mBox = getDelMsgBox();
+            //mBox.Title = AppLib.GetLangTextFromAppProp("cartDelDishTitle");
+            //mBox.MessageText = string.Format("{0} \"{1}\" ?", AppLib.GetLangTextFromAppProp("cartDelDishQuestion"), AppLib.GetLangText(dishItem.langNames));
+            //MessageBoxResult result = mBox.ShowDialog();
+            //mBox = null;
+            string title = AppLib.GetLangTextFromAppProp("cartDelDishTitle");
+            string msg = string.Format("{0} \"{1}\" ?", AppLib.GetLangTextFromAppProp("cartDelDishQuestion"), AppLib.GetLangText(dishItem.langNames));
+            MessageBoxResult result = AppLib.ShowChoiceBox(title, msg);
             if (result == MessageBoxResult.Yes)
             {
                 order.Dishes.Remove(dishItem);
@@ -553,6 +619,7 @@ namespace WpfClient
         {
             string sYes = AppLib.GetLangTextFromAppProp("dialogBoxYesText");
             string sNo = AppLib.GetLangTextFromAppProp("dialogBoxNoText");
+
             MsgBoxExt mBox = new MsgBoxExt()
             {
                 TitleFontSize = (double)AppLib.GetAppGlobalValue("appFontSize6"),
@@ -632,7 +699,7 @@ namespace WpfClient
                         // 2017-02-17 убрать окно "Теперь можете подходить с чеком к кассе для оплаты"
                         //AppLib.ShowMessage(title, msgText, delayInfoWin);
 
-                        // вернуть интерфейс в исходное состояние и очистить заказ
+                        // вернуть интерфейс в исходное состояние и создать новый заказ
                         AppLib.ReDrawApp(false, true);
 
                     }
@@ -641,14 +708,14 @@ namespace WpfClient
                     {
                         AppLib.WriteLogErrorMessage(userErrMsg);
                         msgText = (string)AppLib.GetLangTextFromAppProp("printOrderErrorMessage");
-                        AppLib.ShowMessage(title, msgText);
+                        AppLib.ShowMessageBox(title, msgText);
                     }
                 }
 
                 // ошибка формирования чека и/или печати - сообщение пользователю на экран и запись в лог
                 else
                 {
-                    AppLib.ShowMessage(title, userErrMsg);
+                    AppLib.ShowMessageBox(title, userErrMsg);
                 }
             }  // if
         }

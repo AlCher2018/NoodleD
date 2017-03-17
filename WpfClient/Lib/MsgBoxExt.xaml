@@ -11,7 +11,7 @@
         WindowStyle="None" ResizeMode="NoResize"
         WindowState="Maximized"
         AllowsTransparency="True" Background="#88000000"
-        SizeChanged="mbWindow_SizeChanged"
+        SizeChanged="mbWindow_SizeChanged" PreviewKeyDown="MsgBoxExt_PreviewKeyDown"
         DataContext="{Binding RelativeSource={RelativeSource Self}, Mode=OneWay}"
         >
     <Window.Resources>
@@ -24,16 +24,19 @@
         <Style x:Key="btnStyle" TargetType="Border">
             <Setter Property="Background" Value="{Binding ButtonBackground}" />
             <Setter Property="TextBlock.Foreground" Value="{Binding ButtonForeground}"/>
-            <EventSetter Event="PreviewMouseLeftButtonDown" Handler="btn_MouseDown"/>
-            <EventSetter Event="PreviewMouseLeftButtonUp" Handler="btn_MouseUp"/>
+            <EventSetter Event="PreviewTouchDown" Handler="btn_TouchDown"/>
+            <EventSetter Event="PreviewTouchUp" Handler="btn_TouchUp"/>
+            <EventSetter Event="TouchLeave" Handler="btn_TouchLeave"/>
+            <EventSetter Event="PreviewMouseDown" Handler="btn_MouseDown"/>
+            <EventSetter Event="PreviewMouseUp" Handler="btn_MouseUp"/>
             <EventSetter Event="MouseLeave" Handler="btn_MouseLeave"/>
-            <Style.Triggers>
+            <!--<Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Background" Value="{Binding ButtonBackgroundOver}" />
                     <Setter Property="TextBlock.Foreground" Value="{Binding ButtonForegroundOver}" />
                     <Setter Property="TextBlock.FontWeight" Value="Bold"/>
                 </Trigger>
-            </Style.Triggers>
+            </Style.Triggers>-->
         </Style>
     </Window.Resources>
     

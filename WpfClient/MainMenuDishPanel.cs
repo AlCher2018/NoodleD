@@ -843,13 +843,13 @@ namespace WpfClient
                 _descrText.Text = AppLib.GetLangText(_dishItem.langDescriptions);
 
             // кнопка Добавить с тенью
-            //TextBlock tbAdd = tbList.First(t => t.Name == "tbAdd");
-            //if (tbAdd != null) tbAdd.Text = (string)AppLib.GetLangText((Dictionary<string, string>)AppLib.GetAppGlobalValue("btnSelectDishText"));
+            TextBlock tbAdd = tbList.First(t => t.Name == "tbAdd");
+            if (tbAdd != null) tbAdd.Text = (string)AppLib.GetLangText((Dictionary<string, string>)AppLib.GetAppGlobalValue("btnSelectDishText"));
 
             if (_hasGarnishes == true)
             {
-                //TextBlock tbInv = tbList.First(t => t.Name == "tbInvitation");
-                //if (tbInv != null) tbInv.Text = (string)AppLib.GetLangText((Dictionary<string, string>)AppLib.GetAppGlobalValue("btnSelectGarnishText"));
+                TextBlock tbInv = tbList.First(t => t.Name == "tbInvitation");
+                if (tbInv != null) tbInv.Text = (string)AppLib.GetLangText((Dictionary<string, string>)AppLib.GetAppGlobalValue("btnSelectGarnishText"));
 
                 foreach (MainMenuGarnish garn in _grdGarnishes.Children)
                 {

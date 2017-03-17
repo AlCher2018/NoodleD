@@ -48,6 +48,56 @@ namespace WpfClient
 
         }
 
+        public static System.Windows.Documents.BlockUIContainer getImageBlock(ImageModel imgModel, System.Windows.Documents.FlowDocument doc)
+        {
+            System.Windows.Controls.Image img = getImage(imgModel.Source);
+            if (img == null) return null;
+
+            double width = (double)imgModel.Width, height = (double)imgModel.Height;
+
+            if ((height != 0) && (width != 0))
+            {
+                img.Height = height; img.Width = width;
+//                img.Stretch = System.Windows.Media.Stretch.Fill;
+            }
+            else if ((height == 0) && (width == 0))
+            {
+                img.Width = doc.PageWidth - doc.PagePadding.Left - doc.PagePadding.Right;
+            }
+            else
+            {
+                if (!height.Equals(.0)) img.Height = height;
+                if (!width.Equals(.0)) img.Width = width;
+//                img.Stretch = System.Windows.Media.Stretch.Uniform;
+            }
+            img.Stretch = System.Windows.Media.Stretch.Uniform;
+
+            System.Windows.Documents.BlockUIContainer block = new System.Windows.Documents.BlockUIContainer(img);
+            block.Margin = new System.Windows.Thickness(imgModel.LeftMargin, imgModel.TopMargin, imgModel.RightMargin, imgModel.ButtomMargin);
+
+            return block;
+        }
+
+        public static System.Windows.Controls.Image getImage(string fileName)
+        {
+            if (!File.Exists(fileName))
+            {
+                AppLib.WriteLogErrorMessage(string.Format("Изображение {0} не найдено!",fileName));
+                return null;
+            }
+
+            System.Windows.Media.Imaging.BitmapImage bitmapImage = new System.Windows.Media.Imaging.BitmapImage();
+            bitmapImage.BeginInit();
+            bitmapImage.UriSource = new Uri(fileName, UriKind.RelativeOrAbsolute);
+            bitmapImage.EndInit();
+
+            System.Windows.Controls.Image img = new System.Windows.Controls.Image();
+            img.Source = bitmapImage;
+            img.HorizontalAlignment = System.Windows.HorizontalAlignment.Center;
+
+            return img;
+        }
+
         public static System.Drawing.Image FromByteArray(byte[] byteArrayIn)
         {
             if (byteArrayIn != null)

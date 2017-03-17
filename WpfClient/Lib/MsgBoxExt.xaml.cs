@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Threading;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
+using System.Windows.Threading;
 
 namespace WpfClient.Lib
 {
@@ -14,7 +17,6 @@ namespace WpfClient.Lib
     public partial class MsgBoxExt : Window
     {
         private MessageBoxResult _retValue = MessageBoxResult.None;
-        private bool _isClosing = false;
 
         #region properties
 
@@ -89,7 +91,7 @@ namespace WpfClient.Lib
         #endregion
 
         #region timer
-        private Timer _timer;
+        private System.Timers.Timer _timer;
         private double _autoCloseInterval;   // in msec
         public double AutoCloseInterval
         {
@@ -111,7 +113,7 @@ namespace WpfClient.Lib
                 {
                     if (_timer == null)
                     {
-                        _timer = new Timer(_autoCloseInterval);
+                        _timer = new System.Timers.Timer(_autoCloseInterval);
                         _timer.Elapsed += _timer_Elapsed;
                     }
                     _timer.Interval = _autoCloseInterval;
@@ -122,8 +124,14 @@ namespace WpfClient.Lib
 
         private void _timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            this.Dispatcher.Invoke(() => this.Close());
+            this.Dispatcher.Invoke(() =>
+            {
+                this.closeWin();
+            });
         }
+
+        private System.Timers.Timer _pressTimer;
+        private FrameworkElement _buttonPressed;
 
         #endregion
 
@@ -131,14 +139,20 @@ namespace WpfClient.Lib
         {
             InitializeComponent();
 
-            this.PreviewKeyDown += MsgBoxExt_PreviewKeyDown;
-
             this._closeByButtonPress = true;
             this.TitleFontSize = 12d;
             this.MessageFontSize = 20d;
             this.ButtonFontSize = 20d;
             _buttonsTextArr = _buttonsText.Split(';');
             this.ButtonBackground = System.Windows.SystemColors.ControlDarkBrush;
+
+            _pressTimer = new System.Timers.Timer(500);
+            _pressTimer.Elapsed += _pressTimer_Elapsed;
+        }
+
+        private void _pressTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            Dispatcher.Invoke(() => doUnpress(), DispatcherPriority.Input);
         }
 
         private void mbWindow_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -237,44 +251,71 @@ namespace WpfClient.Lib
             }
         }
 
-        private void btn_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void btn_TouchDown(object sender, System.Windows.Input.TouchEventArgs e)
         {
             doPress((FrameworkElement)sender);
+        }
 
-            MessageBoxResult res;
-            if (Enum.TryParse<MessageBoxResult>((sender as FrameworkElement).Tag.ToString(), out res) == true) _retValue = res;
+        private void btn_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (e.StylusDevice != null) return;
+            doPress((FrameworkElement)sender);
+
             //closeWin(e);
         }
 
+        private void btn_TouchLeave(object sender, System.Windows.Input.TouchEventArgs e)
+        {
+            doUnpress();
+        }
         private void btn_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            doUnpress((FrameworkElement)sender);
-            if (_isClosing == false) _retValue = MessageBoxResult.None;
+            if (e.StylusDevice != null) return;
+            doUnpress();
         }
 
+        private void btn_TouchUp(object sender, System.Windows.Input.TouchEventArgs e)
+        {
+            if ((sender as FrameworkElement).Equals(_buttonPressed))
+            {
+                closeWin(e);
+            }
+        }
         private void btn_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            doUnpress((FrameworkElement)sender);
-//            if (_isClosing == false) _retValue = MessageBoxResult.None;
-            closeWin(e);
+            if (e.StylusDevice != null) return;
+
+            if ((sender as FrameworkElement).Equals(_buttonPressed))
+            {
+                closeWin(e);
+            }
         }
 
-        private void doPress(FrameworkElement fe)
+        private void doPress(FrameworkElement btn)
         {
-            TranslateTransform tt = (fe.RenderTransform as TranslateTransform);
+            // сохранить нажатую кнопку
+            _buttonPressed = btn;
+
+            TranslateTransform tt = (_buttonPressed.RenderTransform as TranslateTransform);
+            DropShadowEffect de = (_buttonPressed.Effect as DropShadowEffect);
+
             tt.X = 3; tt.Y = 3;
-
-            DropShadowEffect de = (fe.Effect as DropShadowEffect);
             de.ShadowDepth = 0; de.BlurRadius = 0;
+
+            _pressTimer.Enabled = true;
         }
 
-        private void doUnpress(FrameworkElement fe)
+        private void doUnpress()
         {
-            TranslateTransform tt = (fe.RenderTransform as TranslateTransform);
-            tt.X = 0; tt.Y = 0;
+            if (_buttonPressed == null) return;
 
-            DropShadowEffect de = (fe.Effect as DropShadowEffect);
+            TranslateTransform tt = (_buttonPressed.RenderTransform as TranslateTransform);
+            tt.X = 0; tt.Y = 0;
+            DropShadowEffect de = (_buttonPressed.Effect as DropShadowEffect);
             de.ShadowDepth = 6; de.BlurRadius = 10;
+
+            _buttonPressed = null;
+            if (_pressTimer.Enabled) _pressTimer.Enabled = false;
         }
 
         private void MsgBoxExt_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
@@ -282,14 +323,34 @@ namespace WpfClient.Lib
             if (e.Key == System.Windows.Input.Key.Escape) closeWin(e);
         }
 
-        private void closeWin(RoutedEventArgs e)
+        private void closeWin(RoutedEventArgs e = null)
         {
-            e.Handled = true;
+            if ((e != null) && (e is RoutedEventArgs)) e.Handled = true;
 
-            if (_closeByButtonPress == true)
+            // установить возвращаемое значение
+            if (_buttonPressed == null)
             {
-                _isClosing = true;
+                _retValue = MessageBoxResult.None;
+            }
+            else
+            {
+                MessageBoxResult res;
+                if (Enum.TryParse<MessageBoxResult>(_buttonPressed.Tag.ToString(), out res) == true) _retValue = res;
+            }
+            doUnpress();
+
+            if (this._closeByButtonPress)
+            {
                 this.Close();
+            }
+            else
+            {
+                //btn2.InvalidateVisual();
+                //Force render
+                //btn2.Measure(new Size(Double.PositiveInfinity, Double.PositiveInfinity));
+                //btn2.Arrange(new Rect(btn2.DesiredSize));
+
+                this.Hide();
             }
         }
 

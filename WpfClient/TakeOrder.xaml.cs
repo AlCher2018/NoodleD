@@ -33,6 +33,18 @@ namespace WpfClient
         private void TakeOrder_Activated(object sender, EventArgs e)
         {
             _takeOrder = TakeOrderEnum.None;
+
+            BindingExpression be;
+            // установка текстов на выбранном языке
+            //    с собой
+            be = txtTakeOut.GetBindingExpression(TextBlock.TextProperty);
+            if (be != null) be.UpdateTarget();
+            //    или
+            be = txtWordOr.GetBindingExpression(TextBlock.TextProperty);
+            if (be != null) be.UpdateTarget();
+            //   в ресторане
+            be = txtTakeIn.GetBindingExpression(TextBlock.TextProperty);
+            if (be != null) be.UpdateTarget();
         }
 
         private void setWinLayout()

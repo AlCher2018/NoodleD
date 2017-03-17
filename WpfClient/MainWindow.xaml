@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:WpfClient"
         xmlns:lib="clr-namespace:WpfClient.Lib"
         mc:Ignorable="d"
-        Title="MainWindow" 
+        Title="MainWindow" Name="MainMenu"
         WindowStyle="None" WindowState="Maximized" WindowStartupLocation="CenterScreen" 
         UseLayoutRounding ="True" Icon="AppImages/icon.ico">
     <!-- UseLayoutRounding ="True" - выравнивание элеметов по границе пикселей -->

@@ -59,7 +59,7 @@
                 BorderBrush="{TemplateBinding BorderBrush}"
                 Padding="{TemplateBinding Padding}">
                 <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
             </Border>
         </ControlTemplate>
 
@@ -230,7 +230,7 @@
                             <!-- слово Ингредиенты -->
                             <TextBlock Text="{Binding Converter={StaticResource langDictToText}, ConverterParameter=appSet.wordIngredients, Mode=OneWay}" Style="{StaticResource dishIngrTitleStyle}"/>
                             <!-- список ингредиентов -->
-                            <ListBox ItemsSource="{Binding SelectedIngredients}" Background="Transparent" IsHitTestVisible="True" VirtualizingPanel.ScrollUnit="Pixel" BorderThickness="0">
+                            <ListBox ItemsSource="{Binding SelectedIngredients}" Background="Transparent" IsHitTestVisible="True" VirtualizingPanel.ScrollUnit="Pixel" BorderThickness="0" SelectionMode="Single" SnapsToDevicePixels="True">
                                 <ListBox.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <WrapPanel Width="{Binding ElementName=gridDishControls, Path=ActualWidth, Converter={StaticResource multiplyParamConv}, ConverterParameter=0.95, Mode=OneWay}"/>
@@ -239,8 +239,8 @@
                                 <ListBox.ItemContainerStyle>
                                     <Style TargetType="ListBoxItem">
                                         <Setter Property="BorderThickness" Value="0"/>
-                                        <Setter Property="HorizontalContentAlignment" Value="Left"/>
                                         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                                        <Setter Property="HorizontalContentAlignment" Value="Left"/>
                                         <Setter Property="Template" Value="{StaticResource ingrListBoxItemTemplate}"/>
                                     </Style>
                                 </ListBox.ItemContainerStyle>
@@ -252,7 +252,7 @@
                                             <Run Text=" "/>
                                             <Run FontWeight="Bold" Text="{Binding Price, StringFormat={StaticResource priceFormatString}, Mode=OneWay}"/>
                                             </TextBlock>
-                                            <Border PreviewMouseUp="ingrDel_MouseUp" Style="{StaticResource dishIngrDelImageStyle}">
+                                            <Border MouseUp="ingrDel_MouseUp" Style="{StaticResource dishIngrDelImageStyle}">
                                                 <Image Source="AppImages/removeItem.png" Stretch="Fill"/>
                                             </Border>
                                         </StackPanel>
@@ -285,21 +285,22 @@
                             </Grid.ColumnDefinitions>
 
                             <!-- для увеличения зоны нажатия добавим Border -->
-                            <Border Grid.Column="0" PreviewMouseUp="portionCountDel_MouseUp" Style="{StaticResource dishPortionBorderStyle}">
+                            <Border Grid.Column="0" MouseUp="portionCountDel_MouseUp" TouchUp="portionCountDel_TouchUp" Style="{StaticResource dishPortionBorderStyle}">
                                 <Image Source="AppImages/Cart/-.png" Style="{StaticResource dishPortionImageStyle}"/>
                             </Border>
                             
                             <!-- количество порций -->
                             <TextBlock x:Name="txtDishCount" Grid.Column="1" Text="{Binding Count}" Style="{StaticResource dishPortionTextStyle}"/>
 
-                            <Border Grid.Column="2" PreviewMouseUp="portionCountAdd_MouseUp" Style="{StaticResource dishPortionBorderStyle}">
+                            <Border Grid.Column="2" MouseUp="portionCountAdd_MouseUp" TouchUp="portionCountAdd_TouchUp" Style="{StaticResource dishPortionBorderStyle}">
                                 <Image Source="AppImages/Cart/+.png" Style="{StaticResource dishPortionImageStyle}"/>
                             </Border>
                             
                             <TextBlock x:Name="txtDishPrice" Grid.Column="3" Text="{Binding Converter={StaticResource getDishPrice}, StringFormat={StaticResource priceFormatString}, Mode=OneWay}" Style="{StaticResource dishPortionTextStyle}" FontWeight="Normal"/>
                             
-                            <!-- кнопка удаления блюда -->
-                            <Border Grid.Column="4" PreviewMouseUp="dishDel_MouseUp" Style="{StaticResource dishPortionBorderStyle}">
+                            <!-- кнопка удаления блюда 
+                            TouchUp="dishDel_PreviewTouchUp" -->
+                            <Border Grid.Column="4" MouseUp="dishDel_MouseUp" TouchUp="dishDel_PreviewTouchUp" Style="{StaticResource dishPortionBorderStyle}">
                                 <Image Source="AppImages/removeItem.png" Style="{StaticResource dishDelImageStyle}"/>
                             </Border>
                         </Grid>
@@ -455,7 +456,7 @@
                         </TextBlock>
                         <!-- список блюд -->
                         <ListBox x:Name="lstDishes" Background="Transparent" IsHitTestVisible="True"
-                                VirtualizingPanel.ScrollUnit="Pixel" HorizontalContentAlignment="Stretch"
+                                VirtualizingPanel.ScrollUnit="Pixel" HorizontalContentAlignment="Stretch" FocusVisualStyle="{x:Null}"
                             ItemTemplate="{StaticResource dishItemTemplate}" 
                             ItemContainerStyle="{StaticResource dishListBoxItemStyle}">
                             <ListBox.Template>

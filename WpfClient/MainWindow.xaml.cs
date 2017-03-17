@@ -71,9 +71,8 @@ namespace WpfClient
             _daCommon1 = new DoubleAnimation();
             _daCommon2 = new DoubleAnimation();
 
-            // создать текущий заказ
-            _currentOrder = new OrderItem();
-            AppLib.SetAppGlobalValue("currentOrder", _currentOrder);
+            // создать заказ
+            _currentOrder = AppLib.CreateNewOrder();
             updatePrice();
 
             // отслеживание бездействия
@@ -233,6 +232,8 @@ namespace WpfClient
 
             // вспомогательные окна
             AppLib.TakeOrderWindow = new TakeOrder();
+            AppLib.CreateMsgBox();
+            AppLib.CreateChoiceBox();
         }
 
         private void setAppLayout()
@@ -580,6 +581,7 @@ namespace WpfClient
         private void lblButtonLang_MouseDown(object sender, MouseButtonEventArgs e)
         {
             string langId = getLangIdByButtonName(((FrameworkElement)sender).Name);
+            //App.AppActionLogger.
             selectAppLang(langId);
             //e.Handled = true;
 

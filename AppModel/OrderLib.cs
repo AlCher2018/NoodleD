@@ -10,8 +10,12 @@ namespace AppModel
     // класс для хранения выбранных пунктов меню (блюд)
     public class OrderItem
     {
+        public string DeviceID { get; set; }
+
         // номер заказа для печати чека
         private int _orderNumberForPrint;
+        public int RangeOrderNumberFrom { get; set; }
+        public int RangeOrderNumberTo { get; set; }
         public int OrderNumberForPrint { get { return _orderNumberForPrint; } }
 
         public string BarCodeValue { get; set; }
@@ -25,9 +29,12 @@ namespace AppModel
 
         public List<DishItem> Dishes { get { return _dishItems; } }
 
+
+        // constructor
         public OrderItem()
         {
             _dishItems = new List<DishItem>();
+            RangeOrderNumberFrom = 1; RangeOrderNumberTo = 9999;
         }
 
         // добавить КОПИЮ DishItem
@@ -57,27 +64,17 @@ namespace AppModel
             return retVal;
         }
 
-        public void Clear()
-        {
-            _orderNumberForPrint = -1;
-            BarCodeValue = null;
-            takeAway = false;
-            OrderDate = DateTime.MinValue;
-
-            if (_dishItems != null) _dishItems.RemoveAll(d => true);
-        }
-
-        public int CreateOrderNumberForPrint(string deviceName, int rndFrom, int rndTo)
+        public int CreateOrderNumberForPrint()
         {
             int retVal;
 
             using (NoodleDContext db = new NoodleDContext())
             {
-                Terminal term = db.Terminal.FirstOrDefault(t => t.Name == deviceName);
+                Terminal term = db.Terminal.FirstOrDefault(t => t.Name == this.DeviceID);
                 if (term == null)
                 {
-                    term = new Terminal() { Name = deviceName, RndOrderNum_Date = DateTime.Now, TimeOn = DateTime.Now };
-                    term.RndOrderNum_InitVal = getNewRandomOrderNumber(rndFrom, rndTo);
+                    term = new Terminal() { Name = this.DeviceID, RndOrderNum_Date = DateTime.Now, TimeOn = DateTime.Now };
+                    term.RndOrderNum_InitVal = getNewRandomOrderNumber(this.RangeOrderNumberFrom, this.RangeOrderNumberTo);
                     term.RndOrderNum_NextVal = term.RndOrderNum_InitVal;
                     db.Terminal.Add(term);
                 }
@@ -86,7 +83,7 @@ namespace AppModel
                     if (term.RndOrderNum_InitVal == null)
                     {
                         term.RndOrderNum_Date = DateTime.Now;
-                        term.RndOrderNum_InitVal = getNewRandomOrderNumber(rndFrom, rndTo);
+                        term.RndOrderNum_InitVal = getNewRandomOrderNumber(this.RangeOrderNumberFrom, this.RangeOrderNumberTo);
                         term.RndOrderNum_NextVal = term.RndOrderNum_InitVal;
                     }
                     if (term.RndOrderNum_NextVal == null)
@@ -98,7 +95,7 @@ namespace AppModel
                     if (compareDatesOnly(term.RndOrderNum_Date??DateTime.MinValue, DateTime.Now) == false)
                     {
                         term.RndOrderNum_Date = DateTime.Now;
-                        term.RndOrderNum_InitVal = getNewRandomOrderNumber(rndFrom, rndTo);
+                        term.RndOrderNum_InitVal = getNewRandomOrderNumber(this.RangeOrderNumberFrom, this.RangeOrderNumberTo);
                         term.RndOrderNum_NextVal = term.RndOrderNum_InitVal;
                     }
                 }

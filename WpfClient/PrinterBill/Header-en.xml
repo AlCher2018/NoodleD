@@ -5,6 +5,6 @@
     <ParagraphModel LeftMargin="0" TopMargin="0" RightMargin="0" ButtomMargin="0" FontFamily="Panton-Bold" FontSize="12">GUEST'S BILL</ParagraphModel>
     <ParagraphModel LeftMargin="0" TopMargin="0" RightMargin="0" ButtomMargin="0" FontFamily="Panton-Bold" FontSize="12">Order № {OrderNumber}</ParagraphModel>
 	<ParagraphModel LeftMargin="0" TopMargin="0" RightMargin="0" ButtomMargin="0" FontFamily="Panton-Bold" FontSize="12">date {OrderDate}</ParagraphModel>
-    <ParagraphModel LeftMargin="0" TopMargin="0" RightMargin="0" ButtomMargin="0" FontFamily="Panton-Bold" FontSize="32">______________________</ParagraphModel>
+    <ParagraphModel LeftMargin="0" TopMargin="0" RightMargin="0" ButtomMargin="0" FontFamily="Panton-Bold" FontSize="20">______________________</ParagraphModel>
   </Paragraphs>
 </TextModel>

@@ -23,6 +23,7 @@ namespace WpfClient
         // специальные логгеры событий WPF
         public static UserActionsLog UserActionHandler = null;
         public static UserActionIdle IdleHandler = null;
+        public static AppActionNS.AppActionLogger AppActionLogger;
 
         [STAThread]
         public static void Main()
@@ -96,10 +97,11 @@ namespace WpfClient
                     Application.Current.Shutdown(1);
                 }
 
-                //UserActionHandler = new UserActionsLog();
                 // ожидашка
                 IdleHandler = new UserActionIdle() { IdleSeconds = (int)AppLib.GetAppGlobalValue("UserIdleTime") };
                 //IdleHandler.IdleElapseEvent += IdleHandler_IdleElapseEvent;
+                // логгер событий UI-элементов приложения
+                AppActionLogger = new AppActionNS.AppActionLogger();
 
                 // главное окно приложения
                 WpfClient.MainWindow mainWindow = new WpfClient.MainWindow();
