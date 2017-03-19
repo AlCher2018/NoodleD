@@ -1,15 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace AppActionNS
 {
-    public class AppActionLogger
+    public class AppActionLogger: IDisposable
     {
         const int MAXCOUNTOFRECORDS = 200;
+        const string ACTIONLOGFILEIDENTIFIER = "actionLog";
+        const string ACTIONLOGFILEEXTENSION = ".txt";
 
         private int _recCounter;
         private List<List<UICAction>> _actionBuffer;
@@ -35,7 +39,7 @@ namespace AppActionNS
             // достигнуто максимальное количество записей в текущем буфере
             if (_recCounter == MAXCOUNTOFRECORDS)
             {
-                // сохранить ссылку на заполненных буфер для его сброса в БД
+                // сохранить ссылку на заполненный буфер для его сброса в БД
                 List<UICAction> saveBuf = _curBuffer;
                 // запись в БД - в отдельном потоке
                 ParameterizedThreadStart tDlg = new ParameterizedThreadStart(writeBufferToDB);
@@ -56,23 +60,95 @@ namespace AppActionNS
         // сохранить и очистить текущий буфер
         private void writeBufferToDB(object data)
         {
-            List<UICAction> listActions = (List<UICAction>)data;
+            lock (this)
+            {
+                List<UICAction> listActions = (List<UICAction>)data;
+                string[] aMsg = new string[listActions.Count];
+                int i = 0;
+                foreach (UICAction item in listActions)
+                {
+                    string msg = string.Format("{0};{1};{2};{3};{4};{5};{6}", item.nubmer, item.dateTime.ToString("yyyy-MM-dd HH:mm:ss.fff"), item.deviceId, item.orderNumber, item.formName, item.actionType.ToString(), item.controlName);
 
+                    aMsg[i] = msg; i++;
+                }
 
+                writeLogActionsToFile(aMsg);
+            }  // lock
+
+        }  // method
+
+        private void writeLogActionsToFile(string[] aMsg)
+        {
+            string logFilePath = getLogFileName();
+
+            if (File.Exists(logFilePath))
+            {
+                //If this fails its because as a Admin you need to run the app as Admin - wierd problem with GPO's
+                try
+                {
+                    File.AppendAllLines(logFilePath, aMsg);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("If you see this message its because you're an Admin you need to run as Admin - wierd problem with GPO's" + ex.Message + ex.StackTrace);
+                }
+            }
+            else
+            {
+                try
+                {
+                    File.WriteAllLines(logFilePath, aMsg);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("If you see this message its because you're not an Admin you need to run as Admin - wierd problem with GPO's" + ex.Message + ex.StackTrace);
+                }
+            }
+        }  // method
+
+        private string getLogFileName()
+        {
+            string actionLoggerDirectory = FileLib.getLogFilesPath(LogFilesPathLocationEnum.App_Logs);
+
+            //Check if the current file is > 1 MB and create another
+            string[] existingFileList = System.IO.Directory.GetFiles(actionLoggerDirectory, ACTIONLOGFILEIDENTIFIER + DateTime.Now.ToString("yyyyMMdd") + "*" + ACTIONLOGFILEEXTENSION);
+
+            string filePath = actionLoggerDirectory + ACTIONLOGFILEIDENTIFIER + DateTime.Now.ToString("yyyyMMdd") + "-0" + ACTIONLOGFILEEXTENSION;
+            if (existingFileList.Count() > 0)
+            {
+                filePath = actionLoggerDirectory + ACTIONLOGFILEIDENTIFIER + DateTime.Now.ToString("yyyyMMdd") + "-" + (existingFileList.Count() - 1).ToString() + ACTIONLOGFILEEXTENSION;
+                FileInfo fi = new FileInfo(filePath);
+                if (fi.Length / 1024 > 1000) //Over a MB (ie > 1000 KBs)
+                {
+                    filePath = actionLoggerDirectory + ACTIONLOGFILEIDENTIFIER + DateTime.Now.ToString("yyyyMMdd") + "-" + existingFileList.Count().ToString() + ACTIONLOGFILEEXTENSION;
+                }
+            }
+
+            return filePath;
         }
-
         public void ResetRecCounter() { _recCounter = 0; }
 
+
+        public void Close()
+        {
+            Dispose();
+        }
+        public void Dispose()
+        {
+            writeBufferToDB(_curBuffer);
+            _curBuffer.Clear();
+        }
     } // class
 
     // класс, описывающий действие пользовательского контрола
     // UIC - UserInterfaceControl
     public class UICAction
     {
+        internal int nubmer { get; set; }
+        internal DateTime dateTime { get; set; }
+
         public string deviceId { get; set; }
         public string orderNumber { get; set; }
-        public int nubmer { get; set; }
-        public DateTime dateTime { get; set; }
         public string formName { get; set; }
         public UICActionType actionType { get; set; }
         public string controlName { get; set; }
@@ -80,7 +156,7 @@ namespace AppActionNS
 
     public enum UICActionType
     {
-        Click, Drag
+        Open, Close, Click, Drag
     }
 
 }

@@ -298,8 +298,7 @@
                             
                             <TextBlock x:Name="txtDishPrice" Grid.Column="3" Text="{Binding Converter={StaticResource getDishPrice}, StringFormat={StaticResource priceFormatString}, Mode=OneWay}" Style="{StaticResource dishPortionTextStyle}" FontWeight="Normal"/>
                             
-                            <!-- кнопка удаления блюда 
-                            TouchUp="dishDel_PreviewTouchUp" -->
+                            <!-- кнопка удаления блюда  -->
                             <Border Grid.Column="4" MouseUp="dishDel_MouseUp" TouchUp="dishDel_PreviewTouchUp" Style="{StaticResource dishPortionBorderStyle}">
                                 <Image Source="AppImages/removeItem.png" Style="{StaticResource dishDelImageStyle}"/>
                             </Border>
@@ -321,8 +320,8 @@
                               VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
             </Border>
         </ControlTemplate>
-        
-        <Style x:Key="dishListBoxItemStyle" TargetType="{x:Type ListBoxItem}">
+
+        <Style x:Key="dishItemStyle" TargetType="{x:Type ListBoxItem}">
             <Setter Property="BorderThickness" Value="0,0,0,4"/>
             <Setter Property="BorderBrush" Value="DarkGray"/>
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
@@ -440,9 +439,6 @@
 
             <Grid>
                 <!-- правая панель - список заказанных блюд (OrderItem) -->
-                <!--PreviewTouchDown="scrollDishes_PreviewTouchDown"
-                  PreviewTouchUp="scrollDishes_PreviewTouchUp"
-                  PreviewTouchMove="scrollDishes_PreviewTouchMove"-->
                 <local:AniScrollViewer x:Name="scrollDishes" CanContentScroll="False" VerticalScrollBarVisibility="Hidden"                                       ScrollChanged="scrollDishes_ScrollChanged"
                   PreviewMouseDown="scrollDishes_PreviewMouseDown"
                   PreviewMouseUp="scrollDishes_PreviewMouseUp" 
@@ -458,9 +454,9 @@
                         <ListBox x:Name="lstDishes" Background="Transparent" IsHitTestVisible="True"
                                 VirtualizingPanel.ScrollUnit="Pixel" HorizontalContentAlignment="Stretch" FocusVisualStyle="{x:Null}"
                             ItemTemplate="{StaticResource dishItemTemplate}" 
-                            ItemContainerStyle="{StaticResource dishListBoxItemStyle}">
+                            ItemContainerStyle="{StaticResource dishItemStyle}">
                             <ListBox.Template>
-                                <!-- для прокрутки мышью -->
+                                 <!--для прокрутки мышью--> 
                                 <ControlTemplate>
                                     <ItemsPresenter SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
                                 </ControlTemplate>

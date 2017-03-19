@@ -89,11 +89,17 @@ namespace WpfClient
         protected override void OnClosed(EventArgs e)
         {
             base.OnClosed(e);
+
+            AppLib.WriteAppAction(AppActionNS.UICActionType.Close, "MainWindow", this.Name);
+            App.AppActionLogger.Close();
+
             AppLib.WriteLogInfoMessage("************  End application  ************");
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            AppLib.WriteAppAction(AppActionNS.UICActionType.Open, "MainWindow", this.Name);
+
             Point pt = PointFromScreen(new Point(1920, 1080));
             AppLib.ScreenScale = 1920.0 / pt.X;
 
@@ -581,7 +587,8 @@ namespace WpfClient
         private void lblButtonLang_MouseDown(object sender, MouseButtonEventArgs e)
         {
             string langId = getLangIdByButtonName(((FrameworkElement)sender).Name);
-            //App.AppActionLogger.
+            AppLib.WriteAppAction(pFormName: "MainWindow", pControlName: "Выбран язык;" + langId);
+
             selectAppLang(langId);
             //e.Handled = true;
 
@@ -666,6 +673,8 @@ namespace WpfClient
 
         private void brdPromoCode_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
+            AppLib.WriteAppAction(pFormName: "MainWindow", pControlName: "Кнопка Промокод");
+
             //if (AppLib.ShowPromoCodeWindow() == true) AppLib.SetPromoCodeTextBlock(txtPromoCode);
         }
         #endregion
@@ -1041,6 +1050,9 @@ namespace WpfClient
 
             if ((_dishCanvas.Count > 0) && (lstMenuFolders.SelectedIndex <= (_dishCanvas.Count-1)))
             {
+                AppModel.MenuItem mi = lstMenuFolders.SelectedItem as AppModel.MenuItem;
+                AppLib.WriteAppAction(pFormName: "MainWindow", pControlName: "Выбрана категория;" + mi.langNames["ru"]);
+
                 // установить панель блюд
                 MainMenuDishesCanvas currentPanel = _dishCanvas[lstMenuFolders.SelectedIndex];
                 // очистить выбор гарниров
@@ -1101,21 +1113,6 @@ namespace WpfClient
             showCartWindow();
         }
 
-        private void scrollDishes_PreviewTouchDown_1(object sender, TouchEventArgs e)
-        {
-
-        }
-
-        private void scrollDishes_PreviewTouchUp_1(object sender, TouchEventArgs e)
-        {
-
-        }
-
-        private void scrollDishes_PreviewTouchMove_1(object sender, TouchEventArgs e)
-        {
-
-        }
-
         private void btnShowCart_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (e.StylusDevice != null) return;
@@ -1125,6 +1122,8 @@ namespace WpfClient
 
         private void showCartWindow()
         {
+            AppLib.WriteAppAction(pFormName: "MainWindow", pControlName: "Кнопка Оформить");
+
             if (_currentOrder.GetOrderValue() == 0)
             {
                 animateOrderPrice();

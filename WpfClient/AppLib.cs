@@ -98,6 +98,20 @@ namespace WpfClient
             AppLogger.Error(format, values);
         }
 
+        public static void WriteAppAction(AppActionNS.UICActionType pActionType = AppActionNS.UICActionType.Click, string pFormName = "", string pControlName = "")
+        {
+            if ((bool)AppLib.GetAppGlobalValue("IsLogUserAction") == false) return;
+
+            App.AppActionLogger.AddAction(new AppActionNS.UICAction()
+            {
+                deviceId = App.DeviceId,
+                orderNumber = App.OrderNumber,
+                actionType = pActionType,
+                formName = pFormName,
+                controlName = pControlName
+            });
+        }
+
         #endregion
 
         #region system info
@@ -439,6 +453,8 @@ namespace WpfClient
         {
             // прочие настройки
             saveAppSettingToProps("ssdID", null);   // идентификатор устройства самообслуживания
+            App.DeviceId = (string)AppLib.GetAppGlobalValue("ssdID");
+
             saveAppSettingToProps("CurrencyChar", null);   // символ денежной единицы
             saveAppSettingToProps("UserIdleTime", typeof(int));        // время бездействия из config-файла, в сек
             // печать чека
@@ -459,6 +475,8 @@ namespace WpfClient
             saveAppSettingToPropTypeBool("IsPrintBarCode");
             saveAppSettingToPropTypeBool("IsIncludeBarCodeLabel");
             saveAppSettingToPropTypeBool("isAnimatedSelectVoki");
+
+            saveAppSettingToPropTypeBool("IsLogUserAction");
             saveAppSettingToPropTypeBool("IsWriteTraceMessages");
 
             // добавить некоторые постоянные тексты (заголовки, надписи на кнопках)
@@ -648,6 +666,28 @@ namespace WpfClient
             return null;
         }
 
+
+        #region работа с заказом
+        public static OrderItem CreateNewOrder()
+        {
+            string deviceName = (string)AppLib.GetAppGlobalValue("ssdID", string.Empty);
+            int rndFrom = int.Parse(AppLib.GetAppSetting("RandomOrderNumFrom"));       // случайный номер заказа: От
+            int rndTo = int.Parse(AppLib.GetAppSetting("RandomOrderNumTo"));           // случайный номер заказа: До
+
+            OrderItem order = new OrderItem() { DeviceID = deviceName, RangeOrderNumberFrom = rndFrom, RangeOrderNumberTo = rndTo };
+
+            // создать случайный номер заказа
+            order.CreateOrderNumberForPrint();  // 
+            App.OrderNumber = order.OrderNumberForPrint.ToString();
+
+            // сохранить ссылку на новый заказ в глоб.перем.
+            AppLib.SetAppGlobalValue("currentOrder", order);
+
+            return order;
+        }
+
+        #endregion
+
         // закрытие всех окон и возврат в начальный экран
         // создание нового заказа
         public static void ReDrawApp(bool isResetLang, bool isCloseChildWindow)
@@ -673,26 +713,6 @@ namespace WpfClient
 
             mainWin.updatePrice();
         }
-
-        #region работа с заказом
-        public static OrderItem CreateNewOrder()
-        {
-            string deviceName = (string)AppLib.GetAppGlobalValue("ssdID", string.Empty);
-            int rndFrom = int.Parse(AppLib.GetAppSetting("RandomOrderNumFrom"));       // случайный номер заказа: От
-            int rndTo = int.Parse(AppLib.GetAppSetting("RandomOrderNumTo"));           // случайный номер заказа: До
-
-            OrderItem order = new OrderItem() { DeviceID = deviceName, RangeOrderNumberFrom = rndFrom, RangeOrderNumberTo = rndTo };
-
-            // создать случайный номер заказа
-            order.CreateOrderNumberForPrint();  // 
-
-            // сохранить ссылку на новый заказ в глоб.перем.
-            AppLib.SetAppGlobalValue("currentOrder", order);
-
-            return order;
-        }
-
-        #endregion
 
         // закрыть все открытые окна, кроме главного окна
         public static void CloseChildWindows(bool isCloseAuxWindows = false)

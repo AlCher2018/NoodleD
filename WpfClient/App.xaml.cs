@@ -10,6 +10,8 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Navigation;
 using UserActionLog;
+using AppActionNS;
+
 
 namespace WpfClient
 {
@@ -23,7 +25,10 @@ namespace WpfClient
         // специальные логгеры событий WPF
         public static UserActionsLog UserActionHandler = null;
         public static UserActionIdle IdleHandler = null;
-        public static AppActionNS.AppActionLogger AppActionLogger;
+        public static AppActionLogger AppActionLogger;
+
+        public static string DeviceId;
+        public static string OrderNumber;
 
         [STAThread]
         public static void Main()
@@ -101,17 +106,16 @@ namespace WpfClient
                 IdleHandler = new UserActionIdle() { IdleSeconds = (int)AppLib.GetAppGlobalValue("UserIdleTime") };
                 //IdleHandler.IdleElapseEvent += IdleHandler_IdleElapseEvent;
                 // логгер событий UI-элементов приложения
-                AppActionLogger = new AppActionNS.AppActionLogger();
+                AppActionLogger = new AppActionLogger();
 
                 // главное окно приложения
                 WpfClient.MainWindow mainWindow = new WpfClient.MainWindow();
                 app.Run(mainWindow);
-                
+
                 // Allow single instance code to perform cleanup operations
                 Microsoft.Shell.SingleInstance<App>.Cleanup();
             }
         }
-
 
         #region ISingleInstanceApp Members
 

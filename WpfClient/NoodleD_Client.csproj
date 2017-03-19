@@ -97,6 +97,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Lib\FileLib.cs" />
     <Compile Include="Lib\PromoPanel.xaml.cs">
       <DependentUpon>PromoPanel.xaml</DependentUpon>
     </Compile>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -24,49 +25,55 @@ namespace UserActionLog
         public void AddHandler(FrameworkElement control, string eventName)
         {
             Type objectType = control.GetType();
-            
+
             // get EventInfo to wanted event of the objectType
-            var list = objectType.GetEvents();
-            EventInfo objectEventInfo = list.FirstOrDefault(ei => ei.Name == eventName);
-            if (objectEventInfo != null)
+            EventInfo[] list = objectType.GetEvents();
+            EventInfo eventInfo = list.FirstOrDefault(ei => ei.Name == eventName);
+            if (eventInfo == null) return;
+
+            Type eventHandlerType = eventInfo.EventHandlerType;
+            Type argsType = eventHandlerType.ReflectedType;
+            Action<object, EventArgs> action = (o, args) => _eventHandler(eventInfo.Name, o, args);
+            Delegate del=null;
+
+            //var ttt = Activator.CreateInstance(eventHandlerType, action);
+            // MouseButtonEventHandler
+            if (eventHandlerType.Name == "RoutedEventHandler") del = new RoutedEventHandler(action);
+            else if (eventHandlerType.Name == "EventHandler")  del = new EventHandler(action);
+            else if (eventHandlerType.Name == "MouseButtonEventHandler")  del = new System.Windows.Input.MouseButtonEventHandler(action);
+            else if (eventHandlerType.Name == "MouseEventHandler") del = new System.Windows.Input.MouseEventHandler(action);
+            else if (eventHandlerType.Name == "MouseWheelEventHandler") del = new System.Windows.Input.MouseWheelEventHandler(action);
+            else if (eventHandlerType.Name == "KeyEventHandler")  del = new System.Windows.Input.KeyEventHandler(action);
+            else if (eventHandlerType.Name == "InputEventHandler")  del = new System.Windows.Input.InputEventHandler(action);
+            else if (eventHandlerType.Name == "KeyboardEventHandler")  del = new System.Windows.Input.KeyboardEventHandler(action);
+            else if (eventHandlerType.Name == "KeyEventHandler")  del = new System.Windows.Input.KeyEventHandler(action);
+            else if (eventHandlerType.Name == "TouchFrameEventHandler")  del = new System.Windows.Input.TouchFrameEventHandler(action);
+            else if (eventHandlerType.Name == "SizeChangedEventHandler")  del = new SizeChangedEventHandler(action);
+            else if (eventHandlerType.Name == "DragEventHandler")  del = new DragEventHandler(action);
+            else if (eventHandlerType.Name == "CancelEventHandler") del = new System.ComponentModel.CancelEventHandler(action);
+
+            if (del != null)
             {
-                Type objectEventHandlerType = objectEventInfo.EventHandlerType;
-                Delegate del = Delegate.CreateDelegate(objectEventHandlerType, this, _handlerMethod);
-
-                ControlEvent eHandler = new ControlEvent(control, objectEventInfo, del);
-                eHandler.AddHandler();
+                eventInfo.AddEventHandler(control, del);
+                ControlEvent eHandler = new ControlEvent(control, eventInfo, del);
+                //eHandler.AddHandler();
                 _listEvents.Add(eHandler);
-
-            }  // if
+            }
+            else
+            {
+               // Debug.Print("-- handlerType-- " + eventHandlerType.Name);
+            }
 
         }  // method
 
-        public void ReleaseEvents()
-        {
-            foreach (ControlEvent elEvent in _listEvents)
-            {
-                elEvent.RemoveHandler();
-            }
-        }
 
-        public void ReleaseEvents(FrameworkElement element)
+        private void _eventHandler(string eventName, object sender, EventArgs e)
         {
-            foreach (ControlEvent cEvent in _listEvents.Where(ce => ce.Control.Equals(element)))
-            {
-                cEvent.RemoveHandler();
-            }
-        }
-
-        private void _eventHandler(object sender, RoutedEventArgs e)
-        {
+            //Debug.Print(string.Format("*** sender-{0}, eventName-{1}", sender, eventName));
             if (ActionEventHandler != null)
             {
-                ControlEvent ce = _listEvents.Find(c => c.Control.Equals(sender) && (c.EventInfo.Name == e.RoutedEvent.Name));
-
-                string eName = "";
-                eName = e.RoutedEvent.Name;
-
-                ActionEventHandler(sender, 
+                ControlEvent ce = _listEvents.Find(c => c.Control.Equals(sender) && (c.EventInfo.Name == eventName));
+                if (ce != null) ActionEventHandler(sender, 
                     new UserActionEventArgs()
                     {
                         ControlName = ce.Control.Name,
@@ -81,6 +88,21 @@ namespace UserActionLog
             ReleaseEvents();
             _listEvents.Clear(); _listEvents = null;
             GC.Collect();
+        }
+        public void ReleaseEvents()
+        {
+            foreach (ControlEvent elEvent in _listEvents)
+            {
+                elEvent.RemoveHandler();
+            }
+        }
+
+        protected void ReleaseEvents(FrameworkElement element)
+        {
+            foreach (ControlEvent cEvent in _listEvents.Where(ce => ce.Control.Equals(element)))
+            {
+                cEvent.RemoveHandler();
+            }
         }
 
     }  // class

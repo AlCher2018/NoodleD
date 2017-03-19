@@ -39,7 +39,7 @@ namespace UserActionLog
         {
             lock (this)
             {
-                _theUserActions.Add(string.Format("{0}\t{1}\t{2}\t{3}\t{4}", timeStamp.ToString("H:mm:ss.fff"), frmName, ctrlName, eventName, value));
+                _theUserActions.Add(string.Format("{0}: {1}!{2} {3}", timeStamp.ToString("H:mm:ss.fff"), frmName, ctrlName, eventName));
                 if (_theUserActions.Count > _maxNumerOfLogsInMemory) WriteLogActionsToFile();
             }
         }

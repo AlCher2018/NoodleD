@@ -177,7 +177,7 @@ namespace WpfClient
             setStylePropertyValue("dishBorderStyle", "MinHeight", dishBorderHeight);
             // элементы в строке блюда, относительно ее высоты dishBorderHeight
             // внутренние поля в рамке блюда
-            setStylePropertyValue("dishListBoxItemStyle", "Padding",  new Thickness(0.06 * dishBorderHeight, 0.05 * dishBorderHeight, 0, 0.05 * dishBorderHeight));
+            setStylePropertyValue("dishItemStyle", "Padding",  new Thickness(0.06 * dishBorderHeight, 0.05 * dishBorderHeight, 0, 0.05 * dishBorderHeight));
             
             // изображение блюда (1:1.33)
             setStylePropertyValue("dishImageBorderStyle", "Height", 1.0 * dishBorderHeight);

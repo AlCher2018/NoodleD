@@ -103,9 +103,21 @@ namespace UserActionLog
             hookUpEvents(ctrl);
         }
 
+        public override void Dispose()
+        {
+            base.Dispose();
+
+            FinishLoggingUserActions();
+        }
+
         #endregion
 
         #region "Methods"
+
+        public void Close()
+        {
+            this.Dispose();
+        }
 
         /// <summary>
         /// Hooks up the event(s) to get the steps to reproduce problems.
@@ -131,9 +143,10 @@ namespace UserActionLog
                 base.AddHandler(ctrl, "Deactivated");
                 base.AddHandler(ctrl, "Drop");
                 base.AddHandler(ctrl, "GotFocus");
-                base.AddHandler(ctrl, "IsVisibleChanged");
                 base.AddHandler(ctrl, "LostFocus");
                 base.AddHandler(ctrl, "Unloaded");
+                base.AddHandler(ctrl, "SourceUpdated");
+                base.AddHandler(ctrl, "StateChanged");
             }
 
             //** СОБЫТИЯ ДЛЯ ЛЮБОГО FRAMEWORK-ЭЛЕМЕНТА
@@ -232,8 +245,6 @@ namespace UserActionLog
                 _logger.LogAction("UserActionsLog class", "INSTANCE", "RELEASE", "log files path: " + _logger.GetLogFilePath);
                 _logger.WriteLogActionsToFile();
             }
-
-            base.ReleaseEvents();
         }
 
 
@@ -241,6 +252,9 @@ namespace UserActionLog
         {
             // найти значение контрола
             FrameworkElement fe = (FrameworkElement)sender;
+            if (e.ControlType == null) e.ControlType = fe.GetType();
+            if (string.IsNullOrEmpty(e.ControlName)) e.ControlName = fe.GetType().Name;
+
             string valueLogString = GetSendingCtrlValue(fe, e.EventName, e);
             e.Value = valueLogString;
 
@@ -302,7 +316,7 @@ namespace UserActionLog
                 if ((eventName.Contains("Mouse") == true) && (eventName.EndsWith("Down") || (eventName.EndsWith("Up"))))
                 {
                     RoutedEventArgs re = (e as RoutedEventArgs);
-                    return (re.OriginalSource as FrameworkElement).Name;
+                    return (re.OriginalSource == null)?null:(re.OriginalSource as FrameworkElement).Name;
                 }
 
                 return ((Window)ctrl).Name;

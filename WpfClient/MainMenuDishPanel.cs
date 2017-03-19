@@ -406,6 +406,9 @@ namespace WpfClient
                 currentGarnItem.IsSelected = true;
 
                 this._selectedGarnIndex = e.GarnishIndex;
+
+                AppLib.WriteAppAction(pFormName: "MainWindow", pControlName: "Выделен Гарнир;" + _dishItem.Garnishes[_selectedGarnIndex].langNames["ru"] + ";" + _dishItem.langNames["ru"]);
+
                 // изменить изображение блюда с гарниром
                 if (_pathImage != null) _pathImage.Fill = currentGarnItem.DishWithGarnishImageBrush;
                 // изменить описание блюда
@@ -499,6 +502,8 @@ namespace WpfClient
 
         private void unselectGarnish()
         {
+            AppLib.WriteAppAction(pFormName: "MainWindow", pControlName: "Невыделен Гарнир;" + _dishItem.Garnishes[_selectedGarnIndex].langNames["ru"] + ";" + _dishItem.langNames["ru"]);
+
             setAddButtonState(false);
             this._selectedGarnIndex = -1;
             if (_pathImage != null) _pathImage.Fill = _dishImageBrush;
@@ -524,6 +529,8 @@ namespace WpfClient
             if (AppLib.IsDrag == true) return;
 
             _showDescription = !_showDescription;
+
+            AppLib.WriteAppAction(pFormName: "MainWindow", pControlName: ((_showDescription)?"Показать":"Скрыть") + " Описание;" + _dishItem.langNames["ru"]);
 
             if (_sbDescrShow == null)
                 _dishDescrWithoutAnimation();  // без анимации
@@ -657,6 +664,7 @@ namespace WpfClient
             if (brdAddButton.Opacity == 0) return;
 
             OrderItem _currentOrder = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
+
             // изображение взять из элемента
             ImageBrush imgBrush = (ImageBrush)_pathImage.Fill;
             BitmapImage bmpImage = (imgBrush.ImageSource as BitmapImage);
@@ -665,6 +673,8 @@ namespace WpfClient
             // т.к. блюда без гарниров тоже могут быть с ингредиентами (и рекомендациями)
             if ((_dishItem.Ingredients == null) || (_dishItem.Ingredients.Count == 0))
             {
+                AppLib.WriteAppAction(pFormName: "MainWindow", pControlName: "Добавлено в заказ;" + _dishItem.langNames["ru"]);
+
                 DishItem orderDish = _dishItem.GetCopyForOrder();
                 orderDish.Image = bmpImage;
 
@@ -676,6 +686,8 @@ namespace WpfClient
             // иначе через "всплывашку"
             else
             {
+                AppLib.WriteAppAction(pFormName: "MainWindow", pControlName: "Выбрано блюдо;" + _dishItem.langNames["ru"]);
+
                 // текущее блюдо и его изображение передать в конструкторе
                 DishPopup popupWin = new DishPopup(_dishItem, bmpImage);
                 popupWin.ShowDialog();

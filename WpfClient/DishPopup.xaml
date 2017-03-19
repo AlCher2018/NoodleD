@@ -138,7 +138,7 @@
             <Setter Property="SnapsToDevicePixels" Value="True"/>
             <Setter Property="Focusable" Value="False"/>
             <Setter Property="IsHitTestVisible" Value="True"/>
-            <!--<Setter Property="FocusVisualStyle" Value="{x:Null}"/>-->
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="ScrollViewer.CanContentScroll" Value="False"/>
             <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
             <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
@@ -316,12 +316,14 @@
                     <!--Раздел 2. ИНГРЕДИЕНТЫ -->
                     <TextBlock Grid.Column="1" Grid.Row="4" Style="{StaticResource sectionHeaderStyle}"
                             Text="{Binding {x:Null}, ConverterParameter=appSet.formPopUpHeaderText2, Converter={StaticResource langDictToText}}"/>
-                    <ListBox x:Name="listIngredients" Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="5" Style="{StaticResource addingsListBoxStyle}" ItemsSource="{Binding Ingredients}" ItemContainerStyle="{StaticResource addingsListBoxItemStyle}" SelectionChanged="listIngredients_SelectionChanged"/>
+                    <ListBox x:Name="listIngredients" Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="5" Style="{StaticResource addingsListBoxStyle}" ItemsSource="{Binding Ingredients}" 
+                      ItemContainerStyle="{StaticResource addingsListBoxItemStyle}"
+                      SelectionChanged="listIngredients_SelectionChanged"/>
 
                     <!--Раздел 3. РЕКОМЕНДАЦИИ -->
                     <TextBlock Grid.Column="1" Grid.Row="7" Style="{StaticResource sectionHeaderStyle}"
                             Text="{Binding {x:Null}, ConverterParameter=appSet.formPopUpHeaderText3, Converter={StaticResource langDictToText}}"/>
-                    <ListBox x:Name="listRecommends" Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="8" Style="{StaticResource addingsListBoxStyle}" ItemsSource="{Binding Recommends}" ItemContainerStyle="{StaticResource addingsListBoxItemStyle}" SelectionChanged="listRecommends_SelectionChanged"/>
+                    <ListBox x:Name="listRecommends" Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="8" Style="{StaticResource addingsListBoxStyle}" ItemsSource="{Binding Recommends}"     ItemContainerStyle="{StaticResource addingsListBoxItemStyle}" SelectionChanged="listRecommends_SelectionChanged"/>
 
                     <!--Раздел 4. Кнопка Добавить -->
                     <Grid x:Name="gridAddButtonSection" Grid.Row="10" Grid.Column="1">
