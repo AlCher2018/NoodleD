@@ -39,8 +39,10 @@ namespace UserActionLog
         {
             lock (this)
             {
-                _theUserActions.Add(string.Format("{0}: {1}!{2} {3}", timeStamp.ToString("H:mm:ss.fff"), frmName, ctrlName, eventName));
-                if (_theUserActions.Count > _maxNumerOfLogsInMemory) WriteLogActionsToFile();
+                string msg = string.Format("{0}: {1}!{2} {3}", timeStamp.ToString("H:mm:ss.fff"), frmName, ctrlName, eventName);
+                _theUserActions.Add(msg);
+                //if (_theUserActions.Count > _maxNumerOfLogsInMemory) WriteLogActionsToFile();
+                WriteLogActionsToFile();
             }
         }
 
@@ -72,6 +74,8 @@ namespace UserActionLog
 
         public void WriteLogActionsToFile()
         {
+            if ((_theUserActions == null) || (_theUserActions.Count == 0)) return;
+
             string logFilePath = GetLogFileName();
             if (File.Exists(logFilePath))
             {
@@ -96,7 +100,7 @@ namespace UserActionLog
                     System.Windows.Forms.MessageBox.Show("If you see this message its because you're not an Admin you need to run as Admin - wierd problem with GPO's" + ex.Message + ex.StackTrace);
                 }
             }
-            _theUserActions = new List<string>();
+            _theUserActions.Clear();
         }
 
         #endregion

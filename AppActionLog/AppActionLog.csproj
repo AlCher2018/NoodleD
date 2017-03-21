@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppActionLog.cs" />
+    <Compile Include="AppActionsEnum.cs" />
     <Compile Include="FileLib.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -79,7 +79,7 @@ namespace WpfClient
             this.DishWithGarnishImageBrush = new ImageBrush() { ImageSource = _garnItem.ImageDish };
             createGarnishButton();
 
-            base.MouseDown += MainMenuGarnish_PreviewMouseDown;
+            base.MouseUp += MainMenuGarnish_PreviewMouseDown;
         }
 
         public void ResetLangName()

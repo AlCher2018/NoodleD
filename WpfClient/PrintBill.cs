@@ -18,8 +18,6 @@ namespace WpfClient
 {
     public class PrintBill
     {
-        private const string UserErrMsgSuffix = "\nПечать чека невозможна.\nОбратитесь к администратору приложения.";
-
         private OrderItem _order;
         string _langId;
 
@@ -33,6 +31,7 @@ namespace WpfClient
         {
             bool retVal = true;
             errMessage = null;
+            string userErrMsgSuffix = AppLib.GetLangTextFromAppProp("userErrMsgSuffix");
 
             // свойства заказа, созадаваемые перед печатью чека:
             //      1. BarCodeValue - значение штрих-кода, 12 цифр (6 - yymmdd, 2 - код источника, 4 - номер чека для печати)
@@ -43,17 +42,22 @@ namespace WpfClient
             if (deviceName == string.Empty)
             {
                 AppLib.WriteLogErrorMessage("В config-файле не найден элемент \"ssdID\" - идентификатор терминала самообслуживания.\n\t\tTrace: PrintBill.cs, CreateBill()");
-                errMessage = "Ошибка конфигурации приложения!" + UserErrMsgSuffix;
+                errMessage = "Ошибка конфигурации приложения!" + userErrMsgSuffix;
                 return false;
             }
             if (deviceName.Length > 2) deviceName = deviceName.Substring(0, 2);
 
-            // 1. OrderNumberForPrint and order date
-            _order.OrderDate = DateTime.Now;
+            // 1. OrderNumberForPrint
             if (_order.OrderNumberForPrint == -1)
             {
-                AppLib.WriteLogErrorMessage("Модуль OrderLib.cs, CreateOrderNumberForPrint() вернул -1 (признак ошибочного значения)");
-                errMessage = "Ошибка создания номера заказа для печати чека." + UserErrMsgSuffix;
+                AppLib.WriteLogErrorMessage("Класс PrintBill. Не указан номер заказа");
+                errMessage = "Печать чека: не указан номер заказа" + userErrMsgSuffix;
+                return false;
+            }
+            if (_order.OrderDate == null)
+            {
+                AppLib.WriteLogErrorMessage("Класс PrintBill. Не указана дата заказа");
+                errMessage = "Печать чека: не указана дата заказа" + userErrMsgSuffix;
                 return false;
             }
 
@@ -66,7 +70,8 @@ namespace WpfClient
             //    дата заказа в формате yyMMdd - 6 символов
             //    номер заказа (для печати - случайный) в формате 0000 - 4 символа
             // т.к. в формате EAN-13 если первый символ - 0, то он удаляется, используем в начале дату
-            _order.BarCodeValue = _order.OrderDate.ToString("yyMMdd") + deviceName + _order.OrderNumberForPrint.ToString("0000");
+            string sBuf = (_order.OrderDate==null) ? "000000" : string.Format("{0:yyMMdd}", _order.OrderDate);
+            _order.BarCodeValue = sBuf + deviceName + _order.OrderNumberForPrint.ToString("0000");
 
             // 3. LanguageTypeId
             _order.LanguageTypeId = AppLib.AppLang;
@@ -76,7 +81,7 @@ namespace WpfClient
             if (width == 0)
             {
                 AppLib.WriteLogErrorMessage("В config-файле не указан элемент BillPageWidht с шириной чека.\n\t\tМодуль PrintBill.cs, CreateBill()");
-                errMessage = "Ошибка в конфигурации печати чека." + UserErrMsgSuffix;
+                errMessage = AppLib.GetLangTextFromAppProp("printConfigError") + " (BillPageWidht) " + userErrMsgSuffix;
                 return false;
             }
 
@@ -86,13 +91,14 @@ namespace WpfClient
             if (printerName == null)
             {
                 AppLib.WriteLogErrorMessage("В config-файле не указан элемент PrinterName - имя принтера в ОС для печати чеков.\n\t\tМодуль PrintBill.cs, CreateBill()");
-                errMessage = "Ошибка в конфигурации печати чека." + UserErrMsgSuffix;
+                errMessage = AppLib.GetLangTextFromAppProp("printConfigError") + " (PrinterName) " + userErrMsgSuffix;
                 isOk = false;
             }
             string result = PrintHelper.GetPrinterStatus(printerName);
             if (result.ToUpper() != "OK")
             {
-                errMessage = string.Format("Принтер \"{0}\" находится в состоянии {1}", printerName, result);
+                string sFormat = AppLib.GetLangTextFromAppProp("printerStatusMsg");
+                errMessage = string.Format(sFormat, printerName, result);
                 isOk = false;
             }
             // если принтер из настроек не Ок, то берем первый в системе
@@ -117,7 +123,7 @@ namespace WpfClient
             if (retVal == false)
             {
                 AppLib.WriteLogErrorMessage(errMessage + "\tМодуль PrintBill.cs, CreateBill()");
-                errMessage = "Ошибка печати чека.\nОбратитесь к администратору приложения.";
+                errMessage = AppLib.GetLangTextFromAppProp("afterPrintingErrMsg");
             }
 
             return retVal;
@@ -295,7 +301,7 @@ namespace WpfClient
                 // обработка строк шаблона заголовка
                 if (item.Text.Contains("{OrderDate}") == true)
                 {
-                    sBuf = item.Text.Replace("{OrderDate}", _order.OrderDate.ToString("yyyy-MM-dd HH:mm:ss"));
+                    sBuf = item.Text.Replace("{OrderDate}", string.Format("{0:dd.MM.yyyy HH:mm:ss}", _order.OrderDate));
                     Run inLineObj = getRunFromModel(item, sBuf);
                     par = new Paragraph(inLineObj);
                 }

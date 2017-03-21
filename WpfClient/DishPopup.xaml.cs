@@ -59,20 +59,22 @@ namespace WpfClient
             this.Height = (double)AppLib.GetAppGlobalValue("screenHeight");
             this.Top = 0; this.Left = 0;
 
-            double pnlMenuWidth = (double)AppLib.GetAppGlobalValue("categoriesPanelWidth");
-            double pnlMenuHeight = (double)AppLib.GetAppGlobalValue("categoriesPanelHeight");
+            double pnlMenuWidth, pnlMenuHeight;
+            //pnlMenuHeight = (double)AppLib.GetAppGlobalValue("categoriesPanelHeight");
+            //pnlMenuWidth = (double)AppLib.GetAppGlobalValue("categoriesPanelWidth");
+            // высоту и ширину панели управления взять из главного окна
+            WpfClient.MainWindow mainWin = (WpfClient.MainWindow)App.Current.MainWindow;
+            pnlMenuHeight = mainWin.gridMenuSide.ActualHeight;
+            pnlMenuWidth = mainWin.gridMenuSide.ActualWidth;
             brdAboveFolderMenu.Height = pnlMenuHeight;
             brdAboveFolderMenu.Width = pnlMenuWidth;
 
             double dW, dH, d1;
             double grdContentWidth = getAbsColWidth(gridWindow, 1, ((this.Width == pnlMenuWidth) ? this.Width : this.Width - pnlMenuWidth));
             double grdContentHeight = AppLib.GetRowHeightAbsValue(gridWindow, 1, ((this.Height == pnlMenuHeight) ? this.Height : this.Height - pnlMenuHeight));
-
             double itemWidth = 10, itemHeight=10, garnTextFontSize=10;
 
             Setter st; Thickness thMargin;
-            object o1;
-
             Style lbiStyle = (Style)this.Resources["addingsListBoxItemStyle"];
             Style garnTextStyle = (Style)this.Resources["garnishTextStyle"];
             
@@ -282,7 +284,7 @@ namespace WpfClient
             e.Handled = true;
 
             // добавить блюдо в заказ
-            OrderItem curOrder = (OrderItem)AppLib.GetAppGlobalValue("currentOrder");
+            OrderItem curOrder = AppLib.GetCurrentOrder();
             DishItem orderDish = _currentDish.GetCopyForOrder();   // сделать копию блюда со всеми добавками
 
             // изображение взять из элемента

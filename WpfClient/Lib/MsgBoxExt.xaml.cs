@@ -258,7 +258,7 @@ namespace WpfClient.Lib
 
         private void btn_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            if (e.StylusDevice != null) return;
+            //if (e.StylusDevice != null) return;
             doPress((FrameworkElement)sender);
 
             //closeWin(e);
@@ -270,7 +270,7 @@ namespace WpfClient.Lib
         }
         private void btn_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            if (e.StylusDevice != null) return;
+            //if (e.StylusDevice != null) return;
             doUnpress();
         }
 
@@ -283,7 +283,7 @@ namespace WpfClient.Lib
         }
         private void btn_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            if (e.StylusDevice != null) return;
+            //if (e.StylusDevice != null) return;
 
             if ((sender as FrameworkElement).Equals(_buttonPressed))
             {
@@ -339,19 +339,14 @@ namespace WpfClient.Lib
             }
             doUnpress();
 
-            if (this._closeByButtonPress)
-            {
-                this.Close();
-            }
-            else
-            {
-                //btn2.InvalidateVisual();
-                //Force render
-                //btn2.Measure(new Size(Double.PositiveInfinity, Double.PositiveInfinity));
-                //btn2.Arrange(new Rect(btn2.DesiredSize));
-
+            //if (this._closeByButtonPress)
+            //{
+            //    this.Close();
+            //}
+            //else
+            //{
                 this.Hide();
-            }
+            //}
         }
 
     }  // class

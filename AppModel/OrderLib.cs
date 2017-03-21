@@ -23,7 +23,7 @@ namespace AppModel
 
         public bool takeAway { get; set; }
 
-        public DateTime OrderDate { get; set; }
+        public DateTime? OrderDate { get; set; }
 
         private List<DishItem> _dishItems;
 
@@ -64,7 +64,7 @@ namespace AppModel
             return retVal;
         }
 
-        public int CreateOrderNumberForPrint()
+        public int CreateOrderNumberForPrint(out DateTime? dtOrder)
         {
             int retVal;
 
@@ -91,10 +91,11 @@ namespace AppModel
                         term.RndOrderNum_NextVal = term.RndOrderNum_InitVal;
                     }
 
-                    // новая дата для номера чека
+                    // дата заказа
+                    term.RndOrderNum_Date = DateTime.Now;
+                    // для другой даты новый кеш случайных номеров заказа
                     if (compareDatesOnly(term.RndOrderNum_Date??DateTime.MinValue, DateTime.Now) == false)
                     {
-                        term.RndOrderNum_Date = DateTime.Now;
                         term.RndOrderNum_InitVal = getNewRandomOrderNumber(this.RangeOrderNumberFrom, this.RangeOrderNumberTo);
                         term.RndOrderNum_NextVal = term.RndOrderNum_InitVal;
                     }
@@ -102,6 +103,8 @@ namespace AppModel
 
                 retVal = term.RndOrderNum_NextVal??-1;
                 term.RndOrderNum_NextVal++;
+                dtOrder = term.RndOrderNum_Date;
+
                 db.SaveChanges();
             }
 
@@ -129,7 +132,7 @@ namespace AppModel
                 {
                     RowGUID = Guid.NewGuid(),
                     OrderNumForPrint = this.OrderNumberForPrint,
-                    OrderDate = this.OrderDate,
+                    OrderDate = this.OrderDate??DateTime.MinValue,
                     BarCodeValue = this.BarCodeValue,
                     LanguageTypeId = this.LanguageTypeId,
                     takeAway = this.takeAway

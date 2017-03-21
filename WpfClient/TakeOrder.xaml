@@ -48,18 +48,20 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <!--кнопка закрытия окна  -->
-                    <!-- border for click -->
-                    <Border Grid.Column="4" PreviewMouseDown="btnClose_MouseDown" CornerRadius="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=cornerRadiusButton, Mode=OneWay}" PreviewTouchDown="btnClose_PreviewTouchDown" Background="{Binding ElementName=brdDialog, Path=Background}">
+                    <!-- border for click PreviewTouchDown="btnClose_PreviewTouchDown" -->
+                    <Border Grid.Column="4" CornerRadius="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=cornerRadiusButton, Mode=OneWay}" Background="{Binding ElementName=brdDialog, Path=Background}" MouseUp="btnClose_MouseDown">
                         <Image x:Name="btnClose"  Grid.Column="4" Source="AppImages\closeWindow.png" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="{Binding ElementName=brdDialog, Path=ActualHeight, Converter={StaticResource getMargin}, ConverterParameter='0,0.1,0.1,0', Mode=OneWay}"/>
                     </Border>
 
-                    <Border x:Name="btnTakeOut" Grid.Row="1" Grid.Column="1" Style="{StaticResource btnBorderStyle}" PreviewMouseDown = "btnTakeOut_MouseDown" PreviewTouchDown="btnTakeOut_PreviewTouchDown">
+                    <!-- PreviewTouchDown="btnTakeOut_PreviewTouchDown" -->
+                    <Border x:Name="btnTakeOut" Grid.Row="1" Grid.Column="1" Style="{StaticResource btnBorderStyle}" MouseUp = "btnTakeOut_MouseDown">
                         <TextBlock x:Name="txtTakeOut" Grid.Row="1" Grid.Column="1" Style="{StaticResource btnTextStyle}" Text="{Binding Converter={StaticResource langDictToText}, ConverterParameter=appSet.takeOrderOut}"/>
                     </Border>
 
                     <TextBlock x:Name="txtWordOr" Grid.Row="1" Grid.Column="2" Foreground="Black" Style="{StaticResource centeredElement}" Text="{Binding Converter={StaticResource langDictToText}, ConverterParameter=appSet.wordOr}"/>
 
-                    <Border x:Name="btnTakeIn" Grid.Row="1" Grid.Column="3" Style="{StaticResource btnBorderStyle}" PreviewMouseDown = "btnTakeIn_MouseDown" PreviewTouchDown="btnTakeIn_PreviewTouchDown">
+                    <!-- PreviewTouchDown="btnTakeIn_PreviewTouchDown" -->
+                    <Border x:Name="btnTakeIn" Grid.Row="1" Grid.Column="3" Style="{StaticResource btnBorderStyle}" MouseUp = "btnTakeIn_MouseDown">
                         <TextBlock x:Name="txtTakeIn" Grid.Row="1" Grid.Column="3" Style="{StaticResource btnTextStyle}" Text="{Binding Converter={StaticResource langDictToText}, ConverterParameter=appSet.takeOrderIn}"/>
                     </Border>
 

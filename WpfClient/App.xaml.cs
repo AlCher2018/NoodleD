@@ -23,12 +23,12 @@ namespace WpfClient
         private const string Unique = "My_Unique_Application_String";
         
         // специальные логгеры событий WPF
-        public static UserActionsLog UserActionHandler = null;
         public static UserActionIdle IdleHandler = null;
         public static AppActionLogger AppActionLogger;
 
         public static string DeviceId;
         public static string OrderNumber;
+        public static string PromocodeNumber;
 
         [STAThread]
         public static void Main()
@@ -103,8 +103,11 @@ namespace WpfClient
                 }
 
                 // ожидашка
-                IdleHandler = new UserActionIdle() { IdleSeconds = (int)AppLib.GetAppGlobalValue("UserIdleTime") };
-                //IdleHandler.IdleElapseEvent += IdleHandler_IdleElapseEvent;
+                IdleHandler = new UserActionIdle();
+                //IdleHandler.IdleSeconds = (int)AppLib.GetAppGlobalValue("UserIdleTime");
+                // DEBUG
+                IdleHandler.IdleSeconds = 3;
+                IdleHandler.IdleElapseEvent += IdleHandler_IdleElapseEvent;
                 // логгер событий UI-элементов приложения
                 AppActionLogger = new AppActionLogger();
 
@@ -112,9 +115,20 @@ namespace WpfClient
                 WpfClient.MainWindow mainWindow = new WpfClient.MainWindow();
                 app.Run(mainWindow);
 
+                AppLib.WriteLogInfoMessage("************  End application  ************");
+
+                // подчистить память
+                IdleHandler.Dispose();
+                AppActionLogger.Close();
+
                 // Allow single instance code to perform cleanup operations
                 Microsoft.Shell.SingleInstance<App>.Cleanup();
             }
+        }
+
+        private static void IdleHandler_IdleElapseEvent(System.Timers.ElapsedEventArgs obj)
+        {
+            MessageBox.Show("таймер бездействия");
         }
 
         #region ISingleInstanceApp Members
@@ -244,10 +258,10 @@ namespace WpfClient
             {
                 // панель меню
                 AppLib.SetAppGlobalValue("categoriesPanelWidth", screenWidth);
-                AppLib.SetAppGlobalValue("categoriesPanelHeight", (screenHeight / 6d * 1d));
+                AppLib.SetAppGlobalValue("categoriesPanelHeight", (screenHeight / 6d * 1.0d));
                 // панель блюд
                 dishesPanelWidth = screenWidth;
-                AppLib.SetAppGlobalValue("dishesPanelHeight", (screenHeight / 6d * 5d));
+                AppLib.SetAppGlobalValue("dishesPanelHeight", (screenHeight / 6d * 5.0d));
             }
             // горизонтальная разметка: панель меню справа
             else

@@ -20,18 +20,36 @@ namespace WpfClient
     /// </summary>
     public partial class Promocode : Window
     {
-        public string InputValue;
-
         private string _preValue;
 
-        public Promocode(string editCode = null)
+        public Promocode()
         {
             InitializeComponent();
 
             setLayout();
+        }
 
-            if (string.IsNullOrEmpty(editCode) == false) txtInput.Text = editCode;
-            _preValue = editCode;
+        public new void ShowDialog()
+        {
+            this.ReOpen();
+        }
+
+        protected override void OnActivated(EventArgs e)
+        {
+            base.OnActivated(e);
+            BindingExpression be;
+            // установка текстов на выбранном языке
+            //    заголовок
+            be = txtTitle.GetBindingExpression(TextBlock.TextProperty);
+            if (be != null) be.UpdateTarget();
+        }
+
+        public void ReOpen()
+        {
+            txtInput.Text = App.PromocodeNumber;
+            _preValue = txtInput.Text;
+
+            base.ShowDialog();
         }
 
         private void setLayout()
@@ -121,14 +139,12 @@ namespace WpfClient
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            anyAction("Window_PreviewKeyDown");
-
             if (e.Key == Key.Escape) closeWin(false);
         }
 
         private void brdFooterCancel_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.StylusDevice != null) return;
+            //if (e.StylusDevice != null) return;
             e.Handled = true;
             closeWin(false);
         }
@@ -141,7 +157,7 @@ namespace WpfClient
 
         private void brdFooterOk_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.StylusDevice != null) return;
+            //if (e.StylusDevice != null) return;
             e.Handled = true;
             closeWin(true);
         }
@@ -151,79 +167,19 @@ namespace WpfClient
             closeWin(true);
         }
 
-
-
         private void closeWin(bool isSetRetValue)
         {
             if (isSetRetValue)
             {
-                this.InputValue = txtInput.Text;
+                App.PromocodeNumber = txtInput.Text;
             }
             else
             {
-                this.InputValue = null;
+                txtInput.Text = App.PromocodeNumber;
             }
-            this.Close();
+
+            this.Hide();
         }
 
-        private void Window_PreviewKeyUp(object sender, KeyEventArgs e)
-        {
-            anyAction("Window_PreviewKeyUp");
-        }
-
-        private void Window_KeyDown(object sender, KeyEventArgs e)
-        {
-            anyAction("Window_KeyDown");
-        }
-
-        private void Window_KeyUp(object sender, KeyEventArgs e)
-        {
-            anyAction("Window_KeyUp");
-        }
-
-        private void Window_PreviewTouchDown(object sender, TouchEventArgs e)
-        {
-            anyAction("Window_PreviewTouchDown");
-        }
-
-        private void Window_PreviewTouchUp(object sender, TouchEventArgs e)
-        {
-            anyAction("Window_PreviewTouchUp");
-        }
-
-        private void Window_TouchDown(object sender, TouchEventArgs e)
-        {
-            anyAction("Window_TouchDown");
-        }
-
-        private void Window_TouchUp(object sender, TouchEventArgs e)
-        {
-            anyAction("Window_TouchUp");
-        }
-
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            anyAction("Window_Loaded");
-        }
-
-        private void Window_Activated(object sender, EventArgs e)
-        {
-            anyAction("Window_Activated");
-        }
-
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            anyAction("Window_Closing");
-        }
-
-        private void Window_Closed(object sender, EventArgs e)
-        {
-            anyAction("Window_Closed");
-        }
-
-        private void anyAction(string msg)
-        {
-            AppLib.WriteLogTraceMessage(msg + "\n\t"+ Environment.StackTrace);
-        }
     }  // class
 }

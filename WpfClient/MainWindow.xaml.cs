@@ -10,6 +10,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 
 using AppModel;
+using AppActionNS;
 using System.Configuration;
 using System.Data.SqlClient;
 using System.Data;
@@ -30,11 +31,9 @@ namespace WpfClient
         private List<MainMenuDishesCanvas> _dishCanvas;
         private int _dishColCount;  // кол-во колонок блюд
         // текущий заказ
-        private OrderItem _currentOrder;
+        private OrderItem _currentOrder = null;
         // visual elements
         private byte _langButtonPress = 0;
-        private Border _curDescrBorder;
-        private TextBlock _curDescrTextBlock;
         private double _orderPriceFontSize;
 
         // dish description animations
@@ -56,14 +55,24 @@ namespace WpfClient
         private DateTime _dateTime;
 
         public List<MainMenuDishesCanvas> DishesPanels { get { return _dishCanvas; } }
+        public OrderItem CurrentOrder {
+            get { return _currentOrder; }
+            set { _currentOrder = value; }
+        }
 
         public MainWindow()
         {
             InitializeComponent();
 
+            // вспомогательные окна 
+            // создавать только здесь, чтобы в App.Current.Windows главное окно было на ПЕРВОМ месте!!!! - Обязательно!!!
+            AppLib.PromoCodeWindow = new Promocode();
+            AppLib.TakeOrderWindow = new TakeOrder();
+            AppLib.CreateMsgBox();
+            AppLib.CreateChoiceBox();
+
             // для настройки элементов после отрисовки окна
             this.Loaded += MainWindow_Loaded;
-            this.Closing += MainWindow_Closing;
 
             // инициализация локальных переменных
             _dishCanvas = new List<MainMenuDishesCanvas>();
@@ -71,34 +80,33 @@ namespace WpfClient
             _daCommon1 = new DoubleAnimation();
             _daCommon2 = new DoubleAnimation();
 
-            // создать заказ
-            _currentOrder = AppLib.CreateNewOrder();
             updatePrice();
-
-            // отслеживание бездействия
-            App.IdleHandler.AnyActionWindow = this;
 
             initUI();
         }
 
-        private void MainWindow_Closing(object sender, CancelEventArgs e)
+        #region активация ожидашки
+        protected override void OnActivated(EventArgs e)
+        {
+            App.IdleHandler.CurrentWindow = this;
+        }
+        protected override void OnDeactivated(EventArgs e)
+        {
+            App.IdleHandler.CurrentWindow = null;
+        }
+        #endregion
+
+        protected override void OnClosing(CancelEventArgs e)
         {
             AppLib.CloseChildWindows(true);
-        }
 
-        protected override void OnClosed(EventArgs e)
-        {
-            base.OnClosed(e);
-
-            AppLib.WriteAppAction(AppActionNS.UICActionType.Close, "MainWindow", this.Name);
-            App.AppActionLogger.Close();
-
-            AppLib.WriteLogInfoMessage("************  End application  ************");
+            AppLib.WriteAppAction(this.Name, AppActionsEnum.MainWindowClose);
+            base.OnClosing(e);
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            AppLib.WriteAppAction(AppActionNS.UICActionType.Open, "MainWindow", this.Name);
+            AppLib.WriteAppAction(this.Name, AppActionsEnum.MainWindowOpen);
 
             Point pt = PointFromScreen(new Point(1920, 1080));
             AppLib.ScreenScale = 1920.0 / pt.X;
@@ -222,6 +230,7 @@ namespace WpfClient
 
             lstMenuFolders.Focus();
             lstMenuFolders.ItemsSource = mFolders;
+            AppLib.IsEventsEnable = false;  // для предотвращения логирования НЕпользовательского действия
             lstMenuFolders.SelectedIndex = 0;
 
             // установить язык UI
@@ -235,31 +244,36 @@ namespace WpfClient
             }
 
             AppLib.WriteLogTraceMessage("Настраиваю визуальные элементы - READY");
-
-            // вспомогательные окна
-            AppLib.TakeOrderWindow = new TakeOrder();
-            AppLib.CreateMsgBox();
-            AppLib.CreateChoiceBox();
         }
 
         private void setAppLayout()
         {
             AppLib.WriteLogTraceMessage("Настраиваю дизайн приложения...");
 
-            double pnlWidth = (double)AppLib.GetAppGlobalValue("categoriesPanelWidth");
-            double pnlHeight = (double)AppLib.GetAppGlobalValue("categoriesPanelHeight");
+            double screenWidth = (double)AppLib.GetAppGlobalValue("screenWidth");
+            double screenHeight = (double)AppLib.GetAppGlobalValue("screenHeight");
+
+            double pnlWidth, pnlHeight;
+            double pnlDishWidth, pnlDishHeight;
             double lstFldWidth, lstFldHeight;
-            lstFldWidth = pnlWidth;
             double promoFontSize, dH;
 
             //clearMenuSideLayout();
-            // вертикальное размещение: панель меню справа
+            // вертикальное размещение: панель меню сверху
             if (AppLib.IsAppVerticalLayout == true)
             {
                 AppLib.WriteLogTraceMessage("\t- дизайн вертикальный");
 
                 // грид меню
                 DockPanel.SetDock(gridMenuSide, Dock.Top);
+
+                // панель категорий
+                pnlWidth = screenWidth;
+                pnlHeight = screenHeight / 6d * 1.2d;
+                // панель блюд
+                pnlDishWidth = screenWidth;
+                pnlDishHeight = screenHeight / 6d * 4.8d;
+                lstFldWidth = pnlWidth;
 
                 // грид меню
                 gridMenuSide.Height = pnlHeight;
@@ -305,7 +319,7 @@ namespace WpfClient
                 ScrollViewer.SetVerticalScrollBarVisibility(lstMenuFolders, ScrollBarVisibility.Disabled);
 
                 // кнопка Оформить
-                brdMakeOrder.Margin = new Thickness(dH, 0.6*dH, dH, 0.8 * dH);
+                brdMakeOrder.Margin = new Thickness(dH, 0.4*dH, dH, 0.4 * dH);
                 brdMakeOrder.CornerRadius = new CornerRadius((double)AppLib.GetAppGlobalValue("cornerRadiusButton"));
                 pnlMakeOrder.Orientation = Orientation.Horizontal;
                 _orderPriceFontSize = 0.3 * gridMenuSide.RowDefinitions[3].Height.Value;
@@ -325,6 +339,14 @@ namespace WpfClient
             {
                 AppLib.WriteLogTraceMessage("\t- дизайн горизонтальный");
                 DockPanel.SetDock(gridMenuSide, Dock.Left);
+
+                // панель категорий
+                pnlWidth = screenWidth / 6d * 1.0d;
+                pnlHeight = screenHeight;
+                // панель блюд
+                pnlDishWidth = screenWidth / 6d * 5.0d;
+                pnlDishHeight = screenHeight;
+                lstFldWidth = pnlWidth;
 
                 // грид меню
                 gridMenuSide.Height = pnlHeight;
@@ -395,9 +417,7 @@ namespace WpfClient
             txtPromoCode.FontSize = promoFontSize;
 
             // грид блюд
-            pnlWidth = (double)AppLib.GetAppGlobalValue("dishesPanelWidth");
-            pnlHeight = (double)AppLib.GetAppGlobalValue("dishesPanelHeight");
-            gridDishesSide.Height = pnlHeight; gridDishesSide.Width = pnlWidth;
+            gridDishesSide.Height = pnlDishHeight; gridDishesSide.Width = pnlDishWidth;
 
             AppLib.WriteLogTraceMessage("Настраиваю дизайн приложения... READY");
         }  // method
@@ -587,18 +607,13 @@ namespace WpfClient
         private void lblButtonLang_MouseDown(object sender, MouseButtonEventArgs e)
         {
             string langId = getLangIdByButtonName(((FrameworkElement)sender).Name);
-            AppLib.WriteAppAction(pFormName: "MainWindow", pControlName: "Выбран язык;" + langId);
+            AppLib.WriteAppAction(this.Name, AppActionsEnum.SelectLang, langId);
 
             selectAppLang(langId);
             //e.Handled = true;
 
             string dev = "";
             if (e.StylusDevice != null) dev = e.StylusDevice.Name;
-            AppLib.WriteLogTraceMessage("lblButtonLang_MouseDown, StylusDevice - " + dev);
-        }
-
-        private void lblButtonLang_MouseUp(object sender, MouseButtonEventArgs e)
-        {
         }
 
         // установить язык текстов на элементах
@@ -611,7 +626,7 @@ namespace WpfClient
             AppLib.AppLang = langId;
             setLangButtonStyle(true);   // "включить" кнопку
 
-            AppLib.SetPromoCodeTextBlock(txtPromoCode);
+            AppLib.SetPromocodeTextStyle(txtPromoCode);
 
             BindingExpression be;
             // установка текстов на выбранном языке
@@ -673,9 +688,16 @@ namespace WpfClient
 
         private void brdPromoCode_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
-            AppLib.WriteAppAction(pFormName: "MainWindow", pControlName: "Кнопка Промокод");
+            AppLib.WriteAppAction(this.Name, AppActionsEnum.ButtonPromocode);
 
-            //if (AppLib.ShowPromoCodeWindow() == true) AppLib.SetPromoCodeTextBlock(txtPromoCode);
+            string preText = App.PromocodeNumber??"";
+
+            AppLib.PromoCodeWindow.ShowDialog();
+            e.Handled = true;
+            // чтобы не срабатывали обработчики нижележащих контролов
+            AppLib.IsEventsEnable = false;
+
+            if (!(App.PromocodeNumber??"").Equals(preText)) AppLib.SetPromocodeTextStyle(this.txtPromoCode);
         }
         #endregion
 
@@ -820,7 +842,8 @@ namespace WpfClient
         public void animateOrderPrice()
         {
             // анимация фона
-            if ((_currentOrder.GetOrderValue() == 0) && (_animOrderPriceBackgroundColor != null))
+            if ((_currentOrder == null) || 
+                ((_currentOrder.GetOrderValue() == 0) && (_animOrderPriceBackgroundColor != null)))
             {
                 brdMakeOrder.Background.BeginAnimation(SolidColorBrush.ColorProperty, _animOrderPriceBackgroundColor);
             }
@@ -910,6 +933,8 @@ namespace WpfClient
 
         private void initDrag(Point mousePos)
         {
+            if (AppLib.IsEventsEnable == false) { AppLib.IsEventsEnable = true; }
+
             //_dateTime = DateTime.Now;
             //make sure we still can use the scrollbars
             if (mousePos.X <= scrollDishes.ViewportWidth && mousePos.Y < scrollDishes.ViewportHeight)
@@ -960,6 +985,8 @@ namespace WpfClient
         }
         private void doMove(Point posNow)
         {
+            if (AppLib.IsEventsEnable == false) { return; }
+
             double dX = posNow.X - lastDragPoint.Value.X;
             double dY = posNow.Y - lastDragPoint.Value.Y;
 
@@ -1051,7 +1078,13 @@ namespace WpfClient
             if ((_dishCanvas.Count > 0) && (lstMenuFolders.SelectedIndex <= (_dishCanvas.Count-1)))
             {
                 AppModel.MenuItem mi = lstMenuFolders.SelectedItem as AppModel.MenuItem;
-                AppLib.WriteAppAction(pFormName: "MainWindow", pControlName: "Выбрана категория;" + mi.langNames["ru"]);
+
+                if (AppLib.IsEventsEnable)
+                {
+                    AppLib.WriteAppAction(this.Name, AppActionsEnum.SelectDishCategory, mi.langNames["ru"]);
+                }
+                else
+                    AppLib.IsEventsEnable = true;
 
                 // установить панель блюд
                 MainMenuDishesCanvas currentPanel = _dishCanvas[lstMenuFolders.SelectedIndex];
@@ -1068,7 +1101,10 @@ namespace WpfClient
         // обновить стоимость заказа
         public void updatePrice()
         {
-            lblOrderPrice.Text = AppLib.GetCostUIText(_currentOrder.GetOrderValue());
+            decimal dPrice = 0m;
+            if (_currentOrder != null) dPrice = _currentOrder.GetOrderValue();
+
+            lblOrderPrice.Text = AppLib.GetCostUIText(dPrice);
         }
 
         private void Image_MouseUp(object sender, MouseButtonEventArgs e)
@@ -1115,16 +1151,16 @@ namespace WpfClient
 
         private void btnShowCart_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (e.StylusDevice != null) return;
+//            if (e.StylusDevice != null) return;
             showCartWindow();
         }
 
 
         private void showCartWindow()
         {
-            AppLib.WriteAppAction(pFormName: "MainWindow", pControlName: "Кнопка Оформить");
+            AppLib.WriteAppAction(this.Name, AppActionsEnum.ButtonMakeOrder);
 
-            if (_currentOrder.GetOrderValue() == 0)
+            if ((_currentOrder == null) || (_currentOrder.GetOrderValue() == 0))
             {
                 animateOrderPrice();
                 return;
@@ -1132,7 +1168,6 @@ namespace WpfClient
 
             Cart cart = new Cart();
             cart.ShowDialog();
-
             cart = null;
         }
 

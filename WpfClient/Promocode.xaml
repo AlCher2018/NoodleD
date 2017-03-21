@@ -10,13 +10,6 @@
         Top="0" Left="0"
         WindowStyle="None" ResizeMode="NoResize"
         AllowsTransparency="True" Background="Transparent" ShowInTaskbar="False"
-        PreviewKeyDown="Window_PreviewKeyDown"
-        PreviewKeyUp="Window_PreviewKeyUp"
-        KeyDown="Window_KeyDown" KeyUp="Window_KeyUp"
-        PreviewTouchDown="Window_PreviewTouchDown" PreviewTouchUp="Window_PreviewTouchUp"
-        TouchDown="Window_TouchDown" TouchUp="Window_TouchUp"
-        Loaded="Window_Loaded" Activated="Window_Activated" Closing="Window_Closing" Closed="Window_Closed"
-        
         >
 
     <Window.Resources>
@@ -30,8 +23,8 @@
             <Setter Property="Background" Value="{StaticResource btnBackBrush}"/>
             <Setter Property="Margin" Value="7"/>
             <Setter Property="CornerRadius" Value="{StaticResource digBtnCornerRadius}"/>
-            <EventSetter Event="PreviewMouseLeftButtonDown" Handler="digBtn_MouseDown"/>
-            <EventSetter Event="PreviewMouseLeftButtonUp" Handler="digBtn_MouseUp"/>
+            <EventSetter Event="MouseDown" Handler="digBtn_MouseDown"/>
+            <EventSetter Event="MouseUp" Handler="digBtn_MouseUp"/>
             <EventSetter Event="MouseEnter" Handler="digBtn_MouseEnter"/>
             <EventSetter Event="MouseLeave" Handler="digBtn_MouseLeave"/>
         </Style>
@@ -218,11 +211,11 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Border x:Name="brdFooterCancel" Grid.Column="0" Background="#FFF6E4B7" MouseDown="brdFooterCancel_PreviewMouseDown" TouchDown="brdFooterCancel_PreviewTouchDown">
+                        <Border x:Name="brdFooterCancel" Grid.Column="0" Background="#FFF6E4B7" MouseUp="brdFooterCancel_PreviewMouseDown">
                             <TextBlock Text="Cancel" Foreground="{StaticResource btnBackBrush}" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize3}"/>
                         </Border>
 
-                        <Border x:Name="brdFooterOk" Grid.Column="2" Background="{StaticResource btnBackBrush}" MouseDown="brdFooterOk_PreviewMouseDown" TouchDown="brdFooterOk_PreviewTouchDown">
+                        <Border x:Name="brdFooterOk" Grid.Column="2" Background="{StaticResource btnBackBrush}" MouseUp="brdFooterOk_PreviewMouseDown">
                             <TextBlock Text="Ok" Foreground="{StaticResource appSelectedItemColor}" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize3}" FontWeight="Bold"/>
                         </Border>
                     </Grid>

@@ -115,7 +115,7 @@ namespace WpfClient
 
         private void btnClose_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.StylusDevice != null) return;
+//            if (e.StylusDevice != null) return;
 
             closeWin(e);
         }
@@ -127,7 +127,7 @@ namespace WpfClient
 
         private void btnTakeOut_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.StylusDevice != null) return;
+            //if (e.StylusDevice != null) return;
 
             _takeOrder = TakeOrderEnum.TakeAway;
             closeWin(e);
@@ -141,7 +141,7 @@ namespace WpfClient
 
         private void btnTakeIn_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.StylusDevice != null) return;
+            //if (e.StylusDevice != null) return;
 
             _takeOrder = TakeOrderEnum.TakeInRestaurant;
             closeWin(e);

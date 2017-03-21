@@ -67,7 +67,9 @@ namespace AppActionNS
                 int i = 0;
                 foreach (UICAction item in listActions)
                 {
-                    string msg = string.Format("{0};{1};{2};{3};{4};{5};{6}", item.nubmer, item.dateTime.ToString("yyyy-MM-dd HH:mm:ss.fff"), item.deviceId, item.orderNumber, item.formName, item.actionType.ToString(), item.controlName);
+                    string msg;
+                    //msg = string.Format("{0};{1};{2};{3};{4};{5};{6}", item.nubmer, item.dateTime.ToString("yyyy-MM-dd HH:mm:ss.fff"), item.deviceId, item.orderNumber, item.formName, item.actionType.ToString(), item.controlName);
+                    msg = string.Format("{0};{1};{2};{3};{4};{5};{6}", item.nubmer, item.dateTime.ToString("yyyy-MM-dd HH:mm:ss.fff"), item.deviceId, item.orderNumber, item.formName, item.actionType.ToString(), item.value);
 
                     aMsg[i] = msg; i++;
                 }
@@ -147,16 +149,16 @@ namespace AppActionNS
         internal int nubmer { get; set; }
         internal DateTime dateTime { get; set; }
 
-        public string deviceId { get; set; }
-        public string orderNumber { get; set; }
-        public string formName { get; set; }
-        public UICActionType actionType { get; set; }
-        public string controlName { get; set; }
-    }
 
-    public enum UICActionType
-    {
-        Open, Close, Click, Drag
+        public string deviceId { get; set; }
+
+        public string orderNumber { get; set; }
+
+        public string formName { get; set; }
+
+        public AppActionsEnum actionType { get; set; }
+
+        public string value { get; set; }
     }
 
 }

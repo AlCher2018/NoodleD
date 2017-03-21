@@ -168,9 +168,7 @@
                     <!-- логотип -->
                     <Image x:Name="imageLogo" Source="AppImages\logo1.png" Stretch="Uniform" PreviewMouseUp="Image_MouseUp"/>
 
-                    <!--горизонтальный грид языковых кнопок
-            TouchUp="lblButtonLang_TouchDown"
-        -->
+                    <!--горизонтальный грид языковых кнопок TouchDown="btnLang_TouchDown" TouchUp="btnLang_TouchUp"  -->
                     <Grid x:Name="gridLang" Grid.Row="2">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="0.3*"/>
@@ -181,25 +179,17 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="0.3*"/>
                         </Grid.ColumnDefinitions>
-                        <Border x:Name="btnLangUa" Grid.Column="1"
-                    MouseDown="lblButtonLang_MouseDown" MouseUp="lblButtonLang_MouseUp"
-                    TouchDown="btnLang_TouchDown" TouchUp="btnLang_TouchUp">
+                        <Border x:Name="btnLangUa" Grid.Column="1" MouseUp="lblButtonLang_MouseDown">
                             <Border x:Name="btnLangUaInner" Style="{StaticResource langButtonBorderUncheckedStyle}">
                                 <TextBlock x:Name="lblLangUa" Text="Укр" Style="{StaticResource langTextStyle}"/>
                             </Border>
                         </Border>
-                        <Border x:Name="btnLangRu" Grid.Column="3"
-                    MouseDown="lblButtonLang_MouseDown" MouseUp="lblButtonLang_MouseUp"
-                    TouchDown="btnLang_TouchDown" TouchUp="btnLang_TouchUp"
-                    >
+                        <Border x:Name="btnLangRu" Grid.Column="3" MouseUp="lblButtonLang_MouseDown">
                             <Border x:Name="btnLangRuInner" Style="{StaticResource langButtonBorderUncheckedStyle}">
                                 <TextBlock x:Name="lblLangRu" Text="Рус" Style="{StaticResource langTextStyle}"/>
                             </Border>
                         </Border>
-                        <Border x:Name="btnLangEn" Grid.Column="5"
-                    MouseDown="lblButtonLang_MouseDown" MouseUp="lblButtonLang_MouseUp"
-                    TouchDown="btnLang_TouchDown" TouchUp="btnLang_TouchUp"
-                    >
+                        <Border x:Name="btnLangEn" Grid.Column="5" MouseUp="lblButtonLang_MouseDown">
                             <Border x:Name="btnLangEnInner" Style="{StaticResource langButtonBorderUncheckedStyle}">
                                 <TextBlock x:Name="lblLangEn" Text="Eng" Style="{StaticResource langTextStyle}"/>
                             </Border>
@@ -223,7 +213,7 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="0.5*"/>
                     </Grid.ColumnDefinitions>
-                    <Border Grid.Column="1" x:Name="brdPromoCode" Background="{StaticResource appNotSelectedItemColor}" CornerRadius="{Binding Converter={StaticResource cornerRadiusLeft}, Mode=OneWay}" PreviewMouseDown="brdPromoCode_PreviewMouseUp">
+                    <Border Grid.Column="1" x:Name="brdPromoCode" Background="{StaticResource appNotSelectedItemColor}" CornerRadius="{Binding Converter={StaticResource cornerRadiusLeft}, Mode=OneWay}" MouseUp="brdPromoCode_PreviewMouseUp">
                         <!-- обернуть в Border, чтобы клик срабатывал и на тексте -->
                         <TextBlock x:Name="txtPromoCode" x:FieldModifier="public" Grid.Column="1" Style="{StaticResource promoInviteTextStyle}" TextWrapping="NoWrap" Margin="5,0"/>
                     </Border>
@@ -232,9 +222,9 @@
                     </Border>
                 </Grid>
 
-                <!--кнопка ОФОРМИТЬ-->
+                <!--кнопка ОФОРМИТЬ  PreviewTouchDown="brdMakeOrder_PreviewTouchDown" -->
                 <Border x:Name="brdMakeOrder" Grid.Row="3" Background="{StaticResource cartButtonBackgroundColor}" 
-                        PreviewMouseDown="btnShowCart_MouseUp" PreviewTouchDown="brdMakeOrder_PreviewTouchDown">
+                        MouseUp="btnShowCart_MouseUp">
                     <StackPanel x:Name="pnlMakeOrder" VerticalAlignment="Center" HorizontalAlignment="Center">
                         <TextBlock x:Name="lblOrderPrice" TextAlignment="Center" Foreground="{StaticResource addButtonBackgroundTextColor}"/>
                         <TextBlock x:Name="lblMakeOrderText" TextAlignment="Center" Foreground="Black" Text="{Binding {x:Null}, Converter={StaticResource langDictToText}, ConverterParameter=appSet.btnCreateOrderText, Mode=OneWay}" VerticalAlignment="Center"/>

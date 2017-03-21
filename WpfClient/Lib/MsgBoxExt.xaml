@@ -21,12 +21,14 @@
             <Setter Property="FontWeight" Value="Bold"/>
         </Style>
 
+        <!-- 
+                    <EventSetter Event="PreviewTouchDown" Handler="btn_TouchDown"/>
+            <EventSetter Event="PreviewTouchUp" Handler="btn_TouchUp"/>
+            <EventSetter Event="TouchLeave" Handler="btn_TouchLeave"/>
+        -->
         <Style x:Key="btnStyle" TargetType="Border">
             <Setter Property="Background" Value="{Binding ButtonBackground}" />
             <Setter Property="TextBlock.Foreground" Value="{Binding ButtonForeground}"/>
-            <EventSetter Event="PreviewTouchDown" Handler="btn_TouchDown"/>
-            <EventSetter Event="PreviewTouchUp" Handler="btn_TouchUp"/>
-            <EventSetter Event="TouchLeave" Handler="btn_TouchLeave"/>
             <EventSetter Event="PreviewMouseDown" Handler="btn_MouseDown"/>
             <EventSetter Event="PreviewMouseUp" Handler="btn_MouseUp"/>
             <EventSetter Event="MouseLeave" Handler="btn_MouseLeave"/>

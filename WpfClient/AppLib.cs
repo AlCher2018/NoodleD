@@ -16,7 +16,7 @@ using System.Windows.Media.Imaging;
 
 using AppModel;
 using UserActionLog;
-
+using AppActionNS;
 
 namespace WpfClient
 {
@@ -24,12 +24,12 @@ namespace WpfClient
     {
         // общий логгер
         private static NLog.Logger AppLogger;
-        private static string _appPromoCode;
 
-        public static bool IsDrag;
+        public static bool IsDrag, IsEventsEnable;
         public static double ScreenScale = 1d;
 
         // вспомогательные окна
+        public static Promocode PromoCodeWindow = null;
         public static TakeOrder TakeOrderWindow = null;
         public static Lib.MsgBoxExt MessageWindow = null;
         public static Lib.MsgBoxExt ChoiceWindow = null;
@@ -98,17 +98,52 @@ namespace WpfClient
             AppLogger.Error(format, values);
         }
 
-        public static void WriteAppAction(AppActionNS.UICActionType pActionType = AppActionNS.UICActionType.Click, string pFormName = "", string pControlName = "")
+        //public static void WriteAppAction(AppActionNS.UICActionType pActionType = AppActionNS.UICActionType.Click, string pFormName = "", string pControlName = "")
+        //{
+        //    if ((bool)AppLib.GetAppGlobalValue("IsLogUserAction") == false) return;
+
+        //    App.AppActionLogger.AddAction(new AppActionNS.UICAction()
+        //    {
+        //        deviceId = App.DeviceId,
+        //        orderNumber = App.OrderNumber,
+        //        actionType = pActionType,
+        //        formName = pFormName,
+        //        controlName = pControlName
+        //    });
+        //}
+        //public static void WriteAppAction(string pFormName, string pControlName)
+        //{
+        //    if ((bool)AppLib.GetAppGlobalValue("IsLogUserAction") == false) return;
+
+        //    App.AppActionLogger.AddAction(new AppActionNS.UICAction()
+        //    {
+        //        deviceId = App.DeviceId,
+        //        orderNumber = App.OrderNumber,
+        //        formName = pFormName,
+        //        controlName = pControlName
+        //    });
+        //}
+        
+        public static void WriteAppAction(string formName, AppActionsEnum actionType, string value = null)
         {
+            // если надо, создать заказ в Главном окне
+            string mainWinName = App.Current.MainWindow.Name;
+            if ((formName == mainWinName) && 
+                ((actionType != AppActionsEnum.MainWindowOpen) && (actionType != AppActionsEnum.MainWindowClose)))
+            {
+                WpfClient.MainWindow mainWin = (App.Current.MainWindow as WpfClient.MainWindow);
+                if (mainWin.CurrentOrder == null) mainWin.CurrentOrder = AppLib.CreateNewOrder();
+            }
+
             if ((bool)AppLib.GetAppGlobalValue("IsLogUserAction") == false) return;
 
             App.AppActionLogger.AddAction(new AppActionNS.UICAction()
             {
                 deviceId = App.DeviceId,
                 orderNumber = App.OrderNumber,
-                actionType = pActionType,
-                formName = pFormName,
-                controlName = pControlName
+                formName = formName,
+                actionType = actionType,
+                value = value
             });
         }
 
@@ -225,7 +260,7 @@ namespace WpfClient
 
         #region WPF UI interface
 
-        public static void SelectListBoxItemByHisInnerConttrol(FrameworkElement sourceControl, ListBox targetListBox)
+        public static void SelectListBoxItemByHisInnerControl(FrameworkElement sourceControl, ListBox targetListBox)
         {
             FrameworkElement lbItemContainer = AppLib.FindVisualParentByType((FrameworkElement)sourceControl, typeof(ListBoxItem));
             if (lbItemContainer == null) return;
@@ -482,16 +517,20 @@ namespace WpfClient
             // добавить некоторые постоянные тексты (заголовки, надписи на кнопках)
             parseAndSetAllLangString("dialogBoxYesText");
             parseAndSetAllLangString("dialogBoxNoText");
+            parseAndSetAllLangString("wordOr");
+            parseAndSetAllLangString("wordIngredients");
             parseAndSetAllLangString("InputNumberWinTitle");
             parseAndSetAllLangString("cartDelIngrTitle");
             parseAndSetAllLangString("cartDelIngrQuestion");
             parseAndSetAllLangString("cartDelDishTitle");
             parseAndSetAllLangString("cartDelDishQuestion"); 
+            // сообщения печати
             parseAndSetAllLangString("printOrderTitle"); 
-            parseAndSetAllLangString("printOrderErrorMessage"); 
-
-            parseAndSetAllLangString("wordOr");
-            parseAndSetAllLangString("wordIngredients");
+            parseAndSetAllLangString("saveOrderErrorMessage"); 
+            parseAndSetAllLangString("userErrMsgSuffix"); 
+            parseAndSetAllLangString("afterPrintingErrMsg"); 
+            parseAndSetAllLangString("printConfigError"); 
+            parseAndSetAllLangString("printerStatusMsg"); 
             
             parseAndSetAllLangString("takeOrderOut");
             parseAndSetAllLangString("takeOrderIn");
@@ -674,18 +713,34 @@ namespace WpfClient
             int rndFrom = int.Parse(AppLib.GetAppSetting("RandomOrderNumFrom"));       // случайный номер заказа: От
             int rndTo = int.Parse(AppLib.GetAppSetting("RandomOrderNumTo"));           // случайный номер заказа: До
 
-            OrderItem order = new OrderItem() { DeviceID = deviceName, RangeOrderNumberFrom = rndFrom, RangeOrderNumberTo = rndTo };
+            OrderItem order = new OrderItem() {
+                DeviceID = deviceName,
+                RangeOrderNumberFrom = rndFrom, RangeOrderNumberTo = rndTo
+            };
 
-            // создать случайный номер заказа
-            order.CreateOrderNumberForPrint();  // 
+            DateTime? dtOrder;
+            // создать случайный номер заказа и получить дату заказа из БД
+            order.CreateOrderNumberForPrint(out dtOrder);  // 
+            order.OrderDate = dtOrder;
             App.OrderNumber = order.OrderNumberForPrint.ToString();
 
             // сохранить ссылку на новый заказ в глоб.перем.
             AppLib.SetAppGlobalValue("currentOrder", order);
+            // и в Главном окне
+            WpfClient.MainWindow mainWin = (App.Current.MainWindow as WpfClient.MainWindow);
+            mainWin.CurrentOrder = order;
+
+            AppLib.WriteAppAction("App", AppActionsEnum.CreateNewOrder, order.OrderNumberForPrint.ToString()+";"+order.OrderDate.ToString());
 
             return order;
         }
+        public static OrderItem GetCurrentOrder()
+        {
+            OrderItem order = (OrderItem)GetAppGlobalValue("currentOrder");
+            if (order == null) order = AppLib.CreateNewOrder();
 
+            return order;
+        }
         #endregion
 
         // закрытие всех окон и возврат в начальный экран
@@ -709,28 +764,44 @@ namespace WpfClient
             }
 
             // заказ
-            CreateNewOrder();
+            OrderItem newOrder = CreateNewOrder();
 
             mainWin.updatePrice();
         }
 
         // закрыть все открытые окна, кроме главного окна
+        // проще перечислить, какие надо закрывать, а какие прятать
         public static void CloseChildWindows(bool isCloseAuxWindows = false)
         {
             Window currWin;
-            foreach (Window win in Application.Current.Windows)
+            string[] aTypesClose = new string[] {"Cart","DishPopup"};
+            string[] aTypesHide = new string[] {"Promocode", "TakeOrder", "MsgBoxExt"};
+
+            foreach (Window win in App.Current.Windows)
             {
                 currWin = win;
 
-                if (currWin is WpfClient.MainWindow) continue;
-                if ((isCloseAuxWindows == false) && ((currWin is TakeOrder))) continue;
-
-                Type t = currWin.GetType();
-                PropertyInfo pInfo = t.GetProperty("Host");
+                Type winType = currWin.GetType();
+                PropertyInfo pInfo = winType.GetProperty("Host");
                 if (pInfo == null)
                 {
-                    currWin.Close();
-                    currWin = null;
+                    if (aTypesClose.Contains(winType.Name))
+                    {
+                        currWin.Close();
+                        currWin = null;
+                    }
+                    else if (aTypesHide.Contains(winType.Name))
+                    {
+                        if (isCloseAuxWindows == true)
+                        {
+                            currWin.Close();
+                            currWin = null;
+                        }
+                        else if (currWin.Visibility == Visibility.Visible)
+                        {
+                            currWin.Hide();
+                        }
+                    }
                 }
             }  // for each
             
@@ -738,52 +809,22 @@ namespace WpfClient
 
         #endregion
 
-        #region работа с промокодом
-
-        public static bool ShowPromoCodeWindow()
+        // текст на элементе промокода
+        public static void SetPromocodeTextStyle(TextBlock txtInput)
         {
-            string _preCode = GetPromoCode();
-
-            Promocode promoWin = new Promocode(_preCode);
-            promoWin.ShowDialog();
-            string _newCode = promoWin.InputValue;
-            promoWin = null;
-            GC.Collect();
-
-            bool isNewValue = (_newCode != null) && ((_preCode == null) || (_preCode != _newCode));
-            if (isNewValue) SetPromoCode(_newCode);
-
-            return isNewValue;
-        }
-
-        public static void SetPromoCode(string value)
-        {
-            _appPromoCode = value;
-        }
-        public static string GetPromoCode()
-        {
-            return _appPromoCode;
-        }
-
-        public static void SetPromoCodeTextBlock(TextBlock textBlock)
-        {
-            if (textBlock == null) return;
-
-            if (string.IsNullOrEmpty(GetPromoCode()) == true)
+            if (string.IsNullOrEmpty(App.PromocodeNumber))
             {
-                textBlock.Text = AppLib.GetLangTextFromAppProp("invitePromoText");
-                textBlock.Style = (Style)App.Current.Resources["promoInviteTextStyle"];
-                textBlock.FontSize = (double)AppLib.GetAppGlobalValue("appFontSize5");
+                txtInput.Text = AppLib.GetLangTextFromAppProp("invitePromoText");
+                txtInput.Style = (Style)App.Current.Resources["promoInviteTextStyle"];
+                txtInput.FontSize = (double)AppLib.GetAppGlobalValue("appFontSize5");
             }
             else
             {
-                textBlock.Text = GetPromoCode();
-                textBlock.Style = (Style)App.Current.Resources["promoCodeTextStyle"];
-                textBlock.FontSize = (double)AppLib.GetAppGlobalValue("appFontSize4");
+                txtInput.Text = App.PromocodeNumber;
+                txtInput.Style = (Style)App.Current.Resources["promoCodeTextStyle"];
+                txtInput.FontSize = (double)AppLib.GetAppGlobalValue("appFontSize4");
             }
         }
-
-        #endregion
 
     }  // class
 

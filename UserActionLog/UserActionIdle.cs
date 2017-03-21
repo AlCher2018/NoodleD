@@ -10,9 +10,10 @@ using System.Windows;
 namespace UserActionLog
 {
     // класс, ожидающий любого действия пользователя
+    // использует внутренний таймер, который начинает работать когда устанавливается свойство CurrentWindow - окно, которое будет перехватывать некоторые действия пользователя
+    // устанавливать это свойство надо в событии Activated и очищать (= null) в событии DeActivated
     public class UserActionIdle: UserAction
     {
-        private TimeSpan _currentTime;
         private Timer _timer;
 
         public event Action<ElapsedEventArgs> IdleElapseEvent;
@@ -34,28 +35,27 @@ namespace UserActionLog
             }
         }
 
-        private FrameworkElement _anyActionWin;
-        public FrameworkElement AnyActionWindow
+        private Window _currentWin;
+        public Window CurrentWindow
         {
             set
             {
-                if (_anyActionWin != null)
-                {
-                    base.ReleaseEvents(_anyActionWin);
-                }
+                if (_currentWin != null) base.ReleaseEvents(_currentWin);
 
-                _anyActionWin = value;
+                _currentWin = value;
 
-                if (_anyActionWin != null)
+                if (_currentWin == null)
+                    base.ReleaseEvents(_currentWin);
+                else
                 {
-                    base.AddHandler(_anyActionWin, "PreviewMouseMove");
-                    base.AddHandler(_anyActionWin, "PreviewMouseDown");
-                    base.AddHandler(_anyActionWin, "PreviewMouseUp");
-                    base.AddHandler(_anyActionWin, "PreviewMouseWheel");
-                    base.AddHandler(_anyActionWin, "PreviewKeyDown");
-                    base.AddHandler(_anyActionWin, "PreviewTouchDown");
-                    base.AddHandler(_anyActionWin, "PreviewTouchUp");
-                    base.AddHandler(_anyActionWin, "PreviewTouchUp");
+                    base.AddHandler(_currentWin, "PreviewMouseMove");
+                    base.AddHandler(_currentWin, "PreviewMouseDown");
+                    base.AddHandler(_currentWin, "PreviewMouseWheel");
+                    base.AddHandler(_currentWin, "PreviewKeyDown");
+                    base.AddHandler(_currentWin, "TouchDown");
+                    base.AddHandler(_currentWin, "TouchMove");
+                    // и запустить таймер
+                    _restartTimerInterval();
                 }
             } // set
         } // property
@@ -70,28 +70,28 @@ namespace UserActionLog
         public UserActionIdle(int idleSeconds): this()
         {
             _idleSeconds = idleSeconds;
-            if (_idleSeconds > 0)
-            {
-                _timer.Interval = 1000 * _idleSeconds;     // convert sec to msec
-                _restartTimerInterval();
-            }
         }
 
         private void UserActionIdle_ActionEventHandler(object sender, UserActionEventArgs e)
         {
+            Debug.Print("UserActionIdle_ActionEventHandler");
             _restartTimerInterval();
         }
 
         private void _timer_Elapsed(object sender, ElapsedEventArgs e)
         {
+            Debug.Print("_timer_Elapsed");
             if (IdleElapseEvent != null) IdleElapseEvent(e);
         }
 
         // restart timer
         private void _restartTimerInterval()
         {
-            _timer.Stop();
-            _timer.Start();
+            if (_currentWin != null)
+            {
+                _timer.Stop();
+                _timer.Start();
+            }
         }
 
         public override void Dispose()

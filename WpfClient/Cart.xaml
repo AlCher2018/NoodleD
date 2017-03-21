@@ -247,12 +247,14 @@
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal">
+                                            <!-- текст ингредиента -->
                                             <TextBlock Style="{StaticResource dishIngrStyle}">
                                             <Run Text="{Binding langNames, Converter={StaticResource langDictToText}, Mode=OneWay}"/>
                                             <Run Text=" "/>
                                             <Run FontWeight="Bold" Text="{Binding Price, StringFormat={StaticResource priceFormatString}, Mode=OneWay}"/>
                                             </TextBlock>
-                                            <Border MouseUp="ingrDel_MouseUp" Style="{StaticResource dishIngrDelImageStyle}">
+                                            <!-- кнопка удаления ингредиента TouchUp="ingrDel_TouchUp" -->
+                                            <Border PreviewMouseUp="ingrDel_MouseUp" Style="{StaticResource dishIngrDelImageStyle}">
                                                 <Image Source="AppImages/removeItem.png" Stretch="Fill"/>
                                             </Border>
                                         </StackPanel>
@@ -284,22 +286,23 @@
                                 <ColumnDefinition Width="2*"/>  <!-- 4. кнопка удаления блюда из заказа -->
                             </Grid.ColumnDefinitions>
 
-                            <!-- для увеличения зоны нажатия добавим Border -->
-                            <Border Grid.Column="0" MouseUp="portionCountDel_MouseUp" TouchUp="portionCountDel_TouchUp" Style="{StaticResource dishPortionBorderStyle}">
+                            <!-- для увеличения зоны нажатия добавим Border TouchUp="portionCountDel_TouchUp"-->
+                            <Border Grid.Column="0" MouseUp="portionCountDel_MouseUp" Style="{StaticResource dishPortionBorderStyle}">
                                 <Image Source="AppImages/Cart/-.png" Style="{StaticResource dishPortionImageStyle}"/>
                             </Border>
                             
                             <!-- количество порций -->
                             <TextBlock x:Name="txtDishCount" Grid.Column="1" Text="{Binding Count}" Style="{StaticResource dishPortionTextStyle}"/>
-
-                            <Border Grid.Column="2" MouseUp="portionCountAdd_MouseUp" TouchUp="portionCountAdd_TouchUp" Style="{StaticResource dishPortionBorderStyle}">
+                            
+                            <!--TouchUp="portionCountAdd_TouchUp" -->
+                            <Border Grid.Column="2" MouseUp="portionCountAdd_MouseUp" Style="{StaticResource dishPortionBorderStyle}">
                                 <Image Source="AppImages/Cart/+.png" Style="{StaticResource dishPortionImageStyle}"/>
                             </Border>
                             
                             <TextBlock x:Name="txtDishPrice" Grid.Column="3" Text="{Binding Converter={StaticResource getDishPrice}, StringFormat={StaticResource priceFormatString}, Mode=OneWay}" Style="{StaticResource dishPortionTextStyle}" FontWeight="Normal"/>
-                            
-                            <!-- кнопка удаления блюда  -->
-                            <Border Grid.Column="4" MouseUp="dishDel_MouseUp" TouchUp="dishDel_PreviewTouchUp" Style="{StaticResource dishPortionBorderStyle}">
+
+                            <!-- кнопка удаления блюда  TouchUp="dishDel_TouchUp" -->
+                            <Border Grid.Column="4" MouseUp="dishDel_MouseUp" Style="{StaticResource dishPortionBorderStyle}">
                                 <Image Source="AppImages/removeItem.png" Style="{StaticResource dishDelImageStyle}"/>
                             </Border>
                         </Grid>
@@ -366,9 +369,10 @@
             </Grid.RowDefinitions>
             <!-- 0. логотип -->
                 <Image x:Name="imageLogo" Grid.Row="0" Source="AppImages\logo1.png" Stretch="Uniform" Style="{StaticResource centeredElement}" Margin="20,0"/>
-            
-            <!-- 1. кнопка Назад к меню -->
-                <Border x:Name="btnReturn" Grid.Row="1" PreviewMouseDown="btnReturn_MouseUp" Background="{StaticResource appBackgroundColor}" PreviewTouchDown="btnReturn_PreviewTouchDown" BorderThickness="0,1,0,1" BorderBrush="DarkMagenta">
+
+                <!-- 1. кнопка Назад к меню  PreviewTouchDown="btnReturn_PreviewTouchDown"  -->
+                <Border x:Name="btnReturn" Grid.Row="1" Background="{StaticResource appBackgroundColor}" BorderThickness="0,1,0,1" BorderBrush="DarkMagenta"
+                        MouseUp="btnReturn_MouseUp">
                     <TextBlock x:Name="txtReturn" Style="{StaticResource textBackToMenuStyle}" TextAlignment="Center"/>
                 </Border>
 
@@ -387,10 +391,12 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="0.5*"/>
                     </Grid.ColumnDefinitions>
-                    <Border Grid.Column="1" x:Name="brdPromoCode" Background="{StaticResource appNotSelectedItemColor}" CornerRadius="{Binding Converter={StaticResource cornerRadiusLeft}, Mode=OneWay}" PreviewMouseDown="brdPromoCode_PreviewMouseUp">
+                    <!-- promocode text PreviewTouchDown="brdPromoCode_PreviewTouchDown" -->
+                    <Border Grid.Column="1" x:Name="brdPromoCode" Background="{StaticResource appNotSelectedItemColor}" CornerRadius="{Binding Converter={StaticResource cornerRadiusLeft}, Mode=OneWay}" MouseUp="brdPromoCode_PreviewMouseUp">
                         <!-- обернуть в Border, чтобы клик срабатывал и на тексте -->
                         <TextBlock x:Name="txtPromoCode" Grid.Column="1" Style="{StaticResource promoInviteTextStyle}" TextWrapping="NoWrap" Margin="5,0"/>
                     </Border>
+                    <!-- button Ok -->
                     <Border Grid.Column="2" Background="Black" CornerRadius="{Binding Converter={StaticResource cornerRadiusRight}, Mode=OneWay}">
                         <TextBlock x:Name="lblPromoCode" Grid.Column="2" Style="{StaticResource centeredElement}" Text="OK" Foreground="White" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize5, Mode=OneWay}"/>
                     </Border>
@@ -399,8 +405,8 @@
                 <!-- 4. надпись Подходите с чеком... -->
                 <TextBlock x:Name="txtCashier" Grid.Row="4" Style="{StaticResource goToCashierHor}"/>
 
-                <!-- 5. кнопка Распечатать чек -->
-                <Border x:Name="btnPrintCheck" Grid.Row="5" Background="{DynamicResource cartButtonBackgroundColor}" PreviewMouseDown="btnPrintCheck_MouseDown" PreviewTouchDown="btnPrintCheck_PreviewTouchDown">
+                <!-- 5. кнопка Распечатать чек PreviewTouchDown="btnPrintCheck_PreviewTouchDown"-->
+                <Border x:Name="btnPrintCheck" Grid.Row="5" Background="{DynamicResource cartButtonBackgroundColor}" MouseUp="btnPrintCheck_MouseDown">
                     <StackPanel x:Name="pnlPrintCheck" Style="{StaticResource centeredElement}">
                         <TextBlock x:Name="txtPrintCheck" Style="{StaticResource centeredElement}" Foreground="Black" Text="{Binding {x:Null}, Converter={StaticResource langTextToUpper}, ConverterParameter=appSet.btnPrintBillText, Mode=OneWay}" FontSize="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=appFontSize3, Mode=OneWay}"/>
                     </StackPanel>
@@ -417,17 +423,18 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="0.3*"/>
                     </Grid.ColumnDefinitions>
-                    <Border x:Name="btnLangUa" Grid.Column="1" PreviewMouseDown="btnLang_PreviewMouseDown">
+                    <!-- PreviewTouchDown="btnLang_PreviewTouchDown" -->
+                    <Border x:Name="btnLangUa" Grid.Column="1" MouseUp="btnLang_PreviewMouseDown">
                         <Border x:Name="btnLangUaInner" Style="{StaticResource langButtonBorderUncheckedStyle}">
                             <TextBlock x:Name="lblLangUa" Text="Укр" Style="{StaticResource langTextStyle}"/>
                         </Border>
                     </Border>
-                    <Border x:Name="btnLangRu" Grid.Column="3" PreviewMouseDown="btnLang_PreviewMouseDown">
+                    <Border x:Name="btnLangRu" Grid.Column="3" MouseUp="btnLang_PreviewMouseDown">
                         <Border x:Name="btnLangRuInner" Style="{StaticResource langButtonBorderUncheckedStyle}">
                             <TextBlock x:Name="lblLangRu" Text="Рус" Style="{StaticResource langTextStyle}"/>
                         </Border>
                     </Border>
-                    <Border x:Name="btnLangEn" Grid.Column="5" PreviewMouseDown="btnLang_PreviewMouseDown">
+                    <Border x:Name="btnLangEn" Grid.Column="5" MouseUp="btnLang_PreviewMouseDown">
                         <Border x:Name="btnLangEnInner" Style="{StaticResource langButtonBorderUncheckedStyle}">
                             <TextBlock x:Name="lblLangEn" Text="Eng" Style="{StaticResource langTextStyle}"/>
                         </Border>
@@ -439,7 +446,7 @@
 
             <Grid>
                 <!-- правая панель - список заказанных блюд (OrderItem) -->
-                <local:AniScrollViewer x:Name="scrollDishes" CanContentScroll="False" VerticalScrollBarVisibility="Hidden"                                       ScrollChanged="scrollDishes_ScrollChanged"
+                <local:AniScrollViewer x:Name="scrollDishes" CanContentScroll="False" VerticalScrollBarVisibility="Hidden" FocusVisualStyle="{x:Null}" ScrollChanged="scrollDishes_ScrollChanged"
                   PreviewMouseDown="scrollDishes_PreviewMouseDown"
                   PreviewMouseUp="scrollDishes_PreviewMouseUp" 
                   PreviewMouseMove = "scrollDishes_PreviewMouseMove"
