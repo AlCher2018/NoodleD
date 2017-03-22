@@ -28,7 +28,7 @@ namespace UserActionLog
                 if (_idleSeconds > 0)
                 {
                     _timer.Interval = 1000 * _idleSeconds;     // convert sec to msec
-                    _restartTimerInterval();
+                    _restartTimerInterval("set IdleSeconds");
                 }
                 else
                     _timer.Enabled = false;     // stop timer
@@ -45,25 +45,29 @@ namespace UserActionLog
                 _currentWin = value;
 
                 if (_currentWin == null)
+                {
                     base.ReleaseEvents(_currentWin);
+                    _timer.Enabled = false;     // stop timer
+                }
                 else
                 {
                     base.AddHandler(_currentWin, "PreviewMouseMove");
                     base.AddHandler(_currentWin, "PreviewMouseDown");
                     base.AddHandler(_currentWin, "PreviewMouseWheel");
-                    base.AddHandler(_currentWin, "PreviewKeyDown");
                     base.AddHandler(_currentWin, "TouchDown");
                     base.AddHandler(_currentWin, "TouchMove");
-                    // и запустить таймер
-                    _restartTimerInterval();
+                    _restartTimerInterval("set CurrentWindow - " + _currentWin.GetType().Name + " (" + _currentWin.Name + ")");
                 }
             } // set
         } // property
 
+        private bool _pause;
+        
+        // ctor
         public UserActionIdle()
         {
             _timer = new Timer();
-            _timer.AutoReset = true;
+            _timer.AutoReset = false;
             _timer.Elapsed += _timer_Elapsed;
             base.ActionEventHandler += UserActionIdle_ActionEventHandler;
         }
@@ -72,23 +76,38 @@ namespace UserActionLog
             _idleSeconds = idleSeconds;
         }
 
-        private void UserActionIdle_ActionEventHandler(object sender, UserActionEventArgs e)
+        public void SetPause()
         {
-            Debug.Print("UserActionIdle_ActionEventHandler");
-            _restartTimerInterval();
+            _pause = true;
         }
 
+        // действия пользователя, которые рестартуют таймер
+        private void UserActionIdle_ActionEventHandler(object sender, UserActionEventArgs e)
+        {
+            // в режиме паузы ожидаем только НАЖАТИЙ
+            if ((_pause == false) || (_pause && e.EventName.EndsWith("Down")))
+            {
+                //Debug.Print(" *** ActionEventHandler, рестарт таймера по событию: " + e.EventName);
+                if (_pause) _pause = false;  // сбросить паузу
+                _restartTimerInterval("user action handler");
+            }
+        }
+
+        // сработал таймер
         private void _timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            Debug.Print("_timer_Elapsed");
+            //Debug.Print(" *** сработал таймер, (" + _pause.ToString() + ")");
+
+            if (_pause) return;
             if (IdleElapseEvent != null) IdleElapseEvent(e);
         }
 
         // restart timer
-        private void _restartTimerInterval()
+        private void _restartTimerInterval(string reason)
         {
             if (_currentWin != null)
             {
+                //Debug.Print(" *** _restartTimerInterval, рестарт таймера по причине: " + reason);
                 _timer.Stop();
                 _timer.Start();
             }
@@ -99,6 +118,11 @@ namespace UserActionLog
             if (_timer != null)
             {
                 _timer.Stop(); _timer.Close();
+            }
+
+            if (_currentWin != null)
+            {
+                base.ReleaseEvents(_currentWin);
             }
         }
 

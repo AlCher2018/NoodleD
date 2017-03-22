@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfClient"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
-        mc:Ignorable="d"
+        mc:Ignorable="d" Name="CartWindow"
         WindowStyle="None" WindowState="Maximized" WindowStartupLocation="CenterScreen" 
         Title="Cart" Height="254" Width="379" ShowInTaskbar="False"
         KeyDown="Window_KeyDown">

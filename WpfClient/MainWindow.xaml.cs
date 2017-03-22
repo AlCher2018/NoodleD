@@ -73,7 +73,7 @@ namespace WpfClient
 
             // для настройки элементов после отрисовки окна
             this.Loaded += MainWindow_Loaded;
-
+            
             // инициализация локальных переменных
             _dishCanvas = new List<MainMenuDishesCanvas>();
             _dishColCount = AppLib.GetAppGlobalValue("dishesColumnsCount").ToString().ToInt();
@@ -88,11 +88,13 @@ namespace WpfClient
         #region активация ожидашки
         protected override void OnActivated(EventArgs e)
         {
-            App.IdleHandler.CurrentWindow = this;
+            App.IdleTimerStart(this);
+            base.OnActivated(e);
         }
         protected override void OnDeactivated(EventArgs e)
         {
-            App.IdleHandler.CurrentWindow = null;
+            App.IdleTimerStop();
+            base.OnDeactivated(e);
         }
         #endregion
 

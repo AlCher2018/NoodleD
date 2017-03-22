@@ -91,45 +91,16 @@ namespace WpfClient.Lib
         #endregion
 
         #region timer
+
+        // таймер автоматического закрытия окна
         private System.Timers.Timer _timer;
         private double _autoCloseInterval;   // in msec
-        public double AutoCloseInterval
-        {
-            get { return _autoCloseInterval; }
-            set
-            {
-                if (_autoCloseInterval == value) return;
+        private double _autoCloseWaitEventInterval;  // in msec
+        private DateTime _finishTime;
+        // событие, которое возникает во время ожидания закрытия диалогово окна
+        private event EventHandler<AutoCloseWaitEventArgs> _autoCloseWaitEventHandler = null;
 
-                _autoCloseInterval = value;
-                if (_autoCloseInterval == 0)
-                {
-                    if (_timer != null)
-                    {
-                        _timer.Elapsed -= _timer_Elapsed;
-                        _timer.Close(); _timer = null;
-                    }
-                }
-                else
-                {
-                    if (_timer == null)
-                    {
-                        _timer = new System.Timers.Timer(_autoCloseInterval);
-                        _timer.Elapsed += _timer_Elapsed;
-                    }
-                    _timer.Interval = _autoCloseInterval;
-                    _timer.Enabled = true;
-                }
-            }
-        }
-
-        private void _timer_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            this.Dispatcher.Invoke(() =>
-            {
-                this.closeWin();
-            });
-        }
-
+        // таймер автоматического отжатия кнопок
         private System.Timers.Timer _pressTimer;
         private FrameworkElement _buttonPressed;
 
@@ -149,6 +120,19 @@ namespace WpfClient.Lib
             _pressTimer = new System.Timers.Timer(500);
             _pressTimer.Elapsed += _pressTimer_Elapsed;
         }
+
+        #region активация ожидашки
+        protected override void OnActivated(EventArgs e)
+        {
+            App.IdleTimerStart(this);
+            base.OnActivated(e);
+        }
+        protected override void OnDeactivated(EventArgs e)
+        {
+            App.IdleTimerStop();
+            base.OnDeactivated(e);
+        }
+        #endregion
 
         private void _pressTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
@@ -197,6 +181,70 @@ namespace WpfClient.Lib
 
             return _retValue;
         }
+
+        #region auto close timer
+        // создать таймер ожидания автоматического закрытия
+        public void SetAutoCloseTimer(double autoCloseInterval, 
+            double autoCloseWaitEventInterval = 0d, 
+            EventHandler<AutoCloseWaitEventArgs> autoCloseWaitEventHandler = null)
+        {
+            _autoCloseInterval = autoCloseInterval;
+            _autoCloseWaitEventInterval = autoCloseWaitEventInterval;
+            _autoCloseWaitEventHandler = autoCloseWaitEventHandler;
+
+            if (_autoCloseInterval <= 0) return;
+
+            if (_timer == null)
+            {
+                _timer = new System.Timers.Timer();
+                _timer.Enabled = false;
+                _timer.Elapsed += _timer_Elapsed;
+                _finishTime = DateTime.Now.AddMilliseconds(_autoCloseInterval);
+                // установить интервал срабатывания таймера: или _autoCloseInterval или _autoCloseWaitEventInterval
+                if (_autoCloseWaitEventInterval <= 0)
+                {
+                    // без промежуточных событий во время ожидания
+                    _timer.Interval = _autoCloseInterval;
+                }
+                else
+                {
+                    // с промежуточными событиями
+                    _timer.Interval = _autoCloseWaitEventInterval;
+                }
+            }
+            _timer.Enabled = true;
+        }
+
+        public void RemoveAutoCloseTimer()
+        {
+            removeTimer();
+        }
+        private void removeTimer()
+        {
+            _timer.Elapsed -= _timer_Elapsed;
+            _timer.Close(); _timer = null;
+        }
+
+        private void _timer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                if (e.SignalTime < _finishTime)
+                {
+                    if (_autoCloseWaitEventHandler != null)
+                    {
+                        double tsp = _finishTime.Subtract(e.SignalTime).TotalMilliseconds;
+                        _autoCloseWaitEventHandler(this, 
+                            new AutoCloseWaitEventArgs() { RemainMilliSeconds = Convert.ToInt32(tsp) });
+                    }
+                }
+                else
+                {
+                    this.closeWin();
+                }
+            });
+        }
+        #endregion
 
         private void setButtonVisibility()
         {
@@ -251,6 +299,7 @@ namespace WpfClient.Lib
             }
         }
 
+        #region button events
         private void btn_TouchDown(object sender, System.Windows.Input.TouchEventArgs e)
         {
             doPress((FrameworkElement)sender);
@@ -322,6 +371,7 @@ namespace WpfClient.Lib
         {
             if (e.Key == System.Windows.Input.Key.Escape) closeWin(e);
         }
+        #endregion
 
         private void closeWin(RoutedEventArgs e = null)
         {
@@ -339,16 +389,24 @@ namespace WpfClient.Lib
             }
             doUnpress();
 
-            //if (this._closeByButtonPress)
-            //{
-            //    this.Close();
-            //}
-            //else
-            //{
-                this.Hide();
-            //}
+            // закрыть или спрятать
+            if (_closeByButtonPress)
+            {
+                if (_timer != null) removeTimer();
+                this.Close();
+            }
+            else this.Hide();
         }
 
     }  // class
+
+    public class AutoCloseWaitEventArgs: EventArgs
+    {
+        public int RemainMilliSeconds { get; set; }
+
+        public AutoCloseWaitEventArgs()
+        {
+        }
+    }
 
 }

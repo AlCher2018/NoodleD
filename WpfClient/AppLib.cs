@@ -17,6 +17,7 @@ using System.Windows.Media.Imaging;
 using AppModel;
 using UserActionLog;
 using AppActionNS;
+using WpfClient.Lib;
 
 namespace WpfClient
 {
@@ -403,8 +404,7 @@ namespace WpfClient
                 ButtonBackground = (Brush)AppLib.GetAppGlobalValue("appBackgroundColor"),
                 ButtonBackgroundOver = (Brush)AppLib.GetAppGlobalValue("appBackgroundColor"),
 
-                CloseByButtonPress = false,
-                AutoCloseInterval = 0
+                CloseByButtonPress = false
             };
             AppLib.MessageWindow = mBox;
         }
@@ -422,8 +422,7 @@ namespace WpfClient
                 ButtonBackground = (Brush)AppLib.GetAppGlobalValue("appBackgroundColor"),
                 ButtonBackgroundOver = (Brush)AppLib.GetAppGlobalValue("appBackgroundColor"),
 
-                CloseByButtonPress = false,
-                AutoCloseInterval = 0
+                CloseByButtonPress = false
             };
             AppLib.ChoiceWindow = chBox;
         }
@@ -491,7 +490,6 @@ namespace WpfClient
             App.DeviceId = (string)AppLib.GetAppGlobalValue("ssdID");
 
             saveAppSettingToProps("CurrencyChar", null);   // символ денежной единицы
-            saveAppSettingToProps("UserIdleTime", typeof(int));        // время бездействия из config-файла, в сек
             // печать чека
             saveAppSettingToProps("BillPageWidht", typeof(int));   // ширина в пикселях, для перевода в см надо / на 96 и * на 2,45
             saveAppSettingToProps("AutoCloseMsgBoxAfterPrintOrder", typeof(int));   // время показа информац.окна после печати
@@ -517,7 +515,6 @@ namespace WpfClient
             // добавить некоторые постоянные тексты (заголовки, надписи на кнопках)
             parseAndSetAllLangString("dialogBoxYesText");
             parseAndSetAllLangString("dialogBoxNoText");
-            parseAndSetAllLangString("wordOr");
             parseAndSetAllLangString("wordIngredients");
             parseAndSetAllLangString("InputNumberWinTitle");
             parseAndSetAllLangString("cartDelIngrTitle");
@@ -531,12 +528,19 @@ namespace WpfClient
             parseAndSetAllLangString("afterPrintingErrMsg"); 
             parseAndSetAllLangString("printConfigError"); 
             parseAndSetAllLangString("printerStatusMsg"); 
-            
+            // TakeOrder window
             parseAndSetAllLangString("takeOrderOut");
+            parseAndSetAllLangString("wordOr");
             parseAndSetAllLangString("takeOrderIn");
+            // AreYouHere window
+            saveAppSettingToProps("UserIdleTime", typeof(int));        // время бездействия из config-файла, в сек
+            parseAndSetAllLangString("areYouHereTitle");
+            parseAndSetAllLangString("areYouHereQuestion");
+            // время в секундах, через которое произойдет возврат приложения в исходное состояние, если пользователь не нажал Да
+            saveAppSettingToProps("autoUIReset", typeof(int));        
+
             parseAndSetAllLangString("CurrencyName");
             parseAndSetAllLangString("withGarnish");
-            parseAndSetAllLangString("areYouHereQuestion");
         }
 
         // сохранить настройку приложения из config-файла в bool-свойство приложения
@@ -745,7 +749,7 @@ namespace WpfClient
 
         // закрытие всех окон и возврат в начальный экран
         // создание нового заказа
-        public static void ReDrawApp(bool isResetLang, bool isCloseChildWindow)
+        public static void ReStartApp(bool isResetLang, bool isCloseChildWindow, bool isCreateNewOrder)
         {
             if (isCloseChildWindow == true) CloseChildWindows();
 
@@ -764,9 +768,32 @@ namespace WpfClient
             }
 
             // заказ
-            OrderItem newOrder = CreateNewOrder();
+            OrderItem order;
+            if (isCreateNewOrder)
+            {
+                order = CreateNewOrder();
+            }
+            else
+            {
+                order = AppLib.GetCurrentOrder();
+                order.Clear();
+            }
 
             mainWin.updatePrice();
+        }
+
+        public static bool IsOpenWindow(string typeName, string objName)
+        {
+            bool retVal = false;
+            foreach (Window win in App.Current.Windows)
+            {
+                if ((win.GetType().Name.Equals(typeName)) && win.Name.Equals(objName))
+                {
+                    retVal = true; break;
+                }
+            }
+
+            return retVal;
         }
 
         // закрыть все открытые окна, кроме главного окна
@@ -775,22 +802,24 @@ namespace WpfClient
         {
             Window currWin;
             string[] aTypesClose = new string[] {"Cart","DishPopup"};
-            string[] aTypesHide = new string[] {"Promocode", "TakeOrder", "MsgBoxExt"};
+            string[] aTypesHide = new string[] {"Promocode", "TakeOrder"};
 
             foreach (Window win in App.Current.Windows)
             {
                 currWin = win;
-
+                // TODO протестить MsgBoxExt на закрытие и прятание
                 Type winType = currWin.GetType();
                 PropertyInfo pInfo = winType.GetProperty("Host");
                 if (pInfo == null)
                 {
-                    if (aTypesClose.Contains(winType.Name))
+                    if ((aTypesClose.Contains(winType.Name)) ||
+                        ((winType.Name == "MsgBoxExt") && ((currWin as MsgBoxExt).CloseByButtonPress == true)))
                     {
                         currWin.Close();
                         currWin = null;
                     }
-                    else if (aTypesHide.Contains(winType.Name))
+                    else if ((aTypesHide.Contains(winType.Name)) ||
+                        ((winType.Name == "MsgBoxExt") && ((currWin as MsgBoxExt).CloseByButtonPress == false)))
                     {
                         if (isCloseAuxWindows == true)
                         {

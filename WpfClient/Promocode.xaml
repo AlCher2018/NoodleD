@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         Title="Promocode" Height="1080" Width="1920"
         Top="0" Left="0"
-        WindowStyle="None" ResizeMode="NoResize"
+        WindowStyle="None" ResizeMode="NoResize" Name="PromocodeWindow"
         AllowsTransparency="True" Background="Transparent" ShowInTaskbar="False"
         >
 

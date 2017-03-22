@@ -213,8 +213,12 @@ namespace AppModel
             }
 
             return retVal;
-        }
+        }  // method
 
+        public void Clear()
+        {
+            this._dishItems.Clear();
+        }
 
     } // class CurrentOrder
 

@@ -5,8 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfClient"
         mc:Ignorable="d"
-        Title="DishPopup" Height="300" Width="300"
-        PreviewKeyDown="Window_PreviewKeyDown" Loaded="Window_Loaded"
+        Title="DishPopup" Name="DishPopupWindow"
+        Height="300" Width="300"
+        PreviewKeyDown="Window_PreviewKeyDown"
         WindowStyle="None" ResizeMode="NoResize"
         AllowsTransparency="True" Background="Transparent" ShowInTaskbar="False"
         >

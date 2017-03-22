@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AppActionNS;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -45,7 +46,23 @@ namespace WpfClient
             //   в ресторане
             be = txtTakeIn.GetBindingExpression(TextBlock.TextProperty);
             if (be != null) be.UpdateTarget();
+
+            AppLib.WriteAppAction(this.Name, AppActionsEnum.TakeOrderWinOpen);
         }
+
+        #region активация ожидашки
+        protected override void OnActivated(EventArgs e)
+        {
+            App.IdleTimerStart(this);
+            base.OnActivated(e);
+        }
+        protected override void OnDeactivated(EventArgs e)
+        {
+            App.IdleTimerStop();
+            base.OnDeactivated(e);
+        }
+        #endregion
+
 
         private void setWinLayout()
         {
@@ -155,6 +172,8 @@ namespace WpfClient
 
         private void closeWin(RoutedEventArgs e)
         {
+            AppLib.WriteAppAction(this.Name, AppActionsEnum.TakeOrderWinClose, _takeOrder.ToString());
+
             e.Handled = true;
             this.Hide();
         }

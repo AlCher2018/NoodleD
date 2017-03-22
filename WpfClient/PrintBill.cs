@@ -54,12 +54,9 @@ namespace WpfClient
                 errMessage = "Печать чека: не указан номер заказа" + userErrMsgSuffix;
                 return false;
             }
-            if (_order.OrderDate == null)
-            {
-                AppLib.WriteLogErrorMessage("Класс PrintBill. Не указана дата заказа");
-                errMessage = "Печать чека: не указана дата заказа" + userErrMsgSuffix;
-                return false;
-            }
+
+            // дату заказа создаем ПЕРЕД печатью
+            _order.OrderDate = DateTime.Now;
 
             // 2. BarCodeValue
             //    идент.устройства - 2 символа

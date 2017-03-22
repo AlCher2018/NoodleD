@@ -424,11 +424,10 @@ namespace WpfClient
             // снять выделение с текущего гарнира
             else
             {
+                if (_selectedGarnIndex > -1) AppLib.WriteAppAction(_parentWindow.Name, AppActionsEnum.DishGarnishDeselect, _dishItem.Garnishes[_selectedGarnIndex].langNames["ru"] + ";" + _dishItem.langNames["ru"]);
+
                 unselectGarnish();
             }
-
-            // если показано описание блюда, то убрать его
-//            HideDescription();
 
         }  // method
 
@@ -506,8 +505,6 @@ namespace WpfClient
 
         private void unselectGarnish()
         {
-            if (_selectedGarnIndex > -1) AppLib.WriteAppAction(_parentWindow.Name, AppActionsEnum.DishGarnishUnselect, _dishItem.Garnishes[_selectedGarnIndex].langNames["ru"] + ";" + _dishItem.langNames["ru"]);
-
             setAddButtonState(false);
             this._selectedGarnIndex = -1;
             if (_pathImage != null) _pathImage.Fill = _dishImageBrush;

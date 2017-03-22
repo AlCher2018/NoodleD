@@ -10,6 +10,8 @@ using AppModel;
 using WpfClient.Lib;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using AppActionNS;
+using System.ComponentModel;
 
 namespace WpfClient
 {
@@ -29,7 +31,8 @@ namespace WpfClient
         public Cart()
         {
             InitializeComponent();
-            this.Closed += Cart_Closed;
+
+            this.Loaded += Cart_Loaded;
 
             _currentOrder = AppLib.GetCurrentOrder();
             this.lstDishes.ItemsSource = _currentOrder.Dishes;
@@ -39,9 +42,31 @@ namespace WpfClient
             updatePriceOrder();
         }
 
-        private void Cart_Closed(object sender, EventArgs e)
+        private void Cart_Loaded(object sender, RoutedEventArgs e)
         {
+            AppLib.WriteAppAction(this.Name, AppActionsEnum.CartWinOpen);
         }
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            AppLib.WriteAppAction(this.Name, AppActionsEnum.CartWinClose);
+
+            base.OnClosing(e);
+        }
+
+
+        #region активация ожидашки
+        protected override void OnActivated(EventArgs e)
+        {
+            App.IdleTimerStart(this);
+            base.OnActivated(e);
+        }
+        protected override void OnDeactivated(EventArgs e)
+        {
+            App.IdleTimerStop();
+            base.OnDeactivated(e);
+        }
+        #endregion
+
 
         private void initUI()
         {
@@ -256,7 +281,7 @@ namespace WpfClient
         {
             //if (e.StylusDevice != null) return;
 
-            //MessageBox.Show("promocode win");
+            AppLib.WriteAppAction(this.Name, AppActionsEnum.ButtonPromocode);
 
             string preText = App.PromocodeNumber ?? "";
 
@@ -620,10 +645,15 @@ namespace WpfClient
             DishAdding ingrItem = (DishAdding)lbIngr.SelectedItem;
 
             //MessageBox.Show(string.Format("ингредиент - {0}, блюдо - {1}", ingrItem.langNames["ru"], dishItem.langNames["ru"]));
+            string actLogMsg = string.Format("{0};{1}", ingrItem.langNames["ru"], dishItem.langNames["ru"]);
+            AppLib.WriteAppAction(this.Name, AppActionsEnum.ButtonIngredientRemove, actLogMsg);
 
             string title = AppLib.GetLangTextFromAppProp("cartDelIngrTitle");
             string msg = string.Format("{0} \"{1}\" ?", AppLib.GetLangTextFromAppProp("cartDelIngrQuestion"), AppLib.GetLangText(ingrItem.langNames));
+
             MessageBoxResult result = AppLib.ShowChoiceBox(title, msg);
+
+            AppLib.WriteAppAction(this.Name, AppActionsEnum.ButtonIngredientRemoveResult, result.ToString() + ";" + actLogMsg);
             if (result == MessageBoxResult.Yes)
             {
                 dishItem.SelectedIngredients.Remove(ingrItem);
@@ -640,9 +670,15 @@ namespace WpfClient
             if (dishItem == null) return;
             OrderItem order = AppLib.GetCurrentOrder();
 
+            string actLogMsg = string.Format("{0}", dishItem.langNames["ru"]);
+            AppLib.WriteAppAction(this.Name, AppActionsEnum.ButtonDishRemove, actLogMsg);
+
             string title = AppLib.GetLangTextFromAppProp("cartDelDishTitle");
             string msg = string.Format("{0} \"{1}\" ?", AppLib.GetLangTextFromAppProp("cartDelDishQuestion"), AppLib.GetLangText(dishItem.langNames));
+
             MessageBoxResult result = AppLib.ShowChoiceBox(title, msg);
+
+            AppLib.WriteAppAction(this.Name, AppActionsEnum.ButtonDishRemoveResult, result.ToString() + ";" + actLogMsg);
             if (result == MessageBoxResult.Yes)
             {
                 order.Dishes.Remove(dishItem);
@@ -681,6 +717,9 @@ namespace WpfClient
             {
                 curDish.Count--;
                 updatePriceControls();
+
+                string actLogMsg = string.Format("{0};{1}", curDish.Count.ToString(), curDish.langNames["ru"]);
+                AppLib.WriteAppAction(this.Name, AppActionsEnum.DishPortionDel, actLogMsg);
             }
         }
         private void portionCountAdd()
@@ -690,6 +729,9 @@ namespace WpfClient
 
             curDish.Count++;
             updatePriceControls();
+
+            string actLogMsg = string.Format("{0};{1}", curDish.Count.ToString(), curDish.langNames["ru"]);
+            AppLib.WriteAppAction(this.Name, AppActionsEnum.DishPortionAdd, actLogMsg);
         }
 
         #endregion
@@ -709,11 +751,15 @@ namespace WpfClient
 
         private void printClientInvoice()
         {
+            decimal orderValue = _currentOrder.GetOrderValue();
+            AppLib.WriteAppAction(this.Name, AppActionsEnum.ButtonPrintOrder, orderValue.ToString());
+
             // если стоимость чека == 0, то выйти
-            if (_currentOrder.GetOrderValue() == 0) return;
+            if (orderValue == 0) return;
 
             TakeOrder takeOrderWin = AppLib.TakeOrderWindow;
             takeOrderWin.ShowDialog();
+
             // сохранить в заказе флажок "с собой"
             _currentOrder.takeAway = (takeOrderWin.TakeOrderMode == TakeOrderEnum.TakeAway);
 
@@ -721,7 +767,11 @@ namespace WpfClient
             {
                 PrintBill prn = new PrintBill(_currentOrder);
                 string userErrMsg = null;
+
                 bool result = prn.CreateBill(out userErrMsg);
+
+                string actLogMsg = string.Format("{0};{1};{2};{3};{4}",result.ToString(), _currentOrder.OrderNumberForPrint.ToString(), _currentOrder.OrderDate, _currentOrder.DeviceID,  (result ? "" : "(" + userErrMsg + ")"));
+                AppLib.WriteAppAction(this.Name, AppActionsEnum.OrderPrintResult, actLogMsg);
 
                 string title = (string)AppLib.GetLangTextFromAppProp("printOrderTitle");
                 string msgText;
@@ -729,16 +779,21 @@ namespace WpfClient
                 if (result == true)
                 {
                     bool saveRes = _currentOrder.SaveToDB(out userErrMsg);
+
+                    actLogMsg = string.Format("{0};{1}", result.ToString(), (result ? "" : "(" + userErrMsg + ")"));
+                    AppLib.WriteAppAction(this.Name, AppActionsEnum.OrderSaveToDBResult, actLogMsg);
+
                     if (saveRes == true)
                     {
-                        msgText = (string)AppLib.GetLangTextFromAppProp("lblGoText");
-                        int delayInfoWin = (int)AppLib.GetAppGlobalValue("AutoCloseMsgBoxAfterPrintOrder", 0);
+                        //msgText = (string)AppLib.GetLangTextFromAppProp("lblGoText");
+                        //int delayInfoWin = (int)AppLib.GetAppGlobalValue("AutoCloseMsgBoxAfterPrintOrder", 0);
                         // 2017-02-17 убрать окно "Теперь можете подходить с чеком к кассе для оплаты"
                         //AppLib.ShowMessage(title, msgText, delayInfoWin);
 
                         // вернуть интерфейс в исходное состояние и создать новый заказ
-                        AppLib.ReDrawApp(false, true);
-
+                        AppLib.ReStartApp(false, true, true);
+                        // поставить таймер бездействия на паузу
+                        App.IdleHandler.SetPause();
                     }
                     // ошибка сохранения в БД
                     else
@@ -814,6 +869,8 @@ namespace WpfClient
         }
         public void selectAppLang(string langId)
         {
+            AppLib.WriteAppAction(this.Name, AppActionsEnum.SelectLang, langId);
+
             setLangButtonStyle(false);  // "выключить" кнопку
             (App.Current.MainWindow as WpfClient.MainWindow).selectAppLang(langId);
             setLangButtonStyle(true);   // "включить" кнопку

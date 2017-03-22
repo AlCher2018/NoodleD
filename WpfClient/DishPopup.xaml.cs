@@ -16,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.ComponentModel;
 using System.Windows.Media.Animation;
+using AppActionNS;
 
 namespace WpfClient
 {
@@ -32,10 +33,13 @@ namespace WpfClient
         // анимация выбора блюда
         Storyboard _animDishSelection;
 
+        // причина закрытия окна
+        string _closeCause;
 
         public DishPopup(DishItem dishItem, BitmapImage img)
         {
             InitializeComponent();
+            this.Loaded += DishPopup_Loaded;
 
             // init private vars
             _notSelTextColor = new SolidColorBrush(Colors.Black);
@@ -51,6 +55,78 @@ namespace WpfClient
 
             updatePriceControl();
         }
+
+        // после загрузки окна
+        private void DishPopup_Loaded(object sender, RoutedEventArgs e)
+        {
+            AppLib.WriteAppAction(this.Name, AppActionsEnum.DishPopupOpen, _currentDish.langNames["ru"]);
+
+            // обновить ListBox-ы, если есть выбранные ингредиенты и рекомендации
+            if (_currentDish.SelectedIngredients != null)
+            {
+                foreach (DishAdding item in _currentDish.SelectedIngredients.ToList())
+                {
+                    listIngredients.SelectedItems.Add(item);
+                }
+            }
+            if (_currentDish.SelectedRecommends != null)
+            {
+                foreach (DishItem item in _currentDish.SelectedRecommends.ToList())
+                {
+                    listRecommends.SelectedItems.Add(item);
+                }
+            }
+
+            // размеры изображения блюда
+            Rectangle dishImage = (AppLib.FindVisualChildren<Rectangle>(gridMain)).FirstOrDefault(r => r.Name == "dishImage");
+            if (dishImage == null) return;
+            double dishImageHeight = dishImage.ActualHeight;
+            double dishImageWidth = dishImage.ActualWidth;
+            double dishImageCornerRadius = dishImage.RadiusX;
+            // объект перемещения
+            // размеры прямоугольника и углы закругления для изображения и описания блюда берем из разметки
+            RectangleGeometry rGeom = (animImage.Data as RectangleGeometry);
+            rGeom.Rect = new Rect(0, 0, dishImageWidth, dishImageHeight);
+            rGeom.RadiusX = dishImageCornerRadius;
+            rGeom.RadiusY = dishImageCornerRadius;
+            Canvas.SetLeft(canvasDish, -dishImageWidth / 2d);
+            Canvas.SetTop(canvasDish, -dishImageHeight / 2d);
+
+            //   конечный элемент анимации выбора блюда, это Point3 в BezierSegment
+            Border brdMakeOrder = ((WpfClient.MainWindow)Application.Current.MainWindow).brdMakeOrder;
+            Point toBasePoint = brdMakeOrder.PointToScreen(new Point(0, 0));
+            Size toSize = brdMakeOrder.RenderSize;
+            Point endPoint = new Point(toBasePoint.X + toSize.Width / 2.0, toBasePoint.Y + toSize.Height / 2.0);
+            if (AppLib.ScreenScale != 1d) endPoint = PointFromScreen(endPoint);
+            // установить для сегмента анимации конечную точку
+            PathFigure pf = (animPath.Data as PathGeometry).Figures[0];
+            BezierSegment bs = (pf.Segments[0] as BezierSegment);
+            bs.Point3 = endPoint;
+
+            createDishSelectStoryBoard();
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            AppLib.WriteAppAction(this.Name, AppActionsEnum.DishPopupClose, _closeCause);
+
+            _currentDish.ClearAllSelections();
+            base.OnClosing(e);
+        }
+
+
+        #region активация ожидашки
+        protected override void OnActivated(EventArgs e)
+        {
+            App.IdleTimerStart(this);
+            base.OnActivated(e);
+        }
+        protected override void OnDeactivated(EventArgs e)
+        {
+            App.IdleTimerStop();
+            base.OnDeactivated(e);
+        }
+        #endregion
 
         private void setWinLayout()
         {
@@ -164,54 +240,6 @@ namespace WpfClient
             closeWin();
         }
 
-        // после загрузки окна
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            // обновить ListBox-ы, если есть выбранные ингредиенты и рекомендации
-            if (_currentDish.SelectedIngredients != null)
-            {
-                foreach (DishAdding item in _currentDish.SelectedIngredients.ToList())
-                {
-                    listIngredients.SelectedItems.Add(item);
-                }
-            }
-            if (_currentDish.SelectedRecommends != null)
-            {
-                foreach (DishItem item in _currentDish.SelectedRecommends.ToList())
-                {
-                    listRecommends.SelectedItems.Add(item);
-                }
-            }
-
-            // размеры изображения блюда
-            Rectangle dishImage = (AppLib.FindVisualChildren<Rectangle>(gridMain)).FirstOrDefault(r => r.Name == "dishImage");
-            if (dishImage == null) return;
-            double dishImageHeight = dishImage.ActualHeight;
-            double dishImageWidth = dishImage.ActualWidth;
-            double dishImageCornerRadius = dishImage.RadiusX;
-            // объект перемещения
-            // размеры прямоугольника и углы закругления для изображения и описания блюда берем из разметки
-            RectangleGeometry rGeom = (animImage.Data as RectangleGeometry);
-            rGeom.Rect = new Rect(0, 0, dishImageWidth, dishImageHeight);
-            rGeom.RadiusX = dishImageCornerRadius;
-            rGeom.RadiusY = dishImageCornerRadius;
-            Canvas.SetLeft(canvasDish, -dishImageWidth / 2d);
-            Canvas.SetTop(canvasDish, -dishImageHeight / 2d);
-
-            //   конечный элемент анимации выбора блюда, это Point3 в BezierSegment
-            Border brdMakeOrder = ((WpfClient.MainWindow)Application.Current.MainWindow).brdMakeOrder;
-            Point toBasePoint = brdMakeOrder.PointToScreen(new Point(0, 0));
-            Size toSize = brdMakeOrder.RenderSize;
-            Point endPoint = new Point(toBasePoint.X + toSize.Width / 2.0, toBasePoint.Y + toSize.Height / 2.0);
-            if (AppLib.ScreenScale != 1d) endPoint = PointFromScreen(endPoint);
-            // установить для сегмента анимации конечную точку
-            PathFigure pf = (animPath.Data as PathGeometry).Figures[0];
-            BezierSegment bs = (pf.Segments[0] as BezierSegment);
-            bs.Point3 = endPoint;
-
-            createDishSelectStoryBoard();
-        }
-
         private void createDishSelectStoryBoard()
         {
             // раскадровка
@@ -266,12 +294,14 @@ namespace WpfClient
 
         private void btnClose_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
+            _closeCause = "ButtonCloseWin";
             closeWin(e);
         }
 
         // from XAML
         private void closeThisWindowHandler(object sender, MouseButtonEventArgs e)
         {
+            _closeCause = "ClickAround";
             closeWin(e);
         }
 
@@ -281,6 +311,8 @@ namespace WpfClient
         // если это MouseUp, если PreviewMouseUp - то один раз!!
         private void btnAddDish_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            _closeCause = "ButtonAddDish";
+            AppLib.WriteAppAction(this.Name, AppActionsEnum.DishPopupAddButton);
             e.Handled = true;
 
             // добавить блюдо в заказ
@@ -321,12 +353,6 @@ namespace WpfClient
         {
             if (e != null) e.Handled = true;
             this.Close();
-        }
-
-        protected override void OnClosing(CancelEventArgs e)
-        {
-            base.OnClosing(e);
-            _currentDish.ClearAllSelections();
         }
 
         #endregion
@@ -410,33 +436,6 @@ namespace WpfClient
             updatePriceControl();
         }
 
-        private void changeViewAdding(ListBox listBox, SelectionChangedEventArgs e)
-        {
-            TextBlock tbText;
-            Viewbox vBox;
-
-            foreach (var item in e.RemovedItems)
-            {
-                ListBoxItem vRemoved = (ListBoxItem)listBox.ItemContainerGenerator.ContainerFromItem(item);
-                _tbList = AppLib.FindVisualChildren<TextBlock>(vRemoved).ToList();
-                _vbList = AppLib.FindVisualChildren<Viewbox>(vRemoved).ToList();
-                tbText = _tbList.Find(t => t.Name == "txtName");
-                tbText.Foreground = _notSelTextColor;
-                vBox = _vbList.Find(v => v.Name == "garnBaseColorBrush");
-                vBox.Visibility = Visibility.Hidden;
-            }
-            foreach (var item in e.AddedItems)
-            {
-                ListBoxItem vAdded = (ListBoxItem)listBox.ItemContainerGenerator.ContainerFromItem(item);
-                _tbList = AppLib.FindVisualChildren<TextBlock>(vAdded).ToList();
-                _vbList = AppLib.FindVisualChildren<Viewbox>(vAdded).ToList();
-                tbText = _tbList.Find(t => t.Name == "txtName");
-                tbText.Foreground = _selTextColor;
-                vBox = _vbList.Find(v => v.Name == "garnBaseColorBrush");
-                vBox.Visibility = Visibility.Visible;
-            }
-        }
-
         private void listRecommends_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // view level
@@ -451,6 +450,48 @@ namespace WpfClient
                 _currentDish.SelectedRecommends.Add(item);
             }
             updatePriceControl();
+        }
+
+        private void changeViewAdding(ListBox listBox, SelectionChangedEventArgs e)
+        {
+            TextBlock tbText;
+            Viewbox vBox;
+
+            // снять выделение
+            foreach (var item in e.RemovedItems)
+            {
+                ListBoxItem vRemoved = (ListBoxItem)listBox.ItemContainerGenerator.ContainerFromItem(item);
+                _tbList = AppLib.FindVisualChildren<TextBlock>(vRemoved).ToList();
+                _vbList = AppLib.FindVisualChildren<Viewbox>(vRemoved).ToList();
+                tbText = _tbList.Find(t => t.Name == "txtName");
+                tbText.Foreground = _notSelTextColor;
+                vBox = _vbList.Find(v => v.Name == "garnBaseColorBrush");
+                vBox.Visibility = Visibility.Hidden;
+
+                // записать в лог снятие выделения  добавки
+                if (listBox.Equals(listIngredients))
+                    AppLib.WriteAppAction(this.Name, AppActionsEnum.DishPopupIngrDeselect, (vRemoved.Content as DishAdding).langNames["ru"]);
+                else
+                    AppLib.WriteAppAction(this.Name, AppActionsEnum.DishPopupRecommendDeselect, (vRemoved.Content as DishItem).langNames["ru"]);
+            }
+
+            // выделение добавки
+            foreach (var item in e.AddedItems)
+            {
+                ListBoxItem vAdded = (ListBoxItem)listBox.ItemContainerGenerator.ContainerFromItem(item);
+                _tbList = AppLib.FindVisualChildren<TextBlock>(vAdded).ToList();
+                _vbList = AppLib.FindVisualChildren<Viewbox>(vAdded).ToList();
+                tbText = _tbList.Find(t => t.Name == "txtName");
+                tbText.Foreground = _selTextColor;
+                vBox = _vbList.Find(v => v.Name == "garnBaseColorBrush");
+                vBox.Visibility = Visibility.Visible;
+
+                // записать в лог выделение добавки
+                if (listBox.Equals(listIngredients))
+                    AppLib.WriteAppAction(this.Name, AppActionsEnum.DishPopupIngrSelect, (vAdded.Content as DishAdding).langNames["ru"]);
+                else
+                    AppLib.WriteAppAction(this.Name, AppActionsEnum.DishPopupRecommendSelect, (vAdded.Content as DishItem).langNames["ru"]);
+            }
         }
 
         private void updatePriceControl()

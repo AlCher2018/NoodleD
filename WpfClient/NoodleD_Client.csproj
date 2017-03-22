@@ -97,6 +97,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AreYouHereWin.xaml.cs">
+      <DependentUpon>AreYouHereWin.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Lib\FileLib.cs" />
     <Compile Include="Lib\PromoPanel.xaml.cs">
       <DependentUpon>PromoPanel.xaml</DependentUpon>
@@ -140,6 +143,10 @@
     </Compile>
     <Compile Include="TestData.cs" />
     <Compile Include="Lib\TypeExtensions.cs" />
+    <Page Include="AreYouHereWin.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Cart.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

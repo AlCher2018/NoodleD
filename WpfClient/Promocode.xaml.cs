@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AppActionNS;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,24 +26,44 @@ namespace WpfClient
         public Promocode()
         {
             InitializeComponent();
+            this.Activated += Promocode_Activated;
 
             setLayout();
         }
 
-        public new void ShowDialog()
+        private void Promocode_Activated(object sender, EventArgs e)
         {
-            this.ReOpen();
-        }
-
-        protected override void OnActivated(EventArgs e)
-        {
-            base.OnActivated(e);
             BindingExpression be;
             // установка текстов на выбранном языке
             //    заголовок
             be = txtTitle.GetBindingExpression(TextBlock.TextProperty);
             if (be != null) be.UpdateTarget();
         }
+
+        public new void ShowDialog()
+        {
+            //string stack = Environment.StackTrace;
+            // вызывающее окно
+            System.Diagnostics.StackFrame aFrame = (new System.Diagnostics.StackTrace()).GetFrame(1);
+            string callingWinName = aFrame.GetMethod().DeclaringType.Name;
+            AppLib.WriteAppAction(this.Name, AppActionsEnum.PromocodeWinOpen, callingWinName);
+
+            this.ReOpen();
+        }
+
+
+        #region активация ожидашки
+        protected override void OnActivated(EventArgs e)
+        {
+            App.IdleTimerStart(this);
+            base.OnActivated(e);
+        }
+        protected override void OnDeactivated(EventArgs e)
+        {
+            App.IdleTimerStop();
+            base.OnDeactivated(e);
+        }
+        #endregion
 
         public void ReOpen()
         {
@@ -172,11 +193,14 @@ namespace WpfClient
             if (isSetRetValue)
             {
                 App.PromocodeNumber = txtInput.Text;
+                AppLib.WriteAppAction(this.Name, AppActionsEnum.PromocodeInputValue, txtInput.Text);
             }
             else
             {
                 txtInput.Text = App.PromocodeNumber;
             }
+
+            AppLib.WriteAppAction(this.Name, AppActionsEnum.PromocodeWinClose, (isSetRetValue ? "Ok" : "Cancel"));
 
             this.Hide();
         }

@@ -11,7 +11,7 @@ using System.Windows.Media;
 using System.Windows.Navigation;
 using UserActionLog;
 using AppActionNS;
-
+using WpfClient.Lib;
 
 namespace WpfClient
 {
@@ -103,11 +103,14 @@ namespace WpfClient
                 }
 
                 // ожидашка
-                IdleHandler = new UserActionIdle();
-                //IdleHandler.IdleSeconds = (int)AppLib.GetAppGlobalValue("UserIdleTime");
-                // DEBUG
-                IdleHandler.IdleSeconds = 3;
-                IdleHandler.IdleElapseEvent += IdleHandler_IdleElapseEvent;
+                int idleSec = (int)AppLib.GetAppGlobalValue("UserIdleTime");
+                if (idleSec > 0)
+                {
+                    IdleHandler = new UserActionIdle();
+                    IdleHandler.IdleSeconds = idleSec;
+                    IdleHandler.IdleElapseEvent += IdleHandler_IdleElapseEvent;
+                }
+
                 // логгер событий UI-элементов приложения
                 AppActionLogger = new AppActionLogger();
 
@@ -118,7 +121,7 @@ namespace WpfClient
                 AppLib.WriteLogInfoMessage("************  End application  ************");
 
                 // подчистить память
-                IdleHandler.Dispose();
+                if (IdleHandler != null) IdleHandler.Dispose();
                 AppActionLogger.Close();
 
                 // Allow single instance code to perform cleanup operations
@@ -126,10 +129,88 @@ namespace WpfClient
             }
         }
 
+        #region таймер бездействия
+
+        public static void IdleTimerStart(Window targetWindow)
+        {
+            if (App.IdleHandler != null) App.IdleHandler.CurrentWindow = targetWindow;
+        }
+        public static void IdleTimerStop()
+        {
+            if (App.IdleHandler != null) App.IdleHandler.CurrentWindow = null;
+        }
+
         private static void IdleHandler_IdleElapseEvent(System.Timers.ElapsedEventArgs obj)
         {
-            MessageBox.Show("таймер бездействия");
+            App.Current.Dispatcher.Invoke(() =>
+            {
+                if (idleAction() == false)
+                {
+//                    Debug.Print(" *** Idle pause");
+                    App.IdleHandler.SetPause();
+                }
+            });
+
         }
+
+        // окно Ожидашки
+        private static bool idleAction()
+        {
+            if (AppLib.IsOpenWindow("MsgBoxExt", "idleWin")) return false;
+
+            WpfClient.Lib.MsgBoxExt mBox = new WpfClient.Lib.MsgBoxExt()
+            {
+                Name = "idleWin",
+                ShowActivated = true,
+                TitleFontSize = (double)AppLib.GetAppGlobalValue("appFontSize6"),
+                MessageFontSize = (double)AppLib.GetAppGlobalValue("appFontSize2"),
+                ButtonFontSize = (double)AppLib.GetAppGlobalValue("appFontSize4"),
+
+                MsgBoxButton = MessageBoxButton.YesNo,
+
+                ButtonForeground = Brushes.White,
+                ButtonBackground = (Brush)AppLib.GetAppGlobalValue("appBackgroundColor"),
+                ButtonBackgroundOver = (Brush)AppLib.GetAppGlobalValue("appBackgroundColor"),
+            };
+            mBox.CloseByButtonPress = true;
+            var v = AppLib.GetAppGlobalValue("autoUIReset");
+            double dInterval = (v == null) ? 10000 : (int)v * 1000;   // in msec
+            mBox.SetAutoCloseTimer(dInterval, 500, 
+                (sender, e) => 
+                {
+                    double remainSec = Math.Round(e.RemainMilliSeconds / 1000d, 1);
+                    //mBox.MessageText = AppLib.GetLangTextFromAppProp("areYouHereQuestion") + "\nДо закрытия окна осталось " + remainSec.ToString() + " sec";
+                    mBox.btn2Text.Text = AppLib.GetLangTextFromAppProp("dialogBoxNoText") + " (" + remainSec.ToString("0.0") + ")";
+                });
+            mBox.Title = AppLib.GetLangTextFromAppProp("areYouHereTitle");
+            mBox.MessageText = AppLib.GetLangTextFromAppProp("areYouHereQuestion");
+
+            // надписи на кнопках Да/Нет согласно выбранному языку
+            string sYes = AppLib.GetLangTextFromAppProp("dialogBoxYesText");
+            string sNo = AppLib.GetLangTextFromAppProp("dialogBoxNoText");
+            mBox.ButtonsText = string.Format(";;{0};{1}", sYes, sNo);
+
+            AppLib.WriteAppAction(mBox.Name, AppActionsEnum.IdleWindowOpen);
+            MessageBoxResult result = mBox.ShowDialog();
+
+            AppLib.WriteAppAction(mBox.Name, AppActionsEnum.IdleWindowClose, result.ToString());
+
+            // reset UI
+            bool retVal = false;
+            if (result == MessageBoxResult.Yes)
+            {
+                // чтобы не срабатывали обработчики нижележащих контролов
+                AppLib.IsEventsEnable = false;
+                retVal = true;
+            }
+            else
+            {
+                AppLib.ReStartApp(true, true, false);
+            }
+            return retVal;
+        }
+
+        #endregion
 
         #region ISingleInstanceApp Members
 

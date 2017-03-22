@@ -20,7 +20,7 @@ namespace WpfClient
 
             string sLower = source.ToLower();
 
-            if (sLower.Equals("true") || sLower.Equals("да"))
+            if (sLower.Equals("true") || sLower.Equals("да") || sLower.Equals("yes") || sLower.Equals("истина"))
                 retValue = true;
             else
             {
