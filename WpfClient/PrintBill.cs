@@ -273,16 +273,6 @@ namespace WpfClient
         {
             if (sectionModel.ImageModel == null) return;
 
-            //ImageModel imgModel = sectionModel.ImageModel;
-            //BlockUIContainer imageBlockHeader = new BlockUIContainer();
-            //Image imageHeader = new Image();
-            //imageHeader.Source = ImageHelper.GetBitmapImage(imgModel.Source);
-
-            //imageBlockHeader.Child = imageHeader;
-            //imageHeader.Width = imgModel.Width;
-            //imageHeader.Height = imgModel.Height;
-            //imageHeader.Margin = new Thickness(imgModel.LeftMargin, imgModel.TopMargin, imgModel.RightMargin, imgModel.ButtomMargin);
-
             BlockUIContainer imageBlock = ImageHelper.getImageBlock(sectionModel.ImageModel, doc);
 
             if (imageBlock != null) doc.Blocks.Add(imageBlock);

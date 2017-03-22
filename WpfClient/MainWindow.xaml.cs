@@ -259,6 +259,7 @@ namespace WpfClient
             double pnlDishWidth, pnlDishHeight;
             double lstFldWidth, lstFldHeight;
             double promoFontSize, dH;
+            string backgroundImage;
 
             //clearMenuSideLayout();
             // вертикальное размещение: панель меню сверху
@@ -331,8 +332,7 @@ namespace WpfClient
                 lblMakeOrderText.FontSize = 0.8 * _orderPriceFontSize;
                 lblMakeOrderText.FontWeight = FontWeights.Normal;
 
-                // фон
-                dishesPanelBackground.Source = ImageHelper.GetBitmapImage(@"AppImages\bg 3ver 1080x1920 background.png");
+                backgroundImage = AppLib.GetFullFileName("bg 3ver 1080x1920 background.png");
                 scrollDishes.Margin = new Thickness(0,0.5*dH,0,0.5*dH);
             }
 
@@ -388,12 +388,12 @@ namespace WpfClient
                 lblOrderPrice.FontWeight = FontWeights.Bold;
                 lblMakeOrderText.FontSize = 0.2 * gridMenuSide.RowDefinitions[3].Height.Value;
                 lblMakeOrderText.FontWeight = FontWeights.Bold;
-                
-                // фон
-                dishesPanelBackground.Source = ImageHelper.GetBitmapImage(@"AppImages\bg 3hor 1920x1080 background.png");
 
+                backgroundImage = AppLib.GetFullFileName("bg 3hor 1920x1080 background.png");
             }
 
+            // фон
+            dishesPanelBackground.Source = ImageHelper.GetBitmapImage(backgroundImage);
             // яркость фона
             string opacity = AppLib.GetAppSetting("MenuBackgroundBrightness");
             if (opacity != null)
@@ -982,7 +982,7 @@ namespace WpfClient
             }
             else
             {
-                AppLib.IsDrag = (Math.Abs(lastDragPoint.Value.X - initDragPoint.Value.X) > 3) || (Math.Abs(lastDragPoint.Value.Y - initDragPoint.Value.Y) > 3);
+                AppLib.IsDrag = (Math.Abs(lastDragPoint.Value.X - initDragPoint.Value.X) > 10) || (Math.Abs(lastDragPoint.Value.Y - initDragPoint.Value.Y) > 15);
             }
         }
         private void doMove(Point posNow)

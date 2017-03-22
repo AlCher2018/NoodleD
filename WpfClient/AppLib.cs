@@ -184,6 +184,24 @@ namespace WpfClient
             return AppDomain.CurrentDomain.BaseDirectory;
         }
 
+        public static string GetFullFileName(string fileName)
+        {
+            return getImagePath() + fileName; 
+        }
+        private static string getImagePath()
+        {
+            string imgPath = (string)AppLib.GetAppGlobalValue("ImagesPath");
+            if (string.IsNullOrEmpty(imgPath))  // путь не указан в конфиге - берем путь приложения
+                imgPath = AppLib.GetAppDirectory();
+            else if (imgPath.Contains(@"\:"))   // абсолютный путь
+            { }
+            else  // относительный путь
+            {
+                imgPath = AppLib.GetAppDirectory() + imgPath;
+            }
+            if (imgPath.EndsWith(@"\") == false) imgPath += @"\";
+            return imgPath;
+        }
         #endregion
 
         #region app settings
@@ -489,6 +507,7 @@ namespace WpfClient
             saveAppSettingToProps("ssdID", null);   // идентификатор устройства самообслуживания
             App.DeviceId = (string)AppLib.GetAppGlobalValue("ssdID");
 
+            saveAppSettingToProps("ImagesPath");   // путь к папке с изображениями
             saveAppSettingToProps("CurrencyChar", null);   // символ денежной единицы
             // печать чека
             saveAppSettingToProps("BillPageWidht", typeof(int));   // ширина в пикселях, для перевода в см надо / на 96 и * на 2,45
@@ -532,6 +551,7 @@ namespace WpfClient
             parseAndSetAllLangString("takeOrderOut");
             parseAndSetAllLangString("wordOr");
             parseAndSetAllLangString("takeOrderIn");
+
             // AreYouHere window
             saveAppSettingToProps("UserIdleTime", typeof(int));        // время бездействия из config-файла, в сек
             parseAndSetAllLangString("areYouHereTitle");

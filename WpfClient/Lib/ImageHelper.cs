@@ -50,7 +50,8 @@ namespace WpfClient
 
         public static System.Windows.Documents.BlockUIContainer getImageBlock(ImageModel imgModel, System.Windows.Documents.FlowDocument doc)
         {
-            System.Windows.Controls.Image img = getImage(imgModel.Source);
+            string fileName = AppLib.GetFullFileName(imgModel.Source);
+            System.Windows.Controls.Image img = getImage(fileName);
             if (img == null) return null;
 
             double width = (double)imgModel.Width, height = (double)imgModel.Height;
@@ -204,23 +205,19 @@ namespace WpfClient
 
         internal static System.Windows.Media.ImageSource GetBitmapImage(string imagePath)
         {
+            if (imagePath == null) return null;
+
             if (_images.Any(i => i.Key == imagePath))
             {
                 return _images[imagePath];
             }
             else
             {
-                if (imagePath == null) return null;
                 if (!File.Exists(imagePath)) return null;
 
-                BitmapImage bi = null;
-                // full path (absolutely)
-                if (imagePath[1].Equals(':'))
-                    bi = new System.Windows.Media.Imaging.BitmapImage(new Uri(imagePath, UriKind.Absolute));
-                else
-                    bi = new System.Windows.Media.Imaging.BitmapImage(new Uri(imagePath, UriKind.Relative));
+                BitmapImage bi = new System.Windows.Media.Imaging.BitmapImage(new Uri(imagePath, UriKind.RelativeOrAbsolute));
+                _images.Add(imagePath, bi);
 
-                _images.Add(imagePath,bi);
                 return _images[imagePath];
             }
                    

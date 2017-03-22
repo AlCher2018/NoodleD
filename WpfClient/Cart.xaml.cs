@@ -79,6 +79,7 @@ namespace WpfClient
             double dishesPanelHeight = (double)AppLib.GetAppGlobalValue("dishesPanelHeight");
             scrollDishes.Height = dishesPanelHeight; scrollDishes.Width = dishesPanelWidth;
             double dishNameFontSize, dishUnitFontSize;
+            string backgroundImage;
             Style stl; Setter str;
 
             // дизайн вертикальный: панель меню СВЕРХУ
@@ -159,7 +160,8 @@ namespace WpfClient
                 txtCashier.Style = (Style)this.Resources["goToCashierVer"];
 
                 // фон
-                imgBackground.Source = ImageHelper.GetBitmapImage(@"AppImages\bg 3ver 1080x1920 background.png");
+                backgroundImage = AppLib.GetFullFileName("bg 3ver 1080x1920 background.png");
+
                 setLangButtonStyle(true);   // "включить" текущую языковую кнопку
 
                 // панели блюд
@@ -191,7 +193,7 @@ namespace WpfClient
                 txtCashier.Margin = new Thickness(0.5*dH,0,0.5*dH,0);
 
                 // фон
-                imgBackground.Source = ImageHelper.GetBitmapImage(@"AppImages\bg 3hor 1920x1080 background.png");
+                backgroundImage = AppLib.GetFullFileName("bg 3hor 1920x1080 background.png");
 
                 dishBorderHeight = (dishesPanelHeight - dishesListTitle.ActualHeight) / 4.0;
                 titleFontSize = 0.02 * dishesPanelHeight;
@@ -202,6 +204,9 @@ namespace WpfClient
                 setStylePropertyValue("dishPortionImageStyle", "Margin", new Thickness(0.03 * dishBorderHeight));
                 setStylePropertyValue("dishDelImageStyle", "Margin", new Thickness(0.15 * dishBorderHeight));
             }
+
+            // фон
+            imgBackground.Source = ImageHelper.GetBitmapImage(backgroundImage);
 
             // высота рамки блюда в заказе, из стиля
             setStylePropertyValue("dishBorderStyle", "MinHeight", dishBorderHeight);
@@ -394,7 +399,7 @@ namespace WpfClient
             }
             else
             {
-                _isDrag = (Math.Abs(lastDragPoint.Value.X - initDragPoint.Value.X) > 10) || (Math.Abs(lastDragPoint.Value.Y - initDragPoint.Value.Y) > 10);
+                _isDrag = (Math.Abs(lastDragPoint.Value.X - initDragPoint.Value.X) > 10) || (Math.Abs(lastDragPoint.Value.Y - initDragPoint.Value.Y) > 15);
             }
         }
         private void doMove(Point posNow)
@@ -793,7 +798,7 @@ namespace WpfClient
                         // вернуть интерфейс в исходное состояние и создать новый заказ
                         AppLib.ReStartApp(false, true, true);
                         // поставить таймер бездействия на паузу
-                        App.IdleHandler.SetPause();
+                        if (App.IdleHandler != null) App.IdleHandler.SetPause();
                     }
                     // ошибка сохранения в БД
                     else

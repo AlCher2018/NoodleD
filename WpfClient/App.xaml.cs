@@ -54,14 +54,12 @@ namespace WpfClient
                     //                Process.GetCurrentProcess().Kill();
                 }
 
-                System.Windows.SplashScreen splashScreen;
-                if (SystemParameters.PrimaryScreenWidth < SystemParameters.PrimaryScreenHeight)
-                    splashScreen = new System.Windows.SplashScreen("AppImages/bg 3ver 1080x1920 splash.png");
-                else
-                    splashScreen = new System.Windows.SplashScreen("AppImages/bg 3hor 1920x1080 splash.png");
-                splashScreen.Show(true);
-
                 App app = new App();
+
+                getAppLayout();
+                string fileName = (AppLib.IsAppVerticalLayout ? "bg 3ver 1080x1920 splash.png" : "bg 3hor 1920x1080 splash.png");
+                System.Windows.SplashScreen splashScreen = new System.Windows.SplashScreen(fileName);
+                splashScreen.Show(true);
 
                 //******  СТАТИЧЕСКИЕ настройки  ******
 
@@ -144,13 +142,8 @@ namespace WpfClient
         {
             App.Current.Dispatcher.Invoke(() =>
             {
-                if (idleAction() == false)
-                {
-//                    Debug.Print(" *** Idle pause");
-                    App.IdleHandler.SetPause();
-                }
+                if (idleAction() == false) App.IdleHandler.SetPause();
             });
-
         }
 
         // окно Ожидашки
@@ -231,6 +224,12 @@ namespace WpfClient
 
 
         #region check funcs
+
+        private static void getAppLayout()
+        {
+            AppLib.SetAppGlobalValue("screenWidth", SystemParameters.PrimaryScreenWidth);
+            AppLib.SetAppGlobalValue("screenHeight", SystemParameters.PrimaryScreenHeight);
+        }
 
         private static void checkDBConnection()
         {
@@ -324,14 +323,8 @@ namespace WpfClient
             double dVar;
 
             double screenWidth, screenHeight;
-            screenWidth = SystemParameters.PrimaryScreenWidth;
-            //            screenWidth = SystemParameters.VirtualScreenWidth;
-            screenHeight = SystemParameters.PrimaryScreenHeight;
-            //            screenHeight = SystemParameters.VirtualScreenHeight;
-
-
-            AppLib.SetAppGlobalValue("screenWidth", screenWidth);
-            AppLib.SetAppGlobalValue("screenHeight", screenHeight);
+            screenWidth = (double)AppLib.GetAppGlobalValue("screenWidth");
+            screenHeight = (double)AppLib.GetAppGlobalValue("screenHeight");
 
             double dishesPanelWidth;
             // вертикальная разметка: панель меню сверху

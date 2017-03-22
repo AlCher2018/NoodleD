@@ -208,10 +208,10 @@
     <Content Include="AppImages\bg 3hor 1920x1080 background.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Resource Include="AppImages\bg 3hor 1920x1080 splash.png">
+    <Resource Include="bg 3hor 1920x1080 splash.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="AppImages\bg 3ver 1080x1920 splash.png">
+    <Resource Include="bg 3ver 1080x1920 splash.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
     <Content Include="AppImages\bg 3ver 1080x1920 background.png">
