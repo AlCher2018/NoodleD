@@ -68,7 +68,7 @@ namespace WpfClient
             //    номер заказа (для печати - случайный) в формате 0000 - 4 символа
             // т.к. в формате EAN-13 если первый символ - 0, то он удаляется, используем в начале дату
             string sBuf = (_order.OrderDate==null) ? "000000" : string.Format("{0:yyMMdd}", _order.OrderDate);
-            _order.BarCodeValue = sBuf + deviceName + _order.OrderNumberForPrint.ToString("0000");
+            _order.BarCodeValue = sBuf + _order.OrderNumberForPrint.ToString("000000");
 
             // 3. LanguageTypeId
             _order.LanguageTypeId = AppLib.AppLang;

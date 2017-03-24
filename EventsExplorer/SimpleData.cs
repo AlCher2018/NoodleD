@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace UserActionLogTester
+namespace EventsExplorer
 {
     public class SimpleData : DependencyObject
     {

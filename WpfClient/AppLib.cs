@@ -208,7 +208,7 @@ namespace WpfClient
         // получить настройки приложения из config-файла
         public static string GetAppSetting(string key)
         {
-            if (ConfigurationManager.AppSettings.AllKeys.Any(k => k == key) == true)
+            if (ConfigurationManager.AppSettings.AllKeys.Any(k => k.ToLower().Equals(key.ToLower())) == true)
                 return ConfigurationManager.AppSettings.Get(key);
             else
                 return null;
@@ -802,14 +802,15 @@ namespace WpfClient
             mainWin.updatePrice();
         }
 
-        public static bool IsOpenWindow(string typeName, string objName)
+        public static bool IsOpenWindow(string typeName, string objName = null)
         {
             bool retVal = false;
             foreach (Window win in App.Current.Windows)
             {
-                if ((win.GetType().Name.Equals(typeName)) && win.Name.Equals(objName))
+                if ((win.GetType().Name.Equals(typeName)) && (string.IsNullOrEmpty(objName) ? true : win.Name.Equals(objName)))
                 {
-                    retVal = true; break;
+                    retVal = (win.Visibility == Visibility.Visible);
+                    break;
                 }
             }
 

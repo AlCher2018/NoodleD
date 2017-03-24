@@ -198,7 +198,7 @@
 
                 </StackPanel>
 
-                <ListBox x:Name="lstMenuFolders" Grid.Row="1" SelectionMode="Single" BorderThickness="0" SnapsToDevicePixels="True" HorizontalContentAlignment="Stretch" Background="{StaticResource appBackgroundColor}" Focusable="False" FocusVisualStyle="{x:Null}"
+                <ListBox x:Name="lstMenuFolders" Grid.Row="1" SelectionMode="Single" BorderThickness="0" SnapsToDevicePixels="True" HorizontalContentAlignment="Stretch" Background="{StaticResource appBackgroundColor}" Focusable="False" FocusVisualStyle="{x:Null}" 
                          ItemContainerStyle="{StaticResource menuItemStyle}"
                          ItemTemplate="{StaticResource menuDataTemplate}"
                          SelectionChanged="lstMenuFolders_SelectionChanged"

@@ -259,6 +259,7 @@ namespace WpfClient
             double pnlDishWidth, pnlDishHeight;
             double lstFldWidth, lstFldHeight;
             double promoFontSize, dH;
+            double lstFolderTotalMargin;
             string backgroundImage;
 
             //clearMenuSideLayout();
@@ -316,10 +317,8 @@ namespace WpfClient
 
                 lstFldHeight = 3d * dH;
                 lstMenuFolders.ItemsPanel = GetItemsPanelTemplate(Orientation.Horizontal);
-                lstMenuFolders.Margin = new Thickness(dH, 0.5*dH, 0, 0);
-                lstFldWidth -= 1.2*dH;
-                ScrollViewer.SetHorizontalScrollBarVisibility(lstMenuFolders, ScrollBarVisibility.Auto);
-                ScrollViewer.SetVerticalScrollBarVisibility(lstMenuFolders, ScrollBarVisibility.Disabled);
+                lstMenuFolders.Margin = new Thickness(dH, 0.5*dH, dH, 0);
+                lstFolderTotalMargin = 2.0 * dH;
 
                 // кнопка Оформить
                 brdMakeOrder.Margin = new Thickness(dH, 0.4*dH, dH, 0.4 * dH);
@@ -372,10 +371,8 @@ namespace WpfClient
                 // список категорий
                 lstFldHeight = 8d * dH;
                 lstMenuFolders.ItemsPanel = GetItemsPanelTemplate(Orientation.Vertical);
-                lstMenuFolders.Margin = new Thickness(0, 0.01 * lstFldHeight, 0, 0.01 * lstFldHeight);
-                lstFldHeight *= 0.98;
-                ScrollViewer.SetVerticalScrollBarVisibility(lstMenuFolders, ScrollBarVisibility.Auto);
-                ScrollViewer.SetHorizontalScrollBarVisibility(lstMenuFolders, ScrollBarVisibility.Disabled);
+                lstMenuFolders.Margin = new Thickness(0, 0, 0, 0.5*dH);
+                lstFolderTotalMargin = 0.5 * dH;
 
                 // промокод
                 gridPromoCode.Height = 0.6 * dH;
@@ -403,7 +400,7 @@ namespace WpfClient
 
             // создать список категорий блюд
             AppLib.WriteLogTraceMessage(" - создаю список категорий блюд...");
-            createCategoriesList(lstFldWidth, lstFldHeight, dH);
+            createCategoriesList(lstFldWidth, lstFldHeight, dH, lstFolderTotalMargin);
             AppLib.WriteLogTraceMessage(" - создаю список категорий блюд... READY");
 
             // языковые кнопки, фон для внешних Border, чтобы они были кликабельные
@@ -463,13 +460,17 @@ namespace WpfClient
             //gridMenuSideSub1.Children.Clear();
         }
 
-        private void createCategoriesList(double pnlWidth, double pnlHeight, double dH)
+        private void createCategoriesList(double pnlWidth, double pnlHeight, double dH, double lstFolderTotalMargin)
         {
             List<AppModel.MenuItem> mFolders = (List<AppModel.MenuItem>)AppLib.GetAppGlobalValue("mainMenu");
             if (mFolders == null) return;
 
-            bool isVerticalFolderMenu = (pnlWidth < pnlHeight);
             bool isScrollingList = AppLib.GetAppSetting("IsAllowScrollingDishCategories").ToBool();
+            double categoriesPanelMargin = AppLib.GetAppSetting("categoriesPanelMargin").ToDouble();
+            if (categoriesPanelMargin < 0.05) categoriesPanelMargin = 0.05;
+            else if (categoriesPanelMargin > 1.5) categoriesPanelMargin = 1.5;
+            ScrollViewer.SetCanContentScroll(lstMenuFolders, isScrollingList);
+            
             // кол-во пунктов для расчета из размера
             int iCount = (isScrollingList == true)? 6: mFolders.Count;
             if (iCount < 6) iCount = 6;
@@ -480,32 +481,29 @@ namespace WpfClient
             Style txtStyle = (Style)this.Resources["menuItemTextStyle"];
             Setter st;
 
-            double itemHeight, itemWidth, marginBase, imageSize, txtFontSize;
+            double itemHeight, itemWidth, imageSize, txtFontSize;
             double d1, d2, d3;
             Thickness thMargin, thPadding;
             object o1;
 
-            // меню категорий размещено вертикально, справа
-            if (isVerticalFolderMenu)
+            // дизайн вертикальный, панель категорий - сверху
+            if (AppLib.IsAppVerticalLayout)
             {
-                itemHeight = pnlHeight / iCount; itemWidth = pnlWidth;
-                marginBase = 0.1 * itemHeight;
-                thMargin = new Thickness(marginBase, 0, marginBase, 1.4 * marginBase);
-                thPadding = new Thickness(0, 2.0 * marginBase, 0, 2.0 * marginBase);
-                o1 = this.TryFindResource("menuDataTemplate");
-                if (o1 != null) lstMenuFolders.ItemTemplate = (DataTemplate)o1;
-                imageSize = 0.4 * itemHeight;
-                txtFontSize = 0.25 * itemHeight;
+                if (isScrollingList == true)
+                {
+                    ScrollViewer.SetHorizontalScrollBarVisibility(lstMenuFolders, ScrollBarVisibility.Auto);
+                    ScrollViewer.SetVerticalScrollBarVisibility(lstMenuFolders, ScrollBarVisibility.Disabled);
+                }
 
-            }
-            // меню категорий размещено горизонтально, вверху экрана
-            else
-            {
-                d1 = Math.Floor(0.8 * dH);
                 itemHeight = pnlHeight;
-                itemWidth = pnlWidth / iCount;
-                itemWidth -= Math.Floor(d1);
+
+                //расстояние между пунктами
+                d1 = categoriesPanelMargin * dH;
+                itemWidth = Math.Floor(((pnlWidth - lstFolderTotalMargin + d1) / (double)iCount) - d1);
+                if (itemWidth <= 0) itemWidth = 10;
                 thMargin = new Thickness(0, 0, d1, 0);
+                lstMenuFolders.Width = pnlWidth;
+
                 thPadding = new Thickness(0);
                 o1 = this.TryFindResource("menuDataTemplateHor");
                 if (o1 != null) lstMenuFolders.ItemTemplate = (DataTemplate)o1;
@@ -514,6 +512,33 @@ namespace WpfClient
 
                 imageSize = 0.5 * itemHeight;
                 txtFontSize = 0.2 * itemHeight;
+            }
+            
+            // дизайн горизонтальный, панель категорий - слева
+            else
+            {
+                if (isScrollingList == true)
+                {
+                    ScrollViewer.SetHorizontalScrollBarVisibility(lstMenuFolders, ScrollBarVisibility.Disabled);
+                    ScrollViewer.SetVerticalScrollBarVisibility(lstMenuFolders, ScrollBarVisibility.Auto);
+                }
+
+                itemHeight = pnlHeight / iCount; itemWidth = pnlWidth;
+
+                d1 = Math.Floor(categoriesPanelMargin * dH);
+                itemHeight = ((pnlHeight - lstFolderTotalMargin) / (double)iCount) - d1;
+                if (itemHeight <= 0) itemHeight = 20;
+                thMargin = new Thickness(0.1*dH, 0, 0.1*dH, d1);
+                lstMenuFolders.Height = pnlHeight;
+
+                thPadding = new Thickness(0, 0, 0, 0);  // 0.1 * dH
+                o1 = this.TryFindResource("menuDataTemplate");
+                if (o1 != null) lstMenuFolders.ItemTemplate = (DataTemplate)o1;
+
+                brdStyle.Setters.Add(new Setter(ListBoxItem.HeightProperty, itemHeight));
+
+                imageSize = 0.6 * itemHeight;
+                txtFontSize = 0.25 * itemHeight;
             }
 
             // поле вокруг рамки
@@ -540,6 +565,7 @@ namespace WpfClient
             else
                 st.Value = imageSize;
             // размер текста
+            txtFontSize = AppLib.GetAppSetting("categoriesPanelFontSize").ToDouble();
             st = (Setter)txtStyle.Setters.FirstOrDefault(s => (s as Setter).Property.Name == "FontSize");
             if (st == null)
                 txtStyle.Setters.Add(new Setter(TextBlock.FontSizeProperty, txtFontSize));

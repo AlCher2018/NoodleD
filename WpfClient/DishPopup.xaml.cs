@@ -146,8 +146,8 @@ namespace WpfClient
             brdAboveFolderMenu.Width = pnlMenuWidth;
 
             double dW, dH, d1;
-            double grdContentWidth = getAbsColWidth(gridWindow, 1, ((this.Width == pnlMenuWidth) ? this.Width : this.Width - pnlMenuWidth));
-            double grdContentHeight = AppLib.GetRowHeightAbsValue(gridWindow, 1, ((this.Height == pnlMenuHeight) ? this.Height : this.Height - pnlMenuHeight));
+            double grdContentWidth = getAbsColWidth(gridWindow, 1, ((this.Width <= pnlMenuWidth) ? this.Width : this.Width - pnlMenuWidth));
+            double grdContentHeight = AppLib.GetRowHeightAbsValue(gridWindow, 1, ((this.Height <= pnlMenuHeight) ? this.Height : this.Height - pnlMenuHeight));
             double itemWidth = 10, itemHeight=10, garnTextFontSize=10;
 
             Setter st; Thickness thMargin;

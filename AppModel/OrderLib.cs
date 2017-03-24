@@ -67,14 +67,19 @@ namespace AppModel
         public int CreateOrderNumberForPrint(out DateTime? dtOrder)
         {
             int retVal;
+            List<Terminal> terminals;
+            Terminal term;
 
             using (NoodleDContext db = new NoodleDContext())
             {
-                Terminal term = db.Terminal.FirstOrDefault(t => t.Name == this.DeviceID);
+                terminals = db.Terminal.ToList<Terminal>();  // get from DB
+
+                term = terminals.FirstOrDefault(t => t.Name == this.DeviceID);
                 if (term == null)
                 {
                     term = new Terminal() { Name = this.DeviceID, RndOrderNum_Date = DateTime.Now, TimeOn = DateTime.Now };
-                    term.RndOrderNum_InitVal = getNewRandomOrderNumber(this.RangeOrderNumberFrom, this.RangeOrderNumberTo);
+                    term.RndOrderNum_Date = DateTime.Now;
+                    term.RndOrderNum_InitVal = getNumberForInitField(this.RangeOrderNumberFrom, this.RangeOrderNumberTo, terminals);
                     term.RndOrderNum_NextVal = term.RndOrderNum_InitVal;
                     db.Terminal.Add(term);
                 }
@@ -83,26 +88,25 @@ namespace AppModel
                     if (term.RndOrderNum_InitVal == null)
                     {
                         term.RndOrderNum_Date = DateTime.Now;
-                        term.RndOrderNum_InitVal = getNewRandomOrderNumber(this.RangeOrderNumberFrom, this.RangeOrderNumberTo);
+                        term.RndOrderNum_InitVal = getNumberForInitField(this.RangeOrderNumberFrom, this.RangeOrderNumberTo, terminals);
                         term.RndOrderNum_NextVal = term.RndOrderNum_InitVal;
                     }
-                    if (term.RndOrderNum_NextVal == null)
-                    {
-                        term.RndOrderNum_NextVal = term.RndOrderNum_InitVal;
-                    }
+                    if (term.RndOrderNum_NextVal == null) term.RndOrderNum_NextVal = term.RndOrderNum_InitVal;
+                    if (term.RndOrderNum_Date == null) term.RndOrderNum_Date = DateTime.Now;
 
-                    // дата заказа
-                    term.RndOrderNum_Date = DateTime.Now;
                     // для другой даты новый кеш случайных номеров заказа
                     if (compareDatesOnly(term.RndOrderNum_Date??DateTime.MinValue, DateTime.Now) == false)
                     {
-                        term.RndOrderNum_InitVal = getNewRandomOrderNumber(this.RangeOrderNumberFrom, this.RangeOrderNumberTo);
+                        term.RndOrderNum_Date = DateTime.Now;
+                        term.RndOrderNum_InitVal = getNumberForInitField(this.RangeOrderNumberFrom, this.RangeOrderNumberTo, terminals);
                         term.RndOrderNum_NextVal = term.RndOrderNum_InitVal;
                     }
                 }
 
-                retVal = term.RndOrderNum_NextVal??-1;
+                //retVal = getOrderNumber(this.RangeOrderNumberFrom, this.RangeOrderNumberTo, terminals, term.RndOrderNum_NextVal ?? -1);
+                retVal = int.Parse(term.Name) * 10000 + (term.RndOrderNum_NextVal ?? 0);
                 term.RndOrderNum_NextVal++;
+
                 dtOrder = term.RndOrderNum_Date;
 
                 db.SaveChanges();
@@ -111,11 +115,38 @@ namespace AppModel
             _orderNumberForPrint = retVal;
             return retVal;
         }  // CreateOrderNumberForPrint
-        private int getNewRandomOrderNumber(int rndFrom, int rndTo)
+
+        // значение для поля начального номера на день
+        private int getNumberForInitField(int rndFrom, int rndTo, List<Terminal> terminals)
         {
             Random rndGen = new Random();
-            return rndGen.Next(rndFrom, rndTo);
+            int retVal = rndGen.Next(rndFrom, rndTo);
+           
+            while (terminals.Any(t => (t.RndOrderNum_InitVal == null) ? false : t.RndOrderNum_InitVal == retVal))
+            {
+                retVal = rndGen.Next(rndFrom, rndTo);
+            }
+
+            return retVal;
         }
+
+        // значение для поля следующего номера заказа
+        private int getOrderNumber(int rndFrom, int rndTo, List<Terminal> terminals, int initValue)
+        {
+            Random rndGen = new Random();
+            int retVal = initValue;
+            if (retVal == -1) retVal = rndGen.Next(rndFrom, rndTo);
+
+            while (terminals.Any(t => (t.RndOrderNum_InitVal == null) ? false : 
+                ((retVal >= t.RndOrderNum_InitVal) && (retVal <= t.RndOrderNum_NextVal))
+                ) )
+            {
+                retVal += 100;
+            }
+
+            return retVal;
+        }
+
 
         private bool compareDatesOnly(DateTime d1, DateTime d2)
         {

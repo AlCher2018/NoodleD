@@ -56,6 +56,15 @@ namespace WpfClient
 
                 App app = new App();
 
+                // номер устройства - не число!
+                if (AppLib.GetAppSetting("ssdID").IsNumber() == false)
+                {
+                    AppLib.WriteLogErrorMessage("** Номер устройства - НЕ ЧИСЛО !! **");
+                    AppLib.WriteLogInfoMessage("************  End application  ************");
+                    MessageBox.Show("Номер устройства - НЕ ЧИСЛО!!");
+                    Environment.Exit(3);
+                }
+
                 getAppLayout();
                 string fileName = (AppLib.IsAppVerticalLayout ? "bg 3ver 1080x1920 splash.png" : "bg 3hor 1920x1080 splash.png");
                 System.Windows.SplashScreen splashScreen = new System.Windows.SplashScreen(fileName);
@@ -107,6 +116,7 @@ namespace WpfClient
                     IdleHandler = new UserActionIdle();
                     IdleHandler.IdleSeconds = idleSec;
                     IdleHandler.IdleElapseEvent += IdleHandler_IdleElapseEvent;
+                    IdleHandler.SetPause();
                 }
 
                 // логгер событий UI-элементов приложения
@@ -149,7 +159,14 @@ namespace WpfClient
         // окно Ожидашки
         private static bool idleAction()
         {
-            if (AppLib.IsOpenWindow("MsgBoxExt", "idleWin")) return false;
+            // условия, при которых таймер бездействия ставится на паузу
+            if (AppLib.IsOpenWindow("MsgBoxExt", "idleWin")) return false;   // само окно бездействия
+            // продолжаем, т.е. показываем окно бездействия, если открыты некоторые окна или есть блюда в корзине
+            AppModel.OrderItem order = (AppModel.OrderItem)AppLib.GetAppGlobalValue("currentOrder");
+            bool isContinue = AppLib.IsOpenWindow("Cart") || AppLib.IsOpenWindow("DishPopup") || AppLib.IsOpenWindow("Promocode") ||
+                ((order.Dishes != null) && (order.Dishes.Count > 0));
+            if (isContinue == false) return false;
+
 
             WpfClient.Lib.MsgBoxExt mBox = new WpfClient.Lib.MsgBoxExt()
             {
