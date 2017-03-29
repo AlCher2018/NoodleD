@@ -69,34 +69,34 @@ namespace UserActionLog
 
         #region Constructors
         // basic constructor
-        private UserActionsLog(EventsMouseEnum mouseEvents, EventsKeyboardEnum keyboardEvents, EventsTouchEnum touchEvent,  LogFilesPathLocationEnum pathLocation, bool enabled)
+        private UserActionsLog(EventsMouseEnum mouseEvents, EventsKeyboardEnum keyboardEvents, EventsTouchEnum touchEvent,  LogFilesPathLocationEnum pathLocation, bool enabled, bool useWriteBuffer)
         {
             if (_mouseEvents != mouseEvents) _mouseEvents = mouseEvents;
             if (_keyboardEvents != keyboardEvents) _keyboardEvents = keyboardEvents;
             if (_touchEvents != touchEvent) _touchEvents = touchEvent;
             _enabled = enabled;
 
-            _logger = new Logger(logPathEnum: pathLocation);
+            _logger = new Logger(useWriteBuffer?512:0, pathLocation);
             base.ActionEventHandler += UserActionsLog_InnerHandler;
 
-            if (_enabled)
-            {
-                _logger.LogAction("UserActionLog class", "INSTANCE", "CREATED", "log files path: " + _logger.GetLogFilePath);
-            }
+            //if (_enabled)
+            //{
+            //    _logger.LogAction("EventsLog class", "INSTANCE", "CREATED", "log files path: " + _logger.GetLogFilePath);
+            //}
 
         }   // base constructor
 
         /// <summary>
         /// Ctor Optimal way of hooking up control events to listen for user actions. 
         /// </summary>
-        public UserActionsLog(FrameworkElement[] ctrls, EventsMouseEnum mouseEvents = EventsMouseEnum.Bubble, EventsKeyboardEnum keyboardEvents = EventsKeyboardEnum.None, EventsTouchEnum touchEvent = EventsTouchEnum.None, LogFilesPathLocationEnum pathMode = LogFilesPathLocationEnum.App_Logs, bool enabled = true) : this(mouseEvents, keyboardEvents, touchEvent, pathMode, enabled)
+        public UserActionsLog(FrameworkElement[] ctrls, EventsMouseEnum mouseEvents = EventsMouseEnum.Bubble, EventsKeyboardEnum keyboardEvents = EventsKeyboardEnum.None, EventsTouchEnum touchEvent = EventsTouchEnum.None, LogFilesPathLocationEnum pathMode = LogFilesPathLocationEnum.App_Logs, bool enabled = true, bool useWriteBuffer = true) : this(mouseEvents, keyboardEvents, touchEvent, pathMode, enabled, useWriteBuffer)
         {
             if (ctrls == null) return;
 
             foreach (FrameworkElement ctrl in ctrls) hookUpEvents(ctrl);
         }
 
-        public UserActionsLog(FrameworkElement ctrl, EventsMouseEnum mouseEvents = EventsMouseEnum.Bubble, EventsKeyboardEnum keyboardEvents = EventsKeyboardEnum.None, EventsTouchEnum touchEvent = EventsTouchEnum.None, LogFilesPathLocationEnum pathMode = LogFilesPathLocationEnum.App_Logs, bool enabled = true) : this(mouseEvents, keyboardEvents, touchEvent, pathMode, enabled)
+        public UserActionsLog(FrameworkElement ctrl, EventsMouseEnum mouseEvents = EventsMouseEnum.Bubble, EventsKeyboardEnum keyboardEvents = EventsKeyboardEnum.None, EventsTouchEnum touchEvent = EventsTouchEnum.None, LogFilesPathLocationEnum pathMode = LogFilesPathLocationEnum.App_Logs, bool enabled = true, bool useWriteBuffer = true) : this(mouseEvents, keyboardEvents, touchEvent, pathMode, enabled, useWriteBuffer)
         {
             if (ctrl == null) return;
 
@@ -125,6 +125,12 @@ namespace UserActionLog
         /// <param name="ctrl">The control whose events we're suspicious of causing problems.</param>
         private void hookUpEvents(FrameworkElement ctrl)
         {
+            if (ctrl is Window)
+            {
+               _parentName = (ctrl as Window).Name;
+                _logger.LogAction("** Create EventLogger for window " + _parentName, "<" + (ctrl as Window).GetType().Name + ">", null, null);
+            }
+
             // уникальные события для некоторых элементов
             //    кнопка: Click
             if ((ctrl is ButtonBase) && (_mouseEvents != EventsMouseEnum.None))
@@ -242,8 +248,8 @@ namespace UserActionLog
         {
             if (_enabled == true)
             {
-                _logger.LogAction("UserActionsLog class", "INSTANCE", "RELEASE", "log files path: " + _logger.GetLogFilePath);
-                _logger.WriteLogActionsToFile();
+                //_logger.LogAction("UserActionsLog class", "INSTANCE", "RELEASE", "log files path: " + _logger.GetLogFilePath);
+                _logger.Close(); _logger = null;
             }
         }
 
@@ -325,12 +331,6 @@ namespace UserActionLog
             {
                 return ctrl.ToString();
             }
-        }
-
-
-        public string[] GetTodaysLogFileNames()
-        {
-            return _logger.GetTodaysLogFileNames();
         }
 
         #endregion

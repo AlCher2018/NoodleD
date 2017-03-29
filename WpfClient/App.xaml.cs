@@ -12,6 +12,7 @@ using System.Windows.Navigation;
 using UserActionLog;
 using AppActionNS;
 using WpfClient.Lib;
+using AppModel;
 
 namespace WpfClient
 {
@@ -38,12 +39,7 @@ namespace WpfClient
                 AppLib.WriteLogInfoMessage("************  Start application  **************");
 
                 // объем доступной памяти
-                System.Management.ManagementObjectSearcher mgmtObjects = new System.Management.ManagementObjectSearcher("Select * from Win32_OperatingSystem");
-                int freeMemory = 0;
-                foreach (var item in mgmtObjects.Get())
-                {
-                    freeMemory = (Convert.ToInt32(item.Properties["FreeVirtualMemory"].Value)) / 1024;
-                }
+                int freeMemory = AppLib.getAvailableRAM();
                 AppLib.WriteLogInfoMessage(" - available memory: " + freeMemory.ToString() + " MB");
                 if (freeMemory < 300)
                 {
@@ -56,15 +52,23 @@ namespace WpfClient
 
                 App app = new App();
 
+                // проверка соединения с бд
+                if (AppLib.CheckDBConnection(typeof(NoodleDContext)) == false)
+                {
+                    MessageBox.Show("Ошибка подключения к базе данных (описание смотри в логах).\nПриложение будет закрыто", "Аварийное завершение", MessageBoxButton.OK, MessageBoxImage.Stop);
+                    Environment.Exit(3);
+                }
+
                 // номер устройства - не число!
                 if (AppLib.GetAppSetting("ssdID").IsNumber() == false)
                 {
                     AppLib.WriteLogErrorMessage("** Номер устройства - НЕ ЧИСЛО !! **");
                     AppLib.WriteLogInfoMessage("************  End application  ************");
                     MessageBox.Show("Номер устройства - НЕ ЧИСЛО!!");
-                    Environment.Exit(3);
+                    Environment.Exit(4);
                 }
 
+                // сплэш-экран
                 getAppLayout();
                 string fileName = (AppLib.IsAppVerticalLayout ? "bg 3ver 1080x1920 splash.png" : "bg 3hor 1920x1080 splash.png");
                 System.Windows.SplashScreen splashScreen = new System.Windows.SplashScreen(fileName);
@@ -86,17 +90,6 @@ namespace WpfClient
                 AppLib.SetAppGlobalValue("promoCode", null);
                 //TestData.mainProc();
 
-                // проверка соединения с бд
-                try
-                {
-                    checkDBConnection();
-                }
-                catch (Exception eConnDB)
-                {
-                    AppLib.WriteLogErrorMessage(eConnDB.Message);
-                    throw;
-                }
-
                 // определенные в ms sql
                 try
                 {
@@ -106,7 +99,8 @@ namespace WpfClient
                 catch (Exception)
                 {
                     // сообщения об ошибках находятся в соотв.модулях, здесь только выход из приложения
-                    Application.Current.Shutdown(1);
+                    app.Shutdown(1);
+                    return;
                 }
 
                 // ожидашка

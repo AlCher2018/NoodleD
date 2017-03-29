@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
 using System.Windows.Threading;
+using UserActionLog;
 
 namespace WpfClient.Lib
 {
@@ -17,6 +18,7 @@ namespace WpfClient.Lib
     public partial class MsgBoxExt : Window
     {
         private MessageBoxResult _retValue = MessageBoxResult.None;
+        private UserActionsLog _eventsLog;
 
         #region properties
 
@@ -106,6 +108,9 @@ namespace WpfClient.Lib
 
         #endregion
 
+        /// <summary>
+        /// ctor
+        /// </summary>
         public MsgBoxExt()
         {
             InitializeComponent();
@@ -116,6 +121,12 @@ namespace WpfClient.Lib
             this.ButtonFontSize = 20d;
             _buttonsTextArr = _buttonsText.Split(';');
             this.ButtonBackground = System.Windows.SystemColors.ControlDarkBrush;
+
+            if (AppLib.GetAppSetting("IsWriteWindowEvents").ToBool())
+            {
+                _eventsLog = new UserActionsLog(new FrameworkElement[] { this,btn1, btn2, btn3 }, 
+                    EventsMouseEnum.Bubble, EventsKeyboardEnum.None, EventsTouchEnum.Bubble, UserActionLog.LogFilesPathLocationEnum.App_Logs, true, false);
+            }
 
             _pressTimer = new System.Timers.Timer(500);
             _pressTimer.Elapsed += _pressTimer_Elapsed;

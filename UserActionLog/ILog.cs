@@ -8,7 +8,6 @@ namespace UserActionLog
         void LogAction(DateTime timeStamp, string frmName, string ctrlName, string eventName, string value);
         string GetLogFilePath { get; }
         string GetLogFileName();
-        string[] GetTodaysLogFileNames();
-        void WriteLogActionsToFile();
+        void Close();
     }
 }

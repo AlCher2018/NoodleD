@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using UserActionLog;
 
 namespace WpfClient
 {
@@ -22,11 +23,17 @@ namespace WpfClient
     public partial class Promocode : Window
     {
         private string _preValue;
+        private UserActionsLog _eventsLog;
 
         public Promocode()
         {
             InitializeComponent();
             this.Activated += Promocode_Activated;
+
+            if (AppLib.GetAppSetting("IsWriteWindowEvents").ToBool())
+            {
+                _eventsLog = new UserActionsLog(new FrameworkElement[] { this, brdFooterCancel, brdFooterOk }, EventsMouseEnum.Bubble, EventsKeyboardEnum.None, EventsTouchEnum.Bubble, UserActionLog.LogFilesPathLocationEnum.App_Logs, true, false);
+            }
 
             setLayout();
         }

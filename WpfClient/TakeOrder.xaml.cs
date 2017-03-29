@@ -12,6 +12,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using UserActionLog;
 
 namespace WpfClient
 {
@@ -20,6 +21,8 @@ namespace WpfClient
     /// </summary>
     public partial class TakeOrder : Window
     {
+        private UserActionsLog _eventsLog;
+
         private TakeOrderEnum _takeOrder = TakeOrderEnum.None;
         public TakeOrderEnum TakeOrderMode { get { return _takeOrder; } }
 
@@ -29,6 +32,12 @@ namespace WpfClient
             this.Activated += TakeOrder_Activated;
 
             setWinLayout();
+
+            if (AppLib.GetAppSetting("IsWriteWindowEvents").ToBool())
+            {
+                _eventsLog = new UserActionsLog(new FrameworkElement[] { this, btnTakeOut, btnTakeIn }, EventsMouseEnum.Bubble, EventsKeyboardEnum.None, EventsTouchEnum.Bubble, UserActionLog.LogFilesPathLocationEnum.App_Logs, true, false);
+            }
+
         }
 
         private void TakeOrder_Activated(object sender, EventArgs e)

@@ -17,6 +17,7 @@ using System.Windows.Shapes;
 using System.ComponentModel;
 using System.Windows.Media.Animation;
 using AppActionNS;
+using UserActionLog;
 
 namespace WpfClient
 {
@@ -32,6 +33,8 @@ namespace WpfClient
         SolidColorBrush _selTextColor;
         // анимация выбора блюда
         Storyboard _animDishSelection;
+
+        private UserActionsLog _eventsLog;
 
         // причина закрытия окна
         string _closeCause;
@@ -52,6 +55,11 @@ namespace WpfClient
             this.DataContext = _currentDish;
 
             dishImage.Fill = new ImageBrush(img);
+
+            if (AppLib.GetAppSetting("IsWriteWindowEvents").ToBool())
+            {
+                _eventsLog = new UserActionsLog(this, EventsMouseEnum.Bubble, EventsKeyboardEnum.None, EventsTouchEnum.Bubble, UserActionLog.LogFilesPathLocationEnum.App_Logs, true, false);
+            }
 
             updatePriceControl();
         }
@@ -361,7 +369,7 @@ namespace WpfClient
         // анимировать перемещение блюда в тележку
         private void animateDishSelection()
         {
-            AppLib.WriteLogTraceMessage("Выбор Вока: вычисление геометрии анимации");
+//            AppLib.WriteLogTraceMessage("Выбор Вока: вычисление геометрии анимации");
             // перемещаемое изображение
             (animImage.Fill as VisualBrush).Visual = dishImage;
             //animImage.Fill = Brushes.Green;  // debug
@@ -403,11 +411,11 @@ namespace WpfClient
             bezierSeg.Point1 = p1;
             bezierSeg.Point2 = p2;
 
-            AppLib.WriteLogTraceMessage("Выбор Вока: сделать видимой панель анимации");
+//            AppLib.WriteLogTraceMessage("Выбор Вока: сделать видимой панель анимации");
             canvasAnim.Visibility = Visibility.Visible;
 
             // установить скорость анимации
-            AppLib.WriteLogTraceMessage("Выбор Вока: установить скорость анимации");
+//            AppLib.WriteLogTraceMessage("Выбор Вока: установить скорость анимации");
             double animSpeed = double.Parse(AppLib.GetAppSetting("SelectDishAnimationSpeed"));  // in msec
             TimeSpan ts = TimeSpan.FromMilliseconds(animSpeed);
             foreach (Timeline item in _animDishSelection.Children)
@@ -415,7 +423,7 @@ namespace WpfClient
                 item.Duration = ts;
             }
             // обновление стоимости заказа в анимациях
-            AppLib.WriteLogTraceMessage("Выбор Вока: старт анимации");
+//            AppLib.WriteLogTraceMessage("Выбор Вока: старт анимации");
             _animDishSelection.Begin();
 
         }

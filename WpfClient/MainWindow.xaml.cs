@@ -19,6 +19,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
 using System.Timers;
 using System.ComponentModel;
+using UserActionLog;
 
 namespace WpfClient
 {
@@ -54,6 +55,9 @@ namespace WpfClient
         private Point? lastDragPoint, initDragPoint;
         private DateTime _dateTime;
 
+        private UserActionsLog _eventsLog;
+
+
         public List<MainMenuDishesCanvas> DishesPanels { get { return _dishCanvas; } }
         public OrderItem CurrentOrder {
             get { return _currentOrder; }
@@ -79,6 +83,12 @@ namespace WpfClient
             _dishColCount = AppLib.GetAppGlobalValue("dishesColumnsCount").ToString().ToInt();
             _daCommon1 = new DoubleAnimation();
             _daCommon2 = new DoubleAnimation();
+
+            if (AppLib.GetAppSetting("IsWriteWindowEvents").ToBool())
+            {
+                _eventsLog = new UserActionsLog(new FrameworkElement[] { this, btnLangUa, btnLangRu, btnLangEn, brdPromoCode, brdMakeOrder }, 
+                    EventsMouseEnum.Bubble, EventsKeyboardEnum.None, EventsTouchEnum.Bubble, UserActionLog.LogFilesPathLocationEnum.App_Logs, true, false);
+            }
 
             updatePrice();
 

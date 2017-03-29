@@ -676,7 +676,9 @@ namespace WpfClient
             // т.к. блюда без гарниров тоже могут быть с ингредиентами (и рекомендациями)
             if ((_dishItem.Ingredients == null) || (_dishItem.Ingredients.Count == 0))
             {
-                AppLib.WriteAppAction(_parentWindow.Name, AppActionsEnum.AddDishToOrder, _dishItem.langNames["ru"]);
+                AppLib.WriteLogTraceMessage("Выбор блюда без гарнира");
+                AppLib.WriteAppAction(_parentWindow.Name, AppActionsEnum.AddDishToOrder, 
+                    string.Format("{0};{1}", _dishItem.langNames["ru"], _dishItem.GetPrice().ToString("#0.00") ));
 
                 DishItem orderDish = _dishItem.GetCopyForOrder();
                 orderDish.Image = bmpImage;
@@ -689,7 +691,9 @@ namespace WpfClient
             // иначе через "всплывашку"
             else
             {
-                AppLib.WriteAppAction(_parentWindow.Name, AppActionsEnum.ButtonDishWithIngredients, _dishItem.langNames["ru"]);
+                AppLib.WriteLogTraceMessage("Открыть всплывашку");
+                AppLib.WriteAppAction(_parentWindow.Name, AppActionsEnum.ButtonDishWithIngredients,
+                    string.Format("{0};{1}", _dishItem.langNames["ru"], _dishItem.GetPrice().ToString("#0.00")));
 
                 // текущее блюдо и его изображение передать в конструкторе
                 DishPopup popupWin = new DishPopup(_dishItem, bmpImage);

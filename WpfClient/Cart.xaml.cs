@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using AppActionNS;
 using System.ComponentModel;
+using UserActionLog;
 
 namespace WpfClient
 {
@@ -26,6 +27,8 @@ namespace WpfClient
         private OrderItem _currentOrder;
         private bool _isDrag;
 
+        private UserActionsLog _eventsLog;
+
         private double dishBorderHeight;
 
         public Cart()
@@ -38,6 +41,11 @@ namespace WpfClient
             this.lstDishes.ItemsSource = _currentOrder.Dishes;
 
             initUI();
+
+            if (AppLib.GetAppSetting("IsWriteWindowEvents").ToBool())
+            {
+                _eventsLog = new UserActionsLog(this, EventsMouseEnum.Bubble, EventsKeyboardEnum.None, EventsTouchEnum.Bubble, UserActionLog.LogFilesPathLocationEnum.App_Logs, true, false);
+            }
 
             updatePriceOrder();
         }

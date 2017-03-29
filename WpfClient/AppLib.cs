@@ -18,6 +18,8 @@ using AppModel;
 using UserActionLog;
 using AppActionNS;
 using WpfClient.Lib;
+using System.Data.Entity;
+using System.Data.SqlClient;
 
 namespace WpfClient
 {
@@ -74,56 +76,18 @@ namespace WpfClient
 
         public static void WriteLogTraceMessage(string msg)
         {
-            if ((bool)AppLib.GetAppGlobalValue("IsWriteTraceMessages")) AppLogger.Trace(string.Format("{0}: {1}", DateTime.Now.ToString(), msg) );
-        }
-        public static void WriteLogTraceMessage(string format, params string[] values)
-        {
-            if ((bool)AppLib.GetAppGlobalValue("IsWriteTraceMessages")) AppLogger.Trace(format, values);
+            if (AppLib.GetAppSetting("IsWriteTraceMessages").ToBool()) AppLogger.Trace(string.Format("{0}: {1}", DateTime.Now.ToString(), msg) );
         }
 
         public static void WriteLogInfoMessage(string msg)
         {
             AppLogger.Info(msg);
         }
-        public static void WriteLogInfoMessage(string format, params string[] values)
-        {
-            AppLogger.Info(format, values);
-        }
 
         public static void WriteLogErrorMessage(string msg)
         {
             AppLogger.Error(msg);
         }
-        public static void WriteLogErrorMessage(string format, params string[] values)
-        {
-            AppLogger.Error(format, values);
-        }
-
-        //public static void WriteAppAction(AppActionNS.UICActionType pActionType = AppActionNS.UICActionType.Click, string pFormName = "", string pControlName = "")
-        //{
-        //    if ((bool)AppLib.GetAppGlobalValue("IsLogUserAction") == false) return;
-
-        //    App.AppActionLogger.AddAction(new AppActionNS.UICAction()
-        //    {
-        //        deviceId = App.DeviceId,
-        //        orderNumber = App.OrderNumber,
-        //        actionType = pActionType,
-        //        formName = pFormName,
-        //        controlName = pControlName
-        //    });
-        //}
-        //public static void WriteAppAction(string pFormName, string pControlName)
-        //{
-        //    if ((bool)AppLib.GetAppGlobalValue("IsLogUserAction") == false) return;
-
-        //    App.AppActionLogger.AddAction(new AppActionNS.UICAction()
-        //    {
-        //        deviceId = App.DeviceId,
-        //        orderNumber = App.OrderNumber,
-        //        formName = pFormName,
-        //        controlName = pControlName
-        //    });
-        //}
         
         public static void WriteAppAction(string formName, AppActionsEnum actionType, string value = null)
         {
@@ -155,6 +119,7 @@ namespace WpfClient
         public static int getAvailableRAM()
         {
             int retVal = 0;
+
             // class get memory size in kB
             System.Management.ManagementObjectSearcher mgmtObjects = new System.Management.ManagementObjectSearcher("Select * from Win32_OperatingSystem");
             foreach (var item in mgmtObjects.Get())
@@ -164,6 +129,50 @@ namespace WpfClient
                 //System.Diagnostics.Debug.Print("TotalVirtualMemorySize:" + item.Properties["TotalVirtualMemorySize"].Value);
                 retVal = (Convert.ToInt32(item.Properties["FreeVirtualMemory"].Value)) / 1024;
             }
+            return retVal;
+        }
+
+        internal static bool CheckDBConnection(Type dbType)
+        {
+            AppLib.WriteLogTraceMessage("- проверка доступа к базе данных...");
+
+            // контекст БД
+            DbContext dbContext = (DbContext)Activator.CreateInstance(dbType);
+
+            SqlConnection dbConn = (SqlConnection)dbContext.Database.Connection;
+            AppLib.WriteLogTraceMessage("-- строка подключения: " + dbConn.ConnectionString);
+
+            // создать такое же подключение, но с TimeOut = 1 сек
+            SqlConnectionStringBuilder confBld = new SqlConnectionStringBuilder(dbConn.ConnectionString);
+            SqlConnectionStringBuilder testBld = new SqlConnectionStringBuilder()
+            {
+                DataSource = confBld.DataSource,
+                InitialCatalog = confBld.InitialCatalog,
+                PersistSecurityInfo = confBld.PersistSecurityInfo,
+                IntegratedSecurity = confBld.IntegratedSecurity,
+                UserID = confBld.UserID,
+                Password = confBld.Password,
+                ConnectRetryCount = 1,
+                ConnectTimeout = 1
+            };
+            SqlConnection testConn = new SqlConnection(testBld.ConnectionString);
+            bool retVal = false;
+            try
+            {
+                testConn.Open();
+                retVal = true;
+            }
+            catch (Exception ex)
+            {
+                AppLib.WriteLogErrorMessage("--- ошибка доступа к БД: " + ex.Message);
+            }
+            finally
+            {
+                testConn.Close();
+                testConn = null;
+            }
+
+            AppLib.WriteLogTraceMessage("- проверка доступа к базе данных - " + ((retVal) ? "READY" :"ERROR!!!"));
             return retVal;
         }
 

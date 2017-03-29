@@ -19,6 +19,8 @@ namespace AppActionNS
         private List<List<UICAction>> _actionBuffer;
         List<UICAction> _curBuffer;
 
+        private string _singleLogFile = null;
+
         public AppActionLogger()
         {
             _recCounter = 0;
@@ -27,6 +29,8 @@ namespace AppActionNS
             _curBuffer = new List<UICAction>();
             _actionBuffer = new List<List<UICAction>>();
             _actionBuffer.Add(_curBuffer);
+
+            _singleLogFile = getLogFileName();
         }
 
         public void AddAction(UICAction action)
@@ -34,27 +38,31 @@ namespace AppActionNS
             action.nubmer = ++_recCounter;
             action.dateTime = DateTime.Now;
 
-            _curBuffer.Add(action);
+            string msg = string.Format("\n{0};{1};{2};{3};{4};{5};{6}", action.nubmer, action.dateTime.ToString("yyyy-MM-dd HH:mm:ss.fff"), action.deviceId, action.orderNumber, action.formName, action.actionType.ToString(), action.value);
 
-            // достигнуто максимальное количество записей в текущем буфере
-            if (_recCounter == MAXCOUNTOFRECORDS)
-            {
-                // сохранить ссылку на заполненный буфер для его сброса в БД
-                List<UICAction> saveBuf = _curBuffer;
-                // запись в БД - в отдельном потоке
-                ParameterizedThreadStart tDlg = new ParameterizedThreadStart(writeBufferToDB);
-                Thread tSave = new Thread(tDlg);
-                tSave.Start(saveBuf);
+            writeLogActionsToFile(msg);
 
-                // найти или создать следующий буфер для записей
-                List<UICAction> tmpBuf = _actionBuffer.FirstOrDefault(b => !b.Equals(_curBuffer) && (b.Count == 0));
-                if (tmpBuf == null)
-                {
-                    tmpBuf = new List<UICAction>(); 
-                    _actionBuffer.Add(tmpBuf);
-                    _curBuffer = tmpBuf;
-                }
-            }
+            //_curBuffer.Add(action);
+
+            //// достигнуто максимальное количество записей в текущем буфере
+            //if (_recCounter == MAXCOUNTOFRECORDS)
+            //{
+            //    // сохранить ссылку на заполненный буфер для его сброса в БД
+            //    List<UICAction> saveBuf = _curBuffer;
+            //    // запись в БД - в отдельном потоке
+            //    ParameterizedThreadStart tDlg = new ParameterizedThreadStart(writeBufferToDB);
+            //    Thread tSave = new Thread(tDlg);
+            //    tSave.Start(saveBuf);
+
+            //    // найти или создать следующий буфер для записей
+            //    List<UICAction> tmpBuf = _actionBuffer.FirstOrDefault(b => !b.Equals(_curBuffer) && (b.Count == 0));
+            //    if (tmpBuf == null)
+            //    {
+            //        tmpBuf = new List<UICAction>(); 
+            //        _actionBuffer.Add(tmpBuf);
+            //        _curBuffer = tmpBuf;
+            //    }
+            //}
         }  // method
 
         // сохранить и очистить текущий буфер
@@ -107,6 +115,38 @@ namespace AppActionNS
                 }
             }
         }  // method
+
+        private void writeLogActionsToFile(string msg)
+        {
+            string logFilePath;
+            if (_singleLogFile == null) logFilePath = getLogFileName();
+            else logFilePath = _singleLogFile;
+
+            if (File.Exists(logFilePath))
+            {
+                //If this fails its because as a Admin you need to run the app as Admin - wierd problem with GPO's
+                try
+                {
+                    File.AppendAllText(logFilePath, msg);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("If you see this message its because you're an Admin you need to run as Admin - wierd problem with GPO's" + ex.Message + ex.StackTrace);
+                }
+            }
+            else
+            {
+                try
+                {
+                    File.WriteAllText(logFilePath, msg);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("If you see this message its because you're not an Admin you need to run as Admin - wierd problem with GPO's" + ex.Message + ex.StackTrace);
+                }
+            }
+        }  // method
+
 
         private string getLogFileName()
         {
