@@ -166,9 +166,9 @@ namespace WpfClient
             {
                 Name = "idleWin",
                 ShowActivated = true,
-                TitleFontSize = (double)AppLib.GetAppGlobalValue("appFontSize6"),
-                MessageFontSize = (double)AppLib.GetAppGlobalValue("appFontSize2"),
-                ButtonFontSize = (double)AppLib.GetAppGlobalValue("appFontSize4"),
+                BigButtons = true, IsShowTitle = false, IsMessageCentered = true, IsRoundCorner = true,
+                MessageFontSize = (double)AppLib.GetAppGlobalValue("appFontSize1"),
+                ButtonFontSize = (double)AppLib.GetAppGlobalValue((AppLib.IsAppVerticalLayout) ? "appFontSize2" : "appFontSize1"),
 
                 MsgBoxButton = MessageBoxButton.YesNo,
 
@@ -186,7 +186,6 @@ namespace WpfClient
                     //mBox.MessageText = AppLib.GetLangTextFromAppProp("areYouHereQuestion") + "\nДо закрытия окна осталось " + remainSec.ToString() + " sec";
                     mBox.btn2Text.Text = AppLib.GetLangTextFromAppProp("dialogBoxNoText") + " (" + remainSec.ToString("0.0") + ")";
                 });
-            mBox.Title = AppLib.GetLangTextFromAppProp("areYouHereTitle");
             mBox.MessageText = AppLib.GetLangTextFromAppProp("areYouHereQuestion");
 
             // надписи на кнопках Да/Нет согласно выбранному языку

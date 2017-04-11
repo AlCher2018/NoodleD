@@ -763,7 +763,7 @@ namespace WpfClient
             WpfClient.MainWindow mainWin = (App.Current.MainWindow as WpfClient.MainWindow);
             mainWin.CurrentOrder = order;
 
-            AppLib.WriteAppAction("App", AppActionsEnum.CreateNewOrder, order.OrderNumberForPrint.ToString()+";"+order.OrderDate.ToString());
+            AppLib.WriteAppAction("App", AppActionsEnum.CreateNewOrder, order.OrderNumberForPrint.ToString()+";"+string.Format("{0:yyyy-MM-dd}", order.OrderDate));
 
             return order;
         }

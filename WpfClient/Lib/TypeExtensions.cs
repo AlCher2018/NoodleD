@@ -56,6 +56,11 @@ namespace WpfClient
             return (chList.Count > 0) ? int.Parse(string.Join("", chList.ToArray())) : 0;
         }
 
+        public static bool IsNull(this string source)
+        {
+            return (string.IsNullOrEmpty(source));
+        }
+
         public static bool IsNumber(this string source)
         {
             return source.All(c => char.IsDigit(c));

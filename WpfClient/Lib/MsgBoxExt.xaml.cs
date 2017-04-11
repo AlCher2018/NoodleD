@@ -19,6 +19,7 @@ namespace WpfClient.Lib
     {
         private MessageBoxResult _retValue = MessageBoxResult.None;
         private UserActionsLog _eventsLog;
+        private int _buttonsCount;
 
         #region properties
 
@@ -45,7 +46,10 @@ namespace WpfClient.Lib
         public double TitleFontSize { get; set; } 
         public double MessageFontSize { get; set; }
         public double ButtonFontSize { get; set; }
-
+        public bool BigButtons { get; set; }
+        public bool IsShowTitle { get; set; }
+        public bool IsMessageCentered { get; set; }
+        public bool IsRoundCorner { get; set; }
 
         public Brush ButtonBackground
         {
@@ -119,6 +123,11 @@ namespace WpfClient.Lib
             this.TitleFontSize = 12d;
             this.MessageFontSize = 20d;
             this.ButtonFontSize = 20d;
+            this.BigButtons = false;
+            this.IsShowTitle = true;
+            this.IsMessageCentered = false;
+            this.IsRoundCorner = false;
+
             _buttonsTextArr = _buttonsText.Split(';');
             this.ButtonBackground = System.Windows.SystemColors.ControlDarkBrush;
 
@@ -130,6 +139,8 @@ namespace WpfClient.Lib
 
             _pressTimer = new System.Timers.Timer(500);
             _pressTimer.Elapsed += _pressTimer_Elapsed;
+
+            this.Loaded += MsgBoxExt_Loaded;
         }
 
         #region активация ожидашки
@@ -150,16 +161,38 @@ namespace WpfClient.Lib
             Dispatcher.Invoke(() => doUnpress(), DispatcherPriority.Input);
         }
 
-        private void mbWindow_SizeChanged(object sender, SizeChangedEventArgs e)
+        private void MsgBoxExt_Loaded(object sender, RoutedEventArgs e)
         {
             double w = this.ActualWidth;
             double h = this.ActualHeight;
-            
-            mainGrid.Width = ((w > h)?0.4:0.7) * w;
+
+            if (this.BigButtons)
+            {
+                mainGrid.Width = ((w > h) ? 0.6 : 0.8) * w;
+            }
+            else
+            {
+                mainGrid.Width = ((w > h) ? 0.4 : 0.7) * w;
+            }
 
             CornerRadius cr = new CornerRadius(0.008 * Math.Min(w, h));
             btn1.CornerRadius = cr; btn2.CornerRadius = cr; btn3.CornerRadius = cr;
+            if (this.IsRoundCorner)
+            {
+                cr = new CornerRadius(0.01 * Math.Min(w, h));
+                backBorder.CornerRadius = cr;
+            }
             //mainGrid.Height = 0.3 * h;
+
+            if (this.BigButtons)
+            {
+                double dW = mainGrid.Width / _buttonsCount * 0.8;
+                btnPanel.HorizontalAlignment = HorizontalAlignment.Center;
+                if (btn1.Visibility == Visibility.Visible) btn1.Width = dW;
+                if (btn2.Visibility == Visibility.Visible) btn2.Width = dW;
+                if (btn3.Visibility == Visibility.Visible) btn3.Width = dW;
+            }
+
         }
 
 
@@ -170,22 +203,32 @@ namespace WpfClient.Lib
         public new MessageBoxResult ShowDialog()
         {
             //   title
-            mbTitleText.Text = base.Title;
-            mbTitleText.FontSize = TitleFontSize;
-            mbTitleText.FontStyle = FontStyles.Italic;
-            mbTitleText.Margin = new Thickness(TitleFontSize, 0.3 * TitleFontSize, TitleFontSize, 0.3 * TitleFontSize);
+            if (this.IsShowTitle)
+            {
+                mbTitleText.Text = base.Title;
+                mbTitleText.FontSize = TitleFontSize;
+                mbTitleText.FontStyle = FontStyles.Italic;
+                mbTitleText.Margin = new Thickness(TitleFontSize, 0.3 * TitleFontSize, TitleFontSize, 0.3 * TitleFontSize);
+            }
+            else
+            {
+                mbTitleBorder.Visibility = Visibility.Collapsed;
+            }
+            
             //   message
             mbMessageText.FontSize = MessageFontSize;
             mbMessageText.Margin = new Thickness(2 * MessageFontSize, MessageFontSize, 2 * MessageFontSize, 0);
+            if (this.IsMessageCentered) mbMessageText.HorizontalAlignment = HorizontalAlignment.Center;
+
             //   button text
-            btnPanel.Margin = new Thickness(2 * ButtonFontSize);
+            btnPanel.Margin = (this.BigButtons) ? new Thickness(0, ButtonFontSize, 0, ButtonFontSize) : new Thickness(2 * ButtonFontSize);
             btn1Text.FontSize = ButtonFontSize; btn2Text.FontSize = ButtonFontSize; btn3Text.FontSize = ButtonFontSize;
 
             Thickness borderMargin = new Thickness(ButtonFontSize, 0, ButtonFontSize, 0);
             btn1.Margin = borderMargin; btn2.Margin = borderMargin; btn3.Margin = borderMargin;
-            Thickness btnTextMargin = new Thickness(2*ButtonFontSize, 0.5* ButtonFontSize, 2* ButtonFontSize, 0.7*ButtonFontSize);
+            Thickness btnTextMargin = (this.BigButtons)? new Thickness(0, 0.3 * ButtonFontSize, 0, 0.4 * ButtonFontSize) : new Thickness(2 * ButtonFontSize, 0.5 * ButtonFontSize, 2 * ButtonFontSize, 0.7 * ButtonFontSize);
             btn1Text.Margin = btnTextMargin; btn2Text.Margin = btnTextMargin; btn3Text.Margin = btnTextMargin;
-            
+
             setButtonVisibility();
 
             base.ShowDialog();
@@ -268,6 +311,7 @@ namespace WpfClient.Lib
 
                     btn1Text.Text = _buttonsTextArr[0];
                     btn1.Tag = MessageBoxResult.OK;
+                    _buttonsCount = 1;
                     break;
 
                 case MessageBoxButton.OKCancel:
@@ -279,6 +323,7 @@ namespace WpfClient.Lib
                     btn1.Tag = MessageBoxResult.OK;
                     btn2Text.Text = _buttonsTextArr[1];
                     btn2.Tag = MessageBoxResult.Cancel;
+                    _buttonsCount = 2;
                     break;
 
                 case MessageBoxButton.YesNoCancel:
@@ -292,6 +337,7 @@ namespace WpfClient.Lib
                     btn2.Tag = MessageBoxResult.No;
                     btn3Text.Text = _buttonsTextArr[1];
                     btn3.Tag = MessageBoxResult.Cancel;
+                    _buttonsCount = 3;
                     break;
 
                 case MessageBoxButton.YesNo:
@@ -303,6 +349,7 @@ namespace WpfClient.Lib
                     btn1.Tag = MessageBoxResult.Yes;
                     btn2Text.Text = _buttonsTextArr[3];
                     btn2.Tag = MessageBoxResult.No;
+                    _buttonsCount = 2;
                     break;
 
                 default:

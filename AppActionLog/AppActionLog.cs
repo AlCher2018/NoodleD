@@ -38,7 +38,7 @@ namespace AppActionNS
             action.nubmer = ++_recCounter;
             action.dateTime = DateTime.Now;
 
-            string msg = string.Format("\n{0};{1};{2};{3};{4};{5};{6}", action.nubmer, action.dateTime.ToString("yyyy-MM-dd HH:mm:ss.fff"), action.deviceId, action.orderNumber, action.formName, action.actionType.ToString(), action.value);
+            string msg = string.Format("\r\n{0};{1};{2};{3};{4};{5};{6}", action.nubmer, action.dateTime.ToString("yyyy-MM-dd HH:mm:ss.fff"), action.deviceId, action.orderNumber, action.formName, action.actionType.ToString(), action.value);
 
             writeLogActionsToFile(msg);
 

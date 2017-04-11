@@ -87,11 +87,11 @@ namespace WpfClient
             if (AppLib.GetAppSetting("IsWriteWindowEvents").ToBool())
             {
                 _eventsLog = new UserActionsLog(new FrameworkElement[] { this, btnLangUa, btnLangRu, btnLangEn, brdPromoCode, brdMakeOrder }, 
-                    EventsMouseEnum.Bubble, EventsKeyboardEnum.None, EventsTouchEnum.Bubble, UserActionLog.LogFilesPathLocationEnum.App_Logs, true, false);
+                    EventsMouseEnum.Bubble, EventsKeyboardEnum.None, EventsTouchEnum.Bubble | EventsTouchEnum.Tunnel, UserActionLog.LogFilesPathLocationEnum.App_Logs, true, false);
             }
 
             updatePrice();
-
+            
             initUI();
         }
 
@@ -649,9 +649,6 @@ namespace WpfClient
 
             selectAppLang(langId);
             //e.Handled = true;
-
-            string dev = "";
-            if (e.StylusDevice != null) dev = e.StylusDevice.Name;
         }
 
         // установить язык текстов на элементах
@@ -929,7 +926,7 @@ namespace WpfClient
         }
         private void scrollDishes_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.StylusDevice != null) return;
+//            if (e.StylusDevice != null) return;
 
             initDrag(e.GetPosition(scrollDishes));
         }
@@ -941,7 +938,7 @@ namespace WpfClient
 
         private void scrollDishes_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (e.StylusDevice != null) return;
+//            if (e.StylusDevice != null) return;
 
             endDrag();
         }
@@ -953,7 +950,7 @@ namespace WpfClient
 
         private void scrollDishes_MouseMove(object sender, MouseEventArgs e)
         {
-            if (e.StylusDevice != null) return;
+//            if (e.StylusDevice != null) return;
 
             if (lastDragPoint.HasValue && e.LeftButton == MouseButtonState.Pressed)   
             {

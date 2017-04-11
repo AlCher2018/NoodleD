@@ -47,6 +47,7 @@ namespace UserActionLog
             lock (this)
             {
                 string msg = string.Format("{0}: {1} {2}", timeStamp.ToString("yyyy/MM/dd H:mm:ss.fff"), string.IsNullOrEmpty(frmName)? ctrlName: frmName + "." + ctrlName, eventName);
+                if (string.IsNullOrEmpty(value) == false) msg += ";" + value;
 
                 if (_useWriteBuffer)
                 {
@@ -119,7 +120,7 @@ namespace UserActionLog
                 //If this fails its because as a Admin you need to run the app as Admin - wierd problem with GPO's
                 try
                 {
-                    File.AppendAllText(_loggerFile, "\n" + msg);
+                    File.AppendAllText(_loggerFile, "\r\n" + msg);
                 }
                 catch (Exception ex)
                 {
@@ -130,7 +131,7 @@ namespace UserActionLog
             {
                 try
                 {
-                    File.WriteAllText(_loggerFile, "\n" + msg);
+                    File.WriteAllText(_loggerFile, "\r\n" + msg);
                 }
                 catch (Exception ex)
                 {

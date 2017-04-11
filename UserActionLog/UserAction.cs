@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Windows;
+using System.Windows.Input;
 
 namespace UserActionLog
 {
@@ -73,15 +74,23 @@ namespace UserActionLog
             if (ActionEventHandler != null)
             {
                 ControlEvent ce = _listEvents.Find(c => c.Control.Equals(sender) && (c.EventInfo.Name == eventName));
-                if (ce != null) ActionEventHandler(sender, 
-                    new UserActionEventArgs()
+                if (ce != null)
+                {
+                    UserActionEventArgs args = new UserActionEventArgs()
                     {
                         ControlName = ce.Control.Name,
                         ControlType = ce.Control.GetType(),
                         EventName = ce.EventInfo.Name
-                    });
+                    };
+                    if ((eventName.Contains("Mouse")) && (sender is IInputElement))
+                        args.Tag = (e as MouseEventArgs).GetPosition((IInputElement)sender);
+                    if ((eventName.Contains("Touch")) && (sender is IInputElement))
+                        args.Tag = (e as TouchEventArgs).GetTouchPoint((IInputElement)sender).Position;
+
+                    ActionEventHandler(sender, args);
+                }
             }
-        }
+        }  // method
 
         public virtual void Dispose()
         {
@@ -138,6 +147,7 @@ namespace UserActionLog
         public Type ControlType { get; set; }
         public string EventName { get; set; }
         public object Value { get; set; }
+        public object Tag { get; set; }
     }
 
 }

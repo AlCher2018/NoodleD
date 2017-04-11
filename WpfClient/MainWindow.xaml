@@ -113,8 +113,9 @@
         </Style>
 
     </Window.Resources>
-
-    <Grid x:Name="gridMain" UseLayoutRounding="True" PreviewTouchUp="Grid_TouchUp">
+    
+    <!--PreviewTouchUp="Grid_TouchUp" -->
+    <Grid x:Name="gridMain" UseLayoutRounding="True">
 
         <Image x:Name="dishesPanelBackground" Stretch="Fill"/>
 
@@ -235,15 +236,14 @@
 
         <!-- грид панели блюд -->
         <Grid x:Name="gridDishesSide">
-
+                <!--  PreviewTouchDown="scrollDishes_PreviewTouchDown"
+                      PreviewTouchUp="scrollDishes_PreviewTouchUp"
+                      PreviewTouchMove = "scrollDishes_PreviewTouchMove" -->
                 <local:AniScrollViewer x:Name="scrollDishes" IsHitTestVisible="True" CanContentScroll="False" VirtualizingPanel.ScrollUnit="Pixel" Focusable="False" FocusVisualStyle="{x:Null}" HorizontalAlignment="Center" VerticalAlignment="Top" UseLayoutRounding="True" VerticalScrollBarVisibility="Hidden" 
                       ScrollChanged="scrollDishes_ScrollChanged"
                       PreviewMouseDown="scrollDishes_PreviewMouseDown"
                       PreviewMouseUp="scrollDishes_PreviewMouseUp" 
-                      PreviewMouseMove = "scrollDishes_MouseMove"
-                      PreviewTouchDown="scrollDishes_PreviewTouchDown"
-                      PreviewTouchUp="scrollDishes_PreviewTouchUp"
-                      PreviewTouchMove = "scrollDishes_PreviewTouchMove">
+                      PreviewMouseMove = "scrollDishes_MouseMove">
                 </local:AniScrollViewer>
 
             <Viewbox x:Name="btnScrollDown" HorizontalAlignment="Right" VerticalAlignment="Bottom" Visibility="Hidden">

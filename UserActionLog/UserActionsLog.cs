@@ -272,7 +272,13 @@ namespace UserActionLog
             // write to log
             if (_enabled == true)
             {
-                _logger.LogAction(_parentName, e.ControlName, e.EventName, valueLogString);
+                string sVal = null;
+                if (e.EventName.Contains("Mouse") || (e.EventName.Contains("Touch")))
+                {
+                    if (string.IsNullOrEmpty(valueLogString)) sVal = "{" + e.Tag.ToString() + "}";
+                    else sVal = valueLogString += ": {" + e.Tag.ToString() + "}";
+                }
+                _logger.LogAction(_parentName, e.ControlName, e.EventName, sVal);
             }
         }
 

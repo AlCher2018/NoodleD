@@ -11,7 +11,7 @@
         WindowStyle="None" ResizeMode="NoResize"
         WindowState="Maximized"
         AllowsTransparency="True" Background="#88000000"
-        SizeChanged="mbWindow_SizeChanged" PreviewKeyDown="MsgBoxExt_PreviewKeyDown"
+        PreviewKeyDown="MsgBoxExt_PreviewKeyDown"
         DataContext="{Binding RelativeSource={RelativeSource Self}, Mode=OneWay}"
         >
     <Window.Resources>
@@ -42,7 +42,7 @@
         </Style>
     </Window.Resources>
     
-    <Grid x:Name="mainGrid" Width="300" Background="White" VerticalAlignment="Center">
+    <Grid x:Name="mainGrid" Width="300" VerticalAlignment="Center">
         <Grid.Effect>
             <DropShadowEffect ShadowDepth="30" BlurRadius="15" Opacity="0.5" />
         </Grid.Effect>
@@ -55,6 +55,8 @@
             <!-- buttons -->
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
+
+        <Border x:Name="backBorder" Grid.RowSpan="3" Background="White"/>
 
         <!-- title -->
         <Border x:Name="mbTitleBorder" Grid.Row="0" Background="LightSteelBlue">

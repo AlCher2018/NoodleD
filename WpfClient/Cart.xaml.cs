@@ -323,7 +323,7 @@ namespace WpfClient
         }
         private void scrollDishes_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.StylusDevice != null) return;
+//            if (e.StylusDevice != null) return;
 
             initDrag(e.GetPosition(scrollDishes));
         }
@@ -334,7 +334,7 @@ namespace WpfClient
         }
         private void scrollDishes_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (e.StylusDevice != null) return;
+//            if (e.StylusDevice != null) return;
 
             endDrag();
         }
@@ -348,7 +348,7 @@ namespace WpfClient
         }
         private void scrollDishes_PreviewMouseMove(object sender, MouseEventArgs e)
         {
-            if (e.StylusDevice != null) return;
+//            if (e.StylusDevice != null) return;
 
             if (lastDragPoint.HasValue && e.LeftButton == MouseButtonState.Pressed)
             {

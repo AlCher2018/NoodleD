@@ -445,14 +445,15 @@
             </Grid>
 
             <Grid>
-                <!-- правая панель - список заказанных блюд (OrderItem) -->
+                <!-- правая панель - список заказанных блюд (OrderItem) 
+                                  PreviewTouchDown="scrollDishes_PreviewTouchDown"
+                  PreviewTouchUp="scrollDishes_PreviewTouchUp" 
+                  PreviewTouchMove = "scrollDishes_PreviewTouchMove"
+                -->
                 <local:AniScrollViewer x:Name="scrollDishes" CanContentScroll="False" VerticalScrollBarVisibility="Hidden" FocusVisualStyle="{x:Null}" ScrollChanged="scrollDishes_ScrollChanged"
                   PreviewMouseDown="scrollDishes_PreviewMouseDown"
                   PreviewMouseUp="scrollDishes_PreviewMouseUp" 
-                  PreviewMouseMove = "scrollDishes_PreviewMouseMove"
-                  PreviewTouchDown="scrollDishes_PreviewTouchDown"
-                  PreviewTouchUp="scrollDishes_PreviewTouchUp" 
-                  PreviewTouchMove = "scrollDishes_PreviewTouchMove">
+                  PreviewMouseMove = "scrollDishes_PreviewMouseMove">
                     <StackPanel x:Name="pnlDishes">
                         <!--заголовок-->
                         <TextBlock x:Name="dishesListTitle" Foreground="Black" FontWeight="Bold" HorizontalAlignment="Center" Text="{Binding {x:Null}, Converter={StaticResource langTextToUpper}, ConverterParameter=appSet.formOrderHeaderText, Mode=OneWay}">
