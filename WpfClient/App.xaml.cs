@@ -161,13 +161,22 @@ namespace WpfClient
         private static bool idleAction()
         {
             // условия, при которых таймер бездействия ставится на паузу
-            if (AppLib.IsOpenWindow("MsgBoxExt", "idleWin")) return false;   // само окно бездействия
+            if (AppLib.IsOpenWindow("MsgBoxExt", "idleWin"))
+            {
+                AppLib.WriteLogTraceMessage("Таймер ожидания: ожидашка уже открыта");
+                return false;   // само окно бездействия
+            }
+
             // продолжаем, т.е. показываем окно бездействия, если открыты некоторые окна или есть блюда в корзине
             AppModel.OrderItem order = (AppModel.OrderItem)AppLib.GetAppGlobalValue("currentOrder");
-            bool isContinue = AppLib.IsOpenWindow("Cart") || AppLib.IsOpenWindow("DishPopup") || AppLib.IsOpenWindow("Promocode") ||
-                ((order.Dishes != null) && (order.Dishes.Count > 0));
-            if (isContinue == false) return false;
-
+            bool isContinue = AppLib.IsOpenWindow("Cart") 
+                || AppLib.IsOpenWindow("DishPopup") || AppLib.IsOpenWindow("Promocode") 
+                || ((order.Dishes != null) && (order.Dishes.Count > 0));
+            if (isContinue == false)
+            {
+                AppLib.WriteLogTraceMessage("Таймер ожидания: не выполнены условия показа ожидашки");
+                return false; 
+            }
 
             MsgBoxExt mBox = new MsgBoxExt()
             {
@@ -200,9 +209,12 @@ namespace WpfClient
             string sNo = AppLib.GetLangTextFromAppProp("dialogBoxNoText");
             mBox.ButtonsText = string.Format(";;{0};{1}", sYes, sNo);
 
+            AppLib.WriteLogTraceMessage("Ожидашка открывается...");
             AppLib.WriteAppAction(mBox.Name, AppActionsEnum.IdleWindowOpen);
+
             MessageBoxResult result = mBox.ShowDialog();
 
+            AppLib.WriteLogTraceMessage("Ожидашка закрывается...");
             AppLib.WriteAppAction(mBox.Name, AppActionsEnum.IdleWindowClose, result.ToString());
 
             // reset UI
