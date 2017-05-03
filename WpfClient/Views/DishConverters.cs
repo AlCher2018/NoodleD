@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
 
-namespace WpfClient
+namespace WpfClient.Views
 {
     [ValueConversion(typeof(DishItem), typeof(decimal))]
     public class GetDishPrice : IValueConverter

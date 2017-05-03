@@ -68,6 +68,7 @@ namespace UserActionLog
         public new event EventHandler<UserActionEventArgs> ActionEventHandler;
 
         #region Constructors
+
         // basic constructor
         private UserActionsLog(EventsMouseEnum mouseEvents, EventsKeyboardEnum keyboardEvents, EventsTouchEnum touchEvent,  LogFilesPathLocationEnum pathLocation, bool enabled, bool useWriteBuffer)
         {

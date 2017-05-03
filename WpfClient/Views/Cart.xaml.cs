@@ -13,8 +13,9 @@ using System.Windows.Media.Animation;
 using AppActionNS;
 using System.ComponentModel;
 using UserActionLog;
+using WpfClient.Model;
 
-namespace WpfClient
+namespace WpfClient.Views
 {
     /// <summary>
     /// Interaction logic for Cart.xaml
@@ -52,10 +53,12 @@ namespace WpfClient
 
         private void Cart_Loaded(object sender, RoutedEventArgs e)
         {
+            AppLib.WriteLogTraceMessage(string.Format("Открывается корзина для заказа {0} ...", _currentOrder.OrderNumberForPrint));
             AppLib.WriteAppAction(this.Name, AppActionsEnum.CartWinOpen);
         }
         protected override void OnClosing(CancelEventArgs e)
         {
+            AppLib.WriteLogTraceMessage(string.Format("Закрывается корзина для заказа {0} ...", _currentOrder.OrderNumberForPrint));
             AppLib.WriteAppAction(this.Name, AppActionsEnum.CartWinClose);
 
             base.OnClosing(e);
@@ -306,7 +309,7 @@ namespace WpfClient
             if (!(App.PromocodeNumber ?? "").Equals(preText))
             {
                 AppLib.SetPromocodeTextStyle(this.txtPromoCode);
-                AppLib.SetPromocodeTextStyle((App.Current.MainWindow as WpfClient.MainWindow).txtPromoCode);
+                AppLib.SetPromocodeTextStyle((App.Current.MainWindow as MainWindow).txtPromoCode);
             }
         }
         #endregion
@@ -799,7 +802,7 @@ namespace WpfClient
                     if (saveRes == true)
                     {
                         //msgText = (string)AppLib.GetLangTextFromAppProp("lblGoText");
-                        //int delayInfoWin = (int)AppLib.GetAppGlobalValue("AutoCloseMsgBoxAfterPrintOrder", 0);
+                        //int delayInfoWin = AppLib.GetAppSetting("AutoCloseMsgBoxAfterPrintOrder").ToInt();
                         // 2017-02-17 убрать окно "Теперь можете подходить с чеком к кассе для оплаты"
                         //AppLib.ShowMessage(title, msgText, delayInfoWin);
 
@@ -885,7 +888,7 @@ namespace WpfClient
             AppLib.WriteAppAction(this.Name, AppActionsEnum.SelectLang, langId);
 
             setLangButtonStyle(false);  // "выключить" кнопку
-            (App.Current.MainWindow as WpfClient.MainWindow).selectAppLang(langId);
+            (App.Current.MainWindow as MainWindow).selectAppLang(langId);
             setLangButtonStyle(true);   // "включить" кнопку
 
             AppLib.SetPromocodeTextStyle(txtPromoCode);

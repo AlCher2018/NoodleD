@@ -14,7 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace WpfClient.Lib
+namespace WpfClient.Views
 {
     /// <summary>
     /// Interaction logic for PromoPanel.xaml

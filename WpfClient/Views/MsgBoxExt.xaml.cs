@@ -10,7 +10,7 @@ using System.Windows.Media.Effects;
 using System.Windows.Threading;
 using UserActionLog;
 
-namespace WpfClient.Lib
+namespace WpfClient.Views
 {
     /// <summary>
     /// Interaction logic for MsgBoxExt.xaml

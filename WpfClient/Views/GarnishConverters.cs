@@ -9,7 +9,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
 
-namespace WpfClient
+namespace WpfClient.Views
 {
     /// <summary>
     /// Классы конвертеров для гарниров блюд

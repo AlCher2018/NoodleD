@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
-namespace WpfClient
+namespace WpfClient.Lib
 {
     public static class PreventTouchToMousePromotion
     {

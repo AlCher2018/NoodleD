@@ -34,7 +34,7 @@ namespace UserActionLog
                 {
                     bitmap.Save(uniqueFileName, ImageFormat.Jpeg);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     return string.Empty;
                 }

@@ -1,22 +1,23 @@
-﻿<Window x:Class="WpfClient.MainWindow"
+﻿<Window x:Class="WpfClient.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfClient"
+        xmlns:views="clr-namespace:WpfClient.Views"
         xmlns:lib="clr-namespace:WpfClient.Lib"
         mc:Ignorable="d"
         Title="MainWindow" Name="MainMenu"
         WindowStyle="None" WindowState="Maximized" WindowStartupLocation="CenterScreen" 
-        UseLayoutRounding ="True" Icon="AppImages/icon.ico">
+        UseLayoutRounding ="True" Icon="../AppImages/icon.ico">
     <!-- UseLayoutRounding ="True" - выравнивание элеметов по границе пикселей -->
     
     <Window.Resources>
-        <local:MultiplyParamValueConverter x:Key="multiplyParamDefVal1Conv" DefaultValue="1"/>
-        <local:GarnishBrushConverter x:Key="garnishBackgroundConverter" Mode="Background"/>
-        <local:GarnishBrushConverter x:Key="garnishForegroundConverter" Mode="Foreground"/>
-        <local:GarnishVisibilityConverter x:Key="garnishVisibilityConverter"/>
-        <local:GetDishPanelRect x:Key="getDishPanelRect"/>
+        <views:MultiplyParamValueConverter x:Key="multiplyParamDefVal1Conv" DefaultValue="1"/>
+        <views:GarnishBrushConverter x:Key="garnishBackgroundConverter" Mode="Background"/>
+        <views:GarnishBrushConverter x:Key="garnishForegroundConverter" Mode="Foreground"/>
+        <views:GarnishVisibilityConverter x:Key="garnishVisibilityConverter"/>
+        <views:GetDishPanelRect x:Key="getDishPanelRect"/>
 
         <ControlTemplate x:Key="menuListBoxItemTemplate" TargetType="{x:Type ListBoxItem}">
             <Border x:Name="categoryBorder" Background="{TemplateBinding Background}"
@@ -167,7 +168,7 @@
                 <!-- грид для logo, языковых кнопок (и промокода для гориз.дизайна) -->
                 <StackPanel x:Name="menuSidePanelLogo" Grid.Row="0" Orientation="Vertical">
                     <!-- логотип -->
-                    <Image x:Name="imageLogo" Source="AppImages\logo1.png" Stretch="Uniform" PreviewMouseUp="Image_MouseUp"/>
+                    <Image x:Name="imageLogo" Source="..\AppImages\logo1.png" Stretch="Uniform" PreviewMouseUp="Image_MouseUp"/>
 
                     <!--горизонтальный грид языковых кнопок TouchDown="btnLang_TouchDown" TouchUp="btnLang_TouchUp"  -->
                     <Grid x:Name="gridLang" Grid.Row="2">
@@ -239,12 +240,12 @@
                 <!--  PreviewTouchDown="scrollDishes_PreviewTouchDown"
                       PreviewTouchUp="scrollDishes_PreviewTouchUp"
                       PreviewTouchMove = "scrollDishes_PreviewTouchMove" -->
-                <local:AniScrollViewer x:Name="scrollDishes" IsHitTestVisible="True" CanContentScroll="False" VirtualizingPanel.ScrollUnit="Pixel" Focusable="False" FocusVisualStyle="{x:Null}" HorizontalAlignment="Center" VerticalAlignment="Top" UseLayoutRounding="True" VerticalScrollBarVisibility="Hidden" 
+                <lib:AniScrollViewer x:Name="scrollDishes" IsHitTestVisible="True" CanContentScroll="False" VirtualizingPanel.ScrollUnit="Pixel" Focusable="False" FocusVisualStyle="{x:Null}" HorizontalAlignment="Center" VerticalAlignment="Top" UseLayoutRounding="True" VerticalScrollBarVisibility="Hidden" 
                       ScrollChanged="scrollDishes_ScrollChanged"
                       PreviewMouseDown="scrollDishes_PreviewMouseDown"
                       PreviewMouseUp="scrollDishes_PreviewMouseUp" 
                       PreviewMouseMove = "scrollDishes_MouseMove">
-                </local:AniScrollViewer>
+                </lib:AniScrollViewer>
 
             <Viewbox x:Name="btnScrollDown" HorizontalAlignment="Right" VerticalAlignment="Bottom" Visibility="Hidden">
                 <Canvas Width="100" Height="100" MouseDown="btnScrollDown_MouseDown">

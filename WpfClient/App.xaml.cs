@@ -13,6 +13,7 @@ using UserActionLog;
 using AppActionNS;
 using WpfClient.Lib;
 using AppModel;
+using WpfClient.Views;
 
 namespace WpfClient
 {
@@ -67,15 +68,21 @@ namespace WpfClient
                     MessageBox.Show("Номер устройства - НЕ ЧИСЛО!!");
                     Environment.Exit(4);
                 }
+                // основная информация о софт-окружении
+                AppLib.WriteLogTraceMessage(string.Format("Настройки: Id устройства-{0}, папка изображений-{1}, таймер бездействия-{2} sec, диапазон номеров чеков от {3} до {4}, принтер пречека-{5}, отладка: IsLogUserAction-{6}, IsWriteTraceMessages-{7}, IsWriteWindowEvents-{8}", 
+                    AppLib.GetAppSetting("ssdID"), AppLib.GetAppSetting("ImagesPath"), AppLib.GetAppSetting("UserIdleTime"),
+                    AppLib.GetAppSetting("RandomOrderNumFrom"), AppLib.GetAppSetting("RandomOrderNumTo"), 
+                    AppLib.GetAppSetting("PrinterName"), AppLib.GetAppSetting("IsLogUserAction"), AppLib.GetAppSetting("IsWriteTraceMessages"), AppLib.GetAppSetting("IsWriteWindowEvents")));
 
                 // сплэш-экран
+                AppLib.WriteLogTraceMessage("Отображаю splash-screen...");
                 getAppLayout();
                 string fileName = (AppLib.IsAppVerticalLayout ? "bg 3ver 1080x1920 splash.png" : "bg 3hor 1920x1080 splash.png");
                 System.Windows.SplashScreen splashScreen = new System.Windows.SplashScreen(fileName);
                 splashScreen.Show(true);
 
                 //******  СТАТИЧЕСКИЕ настройки  ******
-
+                AppLib.WriteLogTraceMessage("Читаю настройки из ресурсов приложения (app.xaml) ...");
                 // ресурсы приложения
                 //createappresources(app);        // определенные в приложении
                 app.InitializeComponent();          // определенные в app.xaml
@@ -117,7 +124,7 @@ namespace WpfClient
                 AppActionLogger = new AppActionLogger();
 
                 // главное окно приложения
-                WpfClient.MainWindow mainWindow = new WpfClient.MainWindow();
+                MainWindow mainWindow = new MainWindow();
                 app.Run(mainWindow);
 
                 AppLib.WriteLogInfoMessage("************  End application  ************");
@@ -162,7 +169,7 @@ namespace WpfClient
             if (isContinue == false) return false;
 
 
-            WpfClient.Lib.MsgBoxExt mBox = new WpfClient.Lib.MsgBoxExt()
+            MsgBoxExt mBox = new MsgBoxExt()
             {
                 Name = "idleWin",
                 ShowActivated = true,
@@ -312,8 +319,8 @@ namespace WpfClient
             app.Resources.Add("getMinValue", new GetMinValue());
             app.Resources.Add("upperCaseConverter", new UpperCaseConverter());
             app.Resources.Add("isEmptyEnumerator", new IsEmptyEnumerator());
-            app.Resources.Add("cornerRadiusLeft", new CornerRadiusConverter() { Side = "Left" });
-            app.Resources.Add("cornerRadiusRight", new CornerRadiusConverter() { Side = "Right" });
+            app.Resources.Add("cornerRadiusLeft", new Views.CornerRadiusConverter() { Side = "Left" });
+            app.Resources.Add("cornerRadiusRight", new Views.CornerRadiusConverter() { Side = "Right" });
             app.Resources.Add("garnishLangTextConverter", new GarnishLangTextConverter());
             app.Resources.Add("garnishPriceConverter", new GarnishPriceConverter());
             app.Resources.Add("getMargin", new GetMargin());
@@ -335,6 +342,7 @@ namespace WpfClient
             double screenWidth, screenHeight;
             screenWidth = (double)AppLib.GetAppGlobalValue("screenWidth");
             screenHeight = (double)AppLib.GetAppGlobalValue("screenHeight");
+            AppLib.WriteLogTraceMessage(string.Format("Монитор - {0} x {1}", screenWidth, screenHeight));
 
             double dishesPanelWidth;
             // вертикальная разметка: панель меню сверху

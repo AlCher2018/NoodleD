@@ -20,8 +20,9 @@ using System.Windows.Media.Effects;
 using System.Timers;
 using System.ComponentModel;
 using UserActionLog;
+using WpfClient.Lib;
 
-namespace WpfClient
+namespace WpfClient.Views
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -86,8 +87,9 @@ namespace WpfClient
 
             if (AppLib.GetAppSetting("IsWriteWindowEvents").ToBool())
             {
-                _eventsLog = new UserActionsLog(new FrameworkElement[] { this, btnLangUa, btnLangRu, btnLangEn, brdPromoCode, brdMakeOrder }, 
-                    EventsMouseEnum.Bubble, EventsKeyboardEnum.None, EventsTouchEnum.Bubble | EventsTouchEnum.Tunnel, UserActionLog.LogFilesPathLocationEnum.App_Logs, true, false);
+                _eventsLog = new UserActionsLog(new FrameworkElement[] 
+                { this, btnLangUa, btnLangRu, btnLangEn, brdPromoCode, brdMakeOrder }, 
+                EventsMouseEnum.Bubble, EventsKeyboardEnum.None, EventsTouchEnum.Bubble | EventsTouchEnum.Tunnel, UserActionLog.LogFilesPathLocationEnum.App_Logs, true, false);
             }
 
             updatePrice();
@@ -645,6 +647,7 @@ namespace WpfClient
         private void lblButtonLang_MouseDown(object sender, MouseButtonEventArgs e)
         {
             string langId = getLangIdByButtonName(((FrameworkElement)sender).Name);
+            AppLib.WriteLogTraceMessage("Выбран язык: " + langId);
             AppLib.WriteAppAction(this.Name, AppActionsEnum.SelectLang, langId);
 
             selectAppLang(langId);
@@ -1108,6 +1111,8 @@ namespace WpfClient
             AppModel.MenuItem mi = e.AddedItems[0] as AppModel.MenuItem;
             outTouchTrace(string.Format("выбрана кнопка: {0}", mi.langNames["ru"]));
 #endif
+            AppLib.WriteLogTraceMessage("Выбрана категория блюд: " + lstMenuFolders.SelectedIndex.ToString());
+
             e.Handled = true;
 
             if ((_dishCanvas.Count > 0) && (lstMenuFolders.SelectedIndex <= (_dishCanvas.Count-1)))

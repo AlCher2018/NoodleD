@@ -19,7 +19,7 @@ using System.Windows.Media.Animation;
 using AppActionNS;
 using UserActionLog;
 
-namespace WpfClient
+namespace WpfClient.Views
 {
     /// <summary>
     /// Interaction logic for DishPopup.xaml
@@ -42,6 +42,9 @@ namespace WpfClient
         public DishPopup(DishItem dishItem, BitmapImage img)
         {
             InitializeComponent();
+
+            AppLib.WriteLogTraceMessage(string.Format("Открывается всплывашка для \"{0}\" ...", dishItem.langNames["ru"]));
+
             this.Loaded += DishPopup_Loaded;
 
             // init private vars
@@ -101,7 +104,7 @@ namespace WpfClient
             Canvas.SetTop(canvasDish, -dishImageHeight / 2d);
 
             //   конечный элемент анимации выбора блюда, это Point3 в BezierSegment
-            Border brdMakeOrder = ((WpfClient.MainWindow)Application.Current.MainWindow).brdMakeOrder;
+            Border brdMakeOrder = ((MainWindow)Application.Current.MainWindow).brdMakeOrder;
             Point toBasePoint = brdMakeOrder.PointToScreen(new Point(0, 0));
             Size toSize = brdMakeOrder.RenderSize;
             Point endPoint = new Point(toBasePoint.X + toSize.Width / 2.0, toBasePoint.Y + toSize.Height / 2.0);
@@ -116,6 +119,7 @@ namespace WpfClient
 
         protected override void OnClosing(CancelEventArgs e)
         {
+            AppLib.WriteLogTraceMessage("Закрывается всплывашка...");
             AppLib.WriteAppAction(this.Name, AppActionsEnum.DishPopupClose, _closeCause);
 
             _currentDish.ClearAllSelections();
@@ -147,7 +151,7 @@ namespace WpfClient
             //pnlMenuHeight = (double)AppLib.GetAppGlobalValue("categoriesPanelHeight");
             //pnlMenuWidth = (double)AppLib.GetAppGlobalValue("categoriesPanelWidth");
             // высоту и ширину панели управления взять из главного окна
-            WpfClient.MainWindow mainWin = (WpfClient.MainWindow)App.Current.MainWindow;
+            MainWindow mainWin = (MainWindow)App.Current.MainWindow;
             pnlMenuHeight = mainWin.gridMenuSide.ActualHeight;
             pnlMenuWidth = mainWin.gridMenuSide.ActualWidth;
             brdAboveFolderMenu.Height = pnlMenuHeight;
@@ -237,14 +241,14 @@ namespace WpfClient
 
         private void updatePriceAndClose(bool isAnimate)
         {
-            AppLib.WriteLogTraceMessage("Выбор Вока: обновление стоимости заказа в главном окне");
-            WpfClient.MainWindow mm = (WpfClient.MainWindow)Application.Current.MainWindow;
+            //AppLib.WriteLogTraceMessage("Выбор Вока: обновление стоимости заказа в главном окне");
+            MainWindow mm = (MainWindow)Application.Current.MainWindow;
             if (isAnimate == true)
                 mm.animateOrderPrice();
             else
                 mm.updatePrice();
 
-            AppLib.WriteLogTraceMessage("Выбор Вока: закрытие всплывашки");
+            //AppLib.WriteLogTraceMessage("Выбор Вока: закрытие всплывашки");
             closeWin();
         }
 

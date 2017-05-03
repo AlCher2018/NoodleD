@@ -3,6 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:local="clr-namespace:WpfClient"
+             xmlns:views="clr-namespace:WpfClient.Views"
+             xmlns:lib="clr-namespace:WpfClient.Lib"
              >
     <!-- StartupUri="MainWindow.xaml" -->
     
@@ -38,26 +40,26 @@
         <SolidColorBrush x:Key="winShadowColor" Color="#88000000"/>
 
         <sys:String x:Key="priceFormatString">{0:#0}&#160;₴</sys:String>
-        
-        <local:IsNullValueConverter x:Key="isNullValueConverter"/>
-        <local:GetAppSetValue x:Key="getAppSetValue" />
-        
-        <local:LangDictToTextConverter x:Key="langDictToText"/>
-        <local:LangDictToTextConverter x:Key="langDictToUpperText" IsUpper="True"/>  <!--в дизайнере выдает ошибку!!??-->
-        
-        <local:MultiplyParamValueConverter x:Key="multiplyParamConv"/>
-        <local:GetMinValue x:Key="getMinValue"/>
-        <local:UpperCaseConverter x:Key="upperCaseConverter"/>
-        <local:IsEmptyEnumerator x:Key="isEmptyEnumerator"/>
 
-        <local:CornerRadiusConverter x:Key="cornerRadiusLeft" Side="Left"/>
-        <local:CornerRadiusConverter x:Key="cornerRadiusRight" Side="Right"/>
+        <views:IsNullValueConverter x:Key="isNullValueConverter"/>
+        <views:GetAppSetValue x:Key="getAppSetValue" />
 
-        <local:GarnishLangTextConverter x:Key="garnishLangTextConverter"/>
-        <local:GarnishPriceConverter x:Key="garnishPriceConverter"/>
+        <views:LangDictToTextConverter x:Key="langDictToText"/>
+        <views:LangDictToTextConverter x:Key="langDictToUpperText" IsUpper="True"/>  <!--в дизайнере выдает ошибку!!??-->
 
-        <local:GetMargin x:Key="getMargin"/>
-        <local:ConverterChain x:Key="converterChain"/>
+        <views:MultiplyParamValueConverter x:Key="multiplyParamConv"/>
+        <views:GetMinValue x:Key="getMinValue"/>
+        <views:UpperCaseConverter x:Key="upperCaseConverter"/>
+        <views:IsEmptyEnumerator x:Key="isEmptyEnumerator"/>
+
+        <views:CornerRadiusConverter x:Key="cornerRadiusLeft" Side="Left"/>
+        <views:CornerRadiusConverter x:Key="cornerRadiusRight" Side="Right"/>
+
+        <views:GarnishLangTextConverter x:Key="garnishLangTextConverter"/>
+        <views:GarnishPriceConverter x:Key="garnishPriceConverter"/>
+
+        <views:GetMargin x:Key="getMargin"/>
+        <views:ConverterChain x:Key="converterChain"/>
 
         <Style x:Key ="centeredElement" TargetType="FrameworkElement">
             <Setter Property="HorizontalAlignment" Value="Center"/>

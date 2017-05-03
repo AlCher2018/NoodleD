@@ -15,7 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using UserActionLog;
 
-namespace WpfClient
+namespace WpfClient.Views
 {
     /// <summary>
     /// Interaction logic for Promocode.xaml
@@ -53,6 +53,8 @@ namespace WpfClient
             // вызывающее окно
             System.Diagnostics.StackFrame aFrame = (new System.Diagnostics.StackTrace()).GetFrame(1);
             string callingWinName = aFrame.GetMethod().DeclaringType.Name;
+
+            AppLib.WriteLogTraceMessage("Открывается окно ввода промокода");
             AppLib.WriteAppAction(this.Name, AppActionsEnum.PromocodeWinOpen, callingWinName);
 
             this.ReOpen();
@@ -207,6 +209,7 @@ namespace WpfClient
                 txtInput.Text = App.PromocodeNumber;
             }
 
+            AppLib.WriteLogTraceMessage("Закрывается окно ввода промокода");
             AppLib.WriteAppAction(this.Name, AppActionsEnum.PromocodeWinClose, (isSetRetValue ? "Ok" : "Cancel"));
 
             this.Hide();

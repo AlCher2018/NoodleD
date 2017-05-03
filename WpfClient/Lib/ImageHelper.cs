@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
+using WpfClient.Model;
 
 namespace WpfClient
 {
@@ -32,7 +33,7 @@ namespace WpfClient
                         }
                         
                     }
-                    catch (System.IO.IOException e) { }
+                    catch (System.IO.IOException) { }
                 }
             }
             di = null;

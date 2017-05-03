@@ -16,7 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Diagnostics;
 using AppActionNS;
 
-namespace WpfClient
+namespace WpfClient.Views
 {
     public class MainMenuDishPanel: Grid
     {
@@ -676,7 +676,7 @@ namespace WpfClient
             // т.к. блюда без гарниров тоже могут быть с ингредиентами (и рекомендациями)
             if ((_dishItem.Ingredients == null) || (_dishItem.Ingredients.Count == 0))
             {
-                AppLib.WriteLogTraceMessage("Выбор блюда без гарнира");
+                AppLib.WriteLogTraceMessage("Кнопка выбора блюда без гарнира");
                 AppLib.WriteAppAction(_parentWindow.Name, AppActionsEnum.AddDishToOrder, 
                     string.Format("{0};{1}", _dishItem.langNames["ru"], _dishItem.GetPrice().ToString("#0.00") ));
 
@@ -691,7 +691,7 @@ namespace WpfClient
             // иначе через "всплывашку"
             else
             {
-                AppLib.WriteLogTraceMessage("Открыть всплывашку");
+                AppLib.WriteLogTraceMessage("Кнопка выбора блюда через всплывашку");
                 AppLib.WriteAppAction(_parentWindow.Name, AppActionsEnum.ButtonDishWithIngredients,
                     string.Format("{0};{1}", _dishItem.langNames["ru"], _dishItem.GetPrice().ToString("#0.00")));
 
@@ -707,7 +707,7 @@ namespace WpfClient
 
         private void animateDishToCart()
         {
-            WpfClient.MainWindow mainWin = (App.Current.MainWindow as WpfClient.MainWindow);
+            MainWindow mainWin = (App.Current.MainWindow as MainWindow);
             if (_pathImage == null)
             {
                 mainWin.updatePrice(); // обновить стоимость заказа

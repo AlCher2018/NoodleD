@@ -20,6 +20,7 @@ using AppActionNS;
 using WpfClient.Lib;
 using System.Data.Entity;
 using System.Data.SqlClient;
+using WpfClient.Views;
 
 namespace WpfClient
 {
@@ -34,8 +35,8 @@ namespace WpfClient
         // вспомогательные окна
         public static Promocode PromoCodeWindow = null;
         public static TakeOrder TakeOrderWindow = null;
-        public static Lib.MsgBoxExt MessageWindow = null;
-        public static Lib.MsgBoxExt ChoiceWindow = null;
+        public static MsgBoxExt MessageWindow = null;
+        public static MsgBoxExt ChoiceWindow = null;
 
         /// <summary>
         /// Static Ctor
@@ -76,7 +77,7 @@ namespace WpfClient
 
         public static void WriteLogTraceMessage(string msg)
         {
-            if (AppLib.GetAppSetting("IsWriteTraceMessages").ToBool()) AppLogger.Trace(string.Format("{0}: {1}", DateTime.Now.ToString(), msg) );
+            if (AppLib.GetAppSetting("IsWriteTraceMessages").ToBool()) AppLogger.Trace(" " + msg);
         }
 
         public static void WriteLogInfoMessage(string msg)
@@ -96,7 +97,7 @@ namespace WpfClient
             if ((formName == mainWinName) && 
                 ((actionType != AppActionsEnum.MainWindowOpen) && (actionType != AppActionsEnum.MainWindowClose)))
             {
-                WpfClient.MainWindow mainWin = (App.Current.MainWindow as WpfClient.MainWindow);
+                MainWindow mainWin = (App.Current.MainWindow as MainWindow);
                 if (mainWin.CurrentOrder == null) mainWin.CurrentOrder = AppLib.CreateNewOrder();
             }
 
@@ -419,7 +420,7 @@ namespace WpfClient
         #region диалоговые окна
         public static void CreateMsgBox()
         {
-            WpfClient.Lib.MsgBoxExt mBox = new WpfClient.Lib.MsgBoxExt()
+            MsgBoxExt mBox = new MsgBoxExt()
             {
                 TitleFontSize = (double)AppLib.GetAppGlobalValue("appFontSize6"),
                 MessageFontSize = (double)AppLib.GetAppGlobalValue("appFontSize2"),
@@ -437,7 +438,7 @@ namespace WpfClient
         }
         public static void CreateChoiceBox()
         {
-            WpfClient.Lib.MsgBoxExt chBox = new WpfClient.Lib.MsgBoxExt()
+            MsgBoxExt chBox = new MsgBoxExt()
             {
                 TitleFontSize = (double)AppLib.GetAppGlobalValue("appFontSize6"),
                 MessageFontSize = (double)AppLib.GetAppGlobalValue("appFontSize2"),
@@ -512,6 +513,8 @@ namespace WpfClient
 
         public static void GetSettingsFromConfigFile()
         {
+            AppLib.WriteLogTraceMessage("Читаю настройки из файла *.config ...");
+
             // прочие настройки
             saveAppSettingToProps("ssdID", null);   // идентификатор устройства самообслуживания
             App.DeviceId = (string)AppLib.GetAppGlobalValue("ssdID");
@@ -520,7 +523,6 @@ namespace WpfClient
             saveAppSettingToProps("CurrencyChar", null);   // символ денежной единицы
             // печать чека
             saveAppSettingToProps("BillPageWidht", typeof(int));   // ширина в пикселях, для перевода в см надо / на 96 и * на 2,45
-            saveAppSettingToProps("AutoCloseMsgBoxAfterPrintOrder", typeof(int));   // время показа информац.окна после печати
             // большие кнопки прокрутки панели блюд
             saveAppSettingToProps("dishesPanelScrollButtonSize", typeof(double));
             saveAppSettingToProps("dishesPanelScrollButtonHorizontalAlignment");
@@ -570,6 +572,8 @@ namespace WpfClient
 
             parseAndSetAllLangString("CurrencyName");
             parseAndSetAllLangString("withGarnish");
+
+            AppLib.WriteLogTraceMessage("Читаю настройки из файла *.config ... READY");
         }
 
         // сохранить настройку приложения из config-файла в bool-свойство приложения
@@ -760,7 +764,7 @@ namespace WpfClient
             // сохранить ссылку на новый заказ в глоб.перем.
             AppLib.SetAppGlobalValue("currentOrder", order);
             // и в Главном окне
-            WpfClient.MainWindow mainWin = (App.Current.MainWindow as WpfClient.MainWindow);
+            MainWindow mainWin = (App.Current.MainWindow as MainWindow);
             mainWin.CurrentOrder = order;
 
             AppLib.WriteAppAction("App", AppActionsEnum.CreateNewOrder, order.OrderNumberForPrint.ToString()+";"+string.Format("{0:yyyy-MM-dd}", order.OrderDate));
@@ -782,7 +786,7 @@ namespace WpfClient
         {
             if (isCloseChildWindow == true) CloseChildWindows();
 
-            WpfClient.MainWindow mainWin = (WpfClient.MainWindow)Application.Current.MainWindow;
+            MainWindow mainWin = (MainWindow)Application.Current.MainWindow;
             mainWin.ClearSelectedGarnish();
             mainWin.HideDishesDescriptions();
 

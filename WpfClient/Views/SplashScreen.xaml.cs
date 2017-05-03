@@ -18,7 +18,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using UserActionLog;
 
-namespace WpfClient
+namespace WpfClient.Views
 {
     /// <summary>
     /// Interaction logic for SplashScreen.xaml

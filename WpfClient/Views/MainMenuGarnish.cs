@@ -10,7 +10,7 @@ using System.Windows.Media;
 using System.Windows.Media.Effects;
 using System.Windows.Shapes;
 
-namespace WpfClient
+namespace WpfClient.Views
 {
     // создает Grid с готовыми элементами: Path и два TextBox-а
     public class MainMenuGarnish: Grid

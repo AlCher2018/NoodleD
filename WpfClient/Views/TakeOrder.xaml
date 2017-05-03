@@ -1,9 +1,11 @@
-﻿<Window x:Class="WpfClient.TakeOrder"
+﻿<Window x:Class="WpfClient.Views.TakeOrder"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfClient"
+        xmlns:views="clr-namespace:WpfClient.Views"
+        xmlns:lib="clr-namespace:WpfClient.Lib"
         mc:Ignorable="d"
         Title="TakeOrder" Name="TakeOrderWindow"
         Height="1080" Width="1920"
@@ -51,7 +53,7 @@
                     <!--кнопка закрытия окна  -->
                     <!-- border for click PreviewTouchDown="btnClose_PreviewTouchDown" -->
                     <Border Grid.Column="4" CornerRadius="{Binding Converter={StaticResource getAppSetValue}, ConverterParameter=cornerRadiusButton, Mode=OneWay}" Background="{Binding ElementName=brdDialog, Path=Background}" MouseUp="btnClose_MouseDown">
-                        <Image x:Name="btnClose"  Grid.Column="4" Source="AppImages\closeWindow.png" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="{Binding ElementName=brdDialog, Path=ActualHeight, Converter={StaticResource getMargin}, ConverterParameter='0,0.1,0.1,0', Mode=OneWay}"/>
+                        <Image x:Name="btnClose"  Grid.Column="4" Source="..\AppImages\closeWindow.png" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="{Binding ElementName=brdDialog, Path=ActualHeight, Converter={StaticResource getMargin}, ConverterParameter='0,0.1,0.1,0', Mode=OneWay}"/>
                     </Border>
 
                     <!-- PreviewTouchDown="btnTakeOut_PreviewTouchDown" -->

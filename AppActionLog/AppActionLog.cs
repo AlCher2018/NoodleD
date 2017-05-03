@@ -177,8 +177,11 @@ namespace AppActionNS
         }
         public void Dispose()
         {
-            writeBufferToDB(_curBuffer);
-            _curBuffer.Clear();
+            if (_curBuffer.Count > 0)
+            {
+                writeBufferToDB(_curBuffer);
+                _curBuffer.Clear();
+            }
         }
     } // class
 

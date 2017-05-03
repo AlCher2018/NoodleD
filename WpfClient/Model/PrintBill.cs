@@ -14,7 +14,7 @@ using AppModel;
 using WpfClient.Lib;
 using System.Xml.Serialization;
 
-namespace WpfClient
+namespace WpfClient.Model
 {
     public class PrintBill
     {
@@ -32,6 +32,8 @@ namespace WpfClient
             bool retVal = true;
             errMessage = null;
             string userErrMsgSuffix = AppLib.GetLangTextFromAppProp("userErrMsgSuffix");
+
+            AppLib.WriteLogTraceMessage("Создание пречека для заказа " + _order.OrderNumberForPrint.ToString());
 
             // свойства заказа, созадаваемые перед печатью чека:
             //      1. BarCodeValue - значение штрих-кода, 12 цифр (6 - yymmdd, 2 - код источника, 4 - номер чека для печати)
@@ -108,6 +110,7 @@ namespace WpfClient
                     isOk = true; errMessage = "";
                 }
             }
+            AppLib.WriteLogTraceMessage("   - принтер для печати: " + printerName);
             if (isOk == false) return false;
 
             // создание документа
@@ -121,6 +124,10 @@ namespace WpfClient
             {
                 AppLib.WriteLogErrorMessage(errMessage + "\tМодуль PrintBill.cs, CreateBill()");
                 errMessage = AppLib.GetLangTextFromAppProp("afterPrintingErrMsg");
+            }
+            else
+            {
+                AppLib.WriteLogTraceMessage("Пречек распечатан успешно");
             }
 
             return retVal;

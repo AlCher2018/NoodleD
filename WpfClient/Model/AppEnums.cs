@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WpfClient
+namespace WpfClient.Model
 {
     // ENUMS
     public enum TakeOrderEnum

@@ -8,7 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
 
-namespace WpfClient
+namespace WpfClient.Views
 {
     public class TextAnimation
     {
