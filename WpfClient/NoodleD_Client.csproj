@@ -98,6 +98,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Lib\FileLib.cs" />
+    <Compile Include="Views\AppStartWait.xaml.cs">
+      <DependentUpon>AppStartWait.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\PromoPanel.xaml.cs">
       <DependentUpon>PromoPanel.xaml</DependentUpon>
     </Compile>
@@ -140,6 +143,10 @@
     </Compile>
     <Compile Include="TestData.cs" />
     <Compile Include="Lib\TypeExtensions.cs" />
+    <Page Include="Views\AppStartWait.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Cart.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

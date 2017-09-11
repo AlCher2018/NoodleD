@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -37,9 +38,8 @@ namespace WpfClient
             double.TryParse(sParam, out retVal);
             if (retVal == 0)
             {
-                if (sParam.Contains(".")) sParam = sParam.Replace('.', ',');
-                else if (sParam.Contains(",")) sParam = sParam.Replace(',', '.');
-                double.TryParse(sParam, out retVal);
+                if (sParam.Contains(",")) sParam = sParam.Replace(',', '.');
+                double.TryParse(sParam, NumberStyles.Float,  CultureInfo.InvariantCulture, out retVal);
             }
             return retVal;
         }
@@ -48,12 +48,17 @@ namespace WpfClient
         {
             if (source == null) return 0;
 
-            List<char> chList = new List<char>();
+            List<string> chars = new List<string>();
             foreach (char c in source)
             {
-                if (System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) == System.Globalization.UnicodeCategory.DecimalDigitNumber) chList.Add(c);
+                if (System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) == System.Globalization.UnicodeCategory.DecimalDigitNumber) chars.Add(c.ToString());
             }
-            return (chList.Count > 0) ? int.Parse(string.Join("", chList.ToArray())) : 0;
+            if (chars.Count == 0) return 0;
+            else
+            {
+                string numStr = string.Join("", chars.ToArray());
+                return int.Parse(numStr);
+            }
         }
 
         public static bool IsNull(this string source)

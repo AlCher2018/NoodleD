@@ -14,6 +14,8 @@ using AppActionNS;
 using WpfClient.Lib;
 using AppModel;
 using WpfClient.Views;
+using System.Threading;
+using System.Windows.Controls;
 
 namespace WpfClient
 {
@@ -52,12 +54,49 @@ namespace WpfClient
                 }
 
                 App app = new App();
+                // сплэш-экран
+                AppLib.WriteLogTraceMessage("Отображаю splash-screen...");
+                getAppLayout();
+                string fileName = (AppLib.IsAppVerticalLayout ? "bg 3ver 1080x1920 splash.png" : "bg 3hor 1920x1080 splash.png");
+                System.Windows.SplashScreen splashScreen = new System.Windows.SplashScreen(fileName);
+                splashScreen.Show(true);
 
                 // проверка соединения с бд
                 if (AppLib.CheckDBConnection(typeof(NoodleDContext)) == false)
                 {
-                    MessageBox.Show("Ошибка подключения к базе данных (описание смотри в логах).\nПриложение будет закрыто", "Аварийное завершение", MessageBoxButton.OK, MessageBoxImage.Stop);
-                    Environment.Exit(3);
+                    bool result = false;
+                    AppStartWait winWait = new AppStartWait();
+                    winWait.Show();
+
+                    // сделать цикл проверки подключения: 20 раз через 2 сек
+                    for (int i = 1; i <= 20; i++)
+                    {
+                        winWait.Dispatcher.Invoke(() =>
+                            {
+                                int iVal = winWait.txtNumAttempt.Text.ToInt();
+                                iVal++;
+                                winWait.txtNumAttempt.Text = iVal.ToString();
+                                winWait.InvalidateProperty(TextBlock.TextProperty);
+                                winWait.InvalidateVisual();
+                                winWait.Refresh();
+                            });
+                        Thread.Sleep(2000);
+
+                        result = AppLib.CheckDBConnection(typeof(NoodleDContext));
+                        if (result) break;
+                    }
+                    winWait.Close();
+
+                    if (!result)
+                    {
+                        MessageBox.Show("Ошибка подключения к базе данных (описание смотри в логах).\nПриложение будет закрыто", "Аварийное завершение", MessageBoxButton.OK, MessageBoxImage.Stop);
+                        Environment.Exit(3);
+                    }
+                    // перезапусить приложение
+                    else
+                    {
+                        AppLib.RestartApplication();
+                    }
                 }
 
                 // номер устройства - не число!
@@ -73,13 +112,6 @@ namespace WpfClient
                     AppLib.GetAppSetting("ssdID"), AppLib.GetAppSetting("ImagesPath"), AppLib.GetAppSetting("UserIdleTime"),
                     AppLib.GetAppSetting("RandomOrderNumFrom"), AppLib.GetAppSetting("RandomOrderNumTo"), 
                     AppLib.GetAppSetting("PrinterName"), AppLib.GetAppSetting("IsLogUserAction"), AppLib.GetAppSetting("IsWriteTraceMessages"), AppLib.GetAppSetting("IsWriteWindowEvents")));
-
-                // сплэш-экран
-                AppLib.WriteLogTraceMessage("Отображаю splash-screen...");
-                getAppLayout();
-                string fileName = (AppLib.IsAppVerticalLayout ? "bg 3ver 1080x1920 splash.png" : "bg 3hor 1920x1080 splash.png");
-                System.Windows.SplashScreen splashScreen = new System.Windows.SplashScreen(fileName);
-                splashScreen.Show(true);
 
                 //******  СТАТИЧЕСКИЕ настройки  ******
                 AppLib.WriteLogTraceMessage("Читаю настройки из ресурсов приложения (app.xaml) ...");
