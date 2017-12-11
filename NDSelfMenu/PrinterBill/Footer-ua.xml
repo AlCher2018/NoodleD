@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<TextModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <!--<ImageModel LeftMargin="0" TopMargin="0" RightMargin="0" ButtomMargin="0" Source="BlankLogoFooter.png" Width="200" Height="95"/>-->
+  <Paragraphs>
+    <ParagraphModel LeftMargin="10" TopMargin="20" RightMargin="0" ButtomMargin="10" FontFamily="Panton-Bold" FontSize="12">Дякуємо за покупку!</ParagraphModel>
+  </Paragraphs>
+</TextModel>

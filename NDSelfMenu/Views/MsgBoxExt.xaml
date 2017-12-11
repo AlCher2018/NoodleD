@@ -1,0 +1,100 @@
+﻿<Window x:Class="WpfClient.Views.MsgBoxExt"
+        x:Name="mbWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:s="clr-namespace:System;assembly=mscorlib"
+        xmlns:local="clr-namespace:WpfClient"
+        xmlns:views="clr-namespace:WpfClient.Views"
+        xmlns:lib="clr-namespace:WpfClient.Lib"
+        mc:Ignorable="d"
+        Title="MsgBoxExt" Height="720" Width="1280"
+        WindowStyle="None" ResizeMode="NoResize"
+        WindowState="Maximized"
+        AllowsTransparency="True" Background="#88000000"
+        PreviewKeyDown="MsgBoxExt_PreviewKeyDown"
+        DataContext="{Binding RelativeSource={RelativeSource Self}, Mode=OneWay}"
+        >
+    <Window.Resources>
+        <Style x:Key="btnTextStyle" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+
+        <!-- 
+                    <EventSetter Event="PreviewTouchDown" Handler="btn_TouchDown"/>
+            <EventSetter Event="PreviewTouchUp" Handler="btn_TouchUp"/>
+            <EventSetter Event="TouchLeave" Handler="btn_TouchLeave"/>
+        -->
+        <Style x:Key="btnStyle" TargetType="Border">
+            <Setter Property="Background" Value="{Binding ButtonBackground}" />
+            <Setter Property="TextBlock.Foreground" Value="{Binding ButtonForeground}"/>
+            <EventSetter Event="PreviewMouseDown" Handler="btn_MouseDown"/>
+            <EventSetter Event="PreviewMouseUp" Handler="btn_MouseUp"/>
+            <EventSetter Event="MouseLeave" Handler="btn_MouseLeave"/>
+            <!--<Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{Binding ButtonBackgroundOver}" />
+                    <Setter Property="TextBlock.Foreground" Value="{Binding ButtonForegroundOver}" />
+                    <Setter Property="TextBlock.FontWeight" Value="Bold"/>
+                </Trigger>
+            </Style.Triggers>-->
+        </Style>
+    </Window.Resources>
+    
+    <Grid x:Name="mainGrid" Width="300" VerticalAlignment="Center">
+        <Grid.Effect>
+            <DropShadowEffect ShadowDepth="30" BlurRadius="15" Opacity="0.5" />
+        </Grid.Effect>
+        
+        <Grid.RowDefinitions>
+            <!-- title -->
+            <RowDefinition Height="Auto"/>
+            <!-- message -->
+            <RowDefinition Height="Auto"/>
+            <!-- buttons -->
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border x:Name="backBorder" Grid.RowSpan="3" Background="White"/>
+
+        <!-- title -->
+        <Border x:Name="mbTitleBorder" Grid.Row="0" Background="LightSteelBlue">
+            <TextBlock x:Name="mbTitleText" Text="{Binding Title, ElementName=mbWindow, Mode=OneWay}"/>
+        </Border>
+
+        <TextBlock x:Name="mbMessageText" Grid.Row="1" TextWrapping="Wrap" TextAlignment="Left"/>
+
+        <StackPanel x:Name ="btnPanel" Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
+            <Border x:Name="btn1" Style="{StaticResource btnStyle}">
+                <Border.RenderTransform>
+                    <TranslateTransform/>
+                </Border.RenderTransform>
+                <Border.Effect>
+                    <DropShadowEffect ShadowDepth="6" Opacity="0.8" BlurRadius="10"/>
+                </Border.Effect>
+                <TextBlock x:Name="btn1Text" Style="{StaticResource btnTextStyle}"/>
+            </Border>
+            <Border x:Name="btn2" Style="{StaticResource btnStyle}">
+                <Border.RenderTransform>
+                    <TranslateTransform/>
+                </Border.RenderTransform>
+                <Border.Effect>
+                    <DropShadowEffect ShadowDepth="6" Opacity="0.8" BlurRadius="10"/>
+                </Border.Effect>
+                <TextBlock x:Name="btn2Text" Style="{StaticResource btnTextStyle}"/>
+            </Border>
+            <Border x:Name="btn3" Style="{StaticResource btnStyle}">
+                <Border.RenderTransform>
+                    <TranslateTransform/>
+                </Border.RenderTransform>
+                <Border.Effect>
+                    <DropShadowEffect ShadowDepth="6" Opacity="0.8" BlurRadius="10"/>
+                </Border.Effect>
+                <TextBlock x:Name="btn3Text" Style="{StaticResource btnTextStyle}"/>
+            </Border>
+        </StackPanel>
+    </Grid>
+</Window>
