@@ -44,8 +44,23 @@ namespace WpfClient.Views
 
         private void TakeOrder_Activated(object sender, EventArgs e)
         {
+            AppLib.WriteAppAction(this.Name, AppActionsEnum.TakeOrderWinOpen);
             _takeOrder = TakeOrderEnum.None;
+        }
 
+        public void ResetLang()
+        {
+            // напрямую
+            // окно создается и хранится, как глобальная переменная и переключение языка будет осуществляться извне при смене языка UI
+            txtTakeOut.Text = AppLib.GetLangTextFromAppProp("takeOrderOut");
+            txtWordOr.Text = AppLib.GetLangTextFromAppProp("wordOr");
+            txtTakeIn.Text = AppLib.GetLangTextFromAppProp("takeOrderIn");
+
+            #region через связанное свойство - ОТКЛЮЧЕНО, т.к. иногда не переключается
+            /*
+            Text = "{Binding Converter={StaticResource langDictToText}, ConverterParameter=appSet.takeOrderOut}"
+            Text="{Binding Converter={StaticResource langDictToText}, ConverterParameter=appSet.wordOr}"
+            Text = "{Binding Converter={StaticResource langDictToText}, ConverterParameter=appSet.takeOrderIn}"
             BindingExpression be;
             // установка текстов на выбранном языке
             //    с собой
@@ -57,8 +72,8 @@ namespace WpfClient.Views
             //   в ресторане
             be = txtTakeIn.GetBindingExpression(TextBlock.TextProperty);
             if (be != null) be.UpdateTarget();
-
-            AppLib.WriteAppAction(this.Name, AppActionsEnum.TakeOrderWinOpen);
+             */
+            #endregion
         }
 
         #region активация ожидашки

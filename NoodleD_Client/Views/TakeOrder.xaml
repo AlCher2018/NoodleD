@@ -58,14 +58,14 @@
 
                     <!-- PreviewTouchDown="btnTakeOut_PreviewTouchDown" -->
                     <Border x:Name="btnTakeOut" Grid.Row="1" Grid.Column="1" Style="{StaticResource btnBorderStyle}" MouseUp = "btnTakeOut_MouseDown">
-                        <TextBlock x:Name="txtTakeOut" Grid.Row="1" Grid.Column="1" Style="{StaticResource btnTextStyle}" Text="{Binding Converter={StaticResource langDictToText}, ConverterParameter=appSet.takeOrderOut}"/>
+                        <TextBlock x:Name="txtTakeOut" Grid.Row="1" Grid.Column="1" Style="{StaticResource btnTextStyle}"/>
                     </Border>
 
-                    <TextBlock x:Name="txtWordOr" Grid.Row="1" Grid.Column="2" Foreground="Black" Style="{StaticResource centeredElement}" Text="{Binding Converter={StaticResource langDictToText}, ConverterParameter=appSet.wordOr}"/>
+                    <TextBlock x:Name="txtWordOr" Grid.Row="1" Grid.Column="2" Foreground="Black" Style="{StaticResource centeredElement}"/>
 
                     <!-- PreviewTouchDown="btnTakeIn_PreviewTouchDown" -->
                     <Border x:Name="btnTakeIn" Grid.Row="1" Grid.Column="3" Style="{StaticResource btnBorderStyle}" MouseUp = "btnTakeIn_MouseDown">
-                        <TextBlock x:Name="txtTakeIn" Grid.Row="1" Grid.Column="3" Style="{StaticResource btnTextStyle}" Text="{Binding Converter={StaticResource langDictToText}, ConverterParameter=appSet.takeOrderIn}"/>
+                        <TextBlock x:Name="txtTakeIn" Grid.Row="1" Grid.Column="3" Style="{StaticResource btnTextStyle}"/>
                     </Border>
 
                 </Grid>

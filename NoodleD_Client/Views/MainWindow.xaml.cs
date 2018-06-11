@@ -678,6 +678,10 @@ namespace WpfClient.Views
             //if (selMenuItem >= 0) selMenuItem = 0;
             //lstMenuFolders.SelectedIndex = (int)(AppLib.GetAppGlobalValue("selectedMenuIndex")??0);
             lstMenuFolders.SelectedIndex = selMenuItem;
+
+            // изменить язык в служебных окнах
+            AppLib.TakeOrderWindow.ResetLang();
+            AppLib.PromoCodeWindow.ResetLang();
         }
 
         private void setLangButtonStyle(bool checkedMode)

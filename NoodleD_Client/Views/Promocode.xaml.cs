@@ -28,7 +28,6 @@ namespace WpfClient.Views
         public Promocode()
         {
             InitializeComponent();
-            this.Activated += Promocode_Activated;
 
             if (AppLib.GetAppSetting("IsWriteWindowEvents").ToBool())
             {
@@ -38,7 +37,8 @@ namespace WpfClient.Views
             setLayout();
         }
 
-        private void Promocode_Activated(object sender, EventArgs e)
+
+        internal void ResetLang()
         {
             BindingExpression be;
             // установка текстов на выбранном языке

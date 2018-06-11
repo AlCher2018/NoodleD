@@ -816,11 +816,12 @@ namespace WpfClient.Views
                     {
                         AppLib.WriteLogErrorMessage(userErrMsg);
                         msgText = (string)AppLib.GetLangTextFromAppProp("saveOrderErrorMessage");
+                        msgText = msgText.Replace("\\n", Environment.NewLine);
                         AppLib.ShowMessageBox(title, msgText);
                     }
                 }
 
-                // ошибка формирования чека и/или печати - сообщение пользователю на экран и запись в лог
+                // ошибка формирования чека и/или печати - сообщение пользователю на экран
                 else
                 {
                     AppLib.ShowMessageBox(title, userErrMsg);

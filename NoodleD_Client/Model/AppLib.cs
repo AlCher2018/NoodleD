@@ -503,10 +503,16 @@ namespace WpfClient
         #region AppBL
 
         // сохранить настройки приложения из config-файла в свойствах приложения
-        public static bool saveAppSettingToProps(string settingName, Type settingType = null)
+        public static bool saveAppSettingToProps(string settingName, Type settingType = null, string defaultConfValue = null)
         {
             string settingValue = AppLib.GetAppSetting(settingName);
-            if (settingValue == null) return false;
+            if (settingValue == null)
+            {
+                if (defaultConfValue == null)
+                    return false;
+                else
+                    settingValue = defaultConfValue;
+            }
 
             if (settingType == null)
                 AppLib.SetAppGlobalValue(settingName, settingValue);   // по умолчанию сохраняется как строка
@@ -536,8 +542,21 @@ namespace WpfClient
 
             saveAppSettingToProps("ImagesPath");   // путь к папке с изображениями
             saveAppSettingToProps("CurrencyChar", null);   // символ денежной единицы
+            
             // печать чека
-            saveAppSettingToProps("BillPageWidht", typeof(int));   // ширина в пикселях, для перевода в см надо / на 96 и * на 2,45
+            // ширина в пикселях (1"=96px => 1px = 0.26mm)
+            saveAppSettingToProps("BillPageWidht", typeof(int), "300");
+            // размер шрифта позиций заказа
+            saveAppSettingToProps("BillLineFontSize", typeof(int), "12");
+            // отступ слева строк позиций заказа, в пикселях (1px = 0.26mm)
+            saveAppSettingToProps("BillLineLeftMargin", typeof(int), "0");
+            // отступ сверху строки блюда, в пикселях (1px = 0.26mm)
+            saveAppSettingToProps("BillLineTopMargin", typeof(int), "10");
+            // отступ сверху строки ингредиента, в пикселях (1px = 0.26mm)
+            saveAppSettingToProps("BillLineIngrTopMargin", typeof(int), "0");
+            // отступ сверху строки цены, в пикселях (1px = 0.26mm)
+            saveAppSettingToProps("BillLinePriceTopMargin", typeof(int), "0");
+
             // большие кнопки прокрутки панели блюд
             saveAppSettingToProps("dishesPanelScrollButtonSize", typeof(double));
             saveAppSettingToProps("dishesPanelScrollButtonHorizontalAlignment");

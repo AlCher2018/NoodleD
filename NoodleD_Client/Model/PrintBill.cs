@@ -27,11 +27,12 @@ namespace WpfClient.Model
             _langId = AppLib.AppLang;
         }
 
-        public bool CreateBill(out string errMessage)
+        public bool CreateBill(out string msgBoxText)
         {
             bool retVal = true;
-            errMessage = null;
-            string userErrMsgSuffix = AppLib.GetLangTextFromAppProp("userErrMsgSuffix");
+            msgBoxText = null;
+            string userErrMsgSuffix = Environment.NewLine + AppLib.GetLangTextFromAppProp("userErrMsgSuffix");
+            userErrMsgSuffix = userErrMsgSuffix.Replace("\\n", Environment.NewLine);
 
             AppLib.WriteLogTraceMessage("Создание пречека для заказа " + _order.OrderNumberForPrint.ToString());
 
@@ -44,7 +45,7 @@ namespace WpfClient.Model
             if (deviceName == string.Empty)
             {
                 AppLib.WriteLogErrorMessage("В config-файле не найден элемент \"ssdID\" - идентификатор терминала самообслуживания.\n\t\tTrace: PrintBill.cs, CreateBill()");
-                errMessage = "Ошибка конфигурации приложения!" + userErrMsgSuffix;
+                msgBoxText = "App config error: don't find 'ssdID' element." + userErrMsgSuffix;
                 return false;
             }
             if (deviceName.Length > 2) deviceName = deviceName.Substring(0, 2);
@@ -53,7 +54,7 @@ namespace WpfClient.Model
             if (_order.OrderNumberForPrint == -1)
             {
                 AppLib.WriteLogErrorMessage("Класс PrintBill. Не указан номер заказа");
-                errMessage = "Печать чека: не указан номер заказа" + userErrMsgSuffix;
+                msgBoxText = "App error: no order number." + userErrMsgSuffix;
                 return false;
             }
 
@@ -79,56 +80,114 @@ namespace WpfClient.Model
             int width = (int)AppLib.GetAppGlobalValue("BillPageWidht", 0);
             if (width == 0)
             {
-                AppLib.WriteLogErrorMessage("В config-файле не указан элемент BillPageWidht с шириной чека.\n\t\tМодуль PrintBill.cs, CreateBill()");
-                errMessage = AppLib.GetLangTextFromAppProp("printConfigError") + " (BillPageWidht) " + userErrMsgSuffix;
-                return false;
+                AppLib.WriteLogErrorMessage("В config-файле не указан элемент BillPageWidht с шириной чека. Берется значение по умолчанию - 300 (7,8см)");
+                width = 300;
             }
 
             // имя принтера для печати чека
-            string printerName = AppLib.GetAppSetting("PrinterName");
-            bool isOk = true;
-            if (printerName == null)
+            string printerName = null;
+            string result = null;
+            #region поиск принтера для печати чека
+            printerName = AppLib.GetAppSetting("PrinterName");
+            PrintQueue printer = PrintHelper.GetPrintQueueByName(printerName);
+            if (printer == null)
             {
-                AppLib.WriteLogErrorMessage("В config-файле не указан элемент PrinterName - имя принтера в ОС для печати чеков.\n\t\tМодуль PrintBill.cs, CreateBill()");
-                errMessage = AppLib.GetLangTextFromAppProp("printConfigError") + " (PrinterName) " + userErrMsgSuffix;
-                isOk = false;
+                AppLib.WriteLogErrorMessage("В config-файле не указан элемент PrinterName или в системе не найден принтер: " + printerName);
+                printerName = null;
             }
-            string result = PrintHelper.GetPrinterStatus(printerName);
-            if (result.ToUpper() != "OK")
+            else
             {
-                string sFormat = AppLib.GetLangTextFromAppProp("printerStatusMsg");
-                errMessage = string.Format(sFormat, printerName, result);
-                isOk = false;
+                result = getPrinterStatus(printer);
+                AppLib.WriteLogTraceMessage($"Принтер '{printerName}' находится в состоянии '{result}'");
             }
-            // если принтер из настроек не Ок, то берем первый в системе
-            if (isOk == false)
+
+            // если принтер из настроек не Ок, то берем принтер по умолчанию
+            if ((printerName == null) || ((result != null) && (result != "OK")))
             {
-                List<PrintQueue> prnList = PrintHelper.getPrintersList();
-                if (prnList.Count != 0)
+                AppLib.WriteLogTraceMessage("Предпринимается попытка использовать принтер по умолчанию...");
+                printer = PrintHelper.GetDefaultPrinter();
+                if (printer != null)
                 {
-                    printerName = prnList[0].Name;
-                    isOk = true; errMessage = "";
+                    printerName = printer.Name;
+                    result = getPrinterStatus(printer);
+                    AppLib.WriteLogTraceMessage($"Найден принтер по умолчанию: {printerName}");
+                    AppLib.WriteLogTraceMessage($"Принтер '{printerName}' находится в состоянии '{result}'");
                 }
             }
-            AppLib.WriteLogTraceMessage("   - принтер для печати: " + printerName);
-            if (isOk == false) return false;
+
+            // если принтер по умолчанию не ОК, то берем первый в системе
+            if (printerName == null)
+            {
+                AppLib.WriteLogTraceMessage("Предпринимается попытка использовать первый найденный принтер в ОС...");
+                printer = PrintHelper.GetFirstPrinter();
+                if (printer != null)
+                {
+                    printerName = printer.Name;
+                    result = getPrinterStatus(printer);
+                    AppLib.WriteLogTraceMessage($"Найден первый принтер: {printerName}");
+                    AppLib.WriteLogTraceMessage($"Принтер '{printerName}' находится в состоянии '{result}'");
+                }
+            }
+            // принтер не найден - досвидос
+            if (printer == null)
+            {
+                msgBoxText = "App print error: not found any printer." + userErrMsgSuffix;
+                return false;
+            }
+            // найден, но статус не ОК - досвидос
+            else if ((result != null) && (result != "OK"))
+            {
+                string sFormat = AppLib.GetLangTextFromAppProp("printerStatusMsg");
+                if (sFormat != null) sFormat = sFormat.Replace("\\n", Environment.NewLine);
+                msgBoxText = string.Format(sFormat, printerName, result) + userErrMsgSuffix;
+                return false;
+            }
+            #endregion
 
             // создание документа
-            FlowDocument doc = createDocument(width);
+            AppLib.WriteLogTraceMessage($" Создаю документ для печати...");
+            FlowDocument doc = null;
+            try
+            {
+                doc = createDocument(width);
+                AppLib.WriteLogTraceMessage($" - документ создан успешно");
+            }
+            catch (Exception ex)
+            {
+                result = AppLib.GetLangTextFromAppProp("afterPrintingErrMsg");
+                if (result != null) result = result.Replace("\\n", Environment.NewLine);
+                msgBoxText = result + userErrMsgSuffix;
+                AppLib.WriteLogErrorMessage(" Ошибка формирования документа: " + result);
+                return false;
+            }
 
             // имя задания на принтер
             string prnTaskName = "bill " + _order.OrderNumberForPrint.ToString();
             // вывод документа на принтер
-            retVal = PrintHelper.PrintFlowDocument(doc, prnTaskName, printerName, out errMessage);
+            AppLib.WriteLogTraceMessage($" Вывожу пречек на принтер...");
+            retVal = PrintHelper.PrintFlowDocument(doc, prnTaskName, printerName, out msgBoxText);
             if (retVal == false)
             {
-                AppLib.WriteLogErrorMessage(errMessage + "\tМодуль PrintBill.cs, CreateBill()");
-                errMessage = AppLib.GetLangTextFromAppProp("afterPrintingErrMsg");
+                AppLib.WriteLogErrorMessage(" Ошибка печати документа: " + msgBoxText);
+                result = AppLib.GetLangTextFromAppProp("afterPrintingErrMsg");
+                if (result != null) result = result.Replace("\\n", Environment.NewLine);
+                msgBoxText = result + userErrMsgSuffix;
             }
             else
             {
                 AppLib.WriteLogTraceMessage("Пречек распечатан успешно");
             }
+
+            return retVal;
+        }
+
+        private string getPrinterStatus(PrintQueue printer)
+        {
+            string retVal = PrintQueueStatus.None.ToString();
+            if (printer == null) return retVal;
+
+            retVal = printer.QueueStatus.ToString().ToUpper();
+            if ((printer.IsXpsDevice) || (printer.FullName.Contains("PDF"))) retVal = "OK";
 
             return retVal;
         }
@@ -144,12 +203,20 @@ namespace WpfClient.Model
             TextModel textFooter = new TextModel();
             textHeader = DeSerialize<TextModel>(xmlHeader.OuterXml);
             textFooter = DeSerialize<TextModel>(xmlFooter.OuterXml);
+            int leftMargin = getLineMargin("BillLineLeftMargin");
+            Thickness lineMargin = getLineMargin();
+            Thickness lineMarginIngr = lineMargin;
+            lineMarginIngr.Top = getLineMargin("BillLineIngrTopMargin");
+            Thickness lineMarginPrice = lineMargin;
+            lineMarginPrice.Top = getLineMargin("BillLinePriceTopMargin");
 
             var doc = new FlowDocument();
             doc.PageWidth = width;
             // значения по умолчанию
             doc.FontFamily = new FontFamily("Panton-Bold");
-            doc.FontSize = 12;
+            doc.FontWeight = FontWeights.Normal;
+            doc.FontStyle = FontStyles.Normal;
+            doc.FontSize = Convert.ToInt32(AppLib.GetAppGlobalValue("BillLineFontSize", 12));
 
             // вставить изображение в заголовок
             addImageToDoc(textHeader, doc);
@@ -158,14 +225,16 @@ namespace WpfClient.Model
             {
                 string langText = AppLib.GetLangTextFromAppProp("takeOrderOut");
                 langText = string.Concat(" **** ", langText.ToUpper(), " ****");
-                addParagraph(doc, langText, 20, FontWeights.Bold, FontStyles.Normal, new Thickness(0, 20, 0, 10), TextAlignment.Center);
+                addParagraph(doc, langText, 1.5 * doc.FontSize, FontWeights.Bold, FontStyles.Normal, new Thickness(leftMargin, 20, 0, 10), TextAlignment.Center);
             }
             // добавить форматированный заголовок
             addSectionToDoc(textHeader, doc);
 
             // добавить строки заказа
             string currencyName = AppLib.GetLangTextFromAppProp("CurrencyName");
+            string sAppSet;
             decimal totalPrice = 0; string itemName, stringRow;
+
             foreach (DishItem item in _order.Dishes)
             {
                 // блюдо
@@ -178,14 +247,14 @@ namespace WpfClient.Model
                     // 2017-02-02 Формирование полного наименования блюда с гарниром
                     // если DishFullNameInGargnish = true, то полное имя берем из гарнира, 
                     // иначе к имени блюда добавляем имя гарнира
-                    string s = AppLib.GetAppSetting("DishFullNameInGarnish");
-                    if (s != null && s.ToBool())
+                    sAppSet = AppLib.GetAppSetting("DishFullNameInGarnish");
+                    if (sAppSet != null && sAppSet.ToBool())
                         itemName = garnName;
                     else
                         itemName += " " + AppLib.GetLangTextFromAppProp("withGarnish") + " " + garnName;
-                } 
+                }
                 //string stringRow = itemName.Substring(0, itemName.Count() > 30 ? 30 : itemName.Count());
-                addParagraph(doc, itemName);
+                addParagraph(doc, itemName, doc.FontSize, doc.FontWeight, doc.FontStyle, lineMargin);
 
                 // добавить ингредиенты
                 if (item.SelectedIngredients != null)
@@ -197,17 +266,17 @@ namespace WpfClient.Model
                         stringRow += ((isFirst) ? "" : "; ") + itemName;
                         isFirst = false;
                     }
-                    addParagraph(doc, stringRow, 10, null, FontStyles.Italic);
+                    addParagraph(doc, stringRow, 0.9 * doc.FontSize, doc.FontWeight, FontStyles.Italic, lineMarginIngr);
                 }
 
                 // стоимость блюда
                 decimal price = item.GetPrice();
                 string priceString = string.Format("{0} x {1:0.00} {3} = {2:0.00} {3}", item.Count, price, item.Count * price, currencyName);
-                addParagraph(doc, priceString, 12, null, null, null, TextAlignment.Right);
+                addParagraph(doc, priceString, doc.FontSize, doc.FontWeight, doc.FontStyle, lineMarginPrice, TextAlignment.Right);
                 totalPrice += item.Count * price;
             }
             // итог
-            addTotalLine(doc, totalPrice, currencyName);
+            addTotalLine(doc, doc.FontSize, totalPrice, currencyName, leftMargin);
 
             // добавить форматированный "подвал"
             addSectionToDoc(textFooter, doc);
@@ -220,27 +289,45 @@ namespace WpfClient.Model
             BlockUIContainer bcContainer = new BlockUIContainer()
             {
                 Child = imageBarCode,
-                Margin = new Thickness(0,10,0,0)
+                Margin = new Thickness(leftMargin,10,0,0)
             };
             doc.Blocks.Add(bcContainer);
             // вывести значение баркода в чек
             //string bcDisplay = string.Format("{0} {1} {2} {3}", bcVal13.Substring(0,2), bcVal13.Substring(2, 6), bcVal13.Substring(8, 4), bcVal13.Substring(12,1));
             string bcDisplay = string.Format("{0}  {1}  {2}", bcVal13.Substring(0, 1), bcVal13.Substring(1, 6), bcVal13.Substring(7));
-            addParagraph(doc, bcDisplay, 9, FontWeights.Normal, FontStyles.Normal, new Thickness(0,5,0,0), TextAlignment.Center);
+            addParagraph(doc, bcDisplay, 0.75 * doc.FontSize, doc.FontWeight, doc.FontStyle, new Thickness(leftMargin,5,0,0), TextAlignment.Center);
 
             return doc;
         }
 
+        // отступ строк
+        private Thickness getLineMargin()
+        {
+            int left = getLineMargin("BillLineLeftMargin");
+            int top = getLineMargin("BillLineTopMargin");
+            return new Thickness((double)left, (double)top, 0d, 0d);
+        }
+        private int getLineMargin(string appSettingKey)
+        {
+            int retVal = 0;
 
-        private void addParagraph(FlowDocument doc, string text, double fontSize=12, FontWeight? fontWeight = null, FontStyle? fontStyle = null, Thickness? margin = null, TextAlignment alignment = TextAlignment.Left)
+            object sAppSet = AppLib.GetAppGlobalValue(appSettingKey);
+            if (sAppSet != null) retVal = Convert.ToInt32(sAppSet);
+
+            return retVal;
+        }
+
+        private void addParagraph(FlowDocument doc, string text, double fontSize, 
+            FontWeight fontWeight, FontStyle fontStyle, Thickness margin, TextAlignment alignment = TextAlignment.Left)
         {
             Run run = new Run(text);
             run.FontSize = fontSize;
-            run.FontWeight = (fontWeight == null) ? FontWeights.Normal : (FontWeight)fontWeight;
-            run.FontStyle = (fontStyle == null) ? FontStyles.Normal : (FontStyle)fontStyle;
+            run.FontWeight = fontWeight;
+            run.FontStyle = fontStyle;
 
             Paragraph par = new Paragraph(run);
-            par.Margin = (margin == null) ? new Thickness(0, 0, 0, 0) : (Thickness)margin;
+            par.Margin = new Thickness(0);
+            par.Padding = margin;
             par.TextAlignment = alignment;
 
             doc.Blocks.Add(par);
@@ -353,13 +440,16 @@ namespace WpfClient.Model
             }
         }
 
-        private void addTotalLine(FlowDocument doc, decimal totalPrice, string currencyName)
+        private void addTotalLine(FlowDocument doc, double fontSize, decimal totalPrice, string currencyName, int leftMargin)
         {
             Table t = new Table();
-            t.FontSize = 14;
+            t.FontSize = fontSize;
             t.CellSpacing = 0;
             t.BorderThickness = new Thickness(0, 1, 0, 0);
             t.BorderBrush = new SolidColorBrush(Colors.Black);
+            t.Margin = new Thickness(0);
+            t.Padding = new Thickness(leftMargin, 10, 0, 0);
+
             // две колонки
             t.Columns.Add(new TableColumn() { Width = new GridLength(1, GridUnitType.Star) });
             t.Columns.Add(new TableColumn() { Width = new GridLength(1, GridUnitType.Star) });
@@ -369,7 +459,6 @@ namespace WpfClient.Model
             string totalText = AppLib.GetLangText((Dictionary<string, string>)AppLib.GetAppGlobalValue("lblTotalText"));
             Run r = new Run(totalText);
             Paragraph p = new Paragraph(r);
-            p.Margin = new Thickness(0, 7, 0, 0);
             p.TextAlignment = TextAlignment.Left;
             TableCell totalTextCell = new TableCell();
             totalTextCell.Blocks.Add(p);
@@ -378,7 +467,6 @@ namespace WpfClient.Model
             r = new Run(priceText);
             r.FontWeight = FontWeights.Bold;
             p = new Paragraph(r);
-            p.Margin = new Thickness(0, 7, 0, 0);
             p.TextAlignment = TextAlignment.Right;
             TableCell priceTextCell = new TableCell();
             priceTextCell.Blocks.Add(p);
