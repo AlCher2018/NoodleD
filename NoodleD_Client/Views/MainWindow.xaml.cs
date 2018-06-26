@@ -21,6 +21,7 @@ using System.Timers;
 using System.ComponentModel;
 using UserActionLog;
 using WpfClient.Lib;
+using IntegraLib;
 
 namespace WpfClient.Views
 {
@@ -69,10 +70,9 @@ namespace WpfClient.Views
         {
             InitializeComponent();
 
+            Application.Current.MainWindow = this;
+
             // вспомогательные окна 
-            // создавать только здесь, чтобы в App.Current.Windows главное окно было на ПЕРВОМ месте!!!! - Обязательно!!!
-            AppLib.PromoCodeWindow = new Promocode();
-            AppLib.TakeOrderWindow = new TakeOrder();
             AppLib.CreateMsgBox();
             AppLib.CreateChoiceBox();
 
@@ -140,6 +140,9 @@ namespace WpfClient.Views
             {
                 int idleSec = int.Parse(sBuf);
             }
+
+            // закрыть сплэш-экран
+            SplashScreenLib.Splasher.CloseSplash();
 
 #if (enableTimer)
             menuSidePanelLogo.Children.Remove(imageLogo);
@@ -343,7 +346,7 @@ namespace WpfClient.Views
                 lblMakeOrderText.FontSize = 0.8 * _orderPriceFontSize;
                 lblMakeOrderText.FontWeight = FontWeights.Normal;
 
-                backgroundImage = AppLib.GetFullFileName("bg 3ver 1080x1920 background.png");
+                backgroundImage = (string)AppLib.GetAppGlobalValue("BackgroundImageVertical");
                 scrollDishes.Margin = new Thickness(0,0.5*dH,0,0.5*dH);
             }
 
@@ -398,17 +401,14 @@ namespace WpfClient.Views
                 lblMakeOrderText.FontSize = 0.2 * gridMenuSide.RowDefinitions[3].Height.Value;
                 lblMakeOrderText.FontWeight = FontWeights.Bold;
 
-                backgroundImage = AppLib.GetFullFileName("bg 3hor 1920x1080 background.png");
+                backgroundImage = (string)AppLib.GetAppGlobalValue("BackgroundImageHorizontal");
             }
 
             // фон
+            backgroundImage = AppLib.GetImageFullFileName(backgroundImage);
             dishesPanelBackground.Source = ImageHelper.GetBitmapImage(backgroundImage);
             // яркость фона
-            string opacity = AppLib.GetAppSetting("MenuBackgroundBrightness");
-            if (opacity != null)
-            {
-                dishesPanelBackground.Opacity = opacity.ToDouble();
-            }
+            dishesPanelBackground.Opacity = (double)AppLib.GetAppGlobalValue("BackgroundImageBrightness", 0.3);
 
             // создать список категорий блюд
             AppLib.WriteLogTraceMessage(" - создаю список категорий блюд...");
@@ -678,10 +678,6 @@ namespace WpfClient.Views
             //if (selMenuItem >= 0) selMenuItem = 0;
             //lstMenuFolders.SelectedIndex = (int)(AppLib.GetAppGlobalValue("selectedMenuIndex")??0);
             lstMenuFolders.SelectedIndex = selMenuItem;
-
-            // изменить язык в служебных окнах
-            AppLib.TakeOrderWindow.ResetLang();
-            AppLib.PromoCodeWindow.ResetLang();
         }
 
         private void setLangButtonStyle(bool checkedMode)
@@ -734,7 +730,9 @@ namespace WpfClient.Views
 
             string preText = App.PromocodeNumber??"";
 
-            AppLib.PromoCodeWindow.ShowDialog();
+            Promocode promoWin = new Promocode();
+            promoWin.ShowDialog();
+
             e.Handled = true;
             // чтобы не срабатывали обработчики нижележащих контролов
             AppLib.IsEventsEnable = false;

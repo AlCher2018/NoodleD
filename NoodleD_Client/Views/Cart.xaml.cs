@@ -14,6 +14,7 @@ using AppActionNS;
 using System.ComponentModel;
 using UserActionLog;
 using WpfClient.Model;
+using IntegraLib;
 
 namespace WpfClient.Views
 {
@@ -171,7 +172,7 @@ namespace WpfClient.Views
                 txtCashier.Style = (Style)this.Resources["goToCashierVer"];
 
                 // фон
-                backgroundImage = AppLib.GetFullFileName("bg 3ver 1080x1920 background.png");
+                backgroundImage = AppLib.GetImageFullFileName((string)AppLib.GetAppGlobalValue("BackgroundImageVertical"));
 
                 setLangButtonStyle(true);   // "включить" текущую языковую кнопку
 
@@ -204,7 +205,7 @@ namespace WpfClient.Views
                 txtCashier.Margin = new Thickness(0.5*dH,0,0.5*dH,0);
 
                 // фон
-                backgroundImage = AppLib.GetFullFileName("bg 3hor 1920x1080 background.png");
+                backgroundImage = AppLib.GetImageFullFileName((string)AppLib.GetAppGlobalValue("BackgroundImageHorizontal"));
 
                 dishBorderHeight = (dishesPanelHeight - dishesListTitle.ActualHeight) / 4.0;
                 titleFontSize = 0.02 * dishesPanelHeight;
@@ -218,6 +219,8 @@ namespace WpfClient.Views
 
             // фон
             imgBackground.Source = ImageHelper.GetBitmapImage(backgroundImage);
+            // яркость фона
+            imgBackground.Opacity = (double)AppLib.GetAppGlobalValue("BackgroundImageBrightness", 0.3);
 
             // высота рамки блюда в заказе, из стиля
             setStylePropertyValue("dishBorderStyle", "MinHeight", dishBorderHeight);
@@ -249,7 +252,7 @@ namespace WpfClient.Views
             AppLib.SetPromocodeTextStyle(txtPromoCode);
 
             // яркость фона
-            string opacity = AppLib.GetAppSetting("MenuBackgroundBrightness");
+            string opacity = AppLib.GetAppSetting("BackgroundImageBrightness");
             if (opacity != null) imgBackground.Opacity = opacity.ToDouble();
 
             // заголовок списка
@@ -301,7 +304,9 @@ namespace WpfClient.Views
 
             string preText = App.PromocodeNumber ?? "";
 
-            AppLib.PromoCodeWindow.ShowDialog();
+            Promocode promoWin = new Promocode();
+            promoWin.ShowDialog();
+
             e.Handled = true;
             // чтобы не срабатывали обработчики нижележащих контролов
             AppLib.IsEventsEnable = false;
@@ -773,7 +778,7 @@ namespace WpfClient.Views
             // если стоимость чека == 0, то выйти
             if (orderValue == 0) return;
 
-            TakeOrder takeOrderWin = AppLib.TakeOrderWindow;
+            TakeOrder takeOrderWin = new TakeOrder();
             takeOrderWin.ShowDialog();
 
             // сохранить в заказе флажок "с собой"

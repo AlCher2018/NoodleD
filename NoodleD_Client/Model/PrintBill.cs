@@ -13,6 +13,7 @@ using System.Windows.Media;
 using AppModel;
 using WpfClient.Lib;
 using System.Xml.Serialization;
+using IntegraLib;
 
 namespace WpfClient.Model
 {
@@ -84,6 +85,24 @@ namespace WpfClient.Model
                 width = 300;
             }
 
+            // принтеры в системе
+            List<PrintQueue> printers = PrintHelper.getPrintersList();
+            if (printers == null)
+            {
+                AppLib.WriteLogErrorMessage("В системе не зарегистрирован ни один принтер!!");
+                msgBoxText = AppLib.GetLangTextFromAppProp("printConfigError");
+                return false;
+            }
+            else
+            {
+                try
+                {
+                    string sLog = string.Join(Environment.NewLine + "\t", printers.Select(pq => pq.Name + ", status '" + getPrinterStatus(pq) + "', driver '" + pq.QueueDriver.Name + "'"));
+                    AppLib.WriteLogTraceMessage("Системные принтеры: " + Environment.NewLine + "\t" + sLog);
+                }
+                catch (Exception) { }
+            }
+
             // имя принтера для печати чека
             string printerName = null;
             string result = null;
@@ -102,11 +121,12 @@ namespace WpfClient.Model
             }
 
             // если принтер из настроек не Ок, то берем принтер по умолчанию
-            if ((printerName == null) || ((result != null) && (result != "OK")))
+            if ((printer == null) || ((result != null) && (result != "OK")))
             {
                 AppLib.WriteLogTraceMessage("Предпринимается попытка использовать принтер по умолчанию...");
                 printer = PrintHelper.GetDefaultPrinter();
-                if (printer != null)
+                if ((printer != null) 
+                    && ((printerName == null) || ((printerName != null) && (printer.Name != printerName))))
                 {
                     printerName = printer.Name;
                     result = getPrinterStatus(printer);
@@ -116,11 +136,12 @@ namespace WpfClient.Model
             }
 
             // если принтер по умолчанию не ОК, то берем первый в системе
-            if (printerName == null)
+            if (printer == null)
             {
                 AppLib.WriteLogTraceMessage("Предпринимается попытка использовать первый найденный принтер в ОС...");
                 printer = PrintHelper.GetFirstPrinter();
-                if (printer != null)
+                if ((printer != null)
+                    && ((printerName == null) || ((printerName != null) && (printer.Name != printerName))))
                 {
                     printerName = printer.Name;
                     result = getPrinterStatus(printer);
@@ -157,7 +178,7 @@ namespace WpfClient.Model
                 result = AppLib.GetLangTextFromAppProp("afterPrintingErrMsg");
                 if (result != null) result = result.Replace("\\n", Environment.NewLine);
                 msgBoxText = result + userErrMsgSuffix;
-                AppLib.WriteLogErrorMessage(" Ошибка формирования документа: " + result);
+                AppLib.WriteLogErrorMessage(" Ошибка формирования документа: " + ex.ToString());
                 return false;
             }
 
@@ -168,7 +189,9 @@ namespace WpfClient.Model
             retVal = PrintHelper.PrintFlowDocument(doc, prnTaskName, printerName, out msgBoxText);
             if (retVal == false)
             {
+                // сообщение об ошибке в лог
                 AppLib.WriteLogErrorMessage(" Ошибка печати документа: " + msgBoxText);
+                // и на экран пользователю
                 result = AppLib.GetLangTextFromAppProp("afterPrintingErrMsg");
                 if (result != null) result = result.Replace("\\n", Environment.NewLine);
                 msgBoxText = result + userErrMsgSuffix;
@@ -176,6 +199,7 @@ namespace WpfClient.Model
             else
             {
                 AppLib.WriteLogTraceMessage("Пречек распечатан успешно");
+                if (msgBoxText != null) AppLib.WriteLogErrorMessage(msgBoxText);
             }
 
             return retVal;
@@ -186,8 +210,12 @@ namespace WpfClient.Model
             string retVal = PrintQueueStatus.None.ToString();
             if (printer == null) return retVal;
 
-            retVal = printer.QueueStatus.ToString().ToUpper();
-            if ((printer.IsXpsDevice) || (printer.FullName.Contains("PDF"))) retVal = "OK";
+            if ((printer.QueueStatus == PrintQueueStatus.None)
+                || printer.FullName.Contains("PDF")
+                || printer.IsXpsDevice)
+                retVal = "OK";
+            else
+                retVal = printer.QueueStatus.ToString().ToUpper();
 
             return retVal;
         }

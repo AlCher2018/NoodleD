@@ -15,43 +15,37 @@ namespace WpfClient.Lib
         // вывод на печать документа
         public static bool PrintFlowDocument(FlowDocument doc, string prnTaskName, string printerName, out string errMsg)
         {
-            bool retVal = true; errMsg = "";
+            bool retVal = false;
+            errMsg = "";
 
             // проверить статус принтера перед печетью
-            string result = GetPrinterStatus(printerName);
-            if ((result == null) || (result.ToUpper() != "OK"))
-            {
-                errMsg = string.Format("Ошибка печати чека: принтер \"{0}\" находится в состоянии {1}", printerName, result);
-                return false;
-            }
+            //string result = GetPrinterStatus(printerName);
+            //if ((result == null) || (result.ToUpper() != "OK"))
+            //{
+            //    errMsg = string.Format("Ошибка печати чека: принтер \"{0}\" находится в состоянии {1}", printerName, result);
+            //    return false;
+            //}
 
-            PrintQueue prnQueue = GetPrintQueueByName(printerName);
-
-            PrintDialog printDialog = new PrintDialog();
-            printDialog.PageRange = new PageRange(1, 1);
-            printDialog.PrintQueue = prnQueue;
-            IDocumentPaginatorSource ipag = (doc as IDocumentPaginatorSource);
             try
             {
+                PrintQueue prnQueue = GetPrintQueueByName(printerName);
+
+                PrintDialog printDialog = new PrintDialog();
+                printDialog.PageRange = new PageRange(1, 1);
+                printDialog.PrintQueue = prnQueue;
+                IDocumentPaginatorSource ipag = (doc as IDocumentPaginatorSource);
+
                 printDialog.PrintDocument(ipag.DocumentPaginator, prnTaskName);
                 retVal = true;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                errMsg = string.Format("Ошибка печати чека: {0}\n\tSource: {1}\n\t{2}", e.Message, e.Source, e.StackTrace);
-                retVal = false;
+                errMsg = string.Format("Ошибка печати чека: ", ex.ToString());
             }
 
             // проверить статус принтера после печати
-            if (retVal == true)
-            {
-                //result = GetPrinterStatus(printerName);
-                //if (result.ToUpper() != "OK")
-                //{
-                //    errMsg = string.Format("Ошибка печати чека: принтер \"{0}\" ПОСЛЕ печати находится в состоянии {1}", printerName, result);
-                //    retVal = false;
-                //}
-            }
+            string result = GetPrinterStatus(printerName);
+            errMsg = string.Format("Принтер '{0}' ПОСЛЕ печати находится в состоянии '{1}'", printerName, result);
 
             return retVal;
         }

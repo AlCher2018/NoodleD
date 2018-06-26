@@ -51,7 +51,7 @@ namespace WpfClient
 
         public static System.Windows.Documents.BlockUIContainer getImageBlock(ImageModel imgModel, System.Windows.Documents.FlowDocument doc)
         {
-            string fileName = AppLib.GetFullFileName(imgModel.Source);
+            string fileName = AppLib.GetImageFullFileName(imgModel.Source);
             System.Windows.Controls.Image img = getImage(fileName);
             if (img == null) return null;
 

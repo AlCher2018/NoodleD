@@ -11,11 +11,14 @@ using System.Windows.Media;
 using System.Windows.Navigation;
 using UserActionLog;
 using AppActionNS;
-using WpfClient.Lib;
 using AppModel;
-using WpfClient.Views;
 using System.Threading;
 using System.Windows.Controls;
+using SplashScreenLib;
+using IntegraLib;
+using WpfClient.Views;
+using System.Reflection;
+using IntegraWPFLib;
 
 namespace WpfClient
 {
@@ -28,7 +31,6 @@ namespace WpfClient
         
         // специальные логгеры событий WPF
         public static UserActionIdle IdleHandler = null;
-        public static AppActionLogger AppActionLogger;
 
         public static string DeviceId;
         public static string OrderNumber;
@@ -37,110 +39,111 @@ namespace WpfClient
         [STAThread]
         public static void Main()
         {
+            App app = new App();
+
             if (Microsoft.Shell.SingleInstance<App>.InitializeAsFirstInstance(Unique))
             {
-                AppLib.WriteLogInfoMessage("************  Start application  **************");
+                string cfgValue;
+                // установить текущий каталог на папку с приложением
+                setAppDirectory();
 
+                // splash-screen
+                Splasher.Splash = new Views.SplashScreen();
+                Splasher.ShowSplash();
+
+                MessageListener.Instance.ReceiveMessage("Инициализация журнала событий...");
+                cfgValue = AppLib.InitAppLoggers();
+                if (cfgValue != null)
+                {
+                    appExit(1, "Ошибка инициализации журнала приложения: " + cfgValue);
+                }
+
+                AppLib.WriteLogInfoMessage("************  Start NoodleD_Client (WPF) *************");
                 // объем доступной памяти
+                MessageListener.Instance.ReceiveMessage("Check free RAM value...");
                 int freeMemory = AppLib.getAvailableRAM();
-                AppLib.WriteLogInfoMessage(" - available memory: " + freeMemory.ToString() + " MB");
+                AppLib.WriteLogInfoMessage("Available RAM: " + freeMemory.ToString() + " MB");
                 if (freeMemory < 300)
                 {
                     AppLib.WriteLogErrorMessage("Terminate program by low memory.");
                     AppLib.WriteLogInfoMessage("************  End application  ************");
-                    MessageBox.Show("This computer has too low available memory.\nYou need at least 300 MB free memory.");
-                    Environment.Exit(2);
-                    //                Process.GetCurrentProcess().Kill();
+                    appExit(2, "This computer has too low available memory.\r\nYou need at least 300 MB free memory.");
                 }
 
-                App app = new App();
-                // сплэш-экран
-                AppLib.WriteLogTraceMessage("Отображаю splash-screen...");
-                getAppLayout();
-                string fileName = (AppLib.IsAppVerticalLayout ? "bg 3ver 1080x1920 splash.png" : "bg 3hor 1920x1080 splash.png");
-                System.Windows.SplashScreen splashScreen = new System.Windows.SplashScreen(fileName);
-                splashScreen.Show(true);
-
-                // проверка соединения с бд
-                if (AppLib.CheckDBConnection(typeof(NoodleDContext)) == false)
+                // таймаут запуска приложения
+                cfgValue = CfgFileHelper.GetAppSetting("StartTimeout");
+                int startTimeout = 0;
+                if (cfgValue != null) startTimeout = cfgValue.ToInt();
+                if (startTimeout != 0)
                 {
-                    bool result = false;
-                    AppStartWait winWait = new AppStartWait();
-                    winWait.Show();
-
-                    // сделать цикл проверки подключения: 20 раз через 2 сек
-                    for (int i = 1; i <= 20; i++)
+                    for (int i = startTimeout; i > 0; i--)
                     {
-                        winWait.Dispatcher.Invoke(() =>
-                            {
-                                int iVal = winWait.txtNumAttempt.Text.ToInt();
-                                iVal++;
-                                winWait.txtNumAttempt.Text = iVal.ToString();
-                                winWait.InvalidateProperty(TextBlock.TextProperty);
-                                winWait.InvalidateVisual();
-                                winWait.Refresh();
-                            });
-                        Thread.Sleep(2000);
-
-                        result = AppLib.CheckDBConnection(typeof(NoodleDContext));
-                        if (result) break;
-                    }
-                    winWait.Close();
-
-                    if (!result)
-                    {
-                        MessageBox.Show("Ошибка подключения к базе данных (описание смотри в логах).\nПриложение будет закрыто", "Аварийное завершение", MessageBoxButton.OK, MessageBoxImage.Stop);
-                        Environment.Exit(3);
-                    }
-                    // перезапусить приложение
-                    else
-                    {
-                        AppLib.RestartApplication();
+                        MessageListener.Instance.ReceiveMessage($"Таймаут запуска приложения - {i} секунд.");
+                        System.Threading.Thread.Sleep(1000);
                     }
                 }
+
+                #region информация о сборках
+                MessageListener.Instance.ReceiveMessage("Получаю информацию о сборках и настройках...");
+                ITSAssemblyInfo asmInfo = new ITSAssemblyInfo(AppEnvironment.GetAppAssemblyName());
+                AppLib.WriteLogInfoMessage($" - файл: {asmInfo.FullFileName}, version {asmInfo.Version}, last write date '{asmInfo.DateLastOpened.ToString()}'");
+                asmInfo = new ITSAssemblyInfo("IntegraLib");
+                AppLib.WriteLogInfoMessage($" - файл: {asmInfo.FullFileName}, version {asmInfo.Version}, last write date '{asmInfo.DateLastOpened.ToString()}'");
+                asmInfo = new ITSAssemblyInfo("IntegraWPFLib");
+                AppLib.WriteLogInfoMessage($" - файл: {asmInfo.FullFileName}, version {asmInfo.Version}, last write date '{asmInfo.DateLastOpened.ToString()}'");
+
+                AppLib.WriteLogInfoMessage("Системное окружение: " + AppEnvironment.GetEnvironmentString());
 
                 // номер устройства - не число!
                 if (AppLib.GetAppSetting("ssdID").IsNumber() == false)
                 {
                     AppLib.WriteLogErrorMessage("** Номер устройства - НЕ ЧИСЛО !! **");
                     AppLib.WriteLogInfoMessage("************  End application  ************");
-                    MessageBox.Show("Номер устройства - НЕ ЧИСЛО!!");
-                    Environment.Exit(4);
+                    appExit(4, "Номер устройства - НЕ ЧИСЛО!!");
                 }
+
                 // основная информация о софт-окружении
-                AppLib.WriteLogTraceMessage(string.Format("Настройки: Id устройства-{0}, папка изображений-{1}, таймер бездействия-{2} sec, диапазон номеров чеков от {3} до {4}, принтер пречека-{5}, отладка: IsLogUserAction-{6}, IsWriteTraceMessages-{7}, IsWriteWindowEvents-{8}", 
+                AppLib.WriteLogTraceMessage(string.Format("Настройки: Id устройства-{0}, папка изображений-{1}, таймер бездействия-{2} sec, диапазон номеров чеков от {3} до {4}, принтер пречека-{5}, отладка: IsLogUserAction-{6}, IsWriteTraceMessages-{7}, IsWriteWindowEvents-{8}",
                     AppLib.GetAppSetting("ssdID"), AppLib.GetAppSetting("ImagesPath"), AppLib.GetAppSetting("UserIdleTime"),
-                    AppLib.GetAppSetting("RandomOrderNumFrom"), AppLib.GetAppSetting("RandomOrderNumTo"), 
+                    AppLib.GetAppSetting("RandomOrderNumFrom"), AppLib.GetAppSetting("RandomOrderNumTo"),
                     AppLib.GetAppSetting("PrinterName"), AppLib.GetAppSetting("IsLogUserAction"), AppLib.GetAppSetting("IsWriteTraceMessages"), AppLib.GetAppSetting("IsWriteWindowEvents")));
 
-                //******  СТАТИЧЕСКИЕ настройки  ******
-                AppLib.WriteLogTraceMessage("Читаю настройки из ресурсов приложения (app.xaml) ...");
-                // ресурсы приложения
-                //createappresources(app);        // определенные в приложении
-                app.InitializeComponent();          // определенные в app.xaml
-
+                //******  НАСТРОЙКИ  ******
+                // определенные в app.xaml
+                app.InitializeComponent();
+                // определенные в config-файле
+                getSettingsFromConfigFile();     
                 // вычислить размеры, хранимые в свойствах приложения
                 calculateAppSizes();
-
-                //******  динамические настройки  ******
-                // получение и сохранение внешних ресурсов приложения
-                AppLib.GetSettingsFromConfigFile();     // определенные в config-файле
                 // прочие глобальные настройки
                 AppLib.SetAppGlobalValue("promoCode", null);
                 //TestData.mainProc();
+                #endregion
 
-                // определенные в ms sql
-                try
+                // проверка соединения с бд
+                MessageListener.Instance.ReceiveMessage("Проверяю доступность к базе данных...");
+                AppLib.WriteLogTraceMessage("Проверка доступа к базе данных...");
+                AppLib.WriteLogTraceMessage(" - строка подключения: " + getDbConnectionString());
+                string errorMessage;
+                while (AppLib.CheckDBConnection(typeof(NoodleDContext), out errorMessage) == false)
                 {
-                    AppLib.ReadSettingFromDB();
-                    AppLib.ReadAppDataFromDB();
+                    AppLib.WriteLogTraceMessage(" - result: " + errorMessage);
+                    // задержка на 10 сек
+                    for (int i = 10; i > 0; i--)
+                    {
+                        MessageListener.Instance.ReceiveMessage($"Проверка доступа к БД завершилась ошибкой!! (след.проверка через {i} сек)");
+                        Thread.Sleep(1000);
+                    }
+                    MessageListener.Instance.ReceiveMessage("Проверяю доступность к базе данных...");
+                    Thread.Sleep(500);
                 }
-                catch (Exception)
-                {
-                    // сообщения об ошибках находятся в соотв.модулях, здесь только выход из приложения
-                    app.Shutdown(1);
-                    return;
-                }
+                AppLib.WriteLogTraceMessage(" - result: Ok");
+
+                // настройки, определенные в ms sql
+                readSettingFromDB();
+
+                // данные, хранящиеся в БД
+                readAppDataFromDB();
 
                 // ожидашка
                 int idleSec = (int)AppLib.GetAppGlobalValue("UserIdleTime");
@@ -152,23 +155,45 @@ namespace WpfClient
                     IdleHandler.SetPause();
                 }
 
-                // логгер событий UI-элементов приложения
-                AppActionLogger = new AppActionLogger();
-
                 // главное окно приложения
+                MessageListener.Instance.ReceiveMessage("Запуск основного окна...");
+                Thread.Sleep(500);
+
                 MainWindow mainWindow = new MainWindow();
-                app.Run(mainWindow);
+                try
+                {
+                    app.Run(mainWindow);
+                }
+                catch (Exception ex)
+                {
+                    AppLib.WriteLogErrorMessage(ex.ToString());
+                    MessageBox.Show(ex.Message, "Error Application", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
+                }
 
                 AppLib.WriteLogInfoMessage("************  End application  ************");
 
                 // подчистить память
                 if (IdleHandler != null) IdleHandler.Dispose();
-                AppActionLogger.Close();
+                AppLib.AppActionLogger.Close();
 
                 // Allow single instance code to perform cleanup operations
                 Microsoft.Shell.SingleInstance<App>.Cleanup();
             }
         }
+
+
+        private static void appExit(int exitCode, string errMsg)
+        {
+            if (Splasher.Splash != null) Splasher.CloseSplash();
+
+            if ((exitCode != 0) && (errMsg.IsNull() == false))
+            {
+                MessageBox.Show(errMsg, "Аварийное завершение программы", MessageBoxButton.OK, MessageBoxImage.Stop);
+            }
+
+            Environment.Exit(exitCode);
+        }
+
 
         #region таймер бездействия
 
@@ -283,13 +308,15 @@ namespace WpfClient
 
         #endregion
 
-
-        #region check funcs
-
-        private static void getAppLayout()
+        #region работа с БД
+        private static string getDbConnectionString()
         {
-            AppLib.SetAppGlobalValue("screenWidth", SystemParameters.PrimaryScreenWidth);
-            AppLib.SetAppGlobalValue("screenHeight", SystemParameters.PrimaryScreenHeight);
+            string retVal = null;
+            using (NoodleDContext dbContext = new NoodleDContext())
+            {
+                retVal = dbContext.Database.Connection.ConnectionString;
+            }
+            return retVal;
         }
 
         private static void checkDBConnection()
@@ -330,6 +357,305 @@ namespace WpfClient
             }
             AppLib.WriteLogTraceMessage(logMsg + " READY");
         }
+        #endregion
+
+        #region настройка приложения
+
+        private static void getSettingsFromConfigFile()
+        {
+            AppLib.WriteLogTraceMessage("Читаю настройки из файла *.config ...");
+
+            // фоновое изображение
+            saveAppSettingToProps("BackgroundImageHorizontal");
+            saveAppSettingToProps("BackgroundImageVertical");
+            saveAppSettingToProps("BackgroundImageBrightness", typeof(double), "0.2");
+
+            // идентификатор устройства самообслуживания
+            saveAppSettingToProps("ssdID", null);
+            App.DeviceId = (string)AppLib.GetAppGlobalValue("ssdID");
+
+            // путь к папке с изображениями
+            saveAppSettingToProps("ImagesPath");
+
+            // символ денежной единицы
+            saveAppSettingToProps("CurrencyChar", null);
+
+            // печать чека
+            // ширина в пикселях (1"=96px => 1px = 0.26mm)
+            saveAppSettingToProps("BillPageWidht", typeof(int), "300");
+            // размер шрифта позиций заказа
+            saveAppSettingToProps("BillLineFontSize", typeof(int), "12");
+            // отступ слева строк позиций заказа, в пикселях (1px = 0.26mm)
+            saveAppSettingToProps("BillLineLeftMargin", typeof(int), "0");
+            // отступ сверху строки блюда, в пикселях (1px = 0.26mm)
+            saveAppSettingToProps("BillLineTopMargin", typeof(int), "10");
+            // отступ сверху строки ингредиента, в пикселях (1px = 0.26mm)
+            saveAppSettingToProps("BillLineIngrTopMargin", typeof(int), "0");
+            // отступ сверху строки цены, в пикселях (1px = 0.26mm)
+            saveAppSettingToProps("BillLinePriceTopMargin", typeof(int), "0");
+
+            // большие кнопки прокрутки панели блюд
+            saveAppSettingToProps("dishesPanelScrollButtonSize", typeof(double));
+            saveAppSettingToProps("dishesPanelScrollButtonHorizontalAlignment");
+
+            // размер шрифта заголовка панели блюда
+            saveAppSettingToProps("dishPanelHeaderFontSize", typeof(int));
+            saveAppSettingToProps("dishPanelUnitCountFontSize", typeof(int));
+            saveAppSettingToProps("dishPanelDescriptionFontSize", typeof(int));
+            saveAppSettingToProps("dishPanelAddButtoFontSize", typeof(int));
+            saveAppSettingToProps("dishPanelFontSize", typeof(int));
+            saveAppSettingToProps("dishPanelGarnishBrightness");
+
+            saveAppSettingToPropTypeBool("IsPrintBarCode");
+            saveAppSettingToPropTypeBool("IsIncludeBarCodeLabel");
+            saveAppSettingToPropTypeBool("isAnimatedSelectVoki");
+
+            saveAppSettingToPropTypeBool("IsLogUserAction");
+            saveAppSettingToPropTypeBool("IsWriteTraceMessages");
+
+            // добавить некоторые постоянные тексты (заголовки, надписи на кнопках)
+            parseAndSetAllLangString("dialogBoxYesText");
+            parseAndSetAllLangString("dialogBoxNoText");
+            parseAndSetAllLangString("wordIngredients");
+            parseAndSetAllLangString("InputNumberWinTitle");
+            parseAndSetAllLangString("cartDelIngrTitle");
+            parseAndSetAllLangString("cartDelIngrQuestion");
+            parseAndSetAllLangString("cartDelDishTitle");
+            parseAndSetAllLangString("cartDelDishQuestion");
+            // сообщения печати
+            parseAndSetAllLangString("printOrderTitle");
+            parseAndSetAllLangString("saveOrderErrorMessage");
+            parseAndSetAllLangString("userErrMsgSuffix");
+            parseAndSetAllLangString("afterPrintingErrMsg");
+            parseAndSetAllLangString("printConfigError");
+            parseAndSetAllLangString("printerStatusMsg");
+            // TakeOrder window
+            parseAndSetAllLangString("takeOrderOut");
+            parseAndSetAllLangString("wordOr");
+            parseAndSetAllLangString("takeOrderIn");
+
+            // AreYouHere window
+            saveAppSettingToProps("UserIdleTime", typeof(int));        // время бездействия из config-файла, в сек
+            parseAndSetAllLangString("areYouHereTitle");
+            parseAndSetAllLangString("areYouHereQuestion");
+            // время в секундах, через которое произойдет возврат приложения в исходное состояние, если пользователь не нажал Да
+            saveAppSettingToProps("autoUIReset", typeof(int));
+
+            parseAndSetAllLangString("CurrencyName");
+            parseAndSetAllLangString("withGarnish");
+
+            AppLib.WriteLogTraceMessage("Читаю настройки из файла *.config ... READY");
+        }
+
+        // сохранить настройки приложения из config-файла в свойствах приложения
+        public static bool saveAppSettingToProps(string settingName, Type settingType = null, string defaultConfValue = null)
+        {
+            string settingValue = CfgFileHelper.GetAppSetting(settingName);
+            if (settingValue == null)
+            {
+                if (defaultConfValue == null)
+                    return false;
+                else
+                    settingValue = defaultConfValue;
+            }
+
+            if (settingType == null)
+            {
+                AppLib.SetAppGlobalValue(settingName, settingValue);   // по умолчанию сохраняется как строка
+            }
+            else
+            {
+                object objValue = getObjValueFromString(settingValue, settingType);
+                if (objValue != null) AppLib.SetAppGlobalValue(settingName, objValue);
+            }
+            return true;
+        }
+
+        private static object getObjValueFromString(string valString, Type valType)
+        {
+            object retVal = null;
+            if (valType.Equals(typeof(double)))
+            {
+                retVal = Convert.ToDouble(valString, System.Globalization.CultureInfo.InvariantCulture);
+            }
+            else if (valType.Equals(typeof(float)))
+            {
+                retVal = Convert.ToSingle(valString, System.Globalization.CultureInfo.InvariantCulture);
+            }
+            else if (valType.Equals(typeof(decimal)))
+            {
+                retVal = Convert.ToDecimal(valString, System.Globalization.CultureInfo.InvariantCulture);
+            }
+            else
+            {
+                MethodInfo mi = valType.GetMethods().FirstOrDefault(m => m.Name == "Parse");
+                // если у типа есть метод Parse
+                if (mi != null)  // то распарсить значение
+                {
+                    object classInstance = Activator.CreateInstance(valType);
+                    retVal = mi.Invoke(classInstance, new object[] { valString });
+                }
+                else
+                    retVal = valString;   // по умолчанию сохраняется как строка
+            }
+            return retVal;
+        }
+
+        // сохранить настройку приложения из config-файла в bool-свойство приложения
+        private static void saveAppSettingToPropTypeBool(string settingName)
+        {
+            string settingValue = AppLib.GetAppSetting(settingName);
+            if (settingValue == null) return;
+
+            // если значение истина, true или 1, то сохранить в свойствах приложения True, иначе False
+            if (settingValue.ToBool() == true)
+                AppLib.SetAppGlobalValue(settingName, true);
+            else
+                AppLib.SetAppGlobalValue(settingName, false);
+        }
+
+        private static void parseAndSetAllLangString(string resKey)
+        {
+            string resValue = AppLib.GetAppSetting(resKey);
+            if (string.IsNullOrEmpty(resValue) == true) return;
+
+            string[] aStr = resValue.Split('|');
+            if (aStr.Length != 3) return;
+
+            Dictionary<string, string> d = new Dictionary<string, string>();
+            d.Add("ru", aStr[0]); d.Add("ua", aStr[1]); d.Add("en", aStr[2]);
+            AppLib.SetAppGlobalValue(resKey, d);
+        }
+
+
+        private static void setAppDirectory()
+        {
+            string curDir = System.IO.Directory.GetCurrentDirectory();
+            if (curDir.Last() != '\\') curDir += "\\";
+            string appDir = AppDomain.CurrentDomain.BaseDirectory;
+            if (curDir.Equals(appDir, StringComparison.OrdinalIgnoreCase) == false)
+            {
+                AppLib.WriteLogTraceMessage($"Текущий каталог '{curDir}' НЕ установлен в папку приложения '{appDir}'. Изменяю текущий каталог...");
+                try
+                {
+                    System.IO.Directory.SetCurrentDirectory(appDir);
+                    AppLib.WriteLogTraceMessage("Текущий каталог установлен в папку приложения успешно");
+                }
+                catch (Exception ex)
+                {
+                    AppLib.WriteLogErrorMessage("Ошибка изменения текущего каталога: " + ex.Message);
+                    appExit(2, "Error: " + ex.Message);
+                }
+            }
+        }
+
+        public static void readSettingFromDB()
+        {
+            MessageListener.Instance.ReceiveMessage("Читаю настройки из БД...");
+            AppLib.WriteLogTraceMessage("Получаю настройки приложения из таблицы Setting ...");
+
+            using (NoodleDContext db = new NoodleDContext())
+            {
+                try
+                {
+                    List<Setting> setList = db.Setting.ToList();
+                    List<StringValue> stringTable = db.StringValue.ToList();
+
+                    foreach (Setting item in setList)
+                    {
+                        //                        AppLib.WriteLogTraceMessage("- параметр "+ item.UniqName + "...");
+
+                        AppLib.SetAppGlobalValue(item.UniqName, item.Value);
+                        if (item.UniqName.EndsWith("Color") == true)  // преобразовать и переопределить цвета
+                        {
+                            convertAppColor(item.UniqName);
+                            checkAppColor(item.UniqName);
+                        }
+                        if (item.Value == "StringValue")    // заменить в Application.Properties строку StringValue на словарь языковых строк
+                        {
+                            Dictionary<string, string> d = getLangTextDict(stringTable, item.RowGUID, 1);
+                            AppLib.SetAppGlobalValue(item.UniqName, d);
+                        }
+
+                        //                        AppLib.WriteLogTraceMessage("- параметр " + item.UniqName + "... Ready");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    AppLib.WriteLogErrorMessage(string.Format("Fatal error: {0}\nSource: {1}\nStackTrace: {2}", ex.Message, ex.Source, ex.StackTrace));
+                    appExit(5, "Ошибка доступа к данным: " + ex.Message + "\nПрограмма будет закрыта.");
+                }
+            }
+            AppLib.WriteLogTraceMessage("Получаю настройки приложения из таблицы Setting ... READY");
+        }
+
+        // установка цвета ресурса приложения (Application.Resources) в цвет из свойств приложения (Application.Properties)
+        private static void checkAppColor(string setName)
+        {
+            SolidColorBrush bRes = (SolidColorBrush)Application.Current.Resources[setName];
+            if (bRes == null) return;
+
+            SolidColorBrush bProp = (SolidColorBrush)AppLib.GetAppGlobalValue(setName);
+
+            if (bRes.Color.Equals(bProp.Color) == false)  // если не равны
+            {
+                Application.Current.Resources[setName] = bProp;   // то переопределить ресурсную кисть
+            }
+        }
+        private static Dictionary<string, string> getLangTextDict(List<StringValue> stringTable, Guid rowGuid, int fieldTypeId)
+        {
+            Dictionary<string, string> retVal = new Dictionary<string, string>();
+            foreach (StringValue item in
+                from val in stringTable where val.RowGUID == rowGuid && val.FieldType.Id == fieldTypeId select val)
+            {
+                if (retVal.Keys.Contains(item.Lang) == false) retVal.Add(item.Lang, item.Value);
+            }
+            return retVal;
+        }
+
+
+        public static void readAppDataFromDB()
+        {
+            MessageListener.Instance.ReceiveMessage("Получаю из MS SQL главное меню...");
+            AppLib.WriteLogTraceMessage("Получаю из MS SQL главное меню...");
+
+            MenuLib.MenuFolderHandler = (folderName) => MessageListener.Instance.ReceiveMessage($"Получаю блюда раздела '{folderName}'...");
+            List<AppModel.MenuItem> newMenu = MenuLib.GetMenuMainFolders();
+            if (newMenu == null)
+            {
+                AppLib.WriteLogErrorMessage("Fatal error: Ошибка создания Главного Меню. Меню не создано. Аварийное завершение приложения.");
+                MessageBox.Show("Ошибка создания меню\nПрограмма будет закрыта.");
+                throw new Exception("Ошибка создания меню");
+            }
+
+            // сохранить Главное Меню в свойствах приложения
+            List<AppModel.MenuItem> mainMenu = (List<AppModel.MenuItem>)AppLib.GetAppGlobalValue("mainMenu");
+            if (mainMenu != null) mainMenu.Clear();
+            mainMenu = newMenu;
+
+            AppLib.SetAppGlobalValue("mainMenu", mainMenu);
+
+            AppLib.WriteLogTraceMessage("Получаю из MS SQL главное меню... - READY");
+        }
+
+        // преобразование строки цветов (R,G,B) в SolidColorBrush
+        private static void convertAppColor(string setName)
+        {
+            var buf = AppLib.GetAppGlobalValue(setName);
+            if ((buf is string) == false) return;
+
+            // если цвет задан строкой
+            string sBuf = (string)buf;
+            string[] sRGB = sBuf.Split(',');
+            byte r = 0, g = 0, b = 0;
+            byte.TryParse(sRGB[0], out r);
+            byte.TryParse(sRGB[1], out g);
+            byte.TryParse(sRGB[2], out b);
+            SolidColorBrush brush = new SolidColorBrush(new Color() { A = 255, R = r, G = g, B = b });
+
+            AppLib.SetAppGlobalValue(setName, brush);
+        }
+
 
         private static void createAppResources(Application app)
         {
@@ -412,7 +738,7 @@ namespace WpfClient
             AppLib.SetAppGlobalValue("dishesPanelWidth", dishesPanelWidth);
 
             // кол-во колонок панелей блюд
-            AppLib.saveAppSettingToProps("dishesColumnsCount");
+            saveAppSettingToProps("dishesColumnsCount");
             int dColCount = AppLib.GetAppGlobalValue("dishesColumnsCount", 0).ToString().ToInt();
             if (dColCount == 0)
             {

@@ -18,6 +18,7 @@ using System.ComponentModel;
 using System.Windows.Media.Animation;
 using AppActionNS;
 using UserActionLog;
+using IntegraLib;
 
 namespace WpfClient.Views
 {

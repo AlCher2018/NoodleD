@@ -15,6 +15,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Diagnostics;
 using AppActionNS;
+using IntegraLib;
 
 namespace WpfClient.Views
 {

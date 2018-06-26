@@ -1,4 +1,5 @@
 ﻿using AppActionNS;
+using IntegraLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,9 +32,9 @@ namespace WpfClient.Views
         public TakeOrder()
         {
             InitializeComponent();
-            this.Activated += TakeOrder_Activated;
 
             setWinLayout();
+            resetLang();
 
             if (AppLib.GetAppSetting("IsWriteWindowEvents").ToBool())
             {
@@ -42,13 +43,7 @@ namespace WpfClient.Views
 
         }
 
-        private void TakeOrder_Activated(object sender, EventArgs e)
-        {
-            AppLib.WriteAppAction(this.Name, AppActionsEnum.TakeOrderWinOpen);
-            _takeOrder = TakeOrderEnum.None;
-        }
-
-        public void ResetLang()
+        private void resetLang()
         {
             // напрямую
             // окно создается и хранится, как глобальная переменная и переключение языка будет осуществляться извне при смене языка UI

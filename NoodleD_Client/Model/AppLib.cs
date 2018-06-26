@@ -21,6 +21,8 @@ using WpfClient.Lib;
 using System.Data.Entity;
 using System.Data.SqlClient;
 using WpfClient.Views;
+using IntegraLib;
+using IntegraWPFLib;
 
 namespace WpfClient
 {
@@ -29,12 +31,12 @@ namespace WpfClient
         // общий логгер
         private static NLog.Logger AppLogger;
 
+        public static AppActionLogger AppActionLogger;
+
         public static bool IsDrag, IsEventsEnable;
         public static double ScreenScale = 1d;
 
         // вспомогательные окна
-        public static Promocode PromoCodeWindow = null;
-        public static TakeOrder TakeOrderWindow = null;
         public static MsgBoxExt MessageWindow = null;
         public static MsgBoxExt ChoiceWindow = null;
 
@@ -43,8 +45,6 @@ namespace WpfClient
         /// </summary>
         static AppLib()
         {
-            // логгер приложения
-            AppLogger = NLog.LogManager.GetCurrentClassLogger();
         }
 
         public static void OnClosingApp()
@@ -89,6 +89,24 @@ namespace WpfClient
         #endregion
 
         #region App logger
+        public static string InitAppLoggers()
+        {
+            string retVal = null;
+            try
+            {
+                AppLogger = NLog.LogManager.GetLogger("fileLogger");
+                if (AppLogger.IsTraceEnabled == false) throw new Exception("Ошибка конфигурирования логгера. Проверьте настройки логгера в файле ClientOrderQueue.exe.config");
+            }
+            catch (Exception ex)
+            {
+                retVal = ex.Message;
+            }
+
+            // логгер событий UI-элементов приложения
+            AppActionLogger = new AppActionLogger();
+
+            return retVal;
+        }
 
         public static void WriteLogTraceMessage(string msg)
         {
@@ -118,7 +136,7 @@ namespace WpfClient
 
             if ((bool)AppLib.GetAppGlobalValue("IsLogUserAction") == false) return;
 
-            App.AppActionLogger.AddAction(new AppActionNS.UICAction()
+            AppActionLogger.AddAction(new AppActionNS.UICAction()
             {
                 deviceId = App.DeviceId,
                 orderNumber = App.OrderNumber,
@@ -148,15 +166,12 @@ namespace WpfClient
             return retVal;
         }
 
-        internal static bool CheckDBConnection(Type dbType)
+        internal static bool CheckDBConnection(Type dbType, out string errorMessage)
         {
-            AppLib.WriteLogTraceMessage("- проверка доступа к базе данных...");
-
+            errorMessage = null;
             // контекст БД
             DbContext dbContext = (DbContext)Activator.CreateInstance(dbType);
-
             SqlConnection dbConn = (SqlConnection)dbContext.Database.Connection;
-            AppLib.WriteLogTraceMessage("-- строка подключения: " + dbConn.ConnectionString);
 
             // создать такое же подключение, но с TimeOut = 1 сек
             SqlConnectionStringBuilder confBld = new SqlConnectionStringBuilder(dbConn.ConnectionString);
@@ -180,7 +195,7 @@ namespace WpfClient
             }
             catch (Exception ex)
             {
-                AppLib.WriteLogErrorMessage("--- ошибка доступа к БД: " + ex.Message);
+                errorMessage = ex.Message;
             }
             finally
             {
@@ -188,44 +203,16 @@ namespace WpfClient
                 testConn = null;
             }
 
-            AppLib.WriteLogTraceMessage("- проверка доступа к базе данных - " + ((retVal) ? "READY" :"ERROR!!!"));
             return retVal;
         }
 
-        public static string GetAppFileName()
-        {
-            var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-            return assembly.ManifestModule.Name;
-        }
 
-        public static string GetAppFullFile()
+        public static string GetImageFullFileName(string fileName)
         {
-            var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-            return assembly.Location;
-        }
+            if (string.IsNullOrEmpty(fileName)) return null;
 
-        public static string GetAppDirectory()
-        {
-            return AppDomain.CurrentDomain.BaseDirectory;
-        }
-
-        public static string GetFullFileName(string fileName)
-        {
-            return getImagePath() + fileName; 
-        }
-        private static string getImagePath()
-        {
-            string imgPath = (string)AppLib.GetAppGlobalValue("ImagesPath");
-            if (string.IsNullOrEmpty(imgPath))  // путь не указан в конфиге - берем путь приложения
-                imgPath = AppLib.GetAppDirectory();
-            else if (imgPath.Contains(@"\:"))   // абсолютный путь
-            { }
-            else  // относительный путь
-            {
-                imgPath = AppLib.GetAppDirectory() + imgPath;
-            }
-            if (imgPath.EndsWith(@"\") == false) imgPath += @"\";
-            return imgPath;
+            string cfgValue = (string)AppLib.GetAppGlobalValue("ImagesPath");
+            return AppEnvironment.GetFullFileName(cfgValue, fileName);
         }
         #endregion
 
@@ -233,10 +220,8 @@ namespace WpfClient
         // получить настройки приложения из config-файла
         public static string GetAppSetting(string key)
         {
-            if (ConfigurationManager.AppSettings.AllKeys.Any(k => k.ToLower().Equals(key.ToLower())) == true)
-                return ConfigurationManager.AppSettings.Get(key);
-            else
-                return null;
+            string retVal = CfgFileHelper.GetAppSetting(key);
+            return ((retVal == null) ? "-" : retVal);
         }
 
         // возвращает ресурс приложения по имени ресурса, если ресурс не найден, возвращает null
@@ -274,23 +259,13 @@ namespace WpfClient
         // получить глобальное значение приложения из его свойств
         public static object GetAppGlobalValue(string key, object defaultValue = null)
         {
-            IDictionary dict = Application.Current.Properties;
-            if (dict.Contains(key) == false) return defaultValue;
-            else return dict[key];
+            return WpfHelper.GetAppGlobalValue(key, defaultValue);
         }
         
         // установить глобальное значение приложения (в свойствах приложения)
         public static void SetAppGlobalValue(string key, object value)
         {
-            IDictionary dict = Application.Current.Properties;
-            if (dict.Contains(key) == false)  // если еще нет значения в словаре
-            {
-                dict.Add(key, value);   // то добавить
-            }
-            else    // иначе - изменить существующее
-            {
-                dict[key] = value;
-            }
+            WpfHelper.SetAppGlobalValue(key, value);
         }
 
 
@@ -502,231 +477,6 @@ namespace WpfClient
 
         #region AppBL
 
-        // сохранить настройки приложения из config-файла в свойствах приложения
-        public static bool saveAppSettingToProps(string settingName, Type settingType = null, string defaultConfValue = null)
-        {
-            string settingValue = AppLib.GetAppSetting(settingName);
-            if (settingValue == null)
-            {
-                if (defaultConfValue == null)
-                    return false;
-                else
-                    settingValue = defaultConfValue;
-            }
-
-            if (settingType == null)
-                AppLib.SetAppGlobalValue(settingName, settingValue);   // по умолчанию сохраняется как строка
-            else
-            {
-                MethodInfo mi = settingType.GetMethods().FirstOrDefault(m => m.Name == "Parse");
-                // если у типа есть метод Parse
-                if (mi != null)  // то распарсить значение
-                {
-                    object classInstance = Activator.CreateInstance(settingType);
-                    object oVal = mi.Invoke(classInstance, new object[] { settingValue });
-                    AppLib.SetAppGlobalValue(settingName, oVal);
-                }
-                else
-                    AppLib.SetAppGlobalValue(settingName, settingValue);   // по умолчанию сохраняется как строка
-            }
-            return true;
-        }
-
-        public static void GetSettingsFromConfigFile()
-        {
-            AppLib.WriteLogTraceMessage("Читаю настройки из файла *.config ...");
-
-            // прочие настройки
-            saveAppSettingToProps("ssdID", null);   // идентификатор устройства самообслуживания
-            App.DeviceId = (string)AppLib.GetAppGlobalValue("ssdID");
-
-            saveAppSettingToProps("ImagesPath");   // путь к папке с изображениями
-            saveAppSettingToProps("CurrencyChar", null);   // символ денежной единицы
-            
-            // печать чека
-            // ширина в пикселях (1"=96px => 1px = 0.26mm)
-            saveAppSettingToProps("BillPageWidht", typeof(int), "300");
-            // размер шрифта позиций заказа
-            saveAppSettingToProps("BillLineFontSize", typeof(int), "12");
-            // отступ слева строк позиций заказа, в пикселях (1px = 0.26mm)
-            saveAppSettingToProps("BillLineLeftMargin", typeof(int), "0");
-            // отступ сверху строки блюда, в пикселях (1px = 0.26mm)
-            saveAppSettingToProps("BillLineTopMargin", typeof(int), "10");
-            // отступ сверху строки ингредиента, в пикселях (1px = 0.26mm)
-            saveAppSettingToProps("BillLineIngrTopMargin", typeof(int), "0");
-            // отступ сверху строки цены, в пикселях (1px = 0.26mm)
-            saveAppSettingToProps("BillLinePriceTopMargin", typeof(int), "0");
-
-            // большие кнопки прокрутки панели блюд
-            saveAppSettingToProps("dishesPanelScrollButtonSize", typeof(double));
-            saveAppSettingToProps("dishesPanelScrollButtonHorizontalAlignment");
-
-            // размер шрифта заголовка панели блюда
-            saveAppSettingToProps("dishPanelHeaderFontSize", typeof(int));
-            saveAppSettingToProps("dishPanelUnitCountFontSize", typeof(int));
-            saveAppSettingToProps("dishPanelDescriptionFontSize", typeof(int));
-            saveAppSettingToProps("dishPanelAddButtoFontSize", typeof(int));
-            saveAppSettingToProps("dishPanelFontSize", typeof(int));
-            saveAppSettingToProps("dishPanelGarnishBrightness");
-            
-            saveAppSettingToPropTypeBool("IsPrintBarCode");
-            saveAppSettingToPropTypeBool("IsIncludeBarCodeLabel");
-            saveAppSettingToPropTypeBool("isAnimatedSelectVoki");
-
-            saveAppSettingToPropTypeBool("IsLogUserAction");
-            saveAppSettingToPropTypeBool("IsWriteTraceMessages");
-
-            // добавить некоторые постоянные тексты (заголовки, надписи на кнопках)
-            parseAndSetAllLangString("dialogBoxYesText");
-            parseAndSetAllLangString("dialogBoxNoText");
-            parseAndSetAllLangString("wordIngredients");
-            parseAndSetAllLangString("InputNumberWinTitle");
-            parseAndSetAllLangString("cartDelIngrTitle");
-            parseAndSetAllLangString("cartDelIngrQuestion");
-            parseAndSetAllLangString("cartDelDishTitle");
-            parseAndSetAllLangString("cartDelDishQuestion"); 
-            // сообщения печати
-            parseAndSetAllLangString("printOrderTitle"); 
-            parseAndSetAllLangString("saveOrderErrorMessage"); 
-            parseAndSetAllLangString("userErrMsgSuffix"); 
-            parseAndSetAllLangString("afterPrintingErrMsg"); 
-            parseAndSetAllLangString("printConfigError"); 
-            parseAndSetAllLangString("printerStatusMsg"); 
-            // TakeOrder window
-            parseAndSetAllLangString("takeOrderOut");
-            parseAndSetAllLangString("wordOr");
-            parseAndSetAllLangString("takeOrderIn");
-
-            // AreYouHere window
-            saveAppSettingToProps("UserIdleTime", typeof(int));        // время бездействия из config-файла, в сек
-            parseAndSetAllLangString("areYouHereTitle");
-            parseAndSetAllLangString("areYouHereQuestion");
-            // время в секундах, через которое произойдет возврат приложения в исходное состояние, если пользователь не нажал Да
-            saveAppSettingToProps("autoUIReset", typeof(int));        
-
-            parseAndSetAllLangString("CurrencyName");
-            parseAndSetAllLangString("withGarnish");
-
-            AppLib.WriteLogTraceMessage("Читаю настройки из файла *.config ... READY");
-        }
-
-        // сохранить настройку приложения из config-файла в bool-свойство приложения
-        private static void saveAppSettingToPropTypeBool(string settingName)
-        {
-            string settingValue = AppLib.GetAppSetting(settingName);
-            if (settingValue == null) return;
-
-            // если значение истина, true или 1, то сохранить в свойствах приложения True, иначе False
-            if (settingValue.ToBool() == true)
-                AppLib.SetAppGlobalValue(settingName, true);
-            else
-                AppLib.SetAppGlobalValue(settingName, false);
-        }
-        private static void parseAndSetAllLangString(string resKey)
-        {
-            string resValue = AppLib.GetAppSetting(resKey);
-            if (string.IsNullOrEmpty(resValue) == true) return;
-
-            string[] aStr = resValue.Split('|');
-            if (aStr.Length != 3) return;
-
-            Dictionary<string, string> d = new Dictionary<string, string>();
-            d.Add("ru", aStr[0]); d.Add("ua", aStr[1]); d.Add("en", aStr[2]);
-            AppLib.SetAppGlobalValue(resKey, d);
-        }
-
-        public static void ReadSettingFromDB()
-        {
-            AppLib.WriteLogTraceMessage("Получаю настройки приложения из таблицы Setting ...");
-            using (NoodleDContext db = new NoodleDContext())
-            {
-                try
-                {
-                    List<Setting> setList = db.Setting.ToList();
-                    List<StringValue> stringTable = db.StringValue.ToList();
-
-                    foreach (Setting item in setList)
-                    {
-//                        AppLib.WriteLogTraceMessage("- параметр "+ item.UniqName + "...");
-
-                        AppLib.SetAppGlobalValue(item.UniqName, item.Value);
-                        if (item.UniqName.EndsWith("Color") == true)  // преобразовать и переопределить цвета
-                        {
-                            convertAppColor(item.UniqName);
-                            checkAppColor(item.UniqName);
-                        }
-                        if (item.Value == "StringValue")    // заменить в Application.Properties строку StringValue на словарь языковых строк
-                        {
-                            Dictionary<string, string> d = getLangTextDict(stringTable, item.RowGUID, 1);
-                            AppLib.SetAppGlobalValue(item.UniqName, d);
-                        }
-
-//                        AppLib.WriteLogTraceMessage("- параметр " + item.UniqName + "... Ready");
-                    }
-                }
-                catch (Exception e)
-                {
-                    AppLib.WriteLogErrorMessage(string.Format("Fatal error: {0}\nSource: {1}\nStackTrace: {2}", e.Message, e.Source, e.StackTrace));
-                    MessageBox.Show("Ошибка доступа к данным: " + e.Message + "\nПрограмма будет закрыта.");
-                    throw;
-                }
-            }
-            AppLib.WriteLogTraceMessage("Получаю настройки приложения из таблицы Setting ... READY");
-
-        }
-
-        public static void ReadAppDataFromDB()
-        {
-            AppLib.WriteLogTraceMessage("Получаю из MS SQL главное меню...");
-
-            List<AppModel.MenuItem> newMenu = MenuLib.GetMenuMainFolders();
-            if (newMenu == null)
-            {
-                AppLib.WriteLogErrorMessage("Fatal error: Ошибка создания Главного Меню. Меню не создано. Аварийное завершение приложения.");
-                MessageBox.Show("Ошибка создания меню\nПрограмма будет закрыта.");
-                throw new Exception("Ошибка создания меню");
-            }
-
-            // сохранить Главное Меню в свойствах приложения
-            List<AppModel.MenuItem> mainMenu = (List<AppModel.MenuItem>)AppLib.GetAppGlobalValue("mainMenu");
-            if (mainMenu != null) mainMenu.Clear();
-            mainMenu = newMenu;
-
-            AppLib.SetAppGlobalValue("mainMenu", mainMenu);
-
-            AppLib.WriteLogTraceMessage("Получаю из MS SQL главное меню... - READY");
-        }
-
-        // преобразование строки цветов (R,G,B) в SolidColorBrush
-        private static void convertAppColor(string setName)
-        {
-            var buf = AppLib.GetAppGlobalValue(setName);
-            if ((buf is string) == false) return;
-
-            // если цвет задан строкой
-            string sBuf = (string)buf;
-            string[] sRGB = sBuf.Split(',');
-            byte r = 0, g = 0, b = 0;
-            byte.TryParse(sRGB[0], out r);
-            byte.TryParse(sRGB[1], out g);
-            byte.TryParse(sRGB[2], out b);
-            SolidColorBrush brush = new SolidColorBrush(new Color() { A = 255, R = r, G = g, B = b });
-
-            AppLib.SetAppGlobalValue(setName, brush);
-        }
-        // установка цвета ресурса приложения (Application.Resources) в цвет из свойств приложения (Application.Properties)
-        private static void checkAppColor(string setName)
-        {
-            SolidColorBrush bRes = (SolidColorBrush)Application.Current.Resources[setName];
-            if (bRes == null) return;
-
-            SolidColorBrush bProp = (SolidColorBrush)AppLib.GetAppGlobalValue(setName);
-
-            if (bRes.Color.Equals(bProp.Color) == false)  // если не равны
-            {
-                Application.Current.Resources[setName] = bProp;   // то переопределить ресурсную кисть
-            }
-        }
 
         public static Brush GetSolidColorBrushFromAppProps(string propName, Brush defaultBrush)
         {
@@ -744,16 +494,6 @@ namespace WpfClient
 
         }
 
-        private static Dictionary<string, string> getLangTextDict(List<StringValue> stringTable, Guid rowGuid, int fieldTypeId)
-        {
-            Dictionary<string, string> retVal = new Dictionary<string, string>();
-            foreach (StringValue item in
-                from val in stringTable where val.RowGUID == rowGuid && val.FieldType.Id == fieldTypeId select val)
-            {
-                if (retVal.Keys.Contains(item.Lang) == false) retVal.Add(item.Lang, item.Value);
-            }
-            return retVal;
-        }
 
         public static string GetCostUIText(decimal cost)
         {

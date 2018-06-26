@@ -1,4 +1,5 @@
 ﻿using AppModel;
+using IntegraLib;
 using System.Windows.Controls;
 
 namespace WpfClient.Views

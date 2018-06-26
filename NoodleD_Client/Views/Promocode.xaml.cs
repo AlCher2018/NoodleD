@@ -1,4 +1,5 @@
 ﻿using AppActionNS;
+using IntegraLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,10 +36,11 @@ namespace WpfClient.Views
             }
 
             setLayout();
+            resetLang();
         }
 
 
-        internal void ResetLang()
+        private void resetLang()
         {
             BindingExpression be;
             // установка текстов на выбранном языке

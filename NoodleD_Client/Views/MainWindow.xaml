@@ -9,7 +9,7 @@
         mc:Ignorable="d"
         Title="MainWindow" Name="MainMenu"
         WindowStyle="None" WindowState="Maximized" WindowStartupLocation="CenterScreen" 
-        UseLayoutRounding ="True" Icon="../AppImages/icon.ico">
+        UseLayoutRounding ="True" Icon="/NoodleD_Client;component/icon.ico" >
     <!-- UseLayoutRounding ="True" - выравнивание элеметов по границе пикселей -->
     
     <Window.Resources>

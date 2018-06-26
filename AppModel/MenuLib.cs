@@ -16,12 +16,14 @@ namespace AppModel
     // статический класс-оболочка для обслуживания данных из БД
     public static class MenuLib
     {
+        public static Action<string> MenuFolderHandler;
         // статическая оболочка для получения меню
         public static List<MenuItem> GetMenuMainFolders()
         {
             List<MenuItem> retVal = null;
             using (MainMenu mm = new MainMenu())
             {
+                if (MenuLib.MenuFolderHandler != null) mm.MenuFolderHandler = MenuLib.MenuFolderHandler;
                 retVal = mm.GetMenuItemsList();
             }
 
@@ -34,8 +36,10 @@ namespace AppModel
     // экземплярный класс главного меню
     public class MainMenu: IDisposable
     {
-        NoodleDContext _db;
-        List<StringValue> _stringTable;
+        private NoodleDContext _db;
+        private List<StringValue> _stringTable;
+
+        public Action<string> MenuFolderHandler;
 
         public MainMenu()
         {
@@ -55,6 +59,12 @@ namespace AppModel
             {
                 MenuItem newMenuItem = new MenuItem() { MenuFolder = item };
                 newMenuItem.langNames = getLangTextDict(item.RowGUID, fieldTypeId);
+                // передать в обработчик наименование пункта меню
+                if (MenuFolderHandler != null)
+                {
+                    string folderName = getFolderNameRu(item.RowGUID);
+                    if (folderName != null) MenuFolderHandler.Invoke(folderName);
+                }
 
                 // добавить блюда к пункту меню
                 try
@@ -74,6 +84,15 @@ namespace AppModel
 
             return retVal;
         }  // GetMenuItemList
+
+        private string getFolderNameRu(Guid rowGUID)
+        {
+            StringValue row = _stringTable.FirstOrDefault(r => (r.RowGUID==rowGUID) && (r.FieldTypeId==1) && (r.Lang=="ru"));
+            if (row == null)
+                return null;
+            else
+                return row.Value;
+        }
 
         private List<DishItem> getDishes(MenuFolder menuFolder)
         {
