@@ -10,7 +10,6 @@ using AppModel;
 using WpfClient.Lib;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using AppActionNS;
 using System.ComponentModel;
 using UserActionLog;
 using WpfClient.Model;
@@ -29,7 +28,7 @@ namespace WpfClient.Views
         private OrderItem _currentOrder;
         private bool _isDrag;
 
-        private UserActionsLog _eventsLog;
+        //private UserActionsLog _eventsLog;
 
         private double dishBorderHeight;
 
@@ -44,24 +43,21 @@ namespace WpfClient.Views
 
             initUI();
 
-            if (AppLib.GetAppSetting("IsWriteWindowEvents").ToBool())
-            {
-                _eventsLog = new UserActionsLog(this, EventsMouseEnum.Bubble, EventsKeyboardEnum.None, EventsTouchEnum.Bubble, UserActionLog.LogFilesPathLocationEnum.App_Logs, true, false);
-            }
+            //if (AppLib.GetAppSetting("IsWriteWindowEvents").ToBool())
+            //{
+            //    _eventsLog = new UserActionsLog(this, EventsMouseEnum.Bubble, EventsKeyboardEnum.None, EventsTouchEnum.Bubble, UserActionLog.LogFilesPathLocationEnum.App_Logs, true, false);
+            //}
 
             updatePriceOrder();
         }
 
         private void Cart_Loaded(object sender, RoutedEventArgs e)
         {
-            AppLib.WriteLogTraceMessage(string.Format("Открывается корзина для заказа {0} ...", _currentOrder.OrderNumberForPrint));
-            AppLib.WriteAppAction(this.Name, AppActionsEnum.CartWinOpen);
+            AppLib.WriteAppAction($"CartWin|Открывается Корзина для заказа {_currentOrder.OrderNumberForPrint} ...");
         }
         protected override void OnClosing(CancelEventArgs e)
         {
-            AppLib.WriteLogTraceMessage(string.Format("Закрывается корзина для заказа {0} ...", _currentOrder.OrderNumberForPrint));
-            AppLib.WriteAppAction(this.Name, AppActionsEnum.CartWinClose);
-
+            AppLib.WriteAppAction($"CartWin|Закрывается Корзина для заказа {_currentOrder.OrderNumberForPrint} ...");
             base.OnClosing(e);
         }
 
@@ -298,9 +294,7 @@ namespace WpfClient.Views
         }
         private void brdPromoCode_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
-            //if (e.StylusDevice != null) return;
-
-            AppLib.WriteAppAction(this.Name, AppActionsEnum.ButtonPromocode);
+            AppLib.WriteAppAction("CartWin|Нажата кнопка PromoCode");
 
             string preText = App.PromocodeNumber ?? "";
 
@@ -539,11 +533,7 @@ namespace WpfClient.Views
         }
         private void portionCountDel_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            //if (e.StylusDevice != null) return;
             if (_isDrag) return;
-
-            // touch-события контролов не вызывают событие SelectionChanged списка !!!!
-            //AppLib.SelectListBoxItemByHisInnerControl((FrameworkElement)sender, lstDishes); // делаем это принудетельно
 
             lock (this)
             {
@@ -553,8 +543,6 @@ namespace WpfClient.Views
 
         private void portionCountAdd_TouchUp(object sender, TouchEventArgs e)
         {
-            //MessageBox.Show("portionCountAdd_TouchUp: e.TouchDevice - " + ((e.TouchDevice == null) ? "null" : e.TouchDevice.ToString()) + " [e.Device - " + e.Device.ToString() + "]");
-
             if (_isDrag) return;
 
             // touch-события контролов не вызывают событие SelectionChanged списка !!!!
@@ -567,13 +555,6 @@ namespace WpfClient.Views
         }
         private void portionCountAdd_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            //MessageBox.Show("portionCountAdd_MouseUp: e.StylusDevice - " + ((e.StylusDevice == null) ? "null" : e.StylusDevice.ToString()) + " [e.Device - " + e.Device.ToString() + "]");
-
-            //if (e.StylusDevice != null) return;
-
-            // touch-события контролов не вызывают событие SelectionChanged списка !!!!
-            //AppLib.SelectListBoxItemByHisInnerControl((FrameworkElement)sender, lstDishes); // делаем это принудетельно
-
             if (_isDrag) return;
 
             lock (this)
@@ -584,7 +565,6 @@ namespace WpfClient.Views
 
         private void dishDel_TouchUp(object sender, TouchEventArgs e)
         {
-            //MessageBox.Show("dishDel_TouchUp: e.TouchDevice - " + ((e.TouchDevice == null)?"null":e.TouchDevice.ToString()) + " [e.Device - " + e.Device.ToString() + "]");
             e.Handled = true;
 
             if (_isDrag) return;
@@ -599,12 +579,6 @@ namespace WpfClient.Views
         }
         private void dishDel_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            //MessageBox.Show("dishDel_MouseUp: e.StylusDevice - " + ((e.StylusDevice==null)?"null":e.StylusDevice.ToString()) + " [e.Device - " + e.Device.ToString() + "]");
-            //if (e.StylusDevice != null) return;
-
-            // touch-события контролов не вызывают событие SelectionChanged списка !!!!
-            //AppLib.SelectListBoxItemByHisInnerControl((FrameworkElement)sender, lstDishes); // делаем это принудетельно
-
             if (_isDrag) return;
 
             lock (this)
@@ -615,22 +589,10 @@ namespace WpfClient.Views
 
         private void ingrDel_TouchUp(object sender, TouchEventArgs e)
         {
-            MessageBox.Show("ingrDel_TouchUp: e.TouchDevice-" + ((e.TouchDevice==null)?"null":e.TouchDevice.ToString()) + ", e.Device" + e.Device.ToString());
             if (_isDrag) return;
-
-            // touch-события контролов не вызывают событие SelectionChanged списка !!!!
-            //AppLib.SelectListBoxItemByHisInnerConttrol((FrameworkElement)sender, lstDishes); // делаем это принудетельно
-
-            //lock (this)
-            //{
-            //    ingrDel(sender, e.GetTouchPoint(this).Position);
-            //}
         }
         private void ingrDel_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            //MessageBox.Show("ingrDel_MouseUp: e.StylusDevice-" + ((e.StylusDevice==null)?"null":e.StylusDevice.ToString()) + ", e.Device" + e.Device.ToString());
-            //            if (e.StylusDevice != null) return;
-
             if (_isDrag) return;
 
             lock (this)
@@ -639,42 +601,32 @@ namespace WpfClient.Views
             }
         }
 
+        // удаление ингредиента
         private void ingrDel(object sender, Point point)
         {
             // получить контролы из нажатого элемента
             //    listbox ингредиентов
-            AppLib.WriteLogTraceMessage("");
-            AppLib.WriteLogTraceMessage(string.Format("нажата кнопка с координатами ({0}, {1}), type - {2}",point.X, point.Y, sender.GetType().Name));
             ListBoxItem lbiIngr = (ListBoxItem)AppLib.FindVisualParentByType((FrameworkElement)sender, typeof(ListBoxItem));
-
             ListBox lbIngr = (ListBox)AppLib.FindVisualParentByType((FrameworkElement)lbiIngr, typeof(ListBox));
-//            AppLib.WriteLogTraceMessage(string.Format("найден список ингредиентов - {0}",lbIngr));
             DishAdding tmpIngr = (DishAdding)lbIngr.ItemContainerGenerator.ItemFromContainer(lbiIngr);
-//            AppLib.WriteLogTraceMessage(string.Format("найден элемент в списке - {0}, {1}", lbiIngr.ToString(), tmpIngr.langNames["ru"]));
 
             int iCnt = lbIngr.ItemContainerGenerator.IndexFromContainer(lbiIngr);
-//            AppLib.WriteLogTraceMessage(string.Format("индекс контейнера в списке - {0}",iCnt));
 
             if (lbIngr.SelectedIndex != iCnt) lbIngr.SelectedIndex = iCnt;
-//            AppLib.WriteLogTraceMessage(string.Format("индекс элемента в списке - {0}", lbIngr.SelectedIndex));
             
             //    listbox блюд
             AppLib.SelectListBoxItemByHisInnerControl((FrameworkElement)lbIngr, lstDishes); // делаем это принудетельно
-//            AppLib.WriteLogTraceMessage(string.Format("индекс блюда в списке - {0}", lstDishes.SelectedIndex));
 
             DishItem dishItem = (DishItem)lstDishes.SelectedItem;
             DishAdding ingrItem = (DishAdding)lbIngr.SelectedItem;
 
-            //MessageBox.Show(string.Format("ингредиент - {0}, блюдо - {1}", ingrItem.langNames["ru"], dishItem.langNames["ru"]));
-            string actLogMsg = string.Format("{0};{1}", ingrItem.langNames["ru"], dishItem.langNames["ru"]);
-            AppLib.WriteAppAction(this.Name, AppActionsEnum.ButtonIngredientRemove, actLogMsg);
+            AppLib.WriteAppAction($"CartWin|Нажата кнопка удаления ингредиента '{ingrItem.langNames["ru"]}' для блюда '{dishItem.langNames["ru"]}'");
 
             string title = AppLib.GetLangTextFromAppProp("cartDelIngrTitle");
             string msg = string.Format("{0} \"{1}\" ?", AppLib.GetLangTextFromAppProp("cartDelIngrQuestion"), AppLib.GetLangText(ingrItem.langNames));
-
             MessageBoxResult result = AppLib.ShowChoiceBox(title, msg);
 
-            AppLib.WriteAppAction(this.Name, AppActionsEnum.ButtonIngredientRemoveResult, result.ToString() + ";" + actLogMsg);
+            AppLib.WriteAppAction($"CartWin|Удаление ингредиента {ingrItem.langNames["ru"]}: {result.ToString()}");
             if (result == MessageBoxResult.Yes)
             {
                 dishItem.SelectedIngredients.Remove(ingrItem);
@@ -691,15 +643,14 @@ namespace WpfClient.Views
             if (dishItem == null) return;
             OrderItem order = AppLib.GetCurrentOrder();
 
-            string actLogMsg = string.Format("{0}", dishItem.langNames["ru"]);
-            AppLib.WriteAppAction(this.Name, AppActionsEnum.ButtonDishRemove, actLogMsg);
+            AppLib.WriteAppAction($"CartWin|Удаление блюда '{dishItem.langNames["ru"]}'...");
 
             string title = AppLib.GetLangTextFromAppProp("cartDelDishTitle");
             string msg = string.Format("{0} \"{1}\" ?", AppLib.GetLangTextFromAppProp("cartDelDishQuestion"), AppLib.GetLangText(dishItem.langNames));
-
             MessageBoxResult result = AppLib.ShowChoiceBox(title, msg);
 
-            AppLib.WriteAppAction(this.Name, AppActionsEnum.ButtonDishRemoveResult, result.ToString() + ";" + actLogMsg);
+            AppLib.WriteAppAction($"CartWin|Удаление блюда '{dishItem.langNames["ru"]}': {result.ToString()}");
+
             if (result == MessageBoxResult.Yes)
             {
                 order.Dishes.Remove(dishItem);
@@ -736,11 +687,11 @@ namespace WpfClient.Views
 
             if (curDish.Count > 1)
             {
+                AppLib.WriteAppAction($"CartWin|Блюдо '{curDish.langNames["ru"]}' (price {curDish.GetPrice().ToStringMoneyFormat()}), уменьшить кол-во порций({curDish.Count}) на 1");
                 curDish.Count--;
-                updatePriceControls();
+                AppLib.WriteAppAction($"CartWin|Блюдо '{curDish.langNames["ru"]}', кол-во порций: {curDish.Count}");
 
-                string actLogMsg = string.Format("{0};{1}", curDish.Count.ToString(), curDish.langNames["ru"]);
-                AppLib.WriteAppAction(this.Name, AppActionsEnum.DishPortionDel, actLogMsg);
+                updatePriceControls();
             }
         }
         private void portionCountAdd()
@@ -748,11 +699,11 @@ namespace WpfClient.Views
             DishItem curDish = (DishItem)lstDishes.SelectedItem;
             if (curDish == null) return;
 
+            AppLib.WriteAppAction($"CartWin|Блюдо '{curDish.langNames["ru"]}' (price {curDish.GetPrice().ToStringMoneyFormat()}), увеличить кол-во порций({curDish.Count}) на 1");
             curDish.Count++;
-            updatePriceControls();
+            AppLib.WriteAppAction($"CartWin|Блюдо '{curDish.langNames["ru"]}', кол-во порций: {curDish.Count}");
 
-            string actLogMsg = string.Format("{0};{1}", curDish.Count.ToString(), curDish.langNames["ru"]);
-            AppLib.WriteAppAction(this.Name, AppActionsEnum.DishPortionAdd, actLogMsg);
+            updatePriceControls();
         }
 
         #endregion
@@ -765,15 +716,13 @@ namespace WpfClient.Views
         }
         private void btnPrintCheck_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            //            if (e.StylusDevice != null) return;
-
             printClientInvoice();
         }  // method
 
         private void printClientInvoice()
         {
             decimal orderValue = _currentOrder.GetOrderValue();
-            AppLib.WriteAppAction(this.Name, AppActionsEnum.ButtonPrintOrder, orderValue.ToString());
+            AppLib.WriteAppAction($"CartWin|Нажата кнопка PrintCheck (заказ {App.OrderNumber??"-"}, стоимость {orderValue.ToStringMoneyFormat()})");
 
             // если стоимость чека == 0, то выйти
             if (orderValue == 0) return;
@@ -786,23 +735,21 @@ namespace WpfClient.Views
 
             if (takeOrderWin.TakeOrderMode != TakeOrderEnum.None)
             {
+                AppLib.WriteAppAction($"CartWin|Печать заказа '{_currentOrder.OrderNumberForPrint}' от {((_currentOrder.OrderDate==null) ? "--" : ((DateTime)_currentOrder.OrderDate).ToString())} на устройстве '{_currentOrder.DeviceID}'");
                 PrintBill prn = new PrintBill(_currentOrder);
                 string userErrMsg = null;
-
                 bool result = prn.CreateBill(out userErrMsg);
 
-                string actLogMsg = string.Format("{0};{1};{2};{3};{4}",result.ToString(), _currentOrder.OrderNumberForPrint.ToString(), _currentOrder.OrderDate, _currentOrder.DeviceID,  (result ? "" : "(" + userErrMsg + ")"));
-                AppLib.WriteAppAction(this.Name, AppActionsEnum.OrderPrintResult, actLogMsg);
+                AppLib.WriteAppAction($"CartWin|Результат печати заказа '{_currentOrder.OrderNumberForPrint}' - {(result ? "Ok" : "error: " + userErrMsg)}");
 
                 string title = (string)AppLib.GetLangTextFromAppProp("printOrderTitle");
                 string msgText;
                 // формирование чека и печать завершилась успешно - сохраняем заказ в БД
                 if (result == true)
                 {
+                    AppLib.WriteLogTraceMessage($"Сохранение заказа '{_currentOrder.OrderNumberForPrint}' в БД...");
                     bool saveRes = _currentOrder.SaveToDB(out userErrMsg);
-
-                    actLogMsg = string.Format("{0};{1}", result.ToString(), (result ? "" : "(" + userErrMsg + ")"));
-                    AppLib.WriteAppAction(this.Name, AppActionsEnum.OrderSaveToDBResult, actLogMsg);
+                    AppLib.WriteLogTraceMessage(" - результат сохранени в БД - " + (result ? "Ok" : "error: " + userErrMsg));
 
                     if (saveRes == true)
                     {
@@ -864,6 +811,8 @@ namespace WpfClient.Views
             decimal orderValue = _currentOrder.GetOrderValue();
             txtOrderPrice.Text = AppLib.GetCostUIText(orderValue);
 
+            AppLib.WriteAppAction($"CartWin|Обновление стоимости заказа: {orderValue.ToStringMoneyFormat()}");
+
             // также обновить на главном меню
             MainWindow mainWin = (MainWindow)Application.Current.MainWindow;
             mainWin.lblOrderPrice.Text = AppLib.GetCostUIText(_currentOrder.GetOrderValue());
@@ -891,8 +840,6 @@ namespace WpfClient.Views
         }
         public void selectAppLang(string langId)
         {
-            AppLib.WriteAppAction(this.Name, AppActionsEnum.SelectLang, langId);
-
             setLangButtonStyle(false);  // "выключить" кнопку
             (App.Current.MainWindow as MainWindow).selectAppLang(langId);
             setLangButtonStyle(true);   // "включить" кнопку

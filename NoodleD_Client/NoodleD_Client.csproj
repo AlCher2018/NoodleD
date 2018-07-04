@@ -94,6 +94,10 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
+    <Reference Include="UserActionLog, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\UserActionLog\bin\Release\UserActionLog.dll</HintPath>
+    </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -287,17 +291,9 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AppActionLog\AppActionLog.csproj">
-      <Project>{609fb074-3b84-4865-b6fb-e54dc82d5eb7}</Project>
-      <Name>AppActionLog</Name>
-    </ProjectReference>
     <ProjectReference Include="..\AppModel\AppModel.csproj">
       <Project>{69c032f2-4f5d-469d-adf0-59ed5650ab52}</Project>
       <Name>AppModel</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\UserActionLog\UserActionLog.csproj">
-      <Project>{7d843ae8-a3ed-42ae-9eb7-22ea3c7ec733}</Project>
-      <Name>UserActionLog</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

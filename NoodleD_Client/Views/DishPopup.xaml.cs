@@ -3,22 +3,17 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.ComponentModel;
 using System.Windows.Media.Animation;
-using AppActionNS;
 using UserActionLog;
 using IntegraLib;
+
 
 namespace WpfClient.Views
 {
@@ -35,7 +30,7 @@ namespace WpfClient.Views
         // анимация выбора блюда
         Storyboard _animDishSelection;
 
-        private UserActionsLog _eventsLog;
+        //private UserActionsLog _eventsLog;
 
         // причина закрытия окна
         string _closeCause;
@@ -44,7 +39,7 @@ namespace WpfClient.Views
         {
             InitializeComponent();
 
-            AppLib.WriteLogTraceMessage(string.Format("Открывается всплывашка для \"{0}\" ...", dishItem.langNames["ru"]));
+            AppLib.WriteAppAction($"DishPopup|Открывается всплывашка для блюда '{dishItem.langNames["ru"]}'...");
 
             this.Loaded += DishPopup_Loaded;
 
@@ -60,10 +55,10 @@ namespace WpfClient.Views
 
             dishImage.Fill = new ImageBrush(img);
 
-            if (AppLib.GetAppSetting("IsWriteWindowEvents").ToBool())
-            {
-                _eventsLog = new UserActionsLog(this, EventsMouseEnum.Bubble, EventsKeyboardEnum.None, EventsTouchEnum.Bubble, UserActionLog.LogFilesPathLocationEnum.App_Logs, true, false);
-            }
+            //if (AppLib.GetAppSetting("IsWriteWindowEvents").ToBool())
+            //{
+            //    _eventsLog = new UserActionsLog(this, EventsMouseEnum.Bubble, EventsKeyboardEnum.None, EventsTouchEnum.Bubble, UserActionLog.LogFilesPathLocationEnum.App_Logs, true, false);
+            //}
 
             updatePriceControl();
         }
@@ -71,7 +66,7 @@ namespace WpfClient.Views
         // после загрузки окна
         private void DishPopup_Loaded(object sender, RoutedEventArgs e)
         {
-            AppLib.WriteAppAction(this.Name, AppActionsEnum.DishPopupOpen, _currentDish.langNames["ru"]);
+            AppLib.WriteAppAction("DishPopup|Загружено окно DishPopup (Loaded)");
 
             // обновить ListBox-ы, если есть выбранные ингредиенты и рекомендации
             if (_currentDish.SelectedIngredients != null)
@@ -120,8 +115,7 @@ namespace WpfClient.Views
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            AppLib.WriteLogTraceMessage("Закрывается всплывашка...");
-            AppLib.WriteAppAction(this.Name, AppActionsEnum.DishPopupClose, _closeCause);
+            AppLib.WriteAppAction("DishPopup|Закрывается окно DishPopup (" + _closeCause + ")");
 
             _currentDish.ClearAllSelections();
             base.OnClosing(e);
@@ -325,7 +319,7 @@ namespace WpfClient.Views
         private void btnAddDish_MouseUp(object sender, MouseButtonEventArgs e)
         {
             _closeCause = "ButtonAddDish";
-            AppLib.WriteAppAction(this.Name, AppActionsEnum.DishPopupAddButton);
+            AppLib.WriteAppAction("DishPopup|Нажата кнопка AddDish");
             e.Handled = true;
 
             // добавить блюдо в заказ
@@ -465,6 +459,7 @@ namespace WpfClient.Views
             updatePriceControl();
         }
 
+        // выделить/снять выделение с ингредиента или рекоменд.блюда
         private void changeViewAdding(ListBox listBox, SelectionChangedEventArgs e)
         {
             TextBlock tbText;
@@ -481,11 +476,11 @@ namespace WpfClient.Views
                 vBox = _vbList.Find(v => v.Name == "garnBaseColorBrush");
                 vBox.Visibility = Visibility.Hidden;
 
-                // записать в лог снятие выделения  добавки
+                // записать в лог снятие выделения добавки
                 if (listBox.Equals(listIngredients))
-                    AppLib.WriteAppAction(this.Name, AppActionsEnum.DishPopupIngrDeselect, (vRemoved.Content as DishAdding).langNames["ru"]);
+                    AppLib.WriteAppAction("DishPopup|Снято выделение с ингредиента '" + (vRemoved.Content as DishAdding).langNames["ru"] + "'");
                 else
-                    AppLib.WriteAppAction(this.Name, AppActionsEnum.DishPopupRecommendDeselect, (vRemoved.Content as DishItem).langNames["ru"]);
+                    AppLib.WriteAppAction("DishPopup|Снято выделение с рекоменд.блюда '" + (vRemoved.Content as DishItem).langNames["ru"] + "'");
             }
 
             // выделение добавки
@@ -501,9 +496,9 @@ namespace WpfClient.Views
 
                 // записать в лог выделение добавки
                 if (listBox.Equals(listIngredients))
-                    AppLib.WriteAppAction(this.Name, AppActionsEnum.DishPopupIngrSelect, (vAdded.Content as DishAdding).langNames["ru"]);
+                    AppLib.WriteAppAction("DishPopup|Выделен ингредиент '" + (vAdded.Content as DishAdding).langNames["ru"] + "'");
                 else
-                    AppLib.WriteAppAction(this.Name, AppActionsEnum.DishPopupRecommendSelect, (vAdded.Content as DishItem).langNames["ru"]);
+                    AppLib.WriteAppAction("DishPopup|Выделено рекоменд.блюдо '" + (vAdded.Content as DishItem).langNames["ru"] + "'");
             }
         }
 

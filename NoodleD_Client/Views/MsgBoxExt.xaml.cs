@@ -19,7 +19,7 @@ namespace WpfClient.Views
     public partial class MsgBoxExt : Window
     {
         private MessageBoxResult _retValue = MessageBoxResult.None;
-        private UserActionsLog _eventsLog;
+        //private UserActionsLog _eventsLog;
         private int _buttonsCount;
 
         #region properties
@@ -132,11 +132,11 @@ namespace WpfClient.Views
             _buttonsTextArr = _buttonsText.Split(';');
             this.ButtonBackground = System.Windows.SystemColors.ControlDarkBrush;
 
-            if (AppLib.GetAppSetting("IsWriteWindowEvents").ToBool())
-            {
-                _eventsLog = new UserActionsLog(new FrameworkElement[] { this,btn1, btn2, btn3 }, 
-                    EventsMouseEnum.Bubble, EventsKeyboardEnum.None, EventsTouchEnum.Bubble, UserActionLog.LogFilesPathLocationEnum.App_Logs, true, false);
-            }
+            //if (AppLib.GetAppSetting("IsWriteWindowEvents").ToBool())
+            //{
+            //    _eventsLog = new UserActionsLog(new FrameworkElement[] { this,btn1, btn2, btn3 }, 
+            //        EventsMouseEnum.Bubble, EventsKeyboardEnum.None, EventsTouchEnum.Bubble, UserActionLog.LogFilesPathLocationEnum.App_Logs, true, false);
+            //}
 
             _pressTimer = new System.Timers.Timer(500);
             _pressTimer.Elapsed += _pressTimer_Elapsed;
@@ -164,6 +164,7 @@ namespace WpfClient.Views
 
         private void MsgBoxExt_Loaded(object sender, RoutedEventArgs e)
         {
+            AppLib.WriteAppAction("MsgBoxExt|Загрузка окна (MsgBoxExt_Loaded)");
             double w = this.ActualWidth;
             double h = this.ActualHeight;
 
@@ -203,6 +204,8 @@ namespace WpfClient.Views
         }
         public new MessageBoxResult ShowDialog()
         {
+            AppLib.WriteAppAction($"MsgBoxExt|Отображение окна (title: {base.Title??"-"}, msg: {this.MessageText??"-"}, buttons: {_msgBoxButton.ToString()})");
+
             //   title
             if (this.IsShowTitle)
             {
@@ -447,6 +450,8 @@ namespace WpfClient.Views
                 if (Enum.TryParse<MessageBoxResult>(_buttonPressed.Tag.ToString(), out res) == true) _retValue = res;
             }
             doUnpress();
+
+            AppLib.WriteAppAction("MsgBoxExt|Закрытие окна (by button " + _retValue.ToString() + ")");
 
             // закрыть или спрятать
             if (_closeByButtonPress)

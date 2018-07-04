@@ -3,22 +3,16 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
-using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
-using System.Windows.Navigation;
-using UserActionLog;
-using AppActionNS;
 using AppModel;
 using System.Threading;
-using System.Windows.Controls;
 using SplashScreenLib;
 using IntegraLib;
 using WpfClient.Views;
 using System.Reflection;
-using IntegraWPFLib;
+using UserActionLog;
 
 namespace WpfClient
 {
@@ -28,9 +22,9 @@ namespace WpfClient
     public partial class App : Application, Microsoft.Shell.ISingleInstanceApp
     {
         private const string Unique = "My_Unique_Application_String";
-        
-        // специальные логгеры событий WPF
-        public static UserActionIdle IdleHandler = null;
+
+        // нужен для таймера бездействия
+        public static UserActionIdle IdleHandler;
 
         public static string DeviceId;
         public static string OrderNumber;
@@ -45,7 +39,7 @@ namespace WpfClient
             {
                 string cfgValue;
                 // установить текущий каталог на папку с приложением
-                setAppDirectory();
+                string setAppDirResult = setAppDirectory();
 
                 // splash-screen
                 Splasher.Splash = new Views.SplashScreen();
@@ -69,6 +63,8 @@ namespace WpfClient
                     AppLib.WriteLogInfoMessage("************  End application  ************");
                     appExit(2, "This computer has too low available memory.\r\nYou need at least 300 MB free memory.");
                 }
+
+                if (setAppDirResult.IsNull() == false) AppLib.WriteLogInfoMessage(setAppDirResult);
 
                 // таймаут запуска приложения
                 cfgValue = CfgFileHelper.GetAppSetting("StartTimeout");
@@ -103,10 +99,10 @@ namespace WpfClient
                 }
 
                 // основная информация о софт-окружении
-                AppLib.WriteLogTraceMessage(string.Format("Настройки: Id устройства-{0}, папка изображений-{1}, таймер бездействия-{2} sec, диапазон номеров чеков от {3} до {4}, принтер пречека-{5}, отладка: IsLogUserAction-{6}, IsWriteTraceMessages-{7}, IsWriteWindowEvents-{8}",
+                AppLib.WriteLogTraceMessage(string.Format("Настройки: Id устройства-{0}, папка изображений-{1}, таймер бездействия-{2} sec, диапазон номеров чеков от {3} до {4}, принтер пречека-{5}",
                     AppLib.GetAppSetting("ssdID"), AppLib.GetAppSetting("ImagesPath"), AppLib.GetAppSetting("UserIdleTime"),
                     AppLib.GetAppSetting("RandomOrderNumFrom"), AppLib.GetAppSetting("RandomOrderNumTo"),
-                    AppLib.GetAppSetting("PrinterName"), AppLib.GetAppSetting("IsLogUserAction"), AppLib.GetAppSetting("IsWriteTraceMessages"), AppLib.GetAppSetting("IsWriteWindowEvents")));
+                    AppLib.GetAppSetting("PrinterName")));
 
                 //******  НАСТРОЙКИ  ******
                 // определенные в app.xaml
@@ -146,7 +142,7 @@ namespace WpfClient
                 readAppDataFromDB();
 
                 // ожидашка
-                int idleSec = (int)AppLib.GetAppGlobalValue("UserIdleTime");
+                int idleSec = (int)AppLib.GetAppGlobalValue("UserIdleTime", 0);
                 if (idleSec > 0)
                 {
                     IdleHandler = new UserActionIdle();
@@ -174,7 +170,6 @@ namespace WpfClient
 
                 // подчистить память
                 if (IdleHandler != null) IdleHandler.Dispose();
-                AppLib.AppActionLogger.Close();
 
                 // Allow single instance code to perform cleanup operations
                 Microsoft.Shell.SingleInstance<App>.Cleanup();
@@ -217,6 +212,7 @@ namespace WpfClient
         // окно Ожидашки
         private static bool idleAction()
         {
+            AppLib.WriteLogTraceMessage("Таймер ожидания: истек период бездействия...");
             // условия, при которых таймер бездействия ставится на паузу
             if (AppLib.IsOpenWindow("MsgBoxExt", "idleWin"))
             {
@@ -266,13 +262,9 @@ namespace WpfClient
             string sNo = AppLib.GetLangTextFromAppProp("dialogBoxNoText");
             mBox.ButtonsText = string.Format(";;{0};{1}", sYes, sNo);
 
-            AppLib.WriteLogTraceMessage("Ожидашка открывается...");
-            AppLib.WriteAppAction(mBox.Name, AppActionsEnum.IdleWindowOpen);
-
+            AppLib.WriteLogTraceMessage("Таймер ожидания: открытие окна ожидашки");
             MessageBoxResult result = mBox.ShowDialog();
-
-            AppLib.WriteLogTraceMessage("Ожидашка закрывается...");
-            AppLib.WriteAppAction(mBox.Name, AppActionsEnum.IdleWindowClose, result.ToString());
+            AppLib.WriteLogTraceMessage("Таймер ожидания: окно ожидашки закрыто");
 
             // reset UI
             bool retVal = false;
@@ -410,8 +402,7 @@ namespace WpfClient
             saveAppSettingToPropTypeBool("IsIncludeBarCodeLabel");
             saveAppSettingToPropTypeBool("isAnimatedSelectVoki");
 
-            saveAppSettingToPropTypeBool("IsLogUserAction");
-            saveAppSettingToPropTypeBool("IsWriteTraceMessages");
+//            saveAppSettingToPropTypeBool("IsWriteTraceMessages");
 
             // добавить некоторые постоянные тексты (заголовки, надписи на кнопках)
             parseAndSetAllLangString("dialogBoxYesText");
@@ -527,26 +518,35 @@ namespace WpfClient
             AppLib.SetAppGlobalValue(resKey, d);
         }
 
-
-        private static void setAppDirectory()
+        // возвращает результат смены папки
+        private static string setAppDirectory()
         {
             string curDir = System.IO.Directory.GetCurrentDirectory();
             if (curDir.Last() != '\\') curDir += "\\";
             string appDir = AppDomain.CurrentDomain.BaseDirectory;
+
+            string retVal = $"Текущая папка: '{curDir}', папка приложения: '{appDir}'. ";
+
             if (curDir.Equals(appDir, StringComparison.OrdinalIgnoreCase) == false)
             {
-                AppLib.WriteLogTraceMessage($"Текущий каталог '{curDir}' НЕ установлен в папку приложения '{appDir}'. Изменяю текущий каталог...");
+                retVal += "Устанавливаю текущую папку в папку приложения...";
                 try
                 {
                     System.IO.Directory.SetCurrentDirectory(appDir);
-                    AppLib.WriteLogTraceMessage("Текущий каталог установлен в папку приложения успешно");
+                    retVal += " - УСПЕШНО";
                 }
                 catch (Exception ex)
                 {
-                    AppLib.WriteLogErrorMessage("Ошибка изменения текущего каталога: " + ex.Message);
+                    retVal += " - ОШИБКА: " + ex.Message;
                     appExit(2, "Error: " + ex.Message);
                 }
             }
+            else
+            {
+                retVal += "Текущая папка уже установлена в папку приложения, изменение не требуется.";
+            }
+
+            return retVal;
         }
 
         public static void readSettingFromDB()

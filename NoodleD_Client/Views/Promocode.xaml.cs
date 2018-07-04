@@ -1,20 +1,13 @@
-﻿using AppActionNS;
-using IntegraLib;
+﻿using IntegraLib;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using UserActionLog;
+
 
 namespace WpfClient.Views
 {
@@ -24,16 +17,16 @@ namespace WpfClient.Views
     public partial class Promocode : Window
     {
         private string _preValue;
-        private UserActionsLog _eventsLog;
+        //private UserActionsLog _eventsLog;
 
         public Promocode()
         {
             InitializeComponent();
 
-            if (AppLib.GetAppSetting("IsWriteWindowEvents").ToBool())
-            {
-                _eventsLog = new UserActionsLog(new FrameworkElement[] { this, brdFooterCancel, brdFooterOk }, EventsMouseEnum.Bubble, EventsKeyboardEnum.None, EventsTouchEnum.Bubble, UserActionLog.LogFilesPathLocationEnum.App_Logs, true, false);
-            }
+            //if (AppLib.GetAppSetting("IsWriteWindowEvents").ToBool())
+            //{
+            //    _eventsLog = new UserActionsLog(new FrameworkElement[] { this, brdFooterCancel, brdFooterOk }, EventsMouseEnum.Bubble, EventsKeyboardEnum.None, EventsTouchEnum.Bubble, UserActionLog.LogFilesPathLocationEnum.App_Logs, true, false);
+            //}
 
             setLayout();
             resetLang();
@@ -56,8 +49,7 @@ namespace WpfClient.Views
             System.Diagnostics.StackFrame aFrame = (new System.Diagnostics.StackTrace()).GetFrame(1);
             string callingWinName = aFrame.GetMethod().DeclaringType.Name;
 
-            AppLib.WriteLogTraceMessage("Открывается окно ввода промокода");
-            AppLib.WriteAppAction(this.Name, AppActionsEnum.PromocodeWinOpen, callingWinName);
+            AppLib.WriteAppAction("PromoWin|Открывается окно");
 
             this.ReOpen();
         }
@@ -204,16 +196,14 @@ namespace WpfClient.Views
             if (isSetRetValue)
             {
                 App.PromocodeNumber = txtInput.Text;
-                AppLib.WriteAppAction(this.Name, AppActionsEnum.PromocodeInputValue, txtInput.Text);
+                AppLib.WriteAppAction("PromoWin|Введен промокод: " + App.PromocodeNumber);
             }
             else
             {
                 txtInput.Text = App.PromocodeNumber;
             }
 
-            AppLib.WriteLogTraceMessage("Закрывается окно ввода промокода");
-            AppLib.WriteAppAction(this.Name, AppActionsEnum.PromocodeWinClose, (isSetRetValue ? "Ok" : "Cancel"));
-
+            AppLib.WriteAppAction("PromoWin|Закрывается окно (by button '" + (isSetRetValue ? "Ok" : "Cancel") + "')");
             this.Hide();
         }
 

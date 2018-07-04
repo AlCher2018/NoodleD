@@ -4,24 +4,18 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
 using AppModel;
-using AppActionNS;
-using System.Configuration;
-using System.Data.SqlClient;
-using System.Data;
-using System.Diagnostics;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
-using System.Timers;
 using System.ComponentModel;
 using UserActionLog;
 using WpfClient.Lib;
 using IntegraLib;
+
 
 namespace WpfClient.Views
 {
@@ -57,7 +51,7 @@ namespace WpfClient.Views
         private Point? lastDragPoint, initDragPoint;
         private DateTime _dateTime;
 
-        private UserActionsLog _eventsLog;
+        //private UserActionsLog _eventsLog;
 
 
         public List<MainMenuDishesCanvas> DishesPanels { get { return _dishCanvas; } }
@@ -85,12 +79,12 @@ namespace WpfClient.Views
             _daCommon1 = new DoubleAnimation();
             _daCommon2 = new DoubleAnimation();
 
-            if (AppLib.GetAppSetting("IsWriteWindowEvents").ToBool())
-            {
-                _eventsLog = new UserActionsLog(new FrameworkElement[] 
-                { this, btnLangUa, btnLangRu, btnLangEn, brdPromoCode, brdMakeOrder }, 
-                EventsMouseEnum.Bubble, EventsKeyboardEnum.None, EventsTouchEnum.Bubble | EventsTouchEnum.Tunnel, UserActionLog.LogFilesPathLocationEnum.App_Logs, true, false);
-            }
+            //if (AppLib.GetAppSetting("IsWriteWindowEvents").ToBool())
+            //{
+            //    _eventsLog = new UserActionsLog(new FrameworkElement[] 
+            //    { this, btnLangUa, btnLangRu, btnLangEn, brdPromoCode, brdMakeOrder }, 
+            //    EventsMouseEnum.Bubble, EventsKeyboardEnum.None, EventsTouchEnum.Bubble | EventsTouchEnum.Tunnel, UserActionLog.LogFilesPathLocationEnum.App_Logs, true, false);
+            //}
 
             updatePrice();
             
@@ -114,13 +108,13 @@ namespace WpfClient.Views
         {
             AppLib.CloseChildWindows(true);
 
-            AppLib.WriteAppAction(this.Name, AppActionsEnum.MainWindowClose);
+            AppLib.WriteLogTraceMessage("Закрывается Главное окно");
             base.OnClosing(e);
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            AppLib.WriteAppAction(this.Name, AppActionsEnum.MainWindowOpen);
+            AppLib.WriteLogTraceMessage("Открывается Главное окно");
 
             Point pt = PointFromScreen(new Point(1920, 1080));
             AppLib.ScreenScale = 1920.0 / pt.X;
@@ -647,9 +641,6 @@ namespace WpfClient.Views
         private void lblButtonLang_MouseDown(object sender, MouseButtonEventArgs e)
         {
             string langId = getLangIdByButtonName(((FrameworkElement)sender).Name);
-            AppLib.WriteLogTraceMessage("Выбран язык: " + langId);
-            AppLib.WriteAppAction(this.Name, AppActionsEnum.SelectLang, langId);
-
             selectAppLang(langId);
             //e.Handled = true;
         }
@@ -657,6 +648,8 @@ namespace WpfClient.Views
         // установить язык текстов на элементах
         public void selectAppLang(string langId)
         {
+            AppLib.WriteAppAction("MainWin|Выбран язык интерфейса: " + langId);
+
             // сохранить выбранный пункт меню
             int selMenuItem = lstMenuFolders.SelectedIndex;
 
@@ -726,8 +719,6 @@ namespace WpfClient.Views
 
         private void brdPromoCode_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
-            AppLib.WriteAppAction(this.Name, AppActionsEnum.ButtonPromocode);
-
             string preText = App.PromocodeNumber??"";
 
             Promocode promoWin = new Promocode();
@@ -1109,24 +1100,14 @@ namespace WpfClient.Views
         // боковое меню выбора категории блюд
         private void lstMenuFolders_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-#if (enableTimer)
-            AppModel.MenuItem mi = e.AddedItems[0] as AppModel.MenuItem;
-            outTouchTrace(string.Format("выбрана кнопка: {0}", mi.langNames["ru"]));
-#endif
-            AppLib.WriteLogTraceMessage("Выбрана категория блюд: " + lstMenuFolders.SelectedIndex.ToString());
-
             e.Handled = true;
 
             if ((_dishCanvas.Count > 0) && (lstMenuFolders.SelectedIndex <= (_dishCanvas.Count-1)))
             {
                 AppModel.MenuItem mi = lstMenuFolders.SelectedItem as AppModel.MenuItem;
+                AppLib.WriteAppAction($"MainWin|Выбрана категория блюд: {mi.langNames["ru"]} (index {lstMenuFolders.SelectedIndex.ToString()})");
 
-                if (AppLib.IsEventsEnable)
-                {
-                    AppLib.WriteAppAction(this.Name, AppActionsEnum.SelectDishCategory, mi.langNames["ru"]);
-                }
-                else
-                    AppLib.IsEventsEnable = true;
+                if (!AppLib.IsEventsEnable) AppLib.IsEventsEnable = true;
 
                 // установить панель блюд
                 MainMenuDishesCanvas currentPanel = _dishCanvas[lstMenuFolders.SelectedIndex];
@@ -1146,6 +1127,7 @@ namespace WpfClient.Views
             decimal dPrice = 0m;
             if (_currentOrder != null) dPrice = _currentOrder.GetOrderValue();
 
+            AppLib.WriteAppAction($"MainWin|Обновление стоимости заказа: {dPrice.ToStringMoneyFormat()}");
             lblOrderPrice.Text = AppLib.GetCostUIText(dPrice);
         }
 
@@ -1156,11 +1138,7 @@ namespace WpfClient.Views
 
         private void btnLang_TouchUp(object sender, TouchEventArgs e)
         {
-            //AppLib.WriteLogTraceMessage(string.Format("{0} - TouchUp, _langButtonPress = {1}", ((FrameworkElement)sender).Name, _langButtonPress.ToString()));
-
             _langButtonPress = 0;
-
-           // AppLib.WriteLogTraceMessage(string.Format("{0} - TouchUp, _langButtonPress = {1}", ((FrameworkElement)sender).Name, _langButtonPress.ToString()));
         }
 
         private void btnLang_TouchDown(object sender, TouchEventArgs e)
@@ -1173,17 +1151,12 @@ namespace WpfClient.Views
                 case "en": _langButtonPress |= 4; break;
                 default: break;
             }
-            //AppLib.WriteLogTraceMessage(string.Format("{0} - TouchDown, _langButtonPress = {1}", ((FrameworkElement)sender).Name, _langButtonPress.ToString()));
             if (_langButtonPress == 7) App.Current.Shutdown(3);
         }
 
         private void Grid_TouchUp(object sender, TouchEventArgs e)
         {
-//            AppLib.WriteLogTraceMessage(string.Format("{0} - mainGrid_PreviewMouseUp, _langButtonPress = {1}", ((FrameworkElement)sender).Name, _langButtonPress.ToString()));
-
             _langButtonPress = 0;
-
-//            AppLib.WriteLogTraceMessage(string.Format("{0} - mainGrid_PreviewMouseUp, _langButtonPress = {1}", ((FrameworkElement)sender).Name, _langButtonPress.ToString()));
         }
 
         private void brdMakeOrder_PreviewTouchDown(object sender, TouchEventArgs e)
@@ -1193,14 +1166,13 @@ namespace WpfClient.Views
 
         private void btnShowCart_MouseUp(object sender, MouseButtonEventArgs e)
         {
-//            if (e.StylusDevice != null) return;
             showCartWindow();
         }
 
 
         private void showCartWindow()
         {
-            AppLib.WriteAppAction(this.Name, AppActionsEnum.ButtonMakeOrder);
+            AppLib.WriteAppAction("MainWin|Нажата кнопка ShowCart");
 
             if ((_currentOrder == null) || (_currentOrder.GetOrderValue() == 0))
             {

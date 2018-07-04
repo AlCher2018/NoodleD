@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -14,8 +12,8 @@ using System.Windows.Media.Effects;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Diagnostics;
-using AppActionNS;
 using IntegraLib;
+
 
 namespace WpfClient.Views
 {
@@ -254,11 +252,13 @@ namespace WpfClient.Views
             Rect rect = new Rect(0, 0, dGrid.Width, dishImageHeight);
 
             // изображение
-            _pathImage = new Path();
-            _pathImage.Data = new RectangleGeometry(rect, dishImageCornerRadius, dishImageCornerRadius);
             _dishImageBrush = new ImageBrush() { ImageSource = _dishItem.Image };
-            _pathImage.Fill = _dishImageBrush;
-            
+            _pathImage = new Path()
+            {
+                Name = "pathDishImage",
+                Data = new RectangleGeometry(rect, dishImageCornerRadius, dishImageCornerRadius),
+                Fill = _dishImageBrush
+            };
             _pathImage.PreviewMouseLeftButtonUp += CanvDescr_PreviewMouseLeftButtonUp;
             //pathImage.Effect = new DropShadowEffect();
             // добавить в контейнер
@@ -303,6 +303,7 @@ namespace WpfClient.Views
 
             _descrTextBorder = new Border()
             {
+                Name = "brdDescrText",
                 Width = dGrid.Width,
                 Height = dishImageHeight,
                 CornerRadius = new CornerRadius(dishImageCornerRadius),
@@ -316,6 +317,7 @@ namespace WpfClient.Views
 
             _descrText = new TextBlock()
             {
+                Name = "tblDescrText",
                 Width = dGrid.Width,
                 Opacity = 0,
                 Padding = new Thickness(dishPanelDescriptionFontSize),
@@ -412,7 +414,7 @@ namespace WpfClient.Views
 
                 this._selectedGarnIndex = e.GarnishIndex;
 
-                AppLib.WriteAppAction(_parentWindow.Name, AppActionsEnum.DishGarnishSelect, _dishItem.Garnishes[_selectedGarnIndex].langNames["ru"] + ";" + _dishItem.langNames["ru"]);
+                AppLib.WriteAppAction($"MainWin|Блюдо '{_dishItem.langNames["ru"]}', выделен гарнир '{_dishItem.Garnishes[_selectedGarnIndex].langNames["ru"]}'");
 
                 // изменить изображение блюда с гарниром
                 if (_pathImage != null) _pathImage.Fill = currentGarnItem.DishWithGarnishImageBrush;
@@ -425,7 +427,10 @@ namespace WpfClient.Views
             // снять выделение с текущего гарнира
             else
             {
-                if (_selectedGarnIndex > -1) AppLib.WriteAppAction(_parentWindow.Name, AppActionsEnum.DishGarnishDeselect, _dishItem.Garnishes[_selectedGarnIndex].langNames["ru"] + ";" + _dishItem.langNames["ru"]);
+                if (_selectedGarnIndex > -1)
+                {
+                    AppLib.WriteAppAction($"MainWin|Блюдо '{_dishItem.langNames["ru"]}', снято выделение с гарнира '{_dishItem.Garnishes[_selectedGarnIndex].langNames["ru"]}'");
+                }
 
                 unselectGarnish();
             }
@@ -533,7 +538,9 @@ namespace WpfClient.Views
 
             _showDescription = !_showDescription;
 
-            AppLib.WriteAppAction(_parentWindow.Name, ((_showDescription) ? AppActionsEnum.DishDescrShow : AppActionsEnum.DishDescrHide), _dishItem.langNames["ru"]);
+            string ctlName = null;
+            if (sender is FrameworkElement) ctlName = (sender as FrameworkElement).Name;
+            AppLib.WriteAppAction($"MainWin|Блюдо '{_dishItem.langNames["ru"]}', описание {(_showDescription ? "ВКЛ" : "ВЫКЛ")} (by {ctlName??"-"})");
 
             if (_sbDescrShow == null)
                 _dishDescrWithoutAnimation();  // без анимации
@@ -677,9 +684,7 @@ namespace WpfClient.Views
             // т.к. блюда без гарниров тоже могут быть с ингредиентами (и рекомендациями)
             if ((_dishItem.Ingredients == null) || (_dishItem.Ingredients.Count == 0))
             {
-                AppLib.WriteLogTraceMessage("Кнопка выбора блюда без гарнира");
-                AppLib.WriteAppAction(_parentWindow.Name, AppActionsEnum.AddDishToOrder, 
-                    string.Format("{0};{1}", _dishItem.langNames["ru"], _dishItem.GetPrice().ToString("#0.00") ));
+                AppLib.WriteAppAction($"MainWin|Нажата кнопка выбора блюда '{_dishItem.langNames["ru"]}' (price {_dishItem.GetPrice().ToStringMoneyFormat()}) БЕЗ гарнира");
 
                 DishItem orderDish = _dishItem.GetCopyForOrder();
                 orderDish.Image = bmpImage;
@@ -692,10 +697,8 @@ namespace WpfClient.Views
             // иначе через "всплывашку"
             else
             {
-                AppLib.WriteLogTraceMessage("Кнопка выбора блюда через всплывашку");
-                AppLib.WriteAppAction(_parentWindow.Name, AppActionsEnum.ButtonDishWithIngredients,
-                    string.Format("{0};{1}", _dishItem.langNames["ru"], _dishItem.GetPrice().ToString("#0.00")));
-
+                AppLib.WriteAppAction($"MainWin|Нажата кнопка выбора блюда '{_dishItem.langNames["ru"]}' (price {_dishItem.GetPrice().ToStringMoneyFormat()}) С гарниром '{_dishItem.Ingredients[0].langNames["ru"]}' (price {_dishItem.Ingredients[0].Price.ToStringMoneyFormat()})");
+                
                 // текущее блюдо и его изображение передать в конструкторе
                 DishPopup popupWin = new DishPopup(_dishItem, bmpImage);
                 popupWin.ShowDialog();

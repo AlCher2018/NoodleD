@@ -16,7 +16,6 @@ using System.Windows.Media.Imaging;
 
 using AppModel;
 using UserActionLog;
-using AppActionNS;
 using WpfClient.Lib;
 using System.Data.Entity;
 using System.Data.SqlClient;
@@ -30,8 +29,6 @@ namespace WpfClient
     {
         // общий логгер
         private static NLog.Logger AppLogger;
-
-        public static AppActionLogger AppActionLogger;
 
         public static bool IsDrag, IsEventsEnable;
         public static double ScreenScale = 1d;
@@ -102,48 +99,41 @@ namespace WpfClient
                 retVal = ex.Message;
             }
 
-            // логгер событий UI-элементов приложения
-            AppActionLogger = new AppActionLogger();
-
             return retVal;
         }
 
         public static void WriteLogTraceMessage(string msg)
         {
-            if (AppLib.GetAppSetting("IsWriteTraceMessages").ToBool()) AppLogger.Trace(" " + msg);
+            //if (AppLib.GetAppSetting("IsWriteTraceMessages").ToBool())
+            if (AppLogger == null)
+                MessageBox.Show("Not exists AppLogger!!! Check it's configurations.");
+            else
+                AppLogger.Trace(msg);
         }
 
         public static void WriteLogInfoMessage(string msg)
         {
-            AppLogger.Info(msg);
+            if (AppLogger == null)
+                MessageBox.Show("Not exists AppLogger!!! Check it's configurations.");
+            else
+                AppLogger.Info(msg);
         }
 
         public static void WriteLogErrorMessage(string msg)
         {
-            AppLogger.Error(msg);
+            if (AppLogger == null)
+                MessageBox.Show("Not exists AppLogger!!! Check it's configurations.");
+            else
+                AppLogger.Error(msg);
         }
         
-        public static void WriteAppAction(string formName, AppActionsEnum actionType, string value = null)
+        public static void WriteAppAction(string msg)
         {
-            // если надо, создать заказ в Главном окне
-            string mainWinName = App.Current.MainWindow.Name;
-            if ((formName == mainWinName) && 
-                ((actionType != AppActionsEnum.MainWindowOpen) && (actionType != AppActionsEnum.MainWindowClose)))
-            {
-                MainWindow mainWin = (App.Current.MainWindow as MainWindow);
-                if (mainWin.CurrentOrder == null) mainWin.CurrentOrder = AppLib.CreateNewOrder();
-            }
-
-            if ((bool)AppLib.GetAppGlobalValue("IsLogUserAction") == false) return;
-
-            AppActionLogger.AddAction(new AppActionNS.UICAction()
-            {
-                deviceId = App.DeviceId,
-                orderNumber = App.OrderNumber,
-                formName = formName,
-                actionType = actionType,
-                value = value
-            });
+            //if ((bool)AppLib.GetAppGlobalValue("IsLogUserAction", false))
+            if (AppLogger == null)
+                MessageBox.Show("Not exists AppLogger!!! Check it's configurations.");
+            else
+                AppLogger.Trace(msg);
         }
 
         #endregion
@@ -541,7 +531,9 @@ namespace WpfClient
             MainWindow mainWin = (App.Current.MainWindow as MainWindow);
             mainWin.CurrentOrder = order;
 
-            AppLib.WriteAppAction("App", AppActionsEnum.CreateNewOrder, order.OrderNumberForPrint.ToString()+";"+string.Format("{0:yyyy-MM-dd}", order.OrderDate));
+            string logMsg = "Создан новый заказ № '" + App.OrderNumber + "'";
+            if (dtOrder != null) logMsg += " от " + ((DateTime)dtOrder).ToString("yyyy-MM-dd HH:mm:ss");
+            AppLib.WriteAppAction(logMsg);
 
             return order;
         }

@@ -1,18 +1,9 @@
-﻿using AppActionNS;
-using IntegraLib;
+﻿using IntegraLib;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using UserActionLog;
 using WpfClient.Model;
 
@@ -24,7 +15,8 @@ namespace WpfClient.Views
     /// </summary>
     public partial class TakeOrder : Window
     {
-        private UserActionsLog _eventsLog;
+        private string _closeResult;
+        //private UserActionsLog _eventsLog;
 
         private TakeOrderEnum _takeOrder = TakeOrderEnum.None;
         public TakeOrderEnum TakeOrderMode { get { return _takeOrder; } }
@@ -32,43 +24,29 @@ namespace WpfClient.Views
         public TakeOrder()
         {
             InitializeComponent();
+            this.Loaded += TakeOrder_Loaded;
 
             setWinLayout();
+        }
+
+        private void TakeOrder_Loaded(object sender, RoutedEventArgs e)
+        {
+            AppLib.WriteAppAction("TakeOrderWin|Загружено окно (Loaded)");
+
             resetLang();
-
-            if (AppLib.GetAppSetting("IsWriteWindowEvents").ToBool())
-            {
-                _eventsLog = new UserActionsLog(new FrameworkElement[] { this, btnTakeOut, btnTakeIn }, EventsMouseEnum.Bubble, EventsKeyboardEnum.None, EventsTouchEnum.Bubble, UserActionLog.LogFilesPathLocationEnum.App_Logs, true, false);
-            }
-
         }
 
         private void resetLang()
         {
-            // напрямую
-            // окно создается и хранится, как глобальная переменная и переключение языка будет осуществляться извне при смене языка UI
-            txtTakeOut.Text = AppLib.GetLangTextFromAppProp("takeOrderOut");
-            txtWordOr.Text = AppLib.GetLangTextFromAppProp("wordOr");
-            txtTakeIn.Text = AppLib.GetLangTextFromAppProp("takeOrderIn");
+            AppLib.WriteLogTraceMessage(" - язык приложения: " + AppLib.AppLang);
+            string textOut = AppLib.GetLangTextFromAppProp("takeOrderOut");
+            string textOr = AppLib.GetLangTextFromAppProp("wordOr");
+            string textIn = AppLib.GetLangTextFromAppProp("takeOrderIn");
+            AppLib.WriteLogTraceMessage($" - тексты на кнопках: takeOut='{textOut}', wordOr='{textOr}', takeIn='{textIn}'");
 
-            #region через связанное свойство - ОТКЛЮЧЕНО, т.к. иногда не переключается
-            /*
-            Text = "{Binding Converter={StaticResource langDictToText}, ConverterParameter=appSet.takeOrderOut}"
-            Text="{Binding Converter={StaticResource langDictToText}, ConverterParameter=appSet.wordOr}"
-            Text = "{Binding Converter={StaticResource langDictToText}, ConverterParameter=appSet.takeOrderIn}"
-            BindingExpression be;
-            // установка текстов на выбранном языке
-            //    с собой
-            be = txtTakeOut.GetBindingExpression(TextBlock.TextProperty);
-            if (be != null) be.UpdateTarget();
-            //    или
-            be = txtWordOr.GetBindingExpression(TextBlock.TextProperty);
-            if (be != null) be.UpdateTarget();
-            //   в ресторане
-            be = txtTakeIn.GetBindingExpression(TextBlock.TextProperty);
-            if (be != null) be.UpdateTarget();
-             */
-            #endregion
+            txtTakeOut.Text = textOut;
+            txtWordOr.Text = textOr;
+            txtTakeIn.Text = textIn;
         }
 
         #region активация ожидашки
@@ -148,17 +126,23 @@ namespace WpfClient.Views
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Escape) closeWin(e);
+            if (e.Key == Key.Escape)
+            {
+                _closeResult = "нажата клавиша Esc";
+                closeWin(e);
+            }
         }
 
         private void btnClose_MouseDown(object sender, MouseButtonEventArgs e)
         {
-//            if (e.StylusDevice != null) return;
+            //            if (e.StylusDevice != null) return;
+            _closeResult = "нажата кнопка Close (mouse)";
 
             closeWin(e);
         }
         private void btnClose_PreviewTouchDown(object sender, TouchEventArgs e)
         {
+            _closeResult = "нажата кнопка Close (touch)";
             closeWin(e);
         }
 
@@ -166,12 +150,13 @@ namespace WpfClient.Views
         private void btnTakeOut_MouseDown(object sender, MouseButtonEventArgs e)
         {
             //if (e.StylusDevice != null) return;
-
+            _closeResult = "нажата кнопка TakeAway (mouse)";
             _takeOrder = TakeOrderEnum.TakeAway;
             closeWin(e);
         }
         private void btnTakeOut_PreviewTouchDown(object sender, TouchEventArgs e)
         {
+            _closeResult = "нажата кнопка TakeAway (touch)";
             _takeOrder = TakeOrderEnum.TakeAway;
             closeWin(e);
         }
@@ -180,20 +165,21 @@ namespace WpfClient.Views
         private void btnTakeIn_MouseDown(object sender, MouseButtonEventArgs e)
         {
             //if (e.StylusDevice != null) return;
-
+            _closeResult = "нажата кнопка TakeInRest (mouse)";
             _takeOrder = TakeOrderEnum.TakeInRestaurant;
             closeWin(e);
         }
 
         private void btnTakeIn_PreviewTouchDown(object sender, TouchEventArgs e)
         {
+            _closeResult = "нажата кнопка TakeInRest (touch)";
             _takeOrder = TakeOrderEnum.TakeInRestaurant;
             closeWin(e);
         }
 
         private void closeWin(RoutedEventArgs e)
         {
-            AppLib.WriteAppAction(this.Name, AppActionsEnum.TakeOrderWinClose, _takeOrder.ToString());
+            AppLib.WriteAppAction($"TakeOrderWin|Закрыто окно ({_closeResult??"-"})");
 
             e.Handled = true;
             this.Hide();
